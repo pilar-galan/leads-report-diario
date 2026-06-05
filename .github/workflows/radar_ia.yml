@@ -2,8 +2,8 @@ name: GuruSup Radar IA
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # 9:00h España (CEST, UTC+2) — en invierno serán las 8h
-  workflow_dispatch:       # Permite lanzarlo manualmente desde GitHub para hacer pruebas
+    - cron: '0 7 * * *'
+  workflow_dispatch:
 
 jobs:
   radar:
@@ -18,8 +18,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalar dependencias
+      - name: Instalar dependencias Python
         run: pip install -r requirements.txt
+
+      - name: Instalar Chromium para Playwright
+        run: playwright install --with-deps chromium
 
       - name: Ejecutar Radar IA
         env:
