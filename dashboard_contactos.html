@@ -1,504 +1,957 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CRM Intelligence · GuruSup</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --brand:   #FF6B5B;
-      --brand2:  rgba(255,107,91,.12);
-      --bg:      #2B2D31;
-      --s1:      #1A1D28;
-      --s2:      #20232f;
-      --border:  #252836;
-      --text:    #F2F3F7;
-      --muted:   #8B8FA8;
-      --green:   #2DD4BF;
-      --blue:    #60A5FA;
-      --amber:   #FBBF24;
-      --purple:  #A78BFA;
-      --red:     #F87171;
-      --indigo:  #818CF8;
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);padding:24px 20px 56px}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CRM Intelligence · GuruSup</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --brand:#FF6B5B; --brand-dim:rgba(255,107,91,.12); --brand-glow:rgba(255,107,91,.25);
+  --bg:#2B2D31; --s1:#1A1D28; --s2:#20232f; --s3:#242739;
+  --border:#252836; --border2:#2e3147;
+  --text:#F2F3F7; --muted:#8B8FA8; --dim:#5a5f7a;
+  --green:#2DD4BF; --blue:#60A5FA; --amber:#FBBF24;
+  --purple:#A78BFA; --red:#F87171; --indigo:#818CF8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-    /* ── HEADER ── */
-    .hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-bottom:22px;border-bottom:1px solid var(--border);margin-bottom:28px}
-    .hdr-l{}
-    .hdr-lbl{font-size:10px;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-    .hdr-name{font-family:Georgia,serif;font-style:italic;font-size:30px;color:var(--brand);line-height:1.1}
-    .hdr-sub{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:.03em}
-    .hdr-r{display:flex;align-items:center;gap:8px;margin-top:4px}
-    .badge{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--muted)}
-    .badge strong{color:var(--text)}
-    .live{display:inline-flex;align-items:center;gap:6px;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.25);border-radius:20px;padding:6px 12px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
-    .live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.8s ease-in-out infinite}
-    @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.65)}}
+/* ══ LAYOUT ═══════════════════════════════════════ */
+.shell{max-width:1200px;margin:0 auto;padding:0 20px 60px}
 
-    /* ── SECTION ── */
-    .sec{margin-bottom:28px}
-    .sec-lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:14px}
-    .sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+/* ══ TOPBAR ════════════════════════════════════════ */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 16px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;background:var(--bg);
+  backdrop-filter:blur(12px);
+}
+.logo-wrap{display:flex;align-items:baseline;gap:10px}
+.logo{font-family:Georgia,serif;font-style:italic;font-size:22px;color:var(--brand)}
+.logo-tag{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-style:normal;font-family:Helvetica,Arial,sans-serif}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.date-badge{font-size:11px;color:var(--muted);padding:5px 12px;background:var(--s1);border:1px solid var(--border);border-radius:20px}
+.live-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);padding:5px 11px;background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.22);border-radius:20px}
+.live-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.6)}}
 
-    /* ── KPI CARDS ── */
-    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
-    .kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 16px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s;cursor:default}
-    .kpi:hover{border-color:rgba(255,107,91,.3);transform:translateY(-2px)}
-    .kpi-bar{position:absolute;top:0;left:0;right:0;height:2px;border-radius:12px 12px 0 0}
-    .kpi-ico{font-size:17px;margin-bottom:10px}
-    .kpi-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-    .kpi-val{font-size:2rem;font-weight:800;line-height:1;letter-spacing:-.5px}
-    .kpi-hint{font-size:10px;color:var(--muted);margin-top:5px}
+/* ══ TAB NAV ═══════════════════════════════════════ */
+.tab-nav{
+  display:flex;gap:2px;padding:16px 20px 0;overflow-x:auto;
+  scrollbar-width:none;border-bottom:1px solid var(--border);
+}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{
+  flex-shrink:0;padding:9px 18px;font-size:11px;font-weight:600;
+  letter-spacing:.04em;color:var(--muted);background:none;border:none;
+  border-bottom:2px solid transparent;cursor:pointer;
+  transition:color .15s,border-color .15s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--brand);border-bottom-color:var(--brand)}
+.tab-num{display:inline-block;background:var(--s2);border-radius:10px;padding:1px 6px;font-size:9px;margin-left:5px;color:var(--dim)}
+.tab-btn.active .tab-num{background:var(--brand-dim);color:var(--brand)}
 
-    /* ── CARD ── */
-    .card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px}
-    .card-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;margin-bottom:18px}
-    .card-title span{color:var(--text)}
-    .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+/* ══ PANELS ════════════════════════════════════════ */
+.panel{display:none;padding:28px 20px 0}
+.panel.active{display:block}
 
-    /* ── TWO / THREE COL GRIDS ── */
-    .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .g21{display:grid;grid-template-columns:2fr 1fr;gap:14px}
-    .g12{display:grid;grid-template-columns:1fr 2fr;gap:14px}
-    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-    @media(max-width:900px){.g2,.g21,.g12,.g3{grid-template-columns:1fr}}
+/* ══ SECTION HEADER ════════════════════════════════ */
+.sec-head{margin-bottom:20px}
+.sec-title{font-size:18px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.sec-desc{font-size:12px;color:var(--muted);line-height:1.6}
 
-    /* ── HORIZONTAL BARS ── */
-    .hbar-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
-    .hbar-lbl{width:140px;font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .hbar-bg{flex:1;height:9px;background:var(--s2);border-radius:5px;overflow:hidden}
-    .hbar-fill{height:100%;border-radius:5px}
-    .hbar-num{width:50px;text-align:right;font-size:11px;font-weight:700}
-    .hbar-pct{width:40px;text-align:right;font-size:10px;color:var(--muted)}
+/* ══ INSIGHT BOX ═══════════════════════════════════ */
+.insight{
+  background:linear-gradient(135deg,rgba(255,107,91,.08) 0%,rgba(255,107,91,.03) 100%);
+  border:1px solid rgba(255,107,91,.2);border-left:3px solid var(--brand);
+  border-radius:10px;padding:14px 16px;margin-bottom:22px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.insight-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.insight-body{}
+.insight-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brand);margin-bottom:4px}
+.insight-text{font-size:12px;line-height:1.6;color:#c8cadc}
+.insight-text strong{color:var(--text)}
 
-    /* ── PIPELINE FUNNEL ── */
-    .funnel{display:flex;flex-direction:column;gap:6px}
-    .fstep{display:flex;align-items:center;gap:10px}
-    .fbar-wrap{flex:1;height:28px;background:var(--s2);border-radius:6px;overflow:hidden;position:relative}
-    .fbar-inner{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;min-width:4px}
-    .fstep-lbl{width:190px;font-size:11px;color:var(--muted);flex-shrink:0;text-align:right}
-    .fstep-num{width:36px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+/* ══ KPI GRID ══════════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 16px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s}
+.kpi:hover{border-color:var(--brand-glow);transform:translateY(-2px)}
+.kpi-bar{position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-ico{font-size:18px;margin-bottom:10px}
+.kpi-lbl{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-val{font-size:1.9rem;font-weight:800;line-height:1;letter-spacing:-.5px}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:5px}
+.kpi-trend{font-size:10px;font-weight:600;margin-top:4px}
+.trend-up{color:var(--green)} .trend-dn{color:var(--red)} .trend-warn{color:var(--amber)}
 
-    /* ── TABLE ── */
-    table{width:100%;border-collapse:collapse}
-    thead th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:0 10px 10px;text-align:left;border-bottom:1px solid var(--border)}
-    tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
-    tbody tr:last-child{border-bottom:none}
-    tbody tr:hover{background:var(--s2)}
-    tbody td{padding:10px 10px;font-size:12px}
+/* ══ CARDS ═════════════════════════════════════════ */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px 20px 18px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px}
+.card-title span{color:var(--text)}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.card-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px}
 
-    .pill{display:inline-block;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.03em}
+/* ══ GRIDS ══════════════════════════════════════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g13{display:grid;grid-template-columns:1fr 3fr;gap:14px}
+.g31{display:grid;grid-template-columns:3fr 1fr;gap:14px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.mb{margin-bottom:14px}
+@media(max-width:860px){.g2,.g3,.g13,.g31,.g21{grid-template-columns:1fr}}
 
-    /* ── FREEMIUM FUNNEL ── */
-    .conv-row{display:flex;align-items:stretch;gap:0;margin-top:4px}
-    .conv-box{flex:1;background:var(--s2);border:1px solid var(--border);padding:14px 10px;text-align:center;position:relative}
-    .conv-box:first-child{border-radius:8px 0 0 8px}
-    .conv-box:last-child{border-radius:0 8px 8px 0}
-    .conv-arrow{display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);padding:0 2px;flex-shrink:0}
-    .conv-n{font-size:1.5rem;font-weight:800;line-height:1}
-    .conv-l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-    .conv-rate{font-size:10px;font-weight:600;margin-top:5px}
+/* ══ HORIZONTAL BAR ════════════════════════════════ */
+.hrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.hlbl{width:130px;font-size:11px;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbg{flex:1;height:8px;background:var(--s2);border-radius:4px;overflow:hidden}
+.hfill{height:100%;border-radius:4px}
+.hnum{width:50px;text-align:right;font-size:11px;font-weight:700}
+.hpct{width:38px;text-align:right;font-size:10px;color:var(--muted)}
 
-    /* ── FOOTER ── */
-    footer{margin-top:40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:18px;border-top:1px solid var(--border)}
-    footer .fl{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--brand)}
-    footer .fr{font-size:10px;color:var(--muted)}
-  </style>
+/* ══ FUNNEL ════════════════════════════════════════ */
+.frow{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.flbl{width:160px;font-size:10px;color:var(--muted);flex-shrink:0;text-align:right;line-height:1.3}
+.fbg{flex:1;height:24px;background:var(--s2);border-radius:5px;overflow:hidden;position:relative}
+.ffill{height:100%;border-radius:5px;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:600;color:rgba(255,255,255,.85)}
+.fnum{width:32px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+
+/* ══ PIPELINE STEP ═════════════════════════════════ */
+.pipe-step{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;
+  transition:border-color .15s;
+}
+.pipe-step:hover{border-color:var(--border2)}
+.pipe-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.pipe-info{flex:1}
+.pipe-name{font-size:11px;font-weight:600;margin-bottom:2px}
+.pipe-sub{font-size:10px;color:var(--muted)}
+.pipe-n{font-size:1.3rem;font-weight:800;flex-shrink:0}
+.pipe-bar{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.pipe-bar-fill{height:100%;border-radius:2px}
+
+/* ══ STAGE TAG ════════════════════════════════════ */
+.pill{display:inline-block;padding:3px 9px;border-radius:8px;font-size:10px;font-weight:700}
+
+/* ══ TABLE ══════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse}
+thead th{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:0 10px 10px;text-align:left;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--s2)}
+tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
+
+/* ══ STAT PAIR ══════════════════════════════════════ */
+.stat-row{display:flex;gap:10px;margin-bottom:10px}
+.stat-box{flex:1;background:var(--s2);border-radius:8px;padding:12px;text-align:center}
+.stat-n{font-size:1.4rem;font-weight:800;line-height:1}
+.stat-l{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* ══ CONV FLOW ══════════════════════════════════════ */
+.conv-flow{display:flex;align-items:stretch;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.conv-step{flex:1;padding:16px 12px;text-align:center;background:var(--s2);position:relative}
+.conv-step+.conv-step{border-left:1px solid var(--border)}
+.conv-step::after{content:'→';position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);z-index:2}
+.conv-step:last-child::after{display:none}
+.conv-n{font-size:1.6rem;font-weight:800;line-height:1}
+.conv-l{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.conv-rt{font-size:10px;font-weight:600;margin-top:5px}
+
+/* ══ PROGRESS RING (pure CSS) ══════════════════════ */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.ring{position:relative;width:80px;height:80px}
+.ring svg{transform:rotate(-90deg)}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:14px;font-weight:800;line-height:1}
+.ring-lbl{font-size:8px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:2px;text-align:center}
+
+/* ══ FOOTER ═════════════════════════════════════════ */
+.foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:20px 20px;border-top:1px solid var(--border);margin-top:40px}
+.foot-l{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--brand)}
+.foot-r{font-size:10px;color:var(--dim)}
+</style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="hdr">
-  <div class="hdr-l">
-    <div class="hdr-lbl">CRM Intelligence</div>
-    <div class="hdr-name">GuruSup</div>
-    <div class="hdr-sub">Dashboard Contactos HubSpot · Actualizado 8 jun 2026</div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo">GuruSup</div>
+    <div class="logo-tag">CRM Intelligence</div>
   </div>
-  <div class="hdr-r">
-    <div class="badge">Último pull: <strong>hoy 14:25</strong></div>
-    <div class="live">Live</div>
+  <div class="topbar-r">
+    <div class="date-badge">8 jun 2026 · 14:25</div>
+    <div class="live-pill">Live</div>
   </div>
-</header>
+</div>
 
-<!-- 1. KPIs GENERALES -->
-<div class="sec">
-  <div class="sec-lbl">KPIs generales</div>
+<!-- TABS -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab(0)">Visión General <span class="tab-num">9.023</span></button>
+  <button class="tab-btn" onclick="showTab(1)">Captación <span class="tab-num">12m</span></button>
+  <button class="tab-btn" onclick="showTab(2)">Calidad de Base <span class="tab-num">⚠</span></button>
+  <button class="tab-btn" onclick="showTab(3)">Pipeline &amp; Ventas <span class="tab-num">246</span></button>
+  <button class="tab-btn" onclick="showTab(4)">Freemium <span class="tab-num">377</span></button>
+</div>
+
+<div class="shell">
+
+<!-- ══════════════════════════════════════════════════
+     TAB 0 · VISIÓN GENERAL
+═══════════════════════════════════════════════════ -->
+<div class="panel active" id="p0">
+  <div class="sec-head">
+    <div class="sec-title">Visión General</div>
+    <div class="sec-desc">Estado consolidado de la base de contactos en HubSpot a 8 de junio de 2026.</div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-icon">💡</div>
+    <div class="insight-body">
+      <div class="insight-label">Lectura del dato</div>
+      <div class="insight-text">
+        El <strong>86,5% de los contactos se generaron en los últimos 12 meses</strong>, señal de crecimiento acelerado en captación.
+        Sin embargo, solo <strong>38 son clientes activos (0,4%)</strong> — el reto de GuruSup no es generar volumen,
+        sino <strong>convertir y activar</strong>. Con 5.037 descartados y 351 freemium inactivos, hay masa
+        crítica para trabajar reactivación antes de seguir captando.
+      </div>
+    </div>
+  </div>
+
   <div class="kpi-grid">
     <div class="kpi">
       <div class="kpi-bar" style="background:var(--brand)"></div>
       <div class="kpi-ico">👥</div>
       <div class="kpi-lbl">Total contactos</div>
       <div class="kpi-val" style="color:var(--brand)">9.023</div>
-      <div class="kpi-hint">Base total activa</div>
+      <div class="kpi-sub">Base total HubSpot</div>
     </div>
     <div class="kpi">
       <div class="kpi-bar" style="background:var(--green)"></div>
-      <div class="kpi-ico">📅</div>
+      <div class="kpi-ico">📈</div>
       <div class="kpi-lbl">Últimos 12 meses</div>
       <div class="kpi-val" style="color:var(--green)">7.804</div>
-      <div class="kpi-hint">Jun 2025 → Jun 2026</div>
+      <div class="kpi-sub">Jun 2025 → Jun 2026</div>
+      <div class="kpi-trend trend-up">↑ 86,5% del total</div>
     </div>
     <div class="kpi">
-      <div class="kpi-bar" style="background:var(--blue)"></div>
-      <div class="kpi-ico">✉️</div>
-      <div class="kpi-lbl">Sin email</div>
-      <div class="kpi-val" style="color:var(--blue)">254</div>
-      <div class="kpi-hint">2,8 % del total</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-bar" style="background:var(--amber)"></div>
-      <div class="kpi-ico">🏢</div>
-      <div class="kpi-lbl">Sin empresa</div>
-      <div class="kpi-val" style="color:var(--amber)">6.957</div>
-      <div class="kpi-hint">77,1 % del total</div>
+      <div class="kpi-bar" style="background:var(--green)"></div>
+      <div class="kpi-ico">🏆</div>
+      <div class="kpi-lbl">Clientes activos</div>
+      <div class="kpi-val" style="color:var(--green)">38</div>
+      <div class="kpi-sub">Status: cliente</div>
+      <div class="kpi-trend trend-dn">Solo 0,4% del total</div>
     </div>
     <div class="kpi">
       <div class="kpi-bar" style="background:var(--purple)"></div>
-      <div class="kpi-ico">✅</div>
-      <div class="kpi-lbl">Freemium activos</div>
+      <div class="kpi-ico">🆓</div>
+      <div class="kpi-lbl">Freemium</div>
       <div class="kpi-val" style="color:var(--purple)">377</div>
-      <div class="kpi-hint">Prueba gratuita</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-bar" style="background:var(--green)"></div>
-      <div class="kpi-ico">🎯</div>
-      <div class="kpi-lbl">Clientes</div>
-      <div class="kpi-val" style="color:var(--green)">38</div>
-      <div class="kpi-hint">9,2 % conversión free</div>
+      <div class="kpi-sub">Prueba gratuita</div>
+      <div class="kpi-trend trend-warn">2,1% tasa activación</div>
     </div>
     <div class="kpi">
       <div class="kpi-bar" style="background:var(--red)"></div>
       <div class="kpi-ico">🚫</div>
       <div class="kpi-lbl">Descartados</div>
       <div class="kpi-val" style="color:var(--red)">5.037</div>
-      <div class="kpi-hint">Lead frío / Unqualified</div>
+      <div class="kpi-sub">Lead frío / Unqualified</div>
+      <div class="kpi-trend trend-dn">55,8% de los contactos</div>
     </div>
     <div class="kpi">
       <div class="kpi-bar" style="background:var(--indigo)"></div>
-      <div class="kpi-ico">📊</div>
-      <div class="kpi-lbl">Deals en pipeline</div>
+      <div class="kpi-ico">🔄</div>
+      <div class="kpi-lbl">En pipeline</div>
       <div class="kpi-val" style="color:var(--indigo)">246</div>
-      <div class="kpi-hint">Pipeline de ventas</div>
+      <div class="kpi-sub">Deals activos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--amber)"></div>
+      <div class="kpi-ico">🎯</div>
+      <div class="kpi-lbl">Conversión Free→Cliente</div>
+      <div class="kpi-val" style="color:var(--amber)">9,2%</div>
+      <div class="kpi-sub">38 de 415 potenciales</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--blue)"></div>
+      <div class="kpi-ico">✉️</div>
+      <div class="kpi-lbl">Sin email</div>
+      <div class="kpi-val" style="color:var(--blue)">254</div>
+      <div class="kpi-sub">No accionables por email</div>
+    </div>
+  </div>
+
+  <!-- Resumen visual por categoría -->
+  <div class="g3">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--brand)"></div><span>Distribución</span> de contactos</div>
+      </div>
+      <canvas id="overviewDonut" height="180"></canvas>
+    </div>
+    <div class="card" style="grid-column:span 2">
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--blue)"></div><span>Lifecycle stage</span> — todos los contactos</div>
+      </div>
+      <div id="lcBars"></div>
     </div>
   </div>
 </div>
 
-<!-- 2. EVOLUCIÓN MENSUAL -->
-<div class="sec">
-  <div class="sec-lbl">Evolución mensual — últimos 12 meses</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1 · CAPTACIÓN
+═══════════════════════════════════════════════════ -->
+<div class="panel" id="p1">
+  <div class="sec-head">
+    <div class="sec-title">Captación</div>
+    <div class="sec-desc">Evolución de contactos creados en los últimos 12 meses (jun 2025 – jun 2026).</div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-icon">⚡</div>
+    <div class="insight-body">
+      <div class="insight-label">Lo que dicen los datos</div>
+      <div class="insight-text">
+        <strong>Noviembre 2025 concentra 4.062 contactos</strong> — el 52% de todo el año en un solo mes.
+        Sin ese pico (posible importación masiva), el volumen mensual real es ~<strong>380 contactos</strong>.
+        Lo positivo: <strong>abril–mayo 2026 muestran aceleración orgánica genuina</strong> (+220% respecto al Q1).
+        Junio va camino de superar marzo, pero aún lejos del ritmo de mayo.
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-hd">
+      <div class="card-title"><div class="cdot" style="background:var(--brand)"></div><span>Contactos creados</span> por mes</div>
+      <div class="card-badge" style="background:var(--brand-dim);color:var(--brand)">7.804 en 12m</div>
+    </div>
+    <div style="position:relative;height:260px"><canvas id="captChart"></canvas></div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--green)"></div><span>Mejor mes</span></div></div>
+      <div style="text-align:center;padding:12px 0">
+        <div style="font-size:2.4rem;font-weight:800;color:var(--green)">4.062</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Noviembre 2025</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.5">Posible importación masiva.<br>Verificar fuente de origen.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber)"></div><span>Media mensual</span></div></div>
+      <div style="text-align:center;padding:12px 0">
+        <div style="font-size:2.4rem;font-weight:800;color:var(--amber)">~380</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Sin el pico de Nov</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.5">Con Nov incluido:<br>600 contactos/mes</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--purple)"></div><span>Tendencia 2026</span></div></div>
+      <div style="text-align:center;padding:12px 0">
+        <div style="font-size:2.4rem;font-weight:800;color:var(--purple)">↑ x5,8</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Ene vs May 2026</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.5">De 98 (ene) a 919 (may).<br>Crecimiento acelerado.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 2 · CALIDAD DE BASE
+═══════════════════════════════════════════════════ -->
+<div class="panel" id="p2">
+  <div class="sec-head">
+    <div class="sec-title">Calidad de Base</div>
+    <div class="sec-desc">Análisis de completitud de datos y lifecycle stage de los contactos.</div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-icon">🔍</div>
+    <div class="insight-body">
+      <div class="insight-label">Dónde actuar primero</div>
+      <div class="insight-text">
+        El <strong>93,3% de contactos no tiene país</strong> y el <strong>77,1% no tiene empresa</strong> —
+        esto bloquea completamente la segmentación por ICP (startups B2C Series A-C España/LATAM).
+        La prioridad no es enriquecer los 9.023 contactos, sino los <strong>38 clientes + 62 en negociación activa</strong>.
+        Para el resto, plantear un flujo automático de enriquecimiento vía Apollo o Clay.
+      </div>
+    </div>
+  </div>
+
+  <div class="g21 mb">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--amber)"></div><span>Campos faltantes</span> — % sobre total</div>
+      </div>
+      <div id="missingBars"></div>
+      <canvas id="qualityChart" height="160" style="margin-top:18px"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--purple)"></div><span>Completitud</span> (todos los campos)</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0 8px">
+        <canvas id="completDonut" width="160" height="160"></canvas>
+      </div>
+      <div style="background:var(--s2);border-radius:8px;padding:12px;margin-top:8px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase">Prioridad de enriquecimiento</div>
+        <div class="hrow">
+          <div class="hlbl">Clientes</div>
+          <div class="hbg"><div class="hfill" style="width:100%;background:var(--green)"></div></div>
+          <div class="hnum" style="color:var(--green)">38</div>
+        </div>
+        <div class="hrow">
+          <div class="hlbl">En negociación</div>
+          <div class="hbg"><div class="hfill" style="width:42%;background:var(--blue)"></div></div>
+          <div class="hnum" style="color:var(--blue)">62+12</div>
+        </div>
+        <div class="hrow" style="margin-bottom:0">
+          <div class="hlbl">Freemium activo</div>
+          <div class="hbg"><div class="hfill" style="width:6%;background:var(--purple)"></div></div>
+          <div class="hnum" style="color:var(--purple)">8</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="card-title"><div class="dot" style="background:var(--brand)"></div><span>Contactos creados</span> por mes</div>
-    <div style="position:relative;height:220px"><canvas id="lineChart"></canvas></div>
+    <div class="card-hd">
+      <div class="card-title"><div class="cdot" style="background:var(--brand)"></div><span>Lifecycle stage</span> — distribución detallada</div>
+    </div>
+    <div id="lcTable"></div>
   </div>
 </div>
 
-<!-- 3. LIFECYCLE + PIPELINE -->
-<div class="sec">
-  <div class="sec-lbl">Lifecycle stage &amp; Pipeline de ventas</div>
-  <div class="g21">
 
+<!-- ══════════════════════════════════════════════════
+     TAB 3 · PIPELINE & VENTAS
+═══════════════════════════════════════════════════ -->
+<div class="panel" id="p3">
+  <div class="sec-head">
+    <div class="sec-title">Pipeline &amp; Ventas</div>
+    <div class="sec-desc">Estado del pipeline de ventas, lead status y razones de descarte.</div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-icon">🎯</div>
+    <div class="insight-body">
+      <div class="insight-label">Dónde está el dinero</div>
+      <div class="insight-text">
+        <strong>150 de 246 deals (61%) están cerrados como lost</strong> — el pipeline está invertido.
+        Con solo <strong>35 en Discovery y 15 en Alignment</strong>, hay muy poco volumen en la parte alta del funnel.
+        Los <strong>62 contactos con estado OPEN son la oportunidad más inmediata</strong>: ya conocen GuruSup
+        y están en conversación. Trabajar con ellos antes de abrir más leads nuevos.
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mb">
     <div class="card">
-      <div class="card-title"><div class="dot" style="background:var(--brand)"></div><span>Contactos</span> por Lifecycle Stage</div>
-      <div id="lc-bars"></div>
-      <div style="position:relative;height:180px;margin-top:18px"><canvas id="lcChart"></canvas></div>
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--indigo)"></div><span>Pipeline ventas</span> — etapas activas</div>
+        <div class="card-badge" style="background:rgba(129,140,248,.14);color:var(--indigo)">246 deals total</div>
+      </div>
+      <div id="pipeSteps"></div>
     </div>
 
     <div class="card">
-      <div class="card-title"><div class="dot" style="background:var(--indigo)"></div><span>Deals</span> · Pipeline ventas</div>
-      <div class="funnel" id="pipeline-funnel"></div>
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--brand)"></div><span>Lead status</span> — distribución</div>
+      </div>
+      <canvas id="leadDonut" height="210"></canvas>
     </div>
+  </div>
 
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-title"><div class="cdot" style="background:var(--red)"></div><span>Razones de descarte</span> — todos los estados</div>
+    </div>
+    <table>
+      <thead><tr><th>Estado</th><th>Contactos</th><th>% total</th><th>Distribución visual</th><th>Acción sugerida</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pill" style="background:rgba(248,113,113,.15);color:var(--red)">Lead frío · Unqualified</span></td>
+          <td><strong>5.037</strong></td><td style="color:var(--red)">55,8%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:100%;height:100%;background:var(--red);border-radius:3px"></div></div></td>
+          <td style="color:var(--dim);font-size:11px">Campaña reactivación segmentada</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(139,143,168,.12);color:var(--muted)">Sin estado asignado</span></td>
+          <td><strong>3.471</strong></td><td style="color:var(--muted)">38,5%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:68.9%;height:100%;background:var(--muted);border-radius:3px"></div></div></td>
+          <td style="color:var(--dim);font-size:11px">Asignar estado vía workflow</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(167,139,250,.14);color:var(--purple)">Prueba Gratuita</span></td>
+          <td><strong>377</strong></td><td style="color:var(--purple)">4,2%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:7.5%;height:100%;background:var(--purple);border-radius:3px"></div></div></td>
+          <td style="color:var(--dim);font-size:11px">Secuencia activación freemium</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(96,165,250,.15);color:var(--blue)">En contacto · Open</span></td>
+          <td><strong>62</strong></td><td style="color:var(--blue)">0,7%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:1.2%;height:100%;background:var(--blue);border-radius:3px"></div></div></td>
+          <td style="color:var(--green);font-size:11px;font-weight:600">🔥 Prioridad #1 esta semana</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(45,212,191,.13);color:var(--green)">Cliente activo</span></td>
+          <td><strong>38</strong></td><td style="color:var(--green)">0,4%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:0.75%;height:100%;background:var(--green);border-radius:3px"></div></div></td>
+          <td style="color:var(--dim);font-size:11px">Upsell + NPS + referrals</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(255,107,91,.13);color:var(--brand)">Lead caliente · Attempted</span></td>
+          <td><strong>18</strong></td><td style="color:var(--brand)">0,2%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:0.36%;height:100%;background:var(--brand);border-radius:3px"></div></div></td>
+          <td style="color:var(--dim);font-size:11px">Insistir: alta intención</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(129,140,248,.14);color:var(--indigo)">En negociación</span></td>
+          <td><strong>12</strong></td><td style="color:var(--indigo)">0,1%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:0.24%;height:100%;background:var(--indigo);border-radius:3px"></div></div></td>
+          <td style="color:var(--green);font-size:11px;font-weight:600">🔥 Prioridad #2 esta semana</td>
+        </tr>
+        <tr>
+          <td><span class="pill" style="background:rgba(251,191,36,.13);color:var(--amber)">Mareado</span></td>
+          <td><strong>8</strong></td><td style="color:var(--amber)">0,1%</td>
+          <td><div style="background:var(--s2);border-radius:3px;height:6px;width:120px;overflow:hidden"><div style="width:0.16%;height:100%;background:var(--amber);border-radius:3px"></div></div></td>
+          <td style="color:var(--dim);font-size:11px">Simplificar propuesta de valor</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- 4. LEAD STATUS / DESCARTE -->
-<div class="sec">
-  <div class="sec-lbl">Lead status &amp; Razones de descarte</div>
-  <div class="g12">
 
-    <div class="card">
-      <div class="card-title"><div class="dot" style="background:var(--red)"></div><span>Distribución</span> por estado</div>
-      <div style="position:relative;height:240px;display:flex;align-items:center;justify-content:center"><canvas id="statusDonut"></canvas></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><div class="dot" style="background:var(--muted)"></div><span>Todos los estados</span></div>
-      <table>
-        <thead>
-          <tr><th>Estado</th><th>Contactos</th><th>%</th><th>Barra</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="pill" style="background:rgba(248,113,113,.15);color:var(--red)">Lead frío · Unqualified</span></td>
-            <td><strong>5.037</strong></td><td style="color:var(--red)">55,8%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:100%;height:100%;background:var(--red);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(139,143,168,.12);color:var(--muted)">Sin estado</span></td>
-            <td><strong>3.471</strong></td><td style="color:var(--muted)">38,5%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:68.9%;height:100%;background:var(--muted);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(167,139,250,.14);color:var(--purple)">Prueba Gratuita · Free</span></td>
-            <td><strong>377</strong></td><td style="color:var(--purple)">4,2%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:7.5%;height:100%;background:var(--purple);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(96,165,250,.15);color:var(--blue)">En contacto · Open</span></td>
-            <td><strong>62</strong></td><td style="color:var(--blue)">0,7%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:1.2%;height:100%;background:var(--blue);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(45,212,191,.13);color:var(--green)">Cliente</span></td>
-            <td><strong>38</strong></td><td style="color:var(--green)">0,4%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:0.75%;height:100%;background:var(--green);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(255,107,91,.13);color:var(--brand)">Lead caliente · Attempted</span></td>
-            <td><strong>18</strong></td><td style="color:var(--brand)">0,2%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:0.36%;height:100%;background:var(--brand);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(129,140,248,.14);color:var(--indigo)">En negociación · Open Deal</span></td>
-            <td><strong>12</strong></td><td style="color:var(--indigo)">0,1%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:0.24%;height:100%;background:var(--indigo);border-radius:3px"></div></div></td>
-          </tr>
-          <tr>
-            <td><span class="pill" style="background:rgba(251,191,36,.13);color:var(--amber)">Mareado</span></td>
-            <td><strong>8</strong></td><td style="color:var(--amber)">0,1%</td>
-            <td><div style="background:var(--s2);border-radius:3px;height:5px;width:100px;overflow:hidden"><div style="width:0.16%;height:100%;background:var(--amber);border-radius:3px"></div></div></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+<!-- ══════════════════════════════════════════════════
+     TAB 4 · FREEMIUM
+═══════════════════════════════════════════════════ -->
+<div class="panel" id="p4">
+  <div class="sec-head">
+    <div class="sec-title">Freemium</div>
+    <div class="sec-desc">Estado de usuarios en prueba gratuita y embudo de conversión hacia cliente de pago.</div>
   </div>
-</div>
 
-<!-- 5. FREEMIUM -->
-<div class="sec">
-  <div class="sec-lbl">Freemium — estado &amp; conversión</div>
-  <div class="g2">
-
-    <div class="card">
-      <div class="card-title"><div class="dot" style="background:var(--purple)"></div><span>Freemium</span> por estado (basado en última actividad)</div>
-      <div style="position:relative;height:200px;display:flex;align-items:center;justify-content:center"><canvas id="freeDonut"></canvas></div>
+  <div class="insight">
+    <div class="insight-icon">🚀</div>
+    <div class="insight-body">
+      <div class="insight-label">La oportunidad oculta</div>
+      <div class="insight-text">
+        <strong>93% de usuarios freemium están inactivos</strong> (sin contacto registrado).
+        Con una tasa de activación del <strong>2,1%</strong>, el problema no es adquirir freemium sino <strong>activarlos</strong>.
+        Los <strong>7 usuarios "en riesgo"</strong> (contactados entre 30-90 días) son la intervención más rentable:
+        ya conocen el producto y han mostrado interés. Un outreach personalizado esta semana
+        podría mover 2-3 a conversión — equivalente a <strong>+8% en la base de clientes actual</strong>.
+      </div>
     </div>
+  </div>
 
+  <!-- KPIs freemium -->
+  <div class="kpi-grid mb" style="grid-template-columns:repeat(auto-fill,minmax(155px,1fr))">
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--purple)"></div>
+      <div class="kpi-ico">🆓</div>
+      <div class="kpi-lbl">Total freemium</div>
+      <div class="kpi-val" style="color:var(--purple)">377</div>
+      <div class="kpi-sub">Status usuario_free</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--green)"></div>
+      <div class="kpi-ico">✅</div>
+      <div class="kpi-lbl">Activos</div>
+      <div class="kpi-val" style="color:var(--green)">8</div>
+      <div class="kpi-sub">Contactados &lt;30 días</div>
+      <div class="kpi-trend trend-dn">Solo 2,1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--amber)"></div>
+      <div class="kpi-ico">⚠️</div>
+      <div class="kpi-lbl">En riesgo</div>
+      <div class="kpi-val" style="color:var(--amber)">7</div>
+      <div class="kpi-sub">Contactados 30-90 días</div>
+      <div class="kpi-trend trend-warn">Actuar esta semana</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--red)"></div>
+      <div class="kpi-ico">💤</div>
+      <div class="kpi-lbl">Inactivos</div>
+      <div class="kpi-val" style="color:var(--red)">351</div>
+      <div class="kpi-sub">Sin contacto registrado</div>
+      <div class="kpi-trend trend-dn">93,1% del free</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--green)"></div>
+      <div class="kpi-ico">🎯</div>
+      <div class="kpi-lbl">Convertidos</div>
+      <div class="kpi-val" style="color:var(--green)">38</div>
+      <div class="kpi-sub">Status: cliente</div>
+      <div class="kpi-trend trend-up">9,2% conversión</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-bar" style="background:var(--blue)"></div>
+      <div class="kpi-ico">🔄</div>
+      <div class="kpi-lbl">En conversión</div>
+      <div class="kpi-val" style="color:var(--blue)">11</div>
+      <div class="kpi-sub">Lifecycle: customer</div>
+      <div class="kpi-trend trend-warn">Pendiente cierre</div>
+    </div>
+  </div>
+
+  <div class="g2 mb">
     <div class="card">
-      <div class="card-title"><div class="dot" style="background:var(--green)"></div><span>Conversión</span> Freemium → Cliente</div>
-      <div class="conv-row" style="margin-bottom:20px">
-        <div class="conv-box">
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--purple)"></div><span>Freemium</span> por estado de actividad</div>
+      </div>
+      <canvas id="freeDonut" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><div class="cdot" style="background:var(--green)"></div><span>Embudo</span> de conversión Freemium → Cliente</div>
+      </div>
+      <div class="conv-flow" style="margin-bottom:20px">
+        <div class="conv-step">
           <div class="conv-n" style="color:var(--purple)">377</div>
-          <div class="conv-l">Total Freemium</div>
+          <div class="conv-l">Total Free</div>
+          <div class="conv-rt" style="color:var(--purple)">100%</div>
         </div>
-        <div class="conv-arrow">→</div>
-        <div class="conv-box">
-          <div class="conv-n" style="color:var(--amber)">11</div>
+        <div class="conv-step">
+          <div class="conv-n" style="color:var(--amber)">15</div>
+          <div class="conv-l">Activos+Riesgo</div>
+          <div class="conv-rt" style="color:var(--amber)">4%</div>
+        </div>
+        <div class="conv-step">
+          <div class="conv-n" style="color:var(--blue)">11</div>
           <div class="conv-l">En conversión</div>
-          <div class="conv-rate" style="color:var(--amber)">lifecycle customer</div>
+          <div class="conv-rt" style="color:var(--blue)">2,9%</div>
         </div>
-        <div class="conv-arrow">→</div>
-        <div class="conv-box">
+        <div class="conv-step">
           <div class="conv-n" style="color:var(--green)">38</div>
           <div class="conv-l">Clientes</div>
-          <div class="conv-rate" style="color:var(--green)">status cliente</div>
+          <div class="conv-rt" style="color:var(--green)">9,2%</div>
         </div>
       </div>
-      <div style="background:var(--s2);border-radius:8px;padding:16px">
-        <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Tasa de conversión total</div>
-        <div style="display:flex;align-items:baseline;gap:8px">
-          <div style="font-size:2.4rem;font-weight:800;color:var(--green)">9,2%</div>
-          <div style="font-size:12px;color:var(--muted)">38 de 415 usuarios free+cliente</div>
+      <div style="background:var(--s2);border-radius:10px;padding:16px">
+        <div style="font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Tasa de conversión acumulada</div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">
+          <div style="font-size:2.6rem;font-weight:800;color:var(--green)">9,2%</div>
+          <div style="font-size:12px;color:var(--muted)">38 clientes de 415 que pasaron por free</div>
         </div>
-        <div style="margin-top:12px;background:var(--border);border-radius:4px;height:8px;overflow:hidden">
-          <div style="width:9.2%;height:100%;background:var(--green);border-radius:4px"></div>
+        <div style="background:var(--border);border-radius:5px;height:10px;overflow:hidden;margin-bottom:12px">
+          <div style="width:9.2%;height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:5px"></div>
         </div>
-        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <div style="text-align:center">
-            <div style="font-size:16px;font-weight:700;color:var(--green)">8</div>
-            <div style="font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Activos</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:16px;font-weight:700;color:var(--amber)">7</div>
-            <div style="font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">En riesgo</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:16px;font-weight:700;color:var(--red)">351</div>
-            <div style="font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Inactivos</div>
-          </div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">
+          💡 <strong style="color:var(--text)">Benchmark SaaS:</strong> conversión freemium típica 2-5%.
+          GuruSup está en <strong style="color:var(--green)">9,2%</strong> — por encima del mercado.
+          El reto es escalar el volumen de free cualificados.
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<footer>
-  <div class="fl">GuruSup</div>
-  <div class="fr">CRM Intelligence · HubSpot · 8 jun 2026 · Datos en tiempo real</div>
-</footer>
+</div><!-- /shell -->
+
+<div class="foot">
+  <div class="foot-l">GuruSup</div>
+  <div class="foot-r">CRM Intelligence · HubSpot · 8 jun 2026 · Datos en tiempo real</div>
+</div>
 
 <script>
-/* ── THEME ─────────────────────────────────────────────── */
-const C = {
-  brand:'#FF6B5B', green:'#2DD4BF', blue:'#60A5FA', amber:'#FBBF24',
-  purple:'#A78BFA', red:'#F87171', indigo:'#818CF8', muted:'#8B8FA8',
-  s2:'#20232f', border:'rgba(37,40,54,.7)'
+/* ══ COLORS ═══════════════════════════════════════ */
+const C={
+  brand:'#FF6B5B',green:'#2DD4BF',blue:'#60A5FA',amber:'#FBBF24',
+  purple:'#A78BFA',red:'#F87171',indigo:'#818CF8',muted:'#8B8FA8',
+  s2:'#20232f',border:'rgba(37,40,54,.65)'
 };
-const TIP = {
-  backgroundColor:'#1A1D28', borderColor:'#252836', borderWidth:1,
-  titleColor:'#F2F3F7', bodyColor:'#8B8FA8', padding:10, cornerRadius:8
-};
-Chart.defaults.color = C.muted;
-Chart.defaults.font.family = 'Helvetica, Arial, sans-serif';
+const TIP={backgroundColor:'#1A1D28',borderColor:'#252836',borderWidth:1,titleColor:'#F2F3F7',bodyColor:'#8B8FA8',padding:10,cornerRadius:8};
+Chart.defaults.color=C.muted;
+Chart.defaults.font.family='Helvetica,Arial,sans-serif';
 
-/* ── 1. LINE CHART – evolución 12 meses ─────────────── */
-const months = ['Jun\'25','Jul','Ago','Sep','Oct','Nov','Dic','Ene\'26','Feb','Mar','Abr','May','Jun*'];
-const mcounts = [176,155,122,194,430,4062,633,98,110,158,506,919,241];
-new Chart(document.getElementById('lineChart'), {
+/* ══ TABS ═════════════════════════════════════════ */
+function showTab(i){
+  document.querySelectorAll('.panel').forEach((p,j)=>{
+    p.classList.toggle('active',i===j);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,j)=>{
+    b.classList.toggle('active',i===j);
+  });
+}
+
+/* ══ LIFECYCLE BARS (used in tab 0 and 2) ═════════ */
+const lcData=[
+  {label:'Opportunity',n:6246,color:C.brand},
+  {label:'Lead',n:2669,color:C.blue},
+  {label:'Customer',n:82,color:C.green},
+  {label:'Spam',n:15,color:C.red},
+  {label:'Subscriber',n:9,color:C.amber},
+  {label:'MQL',n:1,color:C.purple},
+];
+function renderLcBars(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const max=lcData[0].n;
+  el.innerHTML=lcData.map(d=>`
+    <div class="hrow">
+      <div class="hlbl">${d.label}</div>
+      <div class="hbg"><div class="hfill" style="width:${(d.n/max*100).toFixed(1)}%;background:${d.color}"></div></div>
+      <div class="hnum" style="color:${d.color}">${d.n.toLocaleString('es')}</div>
+      <div class="hpct">${(d.n/9023*100).toFixed(1)}%</div>
+    </div>`).join('');
+}
+renderLcBars('lcBars');
+
+/* ══ TAB 0 — Overview donut ═══════════════════════ */
+new Chart(document.getElementById('overviewDonut'),{
+  type:'doughnut',
+  data:{
+    labels:['Descartados','Sin estado','Freemium','En negociación','Clientes','Otros activos'],
+    datasets:[{
+      data:[5037,3471,377,74,38,26],
+      backgroundColor:[C.red+'bb',C.muted+'55',C.purple+'bb',C.blue+'bb',C.green+'bb',C.amber+'bb'],
+      borderColor:[C.red,C.muted,C.purple,C.blue,C.green,C.amber],
+      borderWidth:1,hoverOffset:10
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:'70%',
+    plugins:{
+      legend:{position:'bottom',labels:{color:C.muted,font:{size:10},padding:8,usePointStyle:true,pointStyleWidth:8}},
+      tooltip:{...TIP,callbacks:{label:c=>`${c.label}: ${c.parsed.toLocaleString('es')} (${(c.parsed/9023*100).toFixed(1)}%)`}}
+    }
+  },
+  plugins:[{id:'ct',afterDraw(ch){
+    const{ctx,chartArea:{top,bottom,left,right}}=ch;
+    const cx=(left+right)/2,cy=(top+bottom)/2-10;
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 20px Helvetica,Arial,sans-serif';ctx.fillStyle=C.brand;
+    ctx.fillText('9.023',cx,cy);
+    ctx.font='10px Helvetica,Arial,sans-serif';ctx.fillStyle=C.muted;
+    ctx.fillText('contactos',cx,cy+18);ctx.restore();
+  }}]
+});
+
+/* ══ TAB 1 — Captación bar chart ══════════════════ */
+const months=['Jun\'25','Jul','Ago','Sep','Oct','Nov','Dic','Ene\'26','Feb','Mar','Abr','May','Jun*'];
+const mcounts=[176,155,122,194,430,4062,633,98,110,158,506,919,241];
+new Chart(document.getElementById('captChart'),{
   type:'bar',
   data:{
-    labels: months,
+    labels:months,
     datasets:[{
       label:'Contactos creados',
-      data: mcounts,
-      backgroundColor: mcounts.map((v,i)=> i===12 ? C.green+'cc' : C.brand+'88'),
-      borderRadius:6, borderSkipped:false
+      data:mcounts,
+      backgroundColor:mcounts.map((v,i)=>{
+        if(i===5) return C.amber+'dd'; // Nov pico
+        if(i===12) return C.green+'cc'; // Jun actual
+        if(i>=10) return C.brand+'cc'; // Abr-Jun
+        return C.brand+'55';
+      }),
+      borderRadius:7,borderSkipped:false
     }]
   },
   options:{
-    responsive:true, maintainAspectRatio:false,
+    responsive:true,maintainAspectRatio:false,
     plugins:{
       legend:{display:false},
-      tooltip:{...TIP, callbacks:{label:c=>` ${c.parsed.y.toLocaleString('es')} contactos`}}
+      tooltip:{...TIP,callbacks:{
+        label:c=>` ${c.parsed.y.toLocaleString('es')} contactos`,
+        afterLabel:c=>c.dataIndex===5?' ⚠ Posible importación masiva':''
+      }},
+      annotation:{} // placeholder
     },
     scales:{
-      x:{grid:{color:C.border}, ticks:{color:C.muted,font:{size:10}}},
-      y:{grid:{color:C.border}, ticks:{color:C.muted,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}}
+      x:{grid:{color:C.border},ticks:{color:C.muted,font:{size:10}}},
+      y:{grid:{color:C.border},ticks:{color:C.muted,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}}
     }
   }
 });
 
-/* ── 2. LIFECYCLE DOUGHNUT ──────────────────────────── */
-const lcData = [
-  {label:'Opportunity',    n:6246, color:C.brand},
-  {label:'Lead',           n:2669, color:C.blue},
-  {label:'Customer',       n:82,   color:C.green},
-  {label:'Spam',           n:15,   color:C.red},
-  {label:'Subscriber',     n:9,    color:C.amber},
-  {label:'MQL',            n:1,    color:C.purple},
+/* ══ TAB 2 — Missing bars ═════════════════════════ */
+const missingFields=[
+  {label:'Sin país',n:8420,pct:93.3,color:C.amber},
+  {label:'Sin empresa',n:6957,pct:77.1,color:C.brand},
+  {label:'Sin cargo',n:3536,pct:39.2,color:C.purple},
+  {label:'Sin email',n:254,pct:2.8,color:C.blue},
 ];
-new Chart(document.getElementById('lcChart'),{
-  type:'doughnut',
+(()=>{
+  const el=document.getElementById('missingBars');
+  el.innerHTML=missingFields.map(d=>`
+    <div class="hrow">
+      <div class="hlbl">${d.label}</div>
+      <div class="hbg"><div class="hfill" style="width:${d.pct}%;background:${d.color}"></div></div>
+      <div class="hnum" style="color:${d.color}">${d.n.toLocaleString('es')}</div>
+      <div class="hpct">${d.pct}%</div>
+    </div>`).join('');
+})();
+
+/* ══ TAB 2 — Quality radar ════════════════════════ */
+new Chart(document.getElementById('qualityChart'),{
+  type:'radar',
   data:{
-    labels: lcData.map(d=>d.label),
+    labels:['Email','Empresa','País','Cargo','Todos completos'],
     datasets:[{
-      data: lcData.map(d=>d.n),
-      backgroundColor: lcData.map(d=>d.color+'cc'),
-      borderColor: lcData.map(d=>d.color),
-      borderWidth:1, hoverOffset:8
+      label:'% con dato',
+      data:[97.2,22.9,6.7,60.8,6.4],
+      backgroundColor:'rgba(255,107,91,.12)',
+      borderColor:C.brand,
+      pointBackgroundColor:C.brand,
+      pointBorderColor:'#1A1D28',
+      pointRadius:4
     }]
   },
   options:{
-    responsive:true, maintainAspectRatio:false, cutout:'65%',
-    plugins:{
-      legend:{position:'right', labels:{color:C.muted, font:{size:10}, padding:10, usePointStyle:true, pointStyleWidth:8}},
-      tooltip:{...TIP, callbacks:{label:c=>`${c.label}: ${c.parsed.toLocaleString('es')}`}}
-    }
+    responsive:true,maintainAspectRatio:false,
+    scales:{r:{
+      min:0,max:100,
+      grid:{color:'rgba(37,40,54,.8)'},
+      angleLines:{color:'rgba(37,40,54,.8)'},
+      ticks:{color:C.muted,font:{size:9},stepSize:25,backdropColor:'transparent'},
+      pointLabels:{color:C.muted,font:{size:10}}
+    }},
+    plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{label:c=>`${c.raw}% tienen el dato`}}}
   }
 });
 
-/* ── 3. PIPELINE FUNNEL ──────────────────────────────── */
-const pipelineStages = [
-  {label:'Discovery & Lead Qual.',      n:35,  color:C.brand},
-  {label:'Needs Validation & Alignment',n:15,  color:C.amber},
-  {label:'Freemium',                    n:4,   color:C.purple},
-  {label:'Close Won & Onboarding',      n:0,   color:C.green},
-  {label:'Close Lost',                  n:150, color:C.red},
-];
-const maxP = Math.max(...pipelineStages.map(s=>s.n));
-const funnelEl = document.getElementById('pipeline-funnel');
-pipelineStages.forEach(s=>{
-  const pct = maxP>0 ? (s.n/maxP*100) : 0;
-  funnelEl.innerHTML += `
-    <div class="fstep">
-      <div class="fstep-lbl">${s.label}</div>
-      <div class="fbar-wrap">
-        <div class="fbar-inner" style="width:${Math.max(pct,4)}%;background:${s.color}88;border-left:3px solid ${s.color}">
-          ${s.n>0?'':''}</div>
+/* ══ TAB 2 — Completitud donut ═════════════════════ */
+new Chart(document.getElementById('completDonut'),{
+  type:'doughnut',
+  data:{
+    labels:['Completos (4 campos)','Incompletos'],
+    datasets:[{
+      data:[581,8442],
+      backgroundColor:[C.green+'cc',C.s2],
+      borderColor:[C.green,'#2e3147'],
+      borderWidth:2,hoverOffset:8
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:'72%',
+    plugins:{
+      legend:{position:'bottom',labels:{color:C.muted,font:{size:10},padding:10,usePointStyle:true,pointStyleWidth:8}},
+      tooltip:{...TIP,callbacks:{label:c=>`${c.label}: ${c.parsed.toLocaleString('es')}`}}
+    }
+  },
+  plugins:[{id:'ct2',afterDraw(ch){
+    const{ctx,chartArea:{top,bottom,left,right}}=ch;
+    const cx=(left+right)/2,cy=(top+bottom)/2-8;
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 22px Helvetica,Arial,sans-serif';ctx.fillStyle=C.green;
+    ctx.fillText('6,4%',cx,cy);
+    ctx.font='10px Helvetica,Arial,sans-serif';ctx.fillStyle=C.muted;
+    ctx.fillText('completos',cx,cy+18);ctx.restore();
+  }}]
+});
+
+/* ══ TAB 2 — Lifecycle table ══════════════════════ */
+(()=>{
+  const el=document.getElementById('lcTable');
+  const stages=[
+    {name:'Opportunity',n:6246,color:C.brand,desc:'Leads cualificados o con deal asociado'},
+    {name:'Lead',n:2669,color:C.blue,desc:'Primer contacto, sin cualificar'},
+    {name:'Customer',n:82,color:C.green,desc:'Clientes activos'},
+    {name:'Spam',n:15,color:C.red,desc:'Marcados como no válidos'},
+    {name:'Subscriber',n:9,color:C.amber,desc:'Suscritos sin interacción comercial'},
+    {name:'MQL',n:1,color:C.purple,desc:'Marketing Qualified Lead'},
+  ];
+  const total=9023;
+  el.innerHTML=`<table>
+    <thead><tr><th>Stage</th><th>Contactos</th><th>%</th><th>Descripción</th><th>Distribución</th></tr></thead>
+    <tbody>${stages.map(s=>`<tr>
+      <td><span class="pill" style="background:${s.color}22;color:${s.color}">${s.name}</span></td>
+      <td><strong>${s.n.toLocaleString('es')}</strong></td>
+      <td style="color:${s.color}">${(s.n/total*100).toFixed(1)}%</td>
+      <td style="color:var(--muted);font-size:11px">${s.desc}</td>
+      <td><div style="background:var(--s2);border-radius:3px;height:6px;width:100px;overflow:hidden"><div style="width:${(s.n/stages[0].n*100).toFixed(1)}%;height:100%;background:${s.color};border-radius:3px"></div></div></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+})();
+
+/* ══ TAB 3 — Pipeline steps ═══════════════════════ */
+(()=>{
+  const el=document.getElementById('pipeSteps');
+  const steps=[
+    {name:'Discovery & Lead Qualification',sub:'Tope del funnel',n:35,color:C.brand,max:150},
+    {name:'Needs Validation & Alignment',sub:'Cualificación y propuesta',n:15,color:C.amber,max:150},
+    {name:'Freemium',sub:'Prueba gratuita activa',n:4,color:C.purple,max:150},
+    {name:'Close Won & Onboarding',sub:'Ganados pendientes',n:0,color:C.green,max:150},
+    {name:'Close Lost',sub:'Oportunidades perdidas',n:150,color:C.red,max:150},
+  ];
+  el.innerHTML=steps.map(s=>`
+    <div class="pipe-step">
+      <div class="pipe-circle" style="background:${s.color}22;color:${s.color}">${s.n}</div>
+      <div class="pipe-info">
+        <div class="pipe-name">${s.name}</div>
+        <div class="pipe-sub">${s.sub}</div>
+        <div class="pipe-bar"><div class="pipe-bar-fill" style="width:${(s.n/s.max*100).toFixed(0)}%;background:${s.color}"></div></div>
       </div>
-      <div class="fstep-num" style="color:${s.color}">${s.n}</div>
-    </div>`;
-});
+    </div>`).join('');
+})();
 
-/* ── 4. STATUS DONUT ──────────────────────────────────── */
-new Chart(document.getElementById('statusDonut'),{
+/* ══ TAB 3 — Lead status donut ═══════════════════ */
+new Chart(document.getElementById('leadDonut'),{
   type:'doughnut',
   data:{
-    labels:['Lead frío','Sin estado','Free','En contacto','Cliente','Otros'],
+    labels:['Lead frío','Sin estado','Freemium','En contacto','Cliente','Attempted','Open Deal','Mareado'],
     datasets:[{
-      data:[5037,3471,377,62,38,38],
-      backgroundColor:[C.red+'cc',C.muted+'66',C.purple+'cc',C.blue+'cc',C.green+'cc',C.amber+'cc'],
-      borderColor:[C.red,C.muted,C.purple,C.blue,C.green,C.amber],
-      borderWidth:1, hoverOffset:8
+      data:[5037,3471,377,62,38,18,12,8],
+      backgroundColor:[C.red+'bb',C.muted+'44',C.purple+'bb',C.blue+'bb',C.green+'bb',C.brand+'bb',C.indigo+'bb',C.amber+'bb'],
+      borderColor:[C.red,C.muted,C.purple,C.blue,C.green,C.brand,C.indigo,C.amber],
+      borderWidth:1,hoverOffset:10
     }]
   },
   options:{
-    responsive:true, maintainAspectRatio:false, cutout:'68%',
+    responsive:true,maintainAspectRatio:false,cutout:'65%',
     plugins:{
-      legend:{position:'bottom', labels:{color:C.muted,font:{size:10},padding:8,usePointStyle:true,pointStyleWidth:8}},
-      tooltip:{...TIP, callbacks:{label:c=>`${c.label}: ${c.parsed.toLocaleString('es')} (${(c.parsed/9023*100).toFixed(1)}%)`}}
+      legend:{position:'bottom',labels:{color:C.muted,font:{size:9},padding:6,usePointStyle:true,pointStyleWidth:7}},
+      tooltip:{...TIP,callbacks:{label:c=>`${c.label}: ${c.parsed.toLocaleString('es')} (${(c.parsed/9023*100).toFixed(1)}%)`}}
     }
   },
-  plugins:[{
-    id:'center',
-    afterDraw(ch){
-      const {ctx,chartArea:{top,bottom,left,right}}=ch;
-      const cx=(left+right)/2, cy=(top+bottom)/2-8;
-      ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.font='bold 22px Helvetica,Arial,sans-serif';ctx.fillStyle=C.red;
-      ctx.fillText('55,8%',cx,cy);
-      ctx.font='10px Helvetica,Arial,sans-serif';ctx.fillStyle=C.muted;
-      ctx.fillText('descartados',cx,cy+18);ctx.restore();
-    }
-  }]
+  plugins:[{id:'ct3',afterDraw(ch){
+    const{ctx,chartArea:{top,bottom,left,right}}=ch;
+    const cx=(left+right)/2,cy=(top+bottom)/2-8;
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 18px Helvetica,Arial,sans-serif';ctx.fillStyle=C.red;
+    ctx.fillText('55,8%',cx,cy);
+    ctx.font='9px Helvetica,Arial,sans-serif';ctx.fillStyle=C.muted;
+    ctx.fillText('descartados',cx,cy+16);ctx.restore();
+  }}]
 });
 
-/* ── 5. FREEMIUM DONUT ────────────────────────────────── */
+/* ══ TAB 4 — Freemium donut ══════════════════════ */
 new Chart(document.getElementById('freeDonut'),{
   type:'doughnut',
   data:{
-    labels:['Inactivo (sin contacto)','En riesgo (30-90d)','Activo (últimos 30d)','Convertido (customer)'],
+    labels:['Inactivos (sin contacto)','En riesgo (30-90d)','Activos (< 30d)','En conversión (lifecycle customer)'],
     datasets:[{
       data:[351,7,8,11],
       backgroundColor:[C.red+'99',C.amber+'cc',C.green+'cc',C.purple+'cc'],
       borderColor:[C.red,C.amber,C.green,C.purple],
-      borderWidth:1, hoverOffset:10
+      borderWidth:1,hoverOffset:12
     }]
   },
   options:{
-    responsive:true, maintainAspectRatio:false, cutout:'62%',
+    responsive:true,maintainAspectRatio:false,cutout:'65%',
     plugins:{
-      legend:{position:'bottom', labels:{color:C.muted,font:{size:10},padding:8,usePointStyle:true,pointStyleWidth:8}},
-      tooltip:{...TIP, callbacks:{label:c=>`${c.label}: ${c.parsed} (${(c.parsed/377*100).toFixed(1)}%)`}}
+      legend:{position:'bottom',labels:{color:C.muted,font:{size:10},padding:8,usePointStyle:true,pointStyleWidth:8}},
+      tooltip:{...TIP,callbacks:{label:c=>`${c.label}: ${c.parsed} (${(c.parsed/377*100).toFixed(1)}%)`}}
     }
   },
-  plugins:[{
-    id:'center',
-    afterDraw(ch){
-      const {ctx,chartArea:{top,bottom,left,right}}=ch;
-      const cx=(left+right)/2, cy=(top+bottom)/2-8;
-      ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.font='bold 24px Helvetica,Arial,sans-serif';ctx.fillStyle=C.purple;
-      ctx.fillText('377',cx,cy);
-      ctx.font='10px Helvetica,Arial,sans-serif';ctx.fillStyle=C.muted;
-      ctx.fillText('freemium',cx,cy+18);ctx.restore();
-    }
-  }]
+  plugins:[{id:'ct4',afterDraw(ch){
+    const{ctx,chartArea:{top,bottom,left,right}}=ch;
+    const cx=(left+right)/2,cy=(top+bottom)/2-8;
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 24px Helvetica,Arial,sans-serif';ctx.fillStyle=C.purple;
+    ctx.fillText('377',cx,cy);
+    ctx.font='10px Helvetica,Arial,sans-serif';ctx.fillStyle=C.muted;
+    ctx.fillText('freemium',cx,cy+18);ctx.restore();
+  }}]
 });
 </script>
 </body>
