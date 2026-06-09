@@ -21,12 +21,11 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
+      - name: Instalar Playwright Chromium
+        run: playwright install chromium --with-deps
+
       - name: Ejecutar Radar IA
         env:
+          DISCORD_WEBHOOK:   ${{ secrets.DISCORD_WEBHOOK }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          SMTP_HOST:         ${{ secrets.SMTP_HOST }}
-          SMTP_PORT:         ${{ secrets.SMTP_PORT }}
-          SMTP_USER:         ${{ secrets.SMTP_USER }}
-          SMTP_PASS:         ${{ secrets.SMTP_PASS }}
-          EMAIL_TO:          ${{ secrets.EMAIL_TO }}
         run: python radar_ia.py
