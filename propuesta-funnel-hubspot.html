@@ -204,6 +204,24 @@
 
   .note-box{background:var(--blue-soft);border-left:4px solid var(--blue);border-radius:8px;padding:14px 18px;font-size:14px;color:var(--ink);margin-top:16px}
 
+  /* ============ PRINT / PDF (presentación) ============ */
+  @media print{
+    @page{size:A4 landscape;margin:0}
+    body{background:#fff}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    .toc,.cue{display:none!important}
+    .hero{height:100vh;display:flex;align-items:center;padding:0}
+    .hero .container{width:100%}
+    section{page-break-before:always;padding:40px 0}
+    .sec-lead{margin-bottom:24px}
+    .card,.principle,.rule,.stat,.source,.branch,.sql-panel,.benefit,.check,.takeaway,.note-box,.donut-grid,.funnel-wrap,.step{page-break-inside:avoid}
+    .bar-row,.legend-row,.live .callout,.live .grid-3{page-break-inside:avoid}
+    .form-table tr{page-break-inside:avoid}
+    .form-table th{background:var(--dark)!important}
+    footer{page-break-before:always;height:96vh;display:flex;align-items:center}
+    footer .brand{font-size:34px}
+  }
+
   /* panel de datos en vivo */
   .live{background:var(--dark);border-radius:14px;padding:28px;margin:30px 0 10px;color:#fff}
   .live h3{font-family:Georgia,serif;font-size:21px;margin-bottom:4px}
