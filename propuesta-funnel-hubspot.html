@@ -186,6 +186,19 @@
   footer .brand{font-family:Georgia,serif;font-style:italic;color:var(--coral);font-size:20px;margin-bottom:6px}
 
   .note-box{background:var(--blue-soft);border-left:4px solid var(--blue);border-radius:8px;padding:14px 18px;font-size:14px;color:var(--ink);margin-top:16px}
+
+  /* panel de datos en vivo */
+  .live{background:var(--dark);border-radius:14px;padding:28px;margin:30px 0 10px;color:#fff}
+  .live h3{font-family:Georgia,serif;font-size:21px;margin-bottom:4px}
+  .live .src-note{font-size:12px;color:#AEAEAE;margin-bottom:20px}
+  .bar-row{display:grid;grid-template-columns:130px 1fr 120px;gap:12px;align-items:center;margin-bottom:9px;font-size:13.5px}
+  @media(max-width:560px){.bar-row{grid-template-columns:95px 1fr 95px;font-size:12px}}
+  .bar-row .lbl{text-align:right;color:#cbd0da}
+  .bar-row .track{background:rgba(255,255,255,.08);border-radius:6px;height:22px;overflow:hidden}
+  .bar-row .fill{height:100%;border-radius:6px;background:var(--coral);min-width:2px}
+  .bar-row .val{font-weight:700;white-space:nowrap}
+  .bar-row .val small{font-weight:400;color:#AEAEAE}
+  .live .callout{background:rgba(255,107,91,.13);border-left:3px solid var(--coral);border-radius:6px;padding:13px 16px;font-size:13.5px;margin-top:18px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -269,8 +282,8 @@
     <h3 class="serif" style="font-size:21px;margin:40px 0 16px">⚠️ Dos alertas que hay que destacar</h3>
     <div class="grid-2">
       <div class="card" style="border-left-color:var(--red);background:#fff">
-        <span class="tag" style="background:var(--red)">Alerta 1 · ¿130 “clientes”… o 38?</span>
-        <p style="font-size:14.5px;color:var(--gray)">Aunque los clientes activos son <strong>38</strong>, en el CRM aparecen <strong>~130 contactos categorizados como “Cliente”</strong>. Hay que auditar esa diferencia y responder:</p>
+        <span class="tag" style="background:var(--red)">Alerta 1 · ¿92 “clientes”… o 38?</span>
+        <p style="font-size:14.5px;color:var(--gray)">Aunque los clientes activos son <strong>38</strong>, en el CRM aparecen hoy <strong>92 contactos categorizados como “Cliente”</strong> (dato en vivo · 11 jun 2026; han llegado a ser ~130). Son <strong>54 contactos a auditar</strong>:</p>
         <ul style="margin:10px 0 0 18px;font-size:14px;color:var(--gray)">
           <li>¿Son clientes que hicieron <strong>churn</strong> y nadie actualizó su etapa?</li>
           <li>¿<strong>Nunca fueron clientes</strong>? ¿Por qué razón se categorizaron así?</li>
@@ -293,15 +306,28 @@
       </ol>
     </div>
 
-    <div class="img-slot">
-      <span class="i">📊</span>
-      <strong>[ Insertar captura: Datos analizados ]</strong>
-      <span>Gráfico del análisis de la base de datos (image.png del documento original)</span>
-    </div>
-    <div class="img-slot">
-      <span class="i">📉</span>
-      <strong>[ Insertar capturas: Funnel actual en HubSpot ]</strong>
-      <span>Las 2 capturas del embudo actual, para comparar el “antes” con la propuesta</span>
+    <div class="live">
+      <h3>📡 Radiografía en vivo: así está el funnel HOY</h3>
+      <div class="src-note">Datos extraídos directamente de HubSpot · 11 jun 2026 · <strong style="color:#fff">9.095 contactos totales</strong></div>
+
+      <div class="bar-row"><div class="lbl">Oportunidad</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="val">6.248 <small>· 68,7%</small></div></div>
+      <div class="bar-row"><div class="lbl">Lead</div><div class="track"><div class="fill" style="width:43.7%;background:var(--blue)"></div></div><div class="val">2.728 <small>· 30,0%</small></div></div>
+      <div class="bar-row"><div class="lbl">Cliente</div><div class="track"><div class="fill" style="width:1.5%;background:var(--green)"></div></div><div class="val">92 <small>· 1,0%</small></div></div>
+      <div class="bar-row"><div class="lbl">Spam</div><div class="track"><div class="fill" style="width:0.3%;background:#9ca3af"></div></div><div class="val">15 <small>· 0,2%</small></div></div>
+      <div class="bar-row"><div class="lbl">Subscriber</div><div class="track"><div class="fill" style="width:0.2%;background:#9ca3af"></div></div><div class="val">9 <small>· 0,1%</small></div></div>
+      <div class="bar-row"><div class="lbl">Otros</div><div class="track"><div class="fill" style="width:0.06%;background:#9ca3af"></div></div><div class="val">2 <small>· 0,02%</small></div></div>
+      <div class="bar-row"><div class="lbl">MQL</div><div class="track"><div class="fill" style="width:0.06%;background:var(--amber)"></div></div><div class="val">1 <small>· 0,01%</small></div></div>
+      <div class="bar-row"><div class="lbl">SQL</div><div class="track"><div class="fill" style="width:0;background:var(--red)"></div></div><div class="val">0 <small>· 0%</small></div></div>
+
+      <div class="callout">
+        🔍 <strong>El embudo actual está invertido:</strong> el 68,7% de la base vive en “Oportunidad” y las etapas intermedias están vacías (1 MQL, 0 SQL). Hoy no hay funnel — hay un salto directo de Lead a Oportunidad. Es exactamente lo que esta propuesta corrige.
+      </div>
+
+      <div class="grid-3" style="margin-top:20px">
+        <div class="stat dark" style="border:1px solid rgba(255,255,255,.15)"><div class="big">7.864</div><div class="lbl">creados en los últimos 12 meses<br><strong style="color:#fff">86,5% confirmado ✓</strong></div></div>
+        <div class="stat dark" style="border:1px solid rgba(255,255,255,.15)"><div class="big">262</div><div class="lbl">contactos <strong style="color:#fff">sin email</strong><br>→ directos a la lista de revisión</div></div>
+        <div class="stat dark" style="border:1px solid rgba(255,255,255,.15)"><div class="big">8.054</div><div class="lbl"><strong style="color:#fff">sin actividad comercial registrada</strong> en los últimos 12 meses (88,6%)</div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -477,6 +503,19 @@
       </div>
     </div>
 
+    <div class="rule" style="border-left:4px solid var(--coral)">
+      <div class="when"><span class="lc sql">SQL</span> 🔥<h4 style="margin-top:10px">Freemium con intención de compra</h4></div>
+      <div class="what">
+        <p><span class="arrow">→</span> Aunque tenga intención, <strong>si todavía no ha comprado sigue siendo SQL</strong>. Se mantiene como SQL y se activa <strong>seguimiento comercial prioritario</strong> cuando un Freemium:</p>
+        <ul>
+          <li>Solicita hablar con ventas</li>
+          <li>Solicita consultoría / demo</li>
+          <li>Solicita presupuesto</li>
+          <li>Intenta contratar un plan</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="rule">
       <div class="when"><span class="lc opp">Oportunidad</span><h4 style="margin-top:10px">Validación comercial previa</h4></div>
       <div class="what">
@@ -496,25 +535,12 @@
       </div>
     </div>
 
-    <div class="rule" style="border-left:4px solid var(--coral)">
-      <div class="when"><span class="lc sql">SQL</span> 🔥<h4 style="margin-top:10px">Freemium con intención de compra</h4></div>
-      <div class="what">
-        <p><span class="arrow">→</span> Se mantiene como SQL y se activa <strong>seguimiento comercial prioritario</strong> cuando un Freemium:</p>
-        <ul>
-          <li>Solicita hablar con ventas</li>
-          <li>Solicita consultoría / demo</li>
-          <li>Solicita presupuesto</li>
-          <li>Intenta contratar un plan</li>
-        </ul>
-      </div>
-    </div>
-
     <div class="note-box">📌 <strong>Freemium inactivo</strong> = usuario Freemium que <strong>no ha iniciado sesión en los últimos 30 días</strong>. Hoy son 351 → candidatos directos a reactivación.</div>
 
     <div class="img-slot">
       <span class="i">🧊</span>
       <strong>[ Insertar captura: Estado Freemiums ]</strong>
-      <span>Estado de usuarios en prueba gratuita y embudo de conversión hacia cliente de pago. Activar propiedad “Estado” en contactos Freemium.</span>
+      <span>Estado de usuarios en prueba gratuita y embudo de conversión hacia cliente de pago.<br>✔ Comprobado en vivo en HubSpot: la propiedad “Estado Freemium” <strong>aún no existe</strong> — crearla es el primer paso del Frente 2.</span>
     </div>
   </div>
 </section>
@@ -620,9 +646,9 @@
         </div>
       </div>
       <div class="card" style="border-left-color:var(--red)">
-        <span class="tag" style="background:var(--red)">Frente 3 · Auditar los ~130 “clientes”</span>
+        <span class="tag" style="background:var(--red)">Frente 3 · Auditar los 92 “clientes”</span>
         <div class="steps" style="margin-top:10px">
-          <div class="step"><div><h4>Cruzar</h4><p>Comparar los ~130 contactos en etapa “Cliente” con los 38 clientes activos reales.</p></div></div>
+          <div class="step"><div><h4>Cruzar</h4><p>Comparar los 92 contactos en etapa “Cliente” (dato en vivo) con los 38 clientes activos reales: 54 a revisar.</p></div></div>
           <div class="step"><div><h4>Clasificar</h4><p>¿Churn sin actualizar o categorización errónea? Identificar la causa de cada caso.</p></div></div>
           <div class="step"><div><h4>Corregir</h4><p>Actualizar etapas (Churn donde toque) y revisar las automatizaciones que generan “clientes” falsos.</p></div></div>
         </div>
