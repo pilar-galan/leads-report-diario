@@ -206,19 +206,35 @@
 
   /* ============ PRINT / PDF (presentación) ============ */
   @media print{
-    @page{size:A4 landscape;margin:0}
+    @page{size:A4 portrait;margin:13mm 11mm}
     body{background:#fff}
     *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
     .toc,.cue{display:none!important}
-    .hero{height:100vh;display:flex;align-items:center;padding:0}
-    .hero .container{width:100%}
-    section{page-break-before:always;padding:40px 0}
-    .sec-lead{margin-bottom:24px}
-    .card,.principle,.rule,.stat,.source,.branch,.sql-panel,.benefit,.check,.takeaway,.note-box,.donut-grid,.funnel-wrap,.step{page-break-inside:avoid}
-    .bar-row,.legend-row,.live .callout,.live .grid-3{page-break-inside:avoid}
-    .form-table tr{page-break-inside:avoid}
-    .form-table th{background:var(--dark)!important}
-    footer{page-break-before:always;height:96vh;display:flex;align-items:center}
+    .container{max-width:100%;padding:0 2mm}
+    .hero{height:94vh;display:flex;align-items:center;padding:0;border-radius:16px;overflow:hidden}
+    .hero .container{width:100%;padding:0 14mm}
+    .hero h1{font-size:36px}
+    section{page-break-before:always;padding:5mm 0 0}
+    section.alt{background:#fff}
+    .sec-head,h2,h3,h4{page-break-after:avoid}
+    .sec-lead{margin-bottom:22px}
+    .card,.principle,.rule,.stat,.source,.branch,.sql-panel,.benefit,.check,.takeaway,.note-box,.donut-grid,.funnel-wrap,.step,.live{page-break-inside:avoid}
+    .bar-row,.legend-row,.live .callout,.live .grid-3,.form-table,.example,.checklist,.steps{page-break-inside:avoid}
+    .grid-2,.grid-3,.grid-4{page-break-inside:avoid}
+    .grid-3{grid-template-columns:repeat(3,1fr)!important}
+    .funnel-wrap{grid-template-columns:1.15fr 1fr!important}
+    .fstage .link{display:block!important}
+    .live{padding:20px}
+    .live h3{font-size:18px}
+    .live .src-note{margin-bottom:14px}
+    .bar-row{margin-bottom:6px}
+    .bar-row .track{height:18px}
+    .donut-grid{padding:16px;margin-top:14px;gap:18px}
+    .live .callout{margin-top:14px;padding:10px 14px}
+    .live .grid-3{margin-top:14px!important}
+    .live .stat{padding:16px 12px}
+    .live .stat .big{font-size:30px}
+    footer{page-break-before:always;height:92vh;display:flex;align-items:center;border-radius:16px;overflow:hidden}
     footer .brand{font-size:34px}
   }
 
