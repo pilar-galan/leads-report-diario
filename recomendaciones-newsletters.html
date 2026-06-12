@@ -128,6 +128,23 @@
   .slot .h{font-family:Georgia,serif;font-size:30px;font-weight:bold;color:var(--coral);flex-shrink:0;line-height:1}
   .slot p{font-size:13px;color:var(--gray);margin:0}
 
+  /* las 3 preguntas en línea */
+  .qs-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--coral);text-align:center;margin:16px 0 8px}
+  .qs3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:560px){.qs3{grid-template-columns:1fr}}
+  .qs3 .q{background:var(--coral-soft);border-radius:8px;padding:12px 10px;font-size:13.5px;color:var(--ink);text-align:center;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.35}
+  .qs3 .qi{font-size:20px}
+
+  /* pirámide de estructura */
+  .pyramid{display:flex;flex-direction:column;align-items:center;gap:0;margin:18px 0 6px}
+  .pyr{color:#fff;text-align:center;padding:13px 18px 11px;border-radius:10px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.10)}
+  .pyr h5{font-size:14px;letter-spacing:.03em;text-transform:uppercase}
+  .pyr p{font-size:12.5px;opacity:.92;font-weight:400;margin:2px 0 0;color:#fff}
+  .pyr1{width:58%;background:var(--coral)}
+  .pyr2{width:78%;background:var(--amber)}
+  .pyr3{width:98%;background:var(--blue)}
+  @media(max-width:560px){.pyr1,.pyr2,.pyr3{width:100%}}
+
   /* señal de visualizaciones */
   .signal{display:flex;gap:14px;align-items:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:10px}
   .signal .ico{width:40px;height:40px;border-radius:10px;background:var(--coral-soft);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
@@ -159,7 +176,7 @@
     #s1{page-break-before:avoid}
     section.alt{background:#fff}
     .sec-head,h2,h3,h4{page-break-after:avoid}
-    .principle,.card,.takeaway,.note-box,.hero-card,.vs-wrap,.slots,.days,.signal{page-break-inside:avoid}
+    .principle,.card,.takeaway,.note-box,.hero-card,.vs-wrap,.slots,.days,.signal,.pyramid,.qs3{page-break-inside:avoid}
     footer{border-radius:16px;overflow:hidden}
   }
 </style>
@@ -172,12 +189,13 @@
     <div class="kicker">Newsletters · Guía de buenas prácticas</div>
     <div class="brand serif">GuruSup</div>
     <h1>Cómo analizar y optimizar <em>las newsletters</em></h1>
-    <p class="sub">Ocho recomendaciones prácticas sobre datos, KPIs y mejores prácticas para que cada envío nos enseñe algo: qué medir, qué probar y qué señales seguir.</p>
+    <p class="sub"><strong style="font-family:Georgia,serif;font-size:30px;color:#fff;font-weight:bold;line-height:1">10</strong> recomendaciones prácticas sobre datos, KPIs y mejores prácticas para que cada envío nos enseñe algo: qué medir, qué probar y qué señales seguir.</p>
     <div class="audience">
       <span>📊 Datos &amp; KPIs</span>
       <span>🧪 Pruebas A/B</span>
       <span>📬 Email marketing</span>
     </div>
+    <p style="margin-top:28px;font-size:15.5px;color:#cbd0da;font-family:Georgia,serif;font-style:italic;max-width:640px">«Os comparto las recomendaciones de Ana, mi compañera de Customer Success. Os las cuenta ella misma, en primera persona.» — Pilar</p>
     <div class="author">
       <div class="avatar">A</div>
       <div>
@@ -202,12 +220,12 @@
 <section id="s1">
   <div class="container">
     <div class="sec-head"><span class="sec-num">01</span><h2>Cómo mirar los datos sin engañarte</h2></div>
-    <p class="sec-lead">Antes de optimizar nada, hay que asegurarse de que las conclusiones son fiables. Estas tres reglas evitan los sesgos más habituales.</p>
+    <p class="sec-lead">Antes de optimizar nada, hay que asegurarse de que las conclusiones son fiables. Estas cuatro reglas evitan los sesgos más habituales.</p>
 
     <div class="principle">
       <div class="ph"><span class="n">1</span><h3>Compara siempre segmentos equivalentes</h3></div>
       <div class="pb">
-        <p>Los <strong>clientes</strong> suelen tener tasas de apertura y clic superiores a las de <strong>leads</strong> o contactos en otras fases del ciclo de vida: conocen GuruSup y tienen un interés real en el producto.</p>
+        <p>Yo tendría muy en cuenta que los <strong>clientes</strong> suelen tener tasas de apertura y clic superiores a las de <strong>leads</strong> o contactos en otras fases del ciclo de vida: conocen GuruSup y tienen un interés real en el producto.</p>
         <div class="vs-wrap">
           <div class="vs-card" style="border-top:3px solid var(--green)">
             <h5 style="color:var(--green)">🤝 Clientes</h5>
@@ -221,21 +239,37 @@
         </div>
         <div class="outcome ok"><span class="sign">✔</span><span>Compara resultados <strong>entre segmentos similares</strong>: clientes con clientes, leads con leads.</span></div>
         <div class="outcome ko"><span class="sign">✖</span><span>Evita las <strong>métricas agregadas</strong>: mezclan audiencias distintas y sesgan las conclusiones.</span></div>
+        <p style="margin-top:14px">Por eso es tan importante la <strong>clasificación de la etapa de ciclo de vida</strong> de cada contacto: tener bien identificado quién es realmente cliente, y que no se haya colado en esa lista de forma confusa otro tipo de contacto.</p>
       </div>
     </div>
 
     <div class="principle">
-      <div class="ph"><span class="n">2</span><h3>Analiza tendencias, no campañas aisladas</h3></div>
+      <div class="ph"><span class="n">2</span><h3>Valida la segmentación de clientes</h3></div>
       <div class="pb">
-        <p>Fíjate menos en si una newsletter concreta funciona mejor o peor, y más en <strong>identificar patrones a lo largo del tiempo</strong>.</p>
-        <div class="example"><b>Las tres preguntas que importan</b>📩 ¿Qué asuntos generan más aperturas? · 🖱️ ¿Qué contenidos consiguen más clics? · 💡 ¿Qué temáticas despiertan más interés?</div>
+        <p>Yo recomendaría trabajar siempre sobre una <strong>lista dinámica de HubSpot</strong> filtrada por la etapa de ciclo de vida <strong>Cliente</strong>.</p>
+        <div class="outcome ok"><span class="sign">✔</span><span>Revisa periódicamente que todos los <strong>clientes activos</strong> estén correctamente clasificados.</span></div>
+        <div class="outcome ko"><span class="sign">✖</span><span>Quien <strong>ya no sea cliente</strong> debe salir del segmento — si se queda, contamina las métricas.</span></div>
+        <div class="example"><b>Nota de Ana</b>Si me puedes compartir la lista o explicarme cómo seleccionáis los destinatarios, podré orientarte mejor.</div>
       </div>
     </div>
 
     <div class="principle">
-      <div class="ph"><span class="n">3</span><h3>Etiqueta los contenidos por temática</h3></div>
+      <div class="ph"><span class="n">3</span><h3>Analiza tendencias, no campañas aisladas</h3></div>
       <div class="pb">
-        <p>Clasifica las comunicaciones por categorías. Te ayudará a identificar <strong>qué temas generan mayor engagement</strong> y qué perfiles muestran más interés por cada tipo de contenido.</p>
+        <p>Yo intentaría fijarme menos en si una newsletter concreta funciona mejor o peor, y más en <strong>identificar patrones a lo largo del tiempo</strong>.</p>
+        <div class="qs-label">Las 3 preguntas que importan</div>
+        <div class="qs3">
+          <div class="q"><span class="qi">📩</span>¿Qué asuntos abren más?</div>
+          <div class="q"><span class="qi">🖱️</span>¿Qué contenidos clican más?</div>
+          <div class="q"><span class="qi">💡</span>¿Qué temáticas interesan más?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="principle">
+      <div class="ph"><span class="n">4</span><h3>Identifica los contenidos por categorías</h3></div>
+      <div class="pb">
+        <p>A nivel interno, yo identificaría cada comunicación por categorías — sin necesidad de etiquetar nada de cara al lector — para luego entender <strong>qué funciona y qué no</strong>: qué temas generan mayor engagement y qué perfiles muestran más interés por cada tipo de contenido.</p>
         <div class="chips">
           <span class="chip cat-prod">Producto</span>
           <span class="chip cat-ia">IA</span>
@@ -265,9 +299,9 @@
     </div>
 
     <div class="principle">
-      <div class="ph"><span class="n">4</span><h3>Haz pruebas de días y horarios de envío</h3></div>
+      <div class="ph"><span class="n">5</span><h3>Haz pruebas de días y horarios de envío</h3></div>
       <div class="pb">
-        <p>Empieza por los días que mejor suelen funcionar en entornos <strong>B2B</strong>:</p>
+        <p>Mi recomendación sería empezar con los días que mejor suelen funcionar en entornos <strong>B2B</strong>:</p>
         <div class="days">
           <div class="day"><div class="d">L</div><div class="l">Lunes</div></div>
           <div class="day hot"><div class="d">M</div><div class="l">Martes</div></div>
@@ -275,26 +309,39 @@
           <div class="day hot"><div class="d">J</div><div class="l">Jueves</div></div>
           <div class="day"><div class="d">V</div><div class="l">Viernes</div></div>
         </div>
-        <p style="margin-top:14px">Y prueba dos franjas horarias:</p>
+        <p style="margin-top:14px">Y para los horarios, yo probaría dos franjas:</p>
         <div class="slots">
           <div class="slot"><div class="h">10:00</div><p>Mucha gente revisa el correo <strong>al empezar la mañana</strong>.</p></div>
           <div class="slot"><div class="h">15:00</div><p>Después de comer, momento de <strong>ponerse al día</strong> con emails pendientes.</p></div>
         </div>
-        <div class="example"><b>Clave del experimento</b>Mantén el <strong>mismo formato y tipo de contenido</strong> mientras pruebas días y horarios. Solo así podrás comparar de forma objetiva y sacar conclusiones fiables.</div>
+        <div class="example"><b>Clave del experimento</b>Yo intentaría mantener el <strong>mismo formato y tipo de contenido</strong> mientras pruebas días y horarios. Solo así podrás comparar de forma objetiva y sacar conclusiones fiables.</div>
       </div>
     </div>
 
     <div class="principle">
-      <div class="ph"><span class="n">5</span><h3>Empieza optimizando los asuntos</h3></div>
+      <div class="ph"><span class="n">6</span><h3>Empieza optimizando los asuntos</h3></div>
       <div class="pb">
-        <p>Si hay que priorizar una sola cosa al principio, es el <strong>asunto</strong>: suele ser el elemento que más impacto tiene en la tasa de apertura y la vía más rápida de mejorar resultados sin tocar apenas el contenido.</p>
+        <p>Si tuviera que priorizar una sola cosa al principio, sería el <strong>asunto</strong>: suele ser el elemento que más impacto tiene en la tasa de apertura y la vía más rápida de mejorar resultados sin tocar apenas el contenido.</p>
       </div>
     </div>
 
     <div class="principle">
-      <div class="ph"><span class="n">6</span><h3>Construye tus propios benchmarks</h3></div>
+      <div class="ph"><span class="n">7</span><h3>Mantén una estructura simple y fácil de medir</h3></div>
       <div class="pb">
-        <p>Existen referencias de mercado, pero <strong>los datos de GuruSup valen mucho más</strong>. Realiza varias pruebas durante unas semanas y usa esos resultados para definir qué días, horarios y tipos de contenido funcionan mejor con vuestra audiencia.</p>
+        <p>Yo intentaría no incluir demasiados contenidos ni demasiados CTAs en cada newsletter. Mi recomendación sería trabajar con una <strong>estructura tipo pirámide</strong>:</p>
+        <div class="pyramid">
+          <div class="pyr pyr1"><h5>1 contenido principal</h5><p>La novedad más relevante, breve explicación y <strong>un único CTA</strong></p></div>
+          <div class="pyr pyr2"><h5>2 contenidos secundarios</h5><p>Mejoras, funcionalidades o novedades relevantes</p></div>
+          <div class="pyr pyr3"><h5>Bloque final visual</h5><p>Varias menciones breves de otras actualizaciones</p></div>
+        </div>
+        <div class="example"><b>Por qué funciona</b>Además de facilitar la lectura, identificarás con mayor claridad qué temas generan más interés. Con <strong>3 o 4 puntos de interacción</strong> como máximo, el análisis posterior es mucho más sencillo y accionable.</div>
+      </div>
+    </div>
+
+    <div class="principle">
+      <div class="ph"><span class="n">8</span><h3>Construye tus propios benchmarks</h3></div>
+      <div class="pb">
+        <p>Aunque existen referencias de mercado, yo daría mucho más valor a <strong>los datos de GuruSup</strong>. Mi recomendación sería realizar varias pruebas durante unas semanas y usar esos resultados para definir qué días, horarios y tipos de contenido funcionan mejor con vuestra audiencia.</p>
         <div class="outcome ok"><span class="sign">✔</span><span>Tus números, con tu audiencia → <strong>benchmark real</strong> sobre el que decidir.</span></div>
         <div class="outcome ko"><span class="sign">✖</span><span>Medias del sector → orientativas, pero no reflejan a vuestros contactos.</span></div>
       </div>
@@ -311,9 +358,11 @@
     <p class="sec-lead">Más allá de aperturas y clics, hay señales menos evidentes que cuentan mucho sobre el interés real — incluso las negativas.</p>
 
     <div class="principle">
-      <div class="ph"><span class="n">7</span><h3>Aprovecha las señales de interés</h3></div>
+      <div class="ph"><span class="n">9</span><h3>Aprovecha las señales de interés</h3></div>
       <div class="pb">
-        <p>Revisa el <strong>volumen de visualizaciones</strong> en el detalle de cada envío. Cuando es especialmente alto, suele indicar que el correo <strong>se está compartiendo dentro de la empresa</strong>. Puede significar dos cosas — y ambas son buenas:</p>
+        <p>Además de las aperturas y los clics, yo revisaría el <strong>volumen de visualizaciones de cada envío</strong>. Lo encontrarás en el propio mail, <strong>abajo del todo, en la parte derecha</strong>, donde aparecen los clics y las aperturas.</p>
+        <div class="example"><b>Dónde mirar y cuándo actuar</b>Cuando ese volumen es especialmente alto — por ejemplo, <strong>más de 10 aperturas o clics de un mismo destinatario</strong> — merece especial atención: suele ser un indicativo de que el correo <strong>se está compartiendo internamente</strong> en la empresa.</div>
+        <p style="margin-top:14px">Puede significar dos cosas — y ambas son buenas:</p>
         <div class="signal">
           <div class="ico">🎯</div>
           <div><h5>Interés real</h5><p>La funcionalidad o novedad presentada ha despertado un interés genuino en el destinatario.</p></div>
@@ -327,15 +376,15 @@
     </div>
 
     <div class="principle">
-      <div class="ph"><span class="n">8</span><h3>Convierte las bajas y los rebotes en aprendizaje</h3></div>
+      <div class="ph"><span class="n">10</span><h3>Convierte las bajas y los rebotes en aprendizaje</h3></div>
       <div class="pb">
-        <p>Con una relación tan cercana con los clientes, las <strong>bajas y los rebotes recurrentes</strong> son oportunidades para obtener feedback. Si un cliente deja de recibir comunicaciones o se da de baja, intenta entender el motivo en una conversación futura:</p>
+        <p>Como tenéis una relación cercana con los clientes, yo aprovecharía las <strong>bajas y los rebotes recurrentes</strong> como oportunidades para obtener feedback. Si un cliente deja de recibir comunicaciones o se da de baja, intentaría entender el motivo en una conversación futura:</p>
         <div class="chips">
           <span class="chip">¿El contenido no le resulta relevante?</span>
           <span class="chip">¿Prefiere otro tipo de información?</span>
           <span class="chip">¿Las novedades de producto no encajan con su rol?</span>
         </div>
-        <p style="margin-top:14px">Más que quedarse en la métrica, usa estas señales para <strong>mejorar la segmentación, el contenido y la relevancia</strong> de las comunicaciones.</p>
+        <p style="margin-top:14px">Más que centrarme únicamente en la métrica, yo utilizaría estas señales para <strong>mejorar la segmentación, el contenido y la relevancia</strong> de las comunicaciones.</p>
       </div>
     </div>
   </div>
@@ -344,17 +393,19 @@
 <!-- ════════════════ 04 RESUMEN ════════════════ -->
 <section id="s4" class="alt">
   <div class="container">
-    <div class="sec-head"><span class="sec-num">04</span><h2>Las 8 recomendaciones, de un vistazo</h2></div>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Las 10 recomendaciones, de un vistazo</h2></div>
     <p class="sec-lead">El chuletario para tener a mano antes de cada envío y cada análisis.</p>
     <div class="grid-2">
       <div class="card"><span class="tag coral">01 · Datos</span><p style="font-size:14.5px;color:var(--gray)"><strong>Segmentos equivalentes:</strong> clientes con clientes, leads con leads. Nada de métricas agregadas.</p></div>
-      <div class="card"><span class="tag coral">02 · Datos</span><p style="font-size:14.5px;color:var(--gray)"><strong>Tendencias, no campañas aisladas:</strong> patrones de asuntos, contenidos y temáticas en el tiempo.</p></div>
-      <div class="card"><span class="tag coral">03 · Datos</span><p style="font-size:14.5px;color:var(--gray)"><strong>Etiqueta por temática:</strong> producto, IA, operaciones, CX, negocio, integraciones…</p></div>
-      <div class="card"><span class="tag">04 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Días y horarios:</strong> martes–jueves, a las 10:00 o a las 15:00, manteniendo el mismo formato.</p></div>
-      <div class="card"><span class="tag">05 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Primero el asunto:</strong> el mayor impacto en apertura con el menor esfuerzo.</p></div>
-      <div class="card"><span class="tag">06 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Benchmarks propios:</strong> varias semanas de pruebas y decidir con datos de GuruSup.</p></div>
-      <div class="card" style="border-left-color:var(--green)"><span class="tag" style="background:var(--green)">07 · Señales</span><p style="font-size:14.5px;color:var(--gray)"><strong>Visualizaciones altas</strong> = el correo se comparte internamente → seguimiento.</p></div>
-      <div class="card" style="border-left-color:var(--green)"><span class="tag" style="background:var(--green)">08 · Señales</span><p style="font-size:14.5px;color:var(--gray)"><strong>Bajas y rebotes</strong> = feedback en la próxima conversación → mejor segmentación.</p></div>
+      <div class="card"><span class="tag coral">02 · Datos</span><p style="font-size:14.5px;color:var(--gray)"><strong>Valida la segmentación:</strong> lista dinámica por etapa Cliente, revisada periódicamente.</p></div>
+      <div class="card"><span class="tag coral">03 · Datos</span><p style="font-size:14.5px;color:var(--gray)"><strong>Tendencias, no campañas aisladas:</strong> patrones de asuntos, contenidos y temáticas en el tiempo.</p></div>
+      <div class="card"><span class="tag coral">04 · Datos</span><p style="font-size:14.5px;color:var(--gray)"><strong>Categorías internas:</strong> producto, IA, operaciones, CX, negocio, integraciones… para saber qué funciona.</p></div>
+      <div class="card"><span class="tag">05 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Días y horarios:</strong> martes–jueves, a las 10:00 o a las 15:00, manteniendo el mismo formato.</p></div>
+      <div class="card"><span class="tag">06 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Primero el asunto:</strong> el mayor impacto en apertura con el menor esfuerzo.</p></div>
+      <div class="card"><span class="tag">07 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Estructura pirámide:</strong> 1 contenido principal + 2 secundarios + bloque visual de menciones breves.</p></div>
+      <div class="card"><span class="tag">08 · Pruebas</span><p style="font-size:14.5px;color:var(--gray)"><strong>Benchmarks propios:</strong> varias semanas de pruebas y decidir con datos de GuruSup.</p></div>
+      <div class="card" style="border-left-color:var(--green)"><span class="tag" style="background:var(--green)">09 · Señales</span><p style="font-size:14.5px;color:var(--gray)"><strong>Visualizaciones altas</strong> (p. ej. +10 en el detalle del envío) = el correo se comparte internamente → seguimiento.</p></div>
+      <div class="card" style="border-left-color:var(--green)"><span class="tag" style="background:var(--green)">10 · Señales</span><p style="font-size:14.5px;color:var(--gray)"><strong>Bajas y rebotes</strong> = feedback en la próxima conversación → mejor segmentación.</p></div>
     </div>
 
     <div class="note-box">📝 <strong>Documento vivo:</strong> estas son las recomendaciones identificadas a primera vista. Iremos añadiendo nuevas ideas y aprendizajes a medida que vayan surgiendo.</div>
