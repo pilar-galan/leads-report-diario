@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: "Inter Variable", "Liberation Sans", sans-serif; }
+  .canvas {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    background: linear-gradient(170deg, #16202F 0%, #0F1724 60%, #131C29 100%);
+    padding: 72px 80px 0;
+  }
+  .glow { position: absolute; left: 50%; top: 620px; transform: translateX(-50%); width: 900px; height: 900px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,90,95,0.13) 0%, rgba(255,90,95,0) 65%); }
+
+  .kicker {
+    display: inline-block; font-size: 18px; font-weight: 700; letter-spacing: 3px; color: #FF8A8E;
+    border: 2px solid rgba(255,90,95,.45); border-radius: 999px; padding: 10px 24px;
+  }
+  .h1 { margin-top: 28px; font-size: 64px; font-weight: 850; letter-spacing: -2px; color: #fff; line-height: 1.05; }
+  .h1 .muted { color: #6E7F96; }
+
+  .chat { position: relative; margin-top: 56px; width: 100%; }
+  .bubble { position: relative; max-width: 660px; border-radius: 26px; padding: 26px 32px; }
+  .bubble .meta { margin-top: 10px; font-size: 17px; font-weight: 600; }
+  .bubble.user {
+    background: #fff; color: #2A3440; border-bottom-left-radius: 8px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  }
+  .bubble.user .txt { font-size: 26px; font-weight: 550; line-height: 1.42; }
+  .bubble.user .meta { color: #9AA5B1; }
+  .bubble.guru {
+    margin: 26px 0 0 auto; background: #FF5A5F; color: #fff; border-bottom-right-radius: 8px;
+    box-shadow: 0 24px 70px rgba(255,90,95,.35);
+  }
+  .bubble.guru .txt { font-size: 26px; font-weight: 550; line-height: 1.42; }
+  .bubble.guru .txt b { font-weight: 800; }
+  .bubble.guru .meta { color: rgba(255,255,255,.75); text-align: right; display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+  .guru-tag { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 18px; font-weight: 800; color: #fff; }
+  .guru-tag .dot { width: 9px; height: 9px; border-radius: 50%; background: #7BE3A0; }
+
+  .status {
+    margin: 34px auto 0; width: fit-content;
+    font-size: 20px; font-weight: 700; color: #AFE9C3;
+    border: 2px solid rgba(123,227,160,.35); background: rgba(123,227,160,.08);
+    border-radius: 999px; padding: 14px 30px;
+  }
+
+  .h2 { margin-top: 52px; font-size: 64px; font-weight: 850; letter-spacing: -2px; color: #FF5A5F; line-height: 1.05; }
+  .sub { margin-top: 16px; font-size: 24px; font-weight: 500; color: #8FA0B8; letter-spacing: -0.2px; }
+
+  .bottom-row { position: absolute; left: 80px; right: 80px; bottom: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .cta {
+    background: #fff; color: #18202B; font-size: 24px; font-weight: 750;
+    padding: 20px 46px; border-radius: 999px;
+    box-shadow: 0 14px 35px rgba(0,0,0,.3);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo .word { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="glow"></div>
+
+  <div class="kicker">INCIDENCIAS DE VIAJE</div>
+  <div class="h1">Cancelado a las <span class="muted">23:41.</span></div>
+
+  <div class="chat">
+    <div class="bubble user">
+      <div class="txt">Mi vuelo se acaba de cancelar y no sé dónde voy a dormir esta noche. ¿Hay alguien ahí?</div>
+      <div class="meta">Marta · 23:41</div>
+    </div>
+    <div class="bubble guru">
+      <div class="guru-tag">
+        <svg width="30" height="30" viewBox="0 0 34 34">
+          <circle cx="14" cy="13" r="9.5" fill="none" stroke="#fff" stroke-width="3.4"/>
+          <path d="M 8 20 L 5.5 26 L 12.5 22.5" fill="none" stroke="#fff" stroke-width="3.4" stroke-linejoin="round"/>
+          <circle cx="23.5" cy="21" r="7" fill="none" stroke="#fff" stroke-width="3.4"/>
+          <path d="M 29 25.5 L 31 30 L 25.5 27.5" fill="none" stroke="#fff" stroke-width="3.4" stroke-linejoin="round"/>
+        </svg>
+        GuruSup <span class="dot"></span>
+      </div>
+      <div class="txt">Hola, Marta. Ya está resuelto: tienes plaza en el vuelo de mañana a las <b>9:15</b> y una habitación confirmada en un hotel a <b>5 min</b> de la terminal. Te acabo de enviar los bonos. Que descanses.</div>
+      <div class="meta">23:41 &#10003;&#10003;</div>
+    </div>
+    <div class="status">&#10003;&nbsp; Resuelto en 28 segundos · Sin intervención humana</div>
+  </div>
+
+  <div class="h2">Resuelto a las 23:42.</div>
+  <div class="sub">Agentes de IA que resuelven el 95&nbsp;% de las incidencias al instante, en cualquier canal.</div>
+
+  <div class="bottom-row">
+    <div class="cta">Pruébalo gratis</div>
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 34 34">
+        <circle cx="14" cy="13" r="9.5" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+        <path d="M 8 20 L 5.5 26 L 12.5 22.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+        <circle cx="23.5" cy="21" r="7" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+        <path d="M 29 25.5 L 31 30 L 25.5 27.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+      </svg>
+      <span class="word">gurusup</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
