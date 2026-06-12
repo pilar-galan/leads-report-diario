@@ -90,6 +90,12 @@
   .example{background:var(--coral-soft);border-radius:8px;padding:12px 16px;font-size:14px;color:var(--ink);margin-top:8px}
   .example b{color:var(--coral);text-transform:uppercase;font-size:11px;letter-spacing:.08em;display:block;margin-bottom:3px}
 
+  /* cómo hacerlo en HubSpot */
+  .hs{background:var(--amber-soft);border-left:3px solid var(--amber);border-radius:8px;padding:12px 16px;font-size:14px;color:var(--ink);margin-top:12px}
+  .hs b{color:var(--amber);text-transform:uppercase;font-size:11px;letter-spacing:.08em;display:block;margin-bottom:3px}
+  .hs .path{font-size:12.5px;color:var(--gray);display:block;margin-top:6px}
+  .hs .path code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 8px;font-family:inherit;font-size:12px;white-space:nowrap}
+
   .outcome{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:9px 12px;border-radius:7px;margin-top:8px;line-height:1.5}
   .outcome.ok{background:var(--green-soft)}
   .outcome.ko{background:var(--red-soft)}
@@ -176,7 +182,7 @@
     #s1{page-break-before:avoid}
     section.alt{background:#fff}
     .sec-head,h2,h3,h4{page-break-after:avoid}
-    .principle,.card,.takeaway,.note-box,.hero-card,.vs-wrap,.slots,.days,.signal,.pyramid,.qs3{page-break-inside:avoid}
+    .principle,.card,.takeaway,.note-box,.hero-card,.vs-wrap,.slots,.days,.signal,.pyramid,.qs3,.hs,.example{page-break-inside:avoid}
     footer{border-radius:16px;overflow:hidden}
   }
 </style>
@@ -240,6 +246,7 @@
         <div class="outcome ok"><span class="sign">✔</span><span>Compara resultados <strong>entre segmentos similares</strong>: clientes con clientes, leads con leads.</span></div>
         <div class="outcome ko"><span class="sign">✖</span><span>Evita las <strong>métricas agregadas</strong>: mezclan audiencias distintas y sesgan las conclusiones.</span></div>
         <p style="margin-top:14px">Por eso es tan importante la <strong>clasificación de la etapa de ciclo de vida</strong> de cada contacto: tener bien identificado quién es realmente cliente, y que no se haya colado en esa lista de forma confusa otro tipo de contacto.</p>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>En el informe de cada envío, fíjate en la <strong>lista de destinatarios</strong> utilizada y compara solo envíos hechos a la misma lista (o a listas de la misma etapa de ciclo de vida).<span class="path">📍 <code>Marketing → Correo electrónico → [tu envío] → Destinatarios</code></span></div>
       </div>
     </div>
 
@@ -249,6 +256,7 @@
         <p>Yo recomendaría trabajar siempre sobre una <strong>lista dinámica de HubSpot</strong> filtrada por la etapa de ciclo de vida <strong>Cliente</strong>.</p>
         <div class="outcome ok"><span class="sign">✔</span><span>Revisa periódicamente que todos los <strong>clientes activos</strong> estén correctamente clasificados.</span></div>
         <div class="outcome ko"><span class="sign">✖</span><span>Quien <strong>ya no sea cliente</strong> debe salir del segmento — si se queda, contamina las métricas.</span></div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>Crea una <strong>lista activa (dinámica)</strong> con el filtro <em>Etapa del ciclo de vida = Cliente</em>. Se actualiza sola cuando alguien entra o sale de la etapa; aun así, conviene revisar una vez al mes que los clientes reales estén dentro y nadie más.<span class="path">📍 <code>CRM → Listas → Crear lista → Lista activa</code></span></div>
         <div class="example"><b>Nota de Ana</b>Si me puedes compartir la lista o explicarme cómo seleccionáis los destinatarios, podré orientarte mejor.</div>
       </div>
     </div>
@@ -263,6 +271,7 @@
           <div class="q"><span class="qi">🖱️</span>¿Qué contenidos clican más?</div>
           <div class="q"><span class="qi">💡</span>¿Qué temáticas interesan más?</div>
         </div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>La pestaña <strong>Analizar</strong> muestra la evolución de aperturas y clics en el tiempo. Añade esos informes a un <strong>panel propio</strong> para ver la tendencia mes a mes sin tener que mirar campaña a campaña.<span class="path">📍 <code>Marketing → Correo electrónico → Analizar</code> · <code>Informes → Paneles</code></span></div>
       </div>
     </div>
 
@@ -279,6 +288,7 @@
           <span class="chip cat-int">Integraciones</span>
           <span class="chip">+ las que surjan…</span>
         </div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>Asocia cada newsletter a una <strong>Campaña</strong> por categoría, o usa una convención de nombres interna tipo <em>NL · Producto · 2026-06</em>. Así podrás filtrar y comparar el rendimiento por temática sin que el lector vea nada.<span class="path">📍 <code>Marketing → Campañas</code> · nombre interno del correo</span></div>
       </div>
     </div>
   </div>
@@ -315,6 +325,7 @@
           <div class="slot"><div class="h">15:00</div><p>Después de comer, momento de <strong>ponerse al día</strong> con emails pendientes.</p></div>
         </div>
         <div class="example"><b>Clave del experimento</b>Yo intentaría mantener el <strong>mismo formato y tipo de contenido</strong> mientras pruebas días y horarios. Solo así podrás comparar de forma objetiva y sacar conclusiones fiables.</div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>Programa los envíos con <strong>«Enviar más tarde»</strong> y lleva una hoja de control sencilla: fecha, día, hora, asunto y lista. Después, en <strong>Analizar</strong> filtra por rango de fechas para comparar las franjas.<span class="path">📍 <code>Editor del correo → Enviar → Programar</code> · <code>Marketing → Correo electrónico → Analizar</code></span></div>
       </div>
     </div>
 
@@ -322,6 +333,7 @@
       <div class="ph"><span class="n">6</span><h3>Empieza optimizando los asuntos</h3></div>
       <div class="pb">
         <p>Si tuviera que priorizar una sola cosa al principio, sería el <strong>asunto</strong>: suele ser el elemento que más impacto tiene en la tasa de apertura y la vía más rápida de mejorar resultados sin tocar apenas el contenido.</p>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>Usa la <strong>prueba A/B nativa</strong> del editor de correo: dos asuntos, mismo contenido. HubSpot reparte la muestra entre los destinatarios y te dice qué versión gana por tasa de apertura.<span class="path">📍 <code>Editor del correo → Crear prueba A/B</code></span></div>
       </div>
     </div>
 
@@ -335,6 +347,7 @@
           <div class="pyr pyr3"><h5>Bloque final visual</h5><p>Varias menciones breves de otras actualizaciones</p></div>
         </div>
         <div class="example"><b>Por qué funciona</b>Además de facilitar la lectura, identificarás con mayor claridad qué temas generan más interés. Con <strong>3 o 4 puntos de interacción</strong> como máximo, el análisis posterior es mucho más sencillo y accionable.</div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>En el detalle del envío, revisa el <strong>rendimiento por enlace</strong> (clics por URL): te dice exactamente qué bloque de la pirámide concentra la interacción.<span class="path">📍 <code>Marketing → Correo electrónico → [tu envío] → Clics</code></span></div>
       </div>
     </div>
 
@@ -344,6 +357,7 @@
         <p>Aunque existen referencias de mercado, yo daría mucho más valor a <strong>los datos de GuruSup</strong>. Mi recomendación sería realizar varias pruebas durante unas semanas y usar esos resultados para definir qué días, horarios y tipos de contenido funcionan mejor con vuestra audiencia.</p>
         <div class="outcome ok"><span class="sign">✔</span><span>Tus números, con tu audiencia → <strong>benchmark real</strong> sobre el que decidir.</span></div>
         <div class="outcome ko"><span class="sign">✖</span><span>Medias del sector → orientativas, pero no reflejan a vuestros contactos.</span></div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>Monta un <strong>panel propio</strong> con tasa de apertura, clics y bajas por correo. Tras 6–8 envíos tendréis vuestra media real: ese es el benchmark a batir, no el del sector.<span class="path">📍 <code>Informes → Paneles → Crear panel</code> (informes de marketing por correo)</span></div>
       </div>
     </div>
 
@@ -372,6 +386,7 @@
           <div><h5>Reenvío interno</h5><p>El destinatario lo comparte con otras personas del equipo para que lo conozcan o lo evalúen.</p></div>
         </div>
         <div class="example"><b>Qué hacer</b>En ambos casos es una <strong>señal positiva que merece seguimiento</strong> por parte del equipo.</div>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>Abre el correo enviado y entra en <strong>Destinatarios → Abierto / Clic</strong>: ahí ves cuántas veces ha abierto o clicado cada contacto (el dato de abajo a la derecha del detalle). Ordena de mayor a menor para detectar los que superan las 10 interacciones.<span class="path">📍 <code>Marketing → Correo electrónico → [tu envío] → Destinatarios</code></span></div>
       </div>
     </div>
 
@@ -385,6 +400,7 @@
           <span class="chip">¿Las novedades de producto no encajan con su rol?</span>
         </div>
         <p style="margin-top:14px">Más que centrarme únicamente en la métrica, yo utilizaría estas señales para <strong>mejorar la segmentación, el contenido y la relevancia</strong> de las comunicaciones.</p>
+        <div class="hs"><b>⚙️ Cómo hacerlo en HubSpot</b>En el detalle del envío revisa <strong>Cancelación de suscripción</strong> y <strong>Rebotado</strong>, y deja constancia del motivo en la ficha del contacto (una nota o una propiedad tipo <em>«Feedback newsletters»</em>) para retomarlo en la siguiente conversación con el cliente.<span class="path">📍 <code>Marketing → Correo electrónico → [tu envío] → No entregados / Cancelaciones</code></span></div>
       </div>
     </div>
   </div>
