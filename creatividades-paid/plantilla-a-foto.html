@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: "Inter Variable", "Liberation Sans", sans-serif; }
+  .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; background: #fff; }
+
+  .visual { position: relative; width: 1080px; height: 1010px; }
+  .half { position: absolute; top: 0; width: 540px; height: 1010px; overflow: hidden; }
+
+  /* ===== FOTO: sustituir por la imagen real (center/cover) ===== */
+  .half.left {
+    left: 0;
+    background:
+      url('foto-aeropuerto.jpg') center / cover no-repeat,
+      linear-gradient(165deg, #1C2A3E 0%, #101a29 75%);
+  }
+  .half.right {
+    left: 540px;
+    background:
+      url('foto-hotel.jpg') center / cover no-repeat,
+      linear-gradient(165deg, #3a2e2b 0%, #241b18 80%);
+  }
+
+  /* scrims para legibilidad sobre foto */
+  .half::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,16,26,.55) 0%, rgba(10,16,26,0) 24%);
+  }
+  .half.left::after {
+    content: ""; position: absolute; inset: 0;
+    background: rgba(13,20,31,.22);
+  }
+
+  .seam { position: absolute; left: 537px; top: 0; width: 6px; height: 1010px; background: #fff; z-index: 4; }
+
+  .placeholder {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start; padding-top: 140px;
+    gap: 14px; text-align: center; padding-left: 56px; padding-right: 56px;
+  }
+  .placeholder .tag { font-size: 17px; font-weight: 800; letter-spacing: 3px; color: rgba(255,255,255,.85); }
+  .placeholder .desc { font-size: 19px; font-weight: 500; line-height: 1.5; color: rgba(255,255,255,.55); }
+
+  .chip {
+    position: absolute; top: 44px; z-index: 5;
+    font-size: 19px; font-weight: 700; letter-spacing: 3px;
+    padding: 12px 26px; border-radius: 999px;
+  }
+  .chip.sin {
+    left: 44px; color: #E6ECF4;
+    border: 2px solid rgba(255,255,255,.35);
+    background: rgba(10,16,26,.35);
+    backdrop-filter: blur(4px);
+  }
+  .chip.con {
+    right: 44px; color: #fff; background: #FF5A5F;
+    box-shadow: 0 10px 30px rgba(255,90,95,.45);
+  }
+
+  .chat-wrap { position: absolute; left: 50%; top: 385px; transform: translateX(-50%); width: 480px; z-index: 6; }
+  .chat-card {
+    background: rgba(255,255,255,.97); border-radius: 28px; padding: 28px 32px 24px;
+    box-shadow: 0 35px 90px rgba(11,19,30,.5);
+  }
+  .chat-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .chat-head .name { font-size: 21px; font-weight: 800; color: #18202B; }
+  .chat-head .time { font-size: 17px; font-weight: 500; color: #9AA5B1; }
+  .chat-msg { font-size: 22px; line-height: 1.48; color: #2A3440; font-weight: 500; }
+  .chat-msg b { color: #18202B; font-weight: 750; }
+  .chat-foot { margin-top: 14px; text-align: right; font-size: 17px; font-weight: 700; color: #FF5A5F; }
+  .reply {
+    margin: 14px 0 0 auto; width: fit-content;
+    background: #fff; color: #2A3440;
+    font-size: 20px; font-weight: 600;
+    padding: 14px 24px; border-radius: 22px 22px 6px 22px;
+    box-shadow: 0 18px 50px rgba(11,19,30,.35);
+  }
+
+  .band { position: absolute; left: 0; top: 1010px; width: 1080px; height: 340px; background: #fff; padding: 52px 64px 0; }
+  .headline { font-size: 54px; font-weight: 850; letter-spacing: -1.5px; line-height: 1.1; color: #18202B; }
+  .headline .accent { color: #FF5A5F; }
+  .sub { margin-top: 16px; font-size: 23px; font-weight: 500; color: #5C6675; max-width: 950px; letter-spacing: -0.2px; }
+  .bottom-row { position: absolute; left: 64px; right: 64px; bottom: 40px; display: flex; align-items: center; justify-content: space-between; }
+  .cta {
+    background: #FF5A5F; color: #fff; font-size: 24px; font-weight: 750;
+    padding: 20px 46px; border-radius: 999px;
+    box-shadow: 0 14px 35px rgba(255,90,95,.4);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo .word { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; color: #18202B; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="visual">
+    <div class="half left">
+      <div class="placeholder">
+        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6">
+          <rect x="2.5" y="6" width="19" height="14" rx="3"/>
+          <circle cx="12" cy="13" r="4"/>
+          <path d="M 8 6 L 9.5 3.5 L 14.5 3.5 L 16 6"/>
+        </svg>
+        <div class="tag">FOTO 1 · AEROPUERTO</div>
+        <div class="desc">Chico joven dormido en las sillas de la sala de espera, maleta al lado. Panel "CANCELADO" desenfocado al fondo. Luz fría, nocturna.</div>
+      </div>
+    </div>
+
+    <div class="half right">
+      <div class="placeholder">
+        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6">
+          <rect x="2.5" y="6" width="19" height="14" rx="3"/>
+          <circle cx="12" cy="13" r="4"/>
+          <path d="M 8 6 L 9.5 3.5 L 14.5 3.5 L 16 6"/>
+        </svg>
+        <div class="tag">FOTO 2 · HOTEL</div>
+        <div class="desc">El mismo chico durmiendo plácidamente en una cama de hotel, maleta de fondo desenfocada. Luz cálida de lamparita. Mismo encuadre.</div>
+      </div>
+    </div>
+
+    <div class="seam"></div>
+    <div class="chip sin">SIN GURUSUP</div>
+    <div class="chip con">CON GURUSUP</div>
+
+    <div class="chat-wrap">
+      <div class="chat-card">
+        <div class="chat-head">
+          <svg width="34" height="34" viewBox="0 0 34 34">
+            <circle cx="14" cy="13" r="9.5" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+            <path d="M 8 20 L 5.5 26 L 12.5 22.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+            <circle cx="23.5" cy="21" r="7" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+            <path d="M 29 25.5 L 31 30 L 25.5 27.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+          </svg>
+          <span class="name">GuruSup</span>
+          <span class="time">· ahora</span>
+        </div>
+        <div class="chat-msg">Hola, Dani. Tu vuelo se ha cancelado, pero ya está resuelto: tienes plaza en el de las <b>9:15</b> y una habitación confirmada en un hotel a <b>5 min</b> de la terminal.</div>
+        <div class="chat-foot">Resuelto en 28 s &#10003;&#10003;</div>
+      </div>
+      <div class="reply">Madre mía, ¡gracias!</div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="headline">El mismo vuelo cancelado.<br><span class="accent">Otra historia.</span></div>
+    <div class="sub">Agentes de IA que resuelven el 95&nbsp;% de las incidencias al instante, en cualquier canal.</div>
+    <div class="bottom-row">
+      <div class="cta">Pruébalo gratis</div>
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 34 34">
+          <circle cx="14" cy="13" r="9.5" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+          <path d="M 8 20 L 5.5 26 L 12.5 22.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+          <circle cx="23.5" cy="21" r="7" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+          <path d="M 29 25.5 L 31 30 L 25.5 27.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+        </svg>
+        <span class="word">gurusup</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

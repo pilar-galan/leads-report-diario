@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: "Inter Variable", "Liberation Sans", sans-serif; }
+  .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; background: #131C29; }
+
+  .visual { position: relative; width: 1080px; height: 1000px; }
+  .pane { position: absolute; top: 0; left: 0; width: 1080px; height: 1000px; }
+
+  /* ===== FOTO: sustituir por la imagen real (center/cover) ===== */
+  .pane.left {
+    background:
+      url('foto-aeropuerto.jpg') center / cover no-repeat,
+      linear-gradient(165deg, #1C2A3E 0%, #101a29 75%);
+    clip-path: polygon(0 0, 640px 0, 440px 1000px, 0 1000px);
+  }
+  .pane.right {
+    background:
+      url('foto-hotel.jpg') center / cover no-repeat,
+      linear-gradient(165deg, #3a2e2b 0%, #241b18 80%);
+    clip-path: polygon(640px 0, 1080px 0, 1080px 1000px, 440px 1000px);
+  }
+
+  /* scrims para que el texto respire sobre la foto */
+  .pane.left::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(115deg, rgba(10,16,26,.72) 0%, rgba(10,16,26,.25) 45%, rgba(10,16,26,0) 65%);
+  }
+  .pane.right::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(245deg, rgba(15,12,10,.66) 0%, rgba(15,12,10,.2) 45%, rgba(15,12,10,0) 65%);
+  }
+
+  .seam {
+    position: absolute; top: -20px; left: 633px; width: 8px; height: 1060px;
+    background: #fff; transform-origin: top; transform: rotate(11.31deg); z-index: 4;
+  }
+
+  .placeholder {
+    position: absolute; z-index: 2; display: flex; flex-direction: column; gap: 12px;
+    text-align: center; align-items: center; width: 330px;
+  }
+  .placeholder.ph-left  { left: 40px; bottom: 110px; }
+  .placeholder.ph-right { right: 40px; bottom: 110px; }
+  .placeholder .tag { font-size: 16px; font-weight: 800; letter-spacing: 3px; color: rgba(255,255,255,.85); }
+  .placeholder .desc { font-size: 17px; font-weight: 500; line-height: 1.5; color: rgba(255,255,255,.55); }
+
+  .chip {
+    position: absolute; top: 44px; z-index: 5;
+    font-size: 19px; font-weight: 700; letter-spacing: 3px;
+    padding: 12px 26px; border-radius: 999px;
+  }
+  .chip.sin {
+    left: 48px; color: #E6ECF4;
+    border: 2px solid rgba(255,255,255,.35);
+    background: rgba(10,16,26,.35);
+  }
+  .chip.con {
+    right: 48px; color: #fff; background: #FF5A5F;
+    box-shadow: 0 10px 30px rgba(255,90,95,.45);
+  }
+
+  .stamp { position: absolute; z-index: 5; }
+  .stamp .time { font-size: 112px; font-weight: 850; letter-spacing: -4px; color: #fff; text-shadow: 0 6px 40px rgba(0,0,0,.45); }
+  .stamp .cap { margin-top: 10px; font-size: 25px; font-weight: 600; line-height: 1.4; max-width: 380px; letter-spacing: -0.2px; color: rgba(255,255,255,.88); text-shadow: 0 3px 22px rgba(0,0,0,.5); }
+  .stamp.left { left: 56px; top: 150px; }
+  .stamp.right { right: 56px; top: 150px; text-align: right; }
+  .stamp.right .cap { margin-left: auto; }
+  .stamp .cap b { color: #FF8A8E; font-weight: 800; }
+
+  .band { position: absolute; left: 0; top: 1000px; width: 1080px; height: 350px; background: #131C29; padding: 56px 64px 0; }
+  .headline { font-size: 56px; font-weight: 850; letter-spacing: -1.5px; line-height: 1.12; color: #fff; }
+  .headline .accent { color: #FF5A5F; }
+  .sub { margin-top: 16px; font-size: 24px; font-weight: 500; color: #8FA0B8; letter-spacing: -0.2px; }
+  .bottom-row { position: absolute; left: 64px; right: 64px; bottom: 48px; display: flex; align-items: center; justify-content: space-between; }
+  .cta {
+    background: #FF5A5F; color: #fff; font-size: 24px; font-weight: 750;
+    padding: 20px 46px; border-radius: 999px;
+    box-shadow: 0 14px 35px rgba(255,90,95,.35);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo .word { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="visual">
+    <div class="pane left"></div>
+    <div class="pane right"></div>
+    <div class="seam"></div>
+
+    <div class="placeholder ph-left">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6">
+        <rect x="2.5" y="6" width="19" height="14" rx="3"/>
+        <circle cx="12" cy="13" r="4"/>
+        <path d="M 8 6 L 9.5 3.5 L 14.5 3.5 L 16 6"/>
+      </svg>
+      <div class="tag">FOTO 1 · AEROPUERTO</div>
+      <div class="desc">Chico dormido en las sillas, maleta al lado, panel "CANCELADO" desenfocado.</div>
+    </div>
+    <div class="placeholder ph-right">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6">
+        <rect x="2.5" y="6" width="19" height="14" rx="3"/>
+        <circle cx="12" cy="13" r="4"/>
+        <path d="M 8 6 L 9.5 3.5 L 14.5 3.5 L 16 6"/>
+      </svg>
+      <div class="tag">FOTO 2 · HOTEL</div>
+      <div class="desc">El mismo chico durmiendo en una cama de hotel, maleta de fondo, luz cálida.</div>
+    </div>
+
+    <div class="chip sin">SIN GURUSUP</div>
+    <div class="chip con">CON GURUSUP</div>
+
+    <div class="stamp left">
+      <div class="time">23:47</div>
+      <div class="cap">Tres horas esperando una respuesta de la aerolínea.</div>
+    </div>
+    <div class="stamp right">
+      <div class="time">23:47</div>
+      <div class="cap">Reubicado y en su hotel. Resuelto en <b>30 segundos</b>.</div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="headline">La diferencia no es la suerte.<br><span class="accent">Es GuruSup.</span></div>
+    <div class="sub">IA que resuelve el 95&nbsp;% de las incidencias de viaje al instante, en cualquier canal.</div>
+    <div class="bottom-row">
+      <div class="cta">Pruébalo gratis</div>
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 34 34">
+          <circle cx="14" cy="13" r="9.5" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+          <path d="M 8 20 L 5.5 26 L 12.5 22.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+          <circle cx="23.5" cy="21" r="7" fill="none" stroke="#FF5A5F" stroke-width="3.4"/>
+          <path d="M 29 25.5 L 31 30 L 25.5 27.5" fill="none" stroke="#FF5A5F" stroke-width="3.4" stroke-linejoin="round"/>
+        </svg>
+        <span class="word">gurusup</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
