@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+
+# Exportaciones locales de datos de contactos (PII) — no subir al repositorio
+export/
