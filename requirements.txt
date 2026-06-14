@@ -2,3 +2,4 @@ feedparser
 requests
 anthropic
 playwright
+flask
