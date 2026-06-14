@@ -289,8 +289,9 @@ header {
   </div>
   <div class="status-dot">
     <div class="dot" id="statusDot"></div>
-    <span id="statusText">Conectando…</span>
+    <span id="statusText">Cargando…</span>
   </div>
+  <button onclick="promptApiKey()" title="Configurar API Key" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);border-radius:8px;padding:6px 10px;color:var(--accent);font-size:15px;cursor:pointer;margin-left:10px">🔑</button>
 </header>
 
 <div class="chat-wrap" id="chatWrap">
@@ -342,26 +343,95 @@ header {
 </div>
 
 <script>
-const SERVER = window.location.origin;
+// ── Configuración ─────────────────────────────────────────────────────────────
+const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+
+const SYSTEM_PROMPT = `Eres el asistente de IA comercial de GuruSup, una startup española de AI agents para customer support.
+
+CONTEXTO DE NEGOCIO:
+- Competidores: Decagon, Sierra, Ada, Intercom Fin
+- ICP: startups B2C Series A-C, España/LATAM, 5k-50k tickets/mes
+- Modelo: Consultoría + Freemium que convierte a pago
+
+DATOS ACTUALES DEL CRM (HubSpot · 14 Jun 2026):
+- Base de datos: 9.120 contactos totales
+- Nuevos contactos esta semana: 97
+  · Leads: 79 (18 no cualificados, 15 open activos, 5 en contacto)
+  · Opportunities: 3
+  · Clientes nuevos: 10
+- Canales: Offline 53%, Tráfico Directo 22%, Orgánico SEO 13.5%, Paid Search 7.5%, AI Referrals 2%
+
+PIPELINE ACTIVO:
+- 89 deals abiertos · ~€53.000 en juego
+- SQL Consultoría: 3 deals activos (Flywire, eboca, ZZ Test)
+- SQL Freemium: 5 deals (Cooltra €10k, GoTrendier €2k, Rever, TeamSystem, COCUNAT)
+- Presentaciones agendadas: 13 deals · €16.400
+- Deals con fecha vencida urgentes: Waynabox €13.2k, Cooltra €10k, Redexis €5k, Plenergy €3k
+
+FREEMIUMS:
+- 41 deals en pipeline freemium · €51.625 en juego
+- 3 ganados: TBF Abogados, VDS (€5k), PropHero
+- 2 nuevos sin contactar esta semana: Planeta Huerto, Avantio
+- Tasa conversión freemium → cliente: 7.3%
+
+EMAIL Y ACTIVACIÓN:
+- Tasa apertura email: 3% (muy baja)
+- 63.5% contactos no marketable (sin permiso email)
+- 0 contactos en secuencia automática de bienvenida
+
+REVENUE:
+- Mejor mes: Marzo 2026 · €18.850
+- Tasa de cierre histórica: 4% (121 perdidos vs 5 ganados)
+- Ticket medio: €1.150
+
+CLIENTES ACTUALES:
+- 95 clientes en total
+- Canal offline genera el 100% de los cierres
+
+Responde siempre en español, de forma directa, concisa y orientada a la acción.
+Si te preguntan por datos específicos del CRM, usa los datos de contexto anteriores.
+Si te piden hacer algo (generar un email, crear una propuesta, analizar un deal), hazlo.
+Máximo 3-4 párrafos en respuestas largas. Usa listas cuando ayude a la claridad.`;
 
 // ── Estado ───────────────────────────────────────────────────────────────────
 let isRecording = false;
 let recognition  = null;
 let ttsEnabled   = true;
 let msgCount     = 0;
+let conversationHistory = [];
 
-// ── Verificar conexión al servidor ───────────────────────────────────────────
-async function checkStatus() {
-  try {
-    const r = await fetch(SERVER + '/status');
-    const d = await r.json();
-    if (d.ok) {
-      document.getElementById('statusDot').className = 'dot on';
-      document.getElementById('statusText').textContent = d.api_key ? 'Listo' : 'Sin API key';
-    }
-  } catch(e) {
-    document.getElementById('statusText').textContent = 'Sin servidor';
-    showError('⚠️ El servidor no está activo. Ejecuta: python voice_assistant.py');
+// ── Gestión API Key ──────────────────────────────────────────────────────────
+function getApiKey() {
+  return localStorage.getItem('guru_api_key') || '';
+}
+
+function saveApiKey(key) {
+  localStorage.setItem('guru_api_key', key.trim());
+}
+
+function promptApiKey() {
+  const existing = getApiKey();
+  const key = prompt('Introduce tu Anthropic API Key (sk-ant-...):\n\nSe guardará en este dispositivo.', existing);
+  if (key && key.trim().startsWith('sk-')) {
+    saveApiKey(key.trim());
+    document.getElementById('statusDot').className = 'dot on';
+    document.getElementById('statusText').textContent = 'Listo';
+    return key.trim();
+  } else if (key !== null) {
+    showError('API Key inválida. Debe empezar por sk-ant-...');
+  }
+  return null;
+}
+
+// ── Verificar API Key al cargar ──────────────────────────────────────────────
+function checkStatus() {
+  const key = getApiKey();
+  if (key) {
+    document.getElementById('statusDot').className = 'dot on';
+    document.getElementById('statusText').textContent = 'Listo';
+  } else {
+    document.getElementById('statusText').textContent = 'Sin API key';
+    showError('⚠️ Pulsa el botón de clave 🔑 para configurar tu API key de Anthropic.');
   }
 }
 
@@ -432,30 +502,67 @@ function hideTyping() {
   if (t) t.remove();
 }
 
-// ── Enviar texto al servidor ─────────────────────────────────────────────────
+// ── Llamar a la API de Anthropic directamente ────────────────────────────────
 async function sendText(text) {
   if (!text.trim()) return;
+
+  let apiKey = getApiKey();
+  if (!apiKey) {
+    apiKey = promptApiKey();
+    if (!apiKey) return;
+  }
+
   addMessage('user', text);
   showTyping();
   document.getElementById('transcript').textContent = '';
 
+  conversationHistory.push({role: 'user', content: text});
+  // Limitar historial a 20 mensajes
+  if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+
   try {
-    const r = await fetch(SERVER + '/ask', {
+    const r = await fetch(ANTHROPIC_API, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({text})
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
     });
-    const d = await r.json();
+
     hideTyping();
-    if (d.error) {
-      showError(d.error);
-    } else {
-      addMessage('guru', d.response);
-      if (ttsEnabled) speak(d.response);
+
+    if (!r.ok) {
+      const err = await r.json();
+      if (r.status === 401) {
+        localStorage.removeItem('guru_api_key');
+        document.getElementById('statusDot').className = 'dot';
+        document.getElementById('statusText').textContent = 'Sin API key';
+        showError('API Key inválida o expirada. Pulsa 🔑 para actualizarla.');
+      } else {
+        showError(`Error API: ${err.error?.message || r.status}`);
+      }
+      conversationHistory.pop();
+      return;
     }
+
+    const d = await r.json();
+    const answer = d.content[0].text;
+    conversationHistory.push({role: 'assistant', content: answer});
+    addMessage('guru', answer);
+    if (ttsEnabled) speak(answer);
+
   } catch(e) {
     hideTyping();
-    showError('Error de conexión. ¿Está corriendo python voice_assistant.py?');
+    conversationHistory.pop();
+    showError('Error de red. Comprueba tu conexión a internet.');
   }
 }
 
@@ -549,7 +656,7 @@ function toggleTTS() {
 
 // ── Reset conversación ───────────────────────────────────────────────────────
 async function resetChat() {
-  await fetch(SERVER + '/ask', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:'',reset:true})});
+  conversationHistory = [];
   const wrap = document.getElementById('chatWrap');
   wrap.innerHTML = `<div class="welcome" id="welcome">
     <div class="big">🎙️</div>
