@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguimiento Semanal de Oportunidades — GuruSup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0618; color: #e2e8f0; min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #0a0618 0%, #1a0f2e 100%); border-bottom: 1px solid rgba(255,107,91,0.2); padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo { width: 42px; height: 42px; }
+  .header-title { font-size: 22px; font-weight: 700; color: #fff; }
+  .header-sub { font-size: 13px; color: #94a3b8; margin-top: 3px; }
+  .header-date { text-align: right; }
+  .header-date .week { font-size: 13px; color: #94a3b8; }
+  .header-date .dates { font-size: 15px; font-weight: 600; color: #FF6B5B; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  /* KPI cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi-card { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-card.coral::before { background: #FF6B5B; }
+  .kpi-card.green::before { background: #22c55e; }
+  .kpi-card.red::before { background: #ef4444; }
+  .kpi-card.amber::before { background: #f59e0b; }
+  .kpi-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .kpi-value { font-size: 36px; font-weight: 800; color: #fff; line-height: 1; }
+  .kpi-value.coral { color: #FF6B5B; }
+  .kpi-value.green { color: #22c55e; }
+  .kpi-value.red { color: #ef4444; }
+  .kpi-value.amber { color: #f59e0b; }
+  .kpi-sub { font-size: 12px; color: #64748b; margin-top: 6px; }
+
+  /* Section */
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-title span { display: inline-block; width: 4px; height: 18px; background: #FF6B5B; border-radius: 2px; }
+
+  /* Source summary */
+  .sources-card { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; }
+  .source-row { display: grid; grid-template-columns: 200px 1fr 140px 80px; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .source-row:last-child { border-bottom: none; }
+  .source-name { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .source-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .source-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .badge-green { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
+  .badge-red { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
+  .badge-orange { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
+  .source-bar-wrap { background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; }
+  .source-bar { height: 6px; border-radius: 4px; transition: width 1s ease; }
+  .source-pct { font-size: 12px; font-weight: 700; color: #94a3b8; text-align: right; }
+
+  /* Table */
+  .table-card { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: rgba(255,107,91,0.08); }
+  th { padding: 12px 16px; text-align: left; font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  td { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 13px; vertical-align: middle; }
+  tr:hover { background: rgba(255,255,255,0.02); }
+  .td-date { color: #64748b; font-size: 12px; white-space: nowrap; }
+  .lead-name { font-weight: 600; color: #e2e8f0; }
+  .lead-email { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .td-company { color: #cbd5e1; font-size: 13px; }
+  .source-tag { padding: 3px 10px; background: rgba(255,255,255,0.04); border-radius: 4px; font-size: 12px; color: #cbd5e1; display: inline-block; }
+  .status-pill, .stage-pill { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+  /* Funnel bar */
+  .funnel-wrap { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; }
+  .funnel-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-bottom: 12px; }
+  .funnel-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; }
+  .funnel-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 1s ease; }
+  .funnel-bar-label { font-size: 10px; color: #94a3b8; text-align: center; }
+  .funnel-bar-val { font-size: 14px; font-weight: 800; color: #fff; }
+
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .source-row { grid-template-columns: 1fr 1fr; }
+    .source-bar-wrap, .source-pct { display: none; }
+    .header { flex-direction: column; gap: 12px; text-align: center; }
+    th:nth-child(3), td:nth-child(3), th:nth-child(6), td:nth-child(6) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <svg class="logo" viewBox="0 0 42 42" fill="none">
+      <circle cx="21" cy="21" r="21" fill="#FF6B5B" opacity="0.15"/>
+      <circle cx="21" cy="21" r="14" fill="#FF6B5B" opacity="0.25"/>
+      <circle cx="21" cy="21" r="7" fill="#FF6B5B"/>
+      <circle cx="21" cy="21" r="2.5" fill="#fff"/>
+    </svg>
+    <div>
+      <div class="header-title">Seguimiento Semanal de Oportunidades</div>
+      <div class="header-sub">GuruSup · Nuevos contactos y estado de ventas</div>
+    </div>
+  </div>
+  <div class="header-date">
+    <div class="week">Semana del</div>
+    <div class="dates">1 — 14 junio 2026</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card coral">
+      <div class="kpi-label">Leads totales</div>
+      <div class="kpi-value coral">88</div>
+      <div class="kpi-sub">excluyendo tests</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Ya gestionados</div>
+      <div class="kpi-value green">41</div>
+      <div class="kpi-sub">47% del total</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Descartados</div>
+      <div class="kpi-value red">40</div>
+      <div class="kpi-sub">No aplica / Baja calidad</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Duplicados</div>
+      <div class="kpi-value amber">7</div>
+      <div class="kpi-sub">ya existían en CRM</div>
+    </div>
+  </div>
+
+  <!-- Fuentes -->
+  <div class="section">
+    <div class="section-title"><span></span>Captación por canal</div>
+    <div class="sources-card">
+      
+        <div class="source-row">
+          <div class="source-name">
+            <span class="source-dot" style="background:#94a3b8"></span>
+            <strong>Tráfico Directo</strong>
+          </div>
+          <div class="source-stats">
+            <span class="badge badge-green">20 gestionados</span>
+            <span class="badge badge-red">25 descartados</span>
+            <span class="badge badge-orange">2 duplicados</span>
+          </div>
+          <div class="source-bar-wrap">
+            <div class="source-bar" style="width:43%; background:#94a3b8"></div>
+          </div>
+          <div class="source-pct">43% cualificados</div>
+        </div>
+        <div class="source-row">
+          <div class="source-name">
+            <span class="source-dot" style="background:#22c55e"></span>
+            <strong>SEO Orgánico</strong>
+          </div>
+          <div class="source-stats">
+            <span class="badge badge-green">7 gestionados</span>
+            <span class="badge badge-red">12 descartados</span>
+            <span class="badge badge-orange">5 duplicados</span>
+          </div>
+          <div class="source-bar-wrap">
+            <div class="source-bar" style="width:29%; background:#22c55e"></div>
+          </div>
+          <div class="source-pct">29% cualificados</div>
+        </div>
+        <div class="source-row">
+          <div class="source-name">
+            <span class="source-dot" style="background:#4285F4"></span>
+            <strong>SEM / Google Ads</strong>
+          </div>
+          <div class="source-stats">
+            <span class="badge badge-green">10 gestionados</span>
+            <span class="badge badge-red">3 descartados</span>
+            
+          </div>
+          <div class="source-bar-wrap">
+            <div class="source-bar" style="width:77%; background:#4285F4"></div>
+          </div>
+          <div class="source-pct">77% cualificados</div>
+        </div>
+        <div class="source-row">
+          <div class="source-name">
+            <span class="source-dot" style="background:#a855f7"></span>
+            <strong>Otras Campañas</strong>
+          </div>
+          <div class="source-stats">
+            <span class="badge badge-green">2 gestionados</span>
+            <span class="badge badge-red">0 descartados</span>
+            
+          </div>
+          <div class="source-bar-wrap">
+            <div class="source-bar" style="width:100%; background:#a855f7"></div>
+          </div>
+          <div class="source-pct">100% cualificados</div>
+        </div>
+        <div class="source-row">
+          <div class="source-name">
+            <span class="source-dot" style="background:#f97316"></span>
+            <strong>Offline / Referido</strong>
+          </div>
+          <div class="source-stats">
+            <span class="badge badge-green">1 gestionados</span>
+            <span class="badge badge-red">0 descartados</span>
+            
+          </div>
+          <div class="source-bar-wrap">
+            <div class="source-bar" style="width:100%; background:#f97316"></div>
+          </div>
+          <div class="source-pct">100% cualificados</div>
+        </div>
+        <div class="source-row">
+          <div class="source-name">
+            <span class="source-dot" style="background:#eab308"></span>
+            <strong>Social Ads</strong>
+          </div>
+          <div class="source-stats">
+            <span class="badge badge-green">1 gestionados</span>
+            <span class="badge badge-red">0 descartados</span>
+            
+          </div>
+          <div class="source-bar-wrap">
+            <div class="source-bar" style="width:100%; background:#eab308"></div>
+          </div>
+          <div class="source-pct">100% cualificados</div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Tabla leads gestionados -->
+  <div class="section">
+    <div class="section-title"><span></span>Leads gestionados — detalle (41 contactos)</div>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Contacto</th>
+            <th>Empresa</th>
+            <th>Canal</th>
+            <th>Estado</th>
+            <th>Etapa</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td class="td-date">2026-06-12</td>
+            <td class="td-name">
+              <div class="lead-name">Serghi</div>
+              <div class="lead-email">serghiniy22@terraroja.cat</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-12</td>
+            <td class="td-name">
+              <div class="lead-name">Alex Lozano</div>
+              <div class="lead-email">soporte@prestasolutions.com</div>
+            </td>
+            <td class="td-company">prestasolutions</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-12</td>
+            <td class="td-name">
+              <div class="lead-name">Miquel Darriba</div>
+              <div class="lead-email">miquel.darriba@alumnes.joanpelegri.cat</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Ivan</div>
+              <div class="lead-email">ivan@ketaneuropa.com</div>
+            </td>
+            <td class="td-company">Ketan Europa</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">jose trillo</div>
+              <div class="lead-email">josetrillo926@gmail.com</div>
+            </td>
+            <td class="td-company">kmgn vm</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Valentina Tejera</div>
+              <div class="lead-email">valentina.tejera@grossonapoletano.com</div>
+            </td>
+            <td class="td-company">Grosso Napoletano</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #f97316">Offline / Referido</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Juan Carlos Cabas Pérez</div>
+              <div class="lead-email">juancarloscabasperez@gmail.com</div>
+            </td>
+            <td class="td-company">btfgyhujik,</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Vicent Gosalvez</div>
+              <div class="lead-email">vgosalvez@avantgst.com</div>
+            </td>
+            <td class="td-company">AVANT</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #a855f7">Otras Campañas</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Najat Chemlal</div>
+              <div class="lead-email">naiachemlal20188@gmail.com</div>
+            </td>
+            <td class="td-company">Kiko Milan</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Blanca Espina i Pahí</div>
+              <div class="lead-email">bespina@gencat.cat</div>
+            </td>
+            <td class="td-company">Building Actions, SL</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #eab308">Social Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">Trever Gray</div>
+              <div class="lead-email">trever.gray@sendproud.com</div>
+            </td>
+            <td class="td-company">Send Proud</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-11</td>
+            <td class="td-name">
+              <div class="lead-name">tristan.linares</div>
+              <div class="lead-email">tristan.linares@a.vedrunatoledo.es</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">Camilo Suarez</div>
+              <div class="lead-email">camilo.scpm@gmail.com</div>
+            </td>
+            <td class="td-company">Adeslas</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">camila.gomez</div>
+              <div class="lead-email">camila.gomez@gotrendier.com.co</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">Andreu AI</div>
+              <div class="lead-email">sandreuo.ai@gmail.com</div>
+            </td>
+            <td class="td-company">Velocity Savage</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">David Fabregat Heras</div>
+              <div class="lead-email">david.fabregat@vainsmon.es</div>
+            </td>
+            <td class="td-company">VAINSMON SL</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #a855f7">Otras Campañas</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">Yohanes Carreras</div>
+              <div class="lead-email">ycarreras@briolf.com</div>
+            </td>
+            <td class="td-company">Kimakem SRL</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">ramone@biom.net</div>
+              <div class="lead-email">ramone@biom.net</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">Jhon Edinson</div>
+              <div class="lead-email">sanchezvargasjhonedinson@gmail.com</div>
+            </td>
+            <td class="td-company">Venta digital</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">David</div>
+              <div class="lead-email">info@ventidecor.com</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-10</td>
+            <td class="td-name">
+              <div class="lead-name">Ahmed</div>
+              <div class="lead-email">amughal@datatronex.com</div>
+            </td>
+            <td class="td-company">Data Tronex looking for WhatsApp Msg scheduler</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-09</td>
+            <td class="td-name">
+              <div class="lead-name">Fernando García Gudiña</div>
+              <div class="lead-email">fgudina@informaticaq.es</div>
+            </td>
+            <td class="td-company">informatica Q S.L</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-09</td>
+            <td class="td-name">
+              <div class="lead-name">Nick Stroomer</div>
+              <div class="lead-email">nick@clixmedia.nl</div>
+            </td>
+            <td class="td-company">Clix Media V.O.F.</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-09</td>
+            <td class="td-name">
+              <div class="lead-name">Pablo</div>
+              <div class="lead-email">pablo.momparler@inovretail.com</div>
+            </td>
+            <td class="td-company">Inovretail</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-08</td>
+            <td class="td-name">
+              <div class="lead-name">malcaldet02</div>
+              <div class="lead-email">malcaldet02@educarex.es</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-08</td>
+            <td class="td-name">
+              <div class="lead-name">danielfd.a</div>
+              <div class="lead-email">danielfd.a@sancristobal.amgr.es</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-08</td>
+            <td class="td-name">
+              <div class="lead-name">shruti.garg</div>
+              <div class="lead-email">shruti.garg@tredence.com</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-07</td>
+            <td class="td-name">
+              <div class="lead-name">Alvaro</div>
+              <div class="lead-email">alvaro@estiro.es</div>
+            </td>
+            <td class="td-company">Estiro</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-07</td>
+            <td class="td-name">
+              <div class="lead-name">daniele.pennesi@azimut.it</div>
+              <div class="lead-email">daniele.pennesi@azimut.it</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-07</td>
+            <td class="td-name">
+              <div class="lead-name">Francisco Cervera del Toro</div>
+              <div class="lead-email">franciscocerveradeltoro@gmail.com</div>
+            </td>
+            <td class="td-company">Paclick Solutions</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-07</td>
+            <td class="td-name">
+              <div class="lead-name">Sayan Dey</div>
+              <div class="lead-email">rajassarkar@2003gmail.com</div>
+            </td>
+            <td class="td-company">Oriflame</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-06</td>
+            <td class="td-name">
+              <div class="lead-name">Ravi Shah</div>
+              <div class="lead-email">hello@rndtechnosoft.com</div>
+            </td>
+            <td class="td-company">RnD Technosoft</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-05</td>
+            <td class="td-name">
+              <div class="lead-name">gilberto.ruiz</div>
+              <div class="lead-email">gilberto.ruiz@ventas.wom.cl</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-05</td>
+            <td class="td-name">
+              <div class="lead-name">laura.riano</div>
+              <div class="lead-email">laura.riano@gotrendier.com.co</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-05</td>
+            <td class="td-name">
+              <div class="lead-name">gina.villalobos</div>
+              <div class="lead-email">gina.villalobos@gotrendier.com.co</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Cliente</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-04</td>
+            <td class="td-name">
+              <div class="lead-name">info</div>
+              <div class="lead-email">info@teresaaledo.com</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-04</td>
+            <td class="td-name">
+              <div class="lead-name">Antonia Vidal Rodríguez</div>
+              <div class="lead-email">tonitatotana@hotmail.es</div>
+            </td>
+            <td class="td-company">Floristeria Juani S.L</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-04</td>
+            <td class="td-name">
+              <div class="lead-name">Ankit adnani</div>
+              <div class="lead-email">ankitadnani@holiday7.com</div>
+            </td>
+            <td class="td-company">Holiday DryCleaners</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-03</td>
+            <td class="td-name">
+              <div class="lead-name">Juan losada</div>
+              <div class="lead-email">juanlosadautrera2@gmail.com</div>
+            </td>
+            <td class="td-company">Mercadona</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-03</td>
+            <td class="td-name">
+              <div class="lead-name">SHARON ALONZO</div>
+              <div class="lead-email">salonso@eegsa.net</div>
+            </td>
+            <td class="td-company">EEGSA</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-03</td>
+            <td class="td-name">
+              <div class="lead-name">andres.prada</div>
+              <div class="lead-email">andres.prada@gotrendier.com.co</div>
+            </td>
+            <td class="td-company">—</td>
+            <td class="td-source">
+              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+            </td>
+            <td class="td-status">
+              <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
+            </td>
+            <td class="td-stage">
+              <span class="stage-pill" style="background:#94a3b822;color:#94a3b8;border:1px solid #94a3b844">Lead</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
