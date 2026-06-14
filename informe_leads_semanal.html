@@ -30,7 +30,6 @@
   .section-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:10px}
   .section-title span{display:inline-block;width:4px;height:18px;background:#FF6B5B;border-radius:2px}
   .card{background:#1a0f2e;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden}
-  .card-pad{padding:24px}
   .sources-card{background:#1a0f2e;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px}
   .source-row{display:grid;grid-template-columns:230px 1fr 160px 52px;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05)}
   .source-row:last-child{border-bottom:none}
@@ -93,7 +92,6 @@
 
 <div class="container">
 
-  <!-- KPIs -->
   <div class="kpi-grid">
     <div class="kpi-card coral"><div class="kpi-label">Leads totales</div><div class="kpi-value coral">88</div><div class="kpi-sub">excluyendo tests</div></div>
     <div class="kpi-card green"><div class="kpi-label">Ya gestionados</div><div class="kpi-value green">41</div><div class="kpi-sub">47% del total</div></div>
@@ -101,54 +99,6 @@
     <div class="kpi-card amber"><div class="kpi-label">Freemiums nuevos</div><div class="kpi-value amber">3</div><div class="kpi-sub">3 activados esta semana</div></div>
   </div>
 
-  <!-- Calidad por canal -->
-  <div class="section">
-    <div class="section-title"><span></span>Calidad de leads por canal</div>
-    <div class="card">
-      <table>
-        <thead><tr><th>Canal</th><th style="text-align:center">Leads</th><th style="text-align:center">MQL gestionados</th><th style="text-align:center">Oportunidad / Cliente</th></tr></thead>
-        <tbody>
-      <tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#94a3b8;display:inline-block"></span>Tráfico Directo</span></td>
-        <td style="text-align:center;font-weight:700">47</td>
-        <td style="text-align:center"><span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">20 <span style="opacity:.7;font-size:10px">(43%)</span></span></td>
-        <td style="text-align:center"><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">2 <span style="opacity:.7;font-size:10px">(4%)</span></span></td>
-      </tr>
-      <tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block"></span>SEO Orgánico</span></td>
-        <td style="text-align:center;font-weight:700">24</td>
-        <td style="text-align:center"><span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">7 <span style="opacity:.7;font-size:10px">(29%)</span></span></td>
-        <td style="text-align:center"><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">0 <span style="opacity:.7;font-size:10px">(0%)</span></span></td>
-      </tr>
-      <tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#4285F4;display:inline-block"></span>SEM / Google Ads</span></td>
-        <td style="text-align:center;font-weight:700">13</td>
-        <td style="text-align:center"><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">10 <span style="opacity:.7;font-size:10px">(77%)</span></span></td>
-        <td style="text-align:center"><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">0 <span style="opacity:.7;font-size:10px">(0%)</span></span></td>
-      </tr>
-      <tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#a855f7;display:inline-block"></span>Otras Campañas</span></td>
-        <td style="text-align:center;font-weight:700">2</td>
-        <td style="text-align:center"><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">2 <span style="opacity:.7;font-size:10px">(100%)</span></span></td>
-        <td style="text-align:center"><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">0 <span style="opacity:.7;font-size:10px">(0%)</span></span></td>
-      </tr>
-      <tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#f97316;display:inline-block"></span>Offline / Referido</span></td>
-        <td style="text-align:center;font-weight:700">1</td>
-        <td style="text-align:center"><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">1 <span style="opacity:.7;font-size:10px">(100%)</span></span></td>
-        <td style="text-align:center"><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">0 <span style="opacity:.7;font-size:10px">(0%)</span></span></td>
-      </tr>
-      <tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#eab308;display:inline-block"></span>Social Ads</span></td>
-        <td style="text-align:center;font-weight:700">1</td>
-        <td style="text-align:center"><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">1 <span style="opacity:.7;font-size:10px">(100%)</span></span></td>
-        <td style="text-align:center"><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">0 <span style="opacity:.7;font-size:10px">(0%)</span></span></td>
-      </tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Captación por canal -->
   <div class="section">
     <div class="section-title"><span></span>Captación por canal</div>
     <div class="sources-card">
@@ -232,7 +182,6 @@
       </div></div>
   </div>
 
-  <!-- Deals: Consultoría + Freemium -->
   <div class="section">
     <div class="section-title"><span></span>Pipeline de oportunidades</div>
     <div class="two-col">
@@ -242,55 +191,55 @@
           <div class="pipeline-total">€6,100</div>
         </div>
         <table>
-          <thead><tr><th>Fecha</th><th>Empresa</th><th>Etapa</th><th>Valor</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Empresa</th><th>Etapa</th><th style="text-align:right">Valor</th></tr></thead>
           <tbody>
           <tr>
             <td class="td-date">2026-06-11</td>
             <td class="td-company">Grupo Asesban</td>
             <td><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">Demo agendada</span></td>
-            <td style="font-weight:700;color:#e2e8f0">—</td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">—</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-05</td>
             <td class="td-company">Rusticae</td>
             <td><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">Demo agendada</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€750</td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€750</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-05</td>
             <td class="td-company">GlowWhite</td>
             <td><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">Demo agendada</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€350</td>
-          </tr>
-          <tr>
-            <td class="td-date">2026-06-05</td>
-            <td class="td-company">BlueSpace</td>
-            <td><span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Contactado</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€750</td>
-          </tr>
-          <tr>
-            <td class="td-date">2026-06-05</td>
-            <td class="td-company">CABE Trasteros</td>
-            <td><span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Contactado</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€750</td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€350</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-04</td>
             <td class="td-company">Grupo Alsea</td>
             <td><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">Demo agendada</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€1,500</td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€1,500</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-01</td>
             <td class="td-company">Davante</td>
             <td><span class="status-pill" style="background:#FF6B5B22;color:#FF6B5B;border:1px solid #FF6B5B44">Demo agendada</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€2,000</td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€2,000</td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-05</td>
+            <td class="td-company">BlueSpace</td>
+            <td><span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Contactado</span></td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€750</td>
+          </tr>
+          <tr>
+            <td class="td-date">2026-06-05</td>
+            <td class="td-company">CABE Trasteros</td>
+            <td><span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Contactado</span></td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€750</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-10</td>
             <td class="td-company">Weekendesk</td>
             <td><span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Contactado</span></td>
-            <td style="font-weight:700;color:#e2e8f0">—</td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">—</td>
           </tr></tbody>
         </table>
       </div>
@@ -300,32 +249,31 @@
           <div class="pipeline-total">3 activados</div>
         </div>
         <table>
-          <thead><tr><th>Fecha</th><th>Empresa</th><th>Etapa</th><th>Valor</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Empresa</th><th>Etapa</th><th style="text-align:right">Valor</th></tr></thead>
           <tbody>
           <tr>
             <td class="td-date">2026-06-11</td>
             <td class="td-company">Planeta Huerto</td>
-            <td><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Ganado</span></td>
-            <td style="font-weight:700;color:#e2e8f0">—</td>
+            <td><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Ganado ✓</span></td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">—</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-11</td>
             <td class="td-company">Avantio</td>
-            <td><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Ganado</span></td>
-            <td style="font-weight:700;color:#e2e8f0">—</td>
+            <td><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Ganado ✓</span></td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">—</td>
           </tr>
           <tr>
             <td class="td-date">2026-06-09</td>
             <td class="td-company">TBF ABOGADOS</td>
-            <td><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Ganado</span></td>
-            <td style="font-weight:700;color:#e2e8f0">€750</td>
+            <td><span class="status-pill" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e44">Ganado ✓</span></td>
+            <td style="font-weight:700;color:#e2e8f0;text-align:right">€750</td>
           </tr></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- Detalle leads -->
   <div class="section">
     <div class="section-title"><span></span>Detalle de contactos — agrupados por revisión de ventas</div>
     <div class="card">
