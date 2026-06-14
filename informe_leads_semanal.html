@@ -19,7 +19,6 @@
 
   .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
 
-  /* KPI cards */
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
   .kpi-card { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
   .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
@@ -28,61 +27,54 @@
   .kpi-card.red::before { background: #ef4444; }
   .kpi-card.amber::before { background: #f59e0b; }
   .kpi-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-  .kpi-value { font-size: 36px; font-weight: 800; color: #fff; line-height: 1; }
+  .kpi-value { font-size: 36px; font-weight: 800; line-height: 1; }
   .kpi-value.coral { color: #FF6B5B; }
   .kpi-value.green { color: #22c55e; }
   .kpi-value.red { color: #ef4444; }
   .kpi-value.amber { color: #f59e0b; }
   .kpi-sub { font-size: 12px; color: #64748b; margin-top: 6px; }
 
-  /* Section */
   .section { margin-bottom: 32px; }
   .section-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
   .section-title span { display: inline-block; width: 4px; height: 18px; background: #FF6B5B; border-radius: 2px; }
 
-  /* Source summary */
   .sources-card { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; }
-  .source-row { display: grid; grid-template-columns: 200px 1fr 140px 80px; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .source-row { display: grid; grid-template-columns: 220px 1fr 160px 90px; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .source-row:last-child { border-bottom: none; }
-  .source-name { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-  .source-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .source-stats { display: flex; gap: 6px; flex-wrap: wrap; }
-  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .source-name { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .source-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .source-total-pct { font-size: 11px; color: #64748b; margin-top: 3px; }
+  .source-stats { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 600; }
   .badge-green { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
   .badge-red { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
   .badge-orange { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
   .source-bar-wrap { background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; }
-  .source-bar { height: 6px; border-radius: 4px; transition: width 1s ease; }
-  .source-pct { font-size: 12px; font-weight: 700; color: #94a3b8; text-align: right; }
+  .source-bar { height: 6px; border-radius: 4px; }
+  .source-pct { font-size: 13px; font-weight: 700; color: #fff; text-align: right; }
 
-  /* Table */
   .table-card { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; }
   thead tr { background: rgba(255,107,91,0.08); }
-  th { padding: 12px 16px; text-align: left; font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  th { padding: 12px 16px; text-align: left; font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; white-space: nowrap; }
   td { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 13px; vertical-align: middle; }
   tr:hover { background: rgba(255,255,255,0.02); }
   .td-date { color: #64748b; font-size: 12px; white-space: nowrap; }
   .lead-name { font-weight: 600; color: #e2e8f0; }
   .lead-email { font-size: 11px; color: #64748b; margin-top: 2px; }
-  .td-company { color: #cbd5e1; font-size: 13px; }
-  .source-tag { padding: 3px 10px; background: rgba(255,255,255,0.04); border-radius: 4px; font-size: 12px; color: #cbd5e1; display: inline-block; }
-  .status-pill, .stage-pill { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .td-company { color: #cbd5e1; }
+  .source-tag { font-size: 12px; color: #cbd5e1; display: inline-block; padding: 2px 0 2px 8px; }
+  .status-pill, .stage-pill { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-block; }
 
-  /* Funnel bar */
-  .funnel-wrap { background: #1a0f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; }
-  .funnel-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-bottom: 12px; }
-  .funnel-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; }
-  .funnel-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 1s ease; }
-  .funnel-bar-label { font-size: 10px; color: #94a3b8; text-align: center; }
-  .funnel-bar-val { font-size: 14px; font-weight: 800; color: #fff; }
-
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .source-row { grid-template-columns: 1fr 1fr; }
     .source-bar-wrap, .source-pct { display: none; }
     .header { flex-direction: column; gap: 12px; text-align: center; }
-    th:nth-child(3), td:nth-child(3), th:nth-child(6), td:nth-child(6) { display: none; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 16px 12px; }
+    th, td { padding: 10px 10px; }
   }
 </style>
 </head>
@@ -109,7 +101,6 @@
 
 <div class="container">
 
-  <!-- KPIs -->
   <div class="kpi-grid">
     <div class="kpi-card coral">
       <div class="kpi-label">Leads totales</div>
@@ -133,7 +124,6 @@
     </div>
   </div>
 
-  <!-- Fuentes -->
   <div class="section">
     <div class="section-title"><span></span>Captación por canal</div>
     <div class="sources-card">
@@ -141,7 +131,10 @@
         <div class="source-row">
           <div class="source-name">
             <span class="source-dot" style="background:#94a3b8"></span>
-            <strong>Tráfico Directo</strong>
+            <div>
+              <strong>Tráfico Directo</strong>
+              <div class="source-total-pct">47 leads · 53% del total</div>
+            </div>
           </div>
           <div class="source-stats">
             <span class="badge badge-green">20 gestionados</span>
@@ -156,7 +149,10 @@
         <div class="source-row">
           <div class="source-name">
             <span class="source-dot" style="background:#22c55e"></span>
-            <strong>SEO Orgánico</strong>
+            <div>
+              <strong>SEO Orgánico</strong>
+              <div class="source-total-pct">24 leads · 27% del total</div>
+            </div>
           </div>
           <div class="source-stats">
             <span class="badge badge-green">7 gestionados</span>
@@ -171,7 +167,10 @@
         <div class="source-row">
           <div class="source-name">
             <span class="source-dot" style="background:#4285F4"></span>
-            <strong>SEM / Google Ads</strong>
+            <div>
+              <strong>SEM / Google Ads</strong>
+              <div class="source-total-pct">13 leads · 15% del total</div>
+            </div>
           </div>
           <div class="source-stats">
             <span class="badge badge-green">10 gestionados</span>
@@ -186,7 +185,10 @@
         <div class="source-row">
           <div class="source-name">
             <span class="source-dot" style="background:#a855f7"></span>
-            <strong>Otras Campañas</strong>
+            <div>
+              <strong>Otras Campañas</strong>
+              <div class="source-total-pct">2 leads · 2% del total</div>
+            </div>
           </div>
           <div class="source-stats">
             <span class="badge badge-green">2 gestionados</span>
@@ -201,7 +203,10 @@
         <div class="source-row">
           <div class="source-name">
             <span class="source-dot" style="background:#f97316"></span>
-            <strong>Offline / Referido</strong>
+            <div>
+              <strong>Offline / Referido</strong>
+              <div class="source-total-pct">1 leads · 1% del total</div>
+            </div>
           </div>
           <div class="source-stats">
             <span class="badge badge-green">1 gestionados</span>
@@ -216,7 +221,10 @@
         <div class="source-row">
           <div class="source-name">
             <span class="source-dot" style="background:#eab308"></span>
-            <strong>Social Ads</strong>
+            <div>
+              <strong>Social Ads</strong>
+              <div class="source-total-pct">1 leads · 1% del total</div>
+            </div>
           </div>
           <div class="source-stats">
             <span class="badge badge-green">1 gestionados</span>
@@ -231,7 +239,6 @@
     </div>
   </div>
 
-  <!-- Tabla leads gestionados -->
   <div class="section">
     <div class="section-title"><span></span>Leads gestionados — detalle (41 contactos)</div>
     <div class="table-card">
@@ -241,9 +248,9 @@
             <th>Fecha</th>
             <th>Contacto</th>
             <th>Empresa</th>
-            <th>Canal</th>
+            <th>Canal de entrada</th>
             <th>Estado</th>
-            <th>Etapa</th>
+            <th>Etapa ciclo de vida</th>
           </tr>
         </thead>
         <tbody>
@@ -256,7 +263,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -273,7 +280,7 @@
             </td>
             <td class="td-company">prestasolutions</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -290,7 +297,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -307,7 +314,7 @@
             </td>
             <td class="td-company">Ketan Europa</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -324,7 +331,7 @@
             </td>
             <td class="td-company">kmgn vm</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -341,7 +348,7 @@
             </td>
             <td class="td-company">Grosso Napoletano</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #f97316">Offline / Referido</span>
+              <span class="source-tag" style="border-left:3px solid #f97316;padding-left:8px">Offline / Referido</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -358,7 +365,7 @@
             </td>
             <td class="td-company">btfgyhujik,</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -375,7 +382,7 @@
             </td>
             <td class="td-company">AVANT</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #a855f7">Otras Campañas</span>
+              <span class="source-tag" style="border-left:3px solid #a855f7;padding-left:8px">Otras Campañas</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -392,7 +399,7 @@
             </td>
             <td class="td-company">Kiko Milan</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -409,7 +416,7 @@
             </td>
             <td class="td-company">Building Actions, SL</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #eab308">Social Ads</span>
+              <span class="source-tag" style="border-left:3px solid #eab308;padding-left:8px">Social Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -426,7 +433,7 @@
             </td>
             <td class="td-company">Send Proud</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -443,7 +450,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -460,7 +467,7 @@
             </td>
             <td class="td-company">Adeslas</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -477,7 +484,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -494,7 +501,7 @@
             </td>
             <td class="td-company">Velocity Savage</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -511,7 +518,7 @@
             </td>
             <td class="td-company">VAINSMON SL</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #a855f7">Otras Campañas</span>
+              <span class="source-tag" style="border-left:3px solid #a855f7;padding-left:8px">Otras Campañas</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -528,7 +535,7 @@
             </td>
             <td class="td-company">Kimakem SRL</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -545,7 +552,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -562,7 +569,7 @@
             </td>
             <td class="td-company">Venta digital</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -579,7 +586,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -596,7 +603,7 @@
             </td>
             <td class="td-company">Data Tronex looking for WhatsApp Msg scheduler</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -613,7 +620,7 @@
             </td>
             <td class="td-company">informatica Q S.L</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -630,7 +637,7 @@
             </td>
             <td class="td-company">Clix Media V.O.F.</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -647,7 +654,7 @@
             </td>
             <td class="td-company">Inovretail</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -664,7 +671,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -681,7 +688,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -698,7 +705,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -715,7 +722,7 @@
             </td>
             <td class="td-company">Estiro</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -732,7 +739,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -749,7 +756,7 @@
             </td>
             <td class="td-company">Paclick Solutions</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -766,7 +773,7 @@
             </td>
             <td class="td-company">Oriflame</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -783,7 +790,7 @@
             </td>
             <td class="td-company">RnD Technosoft</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -800,7 +807,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -817,7 +824,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -834,7 +841,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -851,7 +858,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#3b82f622;color:#3b82f6;border:1px solid #3b82f644">Abierto</span>
@@ -868,7 +875,7 @@
             </td>
             <td class="td-company">Floristeria Juani S.L</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44">Contactado</span>
@@ -885,7 +892,7 @@
             </td>
             <td class="td-company">Holiday DryCleaners</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -902,7 +909,7 @@
             </td>
             <td class="td-company">Mercadona</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #4285F4">SEM / Google Ads</span>
+              <span class="source-tag" style="border-left:3px solid #4285F4;padding-left:8px">SEM / Google Ads</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -919,7 +926,7 @@
             </td>
             <td class="td-company">EEGSA</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #22c55e">SEO Orgánico</span>
+              <span class="source-tag" style="border-left:3px solid #22c55e;padding-left:8px">SEO Orgánico</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
@@ -936,7 +943,7 @@
             </td>
             <td class="td-company">—</td>
             <td class="td-source">
-              <span class="source-tag" style="border-left:3px solid #94a3b8">Tráfico Directo</span>
+              <span class="source-tag" style="border-left:3px solid #94a3b8;padding-left:8px">Tráfico Directo</span>
             </td>
             <td class="td-status">
               <span class="status-pill" style="background:#6b728022;color:#6b7280;border:1px solid #6b728044">—</span>
