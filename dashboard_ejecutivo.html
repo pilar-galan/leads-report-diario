@@ -3,1063 +3,1501 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GuruSup · Dashboard Ejecutivo Semanal</title>
+<title>GuruSup · Dashboard Ejecutivo · Semana 24 · 2026</title>
 <style>
 :root {
-  --guru-900: #0a0618; --guru-800: #110e2a; --guru-700: #1a1640;
-  --guru-600: #241f58; --guru-500: #7c3aed; --guru-400: #9d5ffa;
-  --guru-300: #c4a2fc; --guru-200: #ede9ff;
-  --surface: #161330; --card: #1e1b42; --border: #2e2a5a;
-  --border-l: rgba(124,58,237,.2);
-  --green: #10b981; --green-bg: rgba(16,185,129,.1);
-  --amber: #f59e0b; --amber-bg: rgba(245,158,11,.1);
-  --red: #ef4444; --red-bg: rgba(239,68,68,.1);
-  --blue: #3b82f6; --blue-bg: rgba(59,130,246,.1);
-  --text: #f0edff; --text-2: #c4bfe0; --muted: #7b76a0;
-  --radius: 16px; --radius-s: 10px;
+  --guru-900: #0a0618;
+  --guru-800: #110e2a;
+  --guru-700: #1a1640;
+  --guru-600: #241f58;
+  --guru-500: #7c3aed;
+  --guru-400: #9d5ffa;
+  --guru-300: #c4a2fc;
+  --surface: #161330;
+  --card: #1e1b42;
+  --border: #2e2a5a;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --text: #f0edff;
+  --text-2: #c4bfe0;
+  --muted: #7b76a0;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--guru-900);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
-
-/* ── HEADER ── */
-.gs-header{background:linear-gradient(160deg,#1a0a3d 0%,#0a0618 70%);border-bottom:1px solid var(--border-l);padding:0 40px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
-.gs-header-top{display:flex;align-items:center;gap:16px;padding:18px 0 12px}
-.gs-logo{width:40px;height:40px;background:linear-gradient(135deg,var(--guru-500),#a855f7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;box-shadow:0 0 20px rgba(124,58,237,.5);flex-shrink:0}
-.gs-brand h1{font-size:17px;font-weight:800;letter-spacing:-.3px}
-.gs-brand p{font-size:11px;color:var(--muted)}
-.gs-header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.gs-badge{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
-.gs-date{font-size:12px;color:var(--muted)}
-.gs-nav{display:flex;gap:2px;padding-bottom:0;overflow-x:auto;scrollbar-width:none}
-.gs-nav::-webkit-scrollbar{display:none}
-.nav-tab{padding:9px 16px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;text-decoration:none;display:block}
-.nav-tab:hover,.nav-tab.active{color:var(--guru-300);border-bottom-color:var(--guru-500)}
-
-/* ── LAYOUT ── */
-.gs-page{max-width:1280px;margin:0 auto;padding:32px 40px 80px}
-.section{margin-bottom:56px;scroll-margin-top:90px}
-.section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:24px}
-.section-title{font-size:20px;font-weight:800;letter-spacing:-.4px}
-.section-sub{font-size:13px;color:var(--muted)}
-.section-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em}
-.sb-purple{background:rgba(124,58,237,.15);color:var(--guru-300);border:1px solid var(--border-l)}
-.sb-green{background:var(--green-bg);color:#6ee7b7;border:1px solid rgba(16,185,129,.2)}
-.sb-amber{background:var(--amber-bg);color:#fcd34d;border:1px solid rgba(245,158,11,.2)}
-.sb-red{background:var(--red-bg);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
-.sb-blue{background:var(--blue-bg);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
-
-/* ── CARDS ── */
-.kpi-grid{display:grid;gap:14px}
-.kpi-grid-6{grid-template-columns:repeat(6,1fr)}
-.kpi-grid-4{grid-template-columns:repeat(4,1fr)}
-.kpi-grid-3{grid-template-columns:repeat(3,1fr)}
-.kpi-grid-2{grid-template-columns:repeat(2,1fr)}
-
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s}
-.kpi-card:hover{border-color:var(--border-l)}
-.kpi-card .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
-.kpi-card .value{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1}
-.kpi-card .delta{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px}
-.kpi-card .delta.up{color:var(--green)}
-.kpi-card .delta.down{color:var(--red)}
-.kpi-card .delta.neutral{color:var(--muted)}
-.kpi-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
-
-/* ── INSIGHTS ── */
-.insights-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
-.insight{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-radius:var(--radius-s);font-size:13px;line-height:1.5}
-.insight.green{background:var(--green-bg);border:1px solid rgba(16,185,129,.2);color:#d1fae5}
-.insight.amber{background:var(--amber-bg);border:1px solid rgba(245,158,11,.2);color:#fef3c7}
-.insight.red{background:var(--red-bg);border:1px solid rgba(239,68,68,.2);color:#fee2e2}
-.insight-icon{font-size:16px;flex-shrink:0;margin-top:1px}
-
-/* ── CHART CONTAINERS ── */
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
-.chart-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-
-/* Bar chart */
-.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px}
-.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
-.bar{border-radius:4px 4px 0 0;width:100%;min-width:24px;transition:opacity .2s;cursor:default}
-.bar:hover{opacity:.8}
-.bar-label{font-size:10px;color:var(--muted);text-align:center}
-.bar-val{font-size:10px;color:var(--text-2);font-weight:600}
-
-/* Donut */
-.donut-wrap{display:flex;align-items:center;gap:24px}
-.donut-legend{display:flex;flex-direction:column;gap:8px;flex:1}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.legend-name{color:var(--text-2);flex:1}
-.legend-pct{font-weight:700;color:var(--text)}
-.legend-delta{font-size:10px;padding:1px 6px;border-radius:4px}
-
-/* Funnel */
-.funnel-stages{display:flex;flex-direction:column;gap:6px}
-.funnel-stage{position:relative;border-radius:var(--radius-s);overflow:hidden;cursor:default;transition:transform .15s}
-.funnel-stage:hover{transform:translateX(4px)}
-.funnel-bar{height:52px;display:flex;align-items:center;padding:0 18px;gap:12px;position:relative}
-.funnel-bar-fill{position:absolute;inset:0;opacity:.15;border-radius:var(--radius-s)}
-.funnel-num{font-size:20px;font-weight:900;color:#fff;z-index:1;width:80px;text-align:right}
-.funnel-name{font-size:13px;font-weight:700;z-index:1;flex:1}
-.funnel-conv{font-size:11px;z-index:1;padding:2px 8px;border-radius:4px;font-weight:600}
-.funnel-delta{font-size:11px;z-index:1;color:var(--muted)}
-.funnel-stage.bottleneck .funnel-bar-fill{background:var(--red);opacity:.2}
-.funnel-stage.bottleneck .funnel-bar{border:1px solid rgba(239,68,68,.35);border-radius:var(--radius-s)}
-.bottleneck-tag{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:10px;background:var(--red-bg);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:2px 8px;border-radius:4px;z-index:2}
-
-/* Table */
-.data-table{width:100%;border-collapse:collapse;font-size:13px}
-.data-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
-.data-table td{padding:11px 12px;border-bottom:1px solid rgba(46,42,90,.5);color:var(--text-2)}
-.data-table tr:last-child td{border-bottom:none}
-.data-table tr:hover td{background:rgba(124,58,237,.05)}
-.risk-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
-.risk-high{background:var(--red-bg);color:#fca5a5}
-.risk-mid{background:var(--amber-bg);color:#fcd34d}
-.risk-low{background:var(--green-bg);color:#6ee7b7}
-
-/* Pipeline visual */
-.pipeline-stages{display:flex;gap:6px;margin-bottom:20px}
-.pipe-stage{flex:1;text-align:center}
-.pipe-bar-wrap{height:80px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
-.pipe-bar{width:100%;border-radius:4px 4px 0 0}
-.pipe-label{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pipe-count{font-size:13px;font-weight:700;color:var(--text)}
-
-/* Priorities */
-.priorities-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.priority-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.priority-card h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.priority-card.marketing h3{color:#93c5fd;border-bottom-color:rgba(59,130,246,.3)}
-.priority-card.ventas h3{color:#fcd34d;border-bottom-color:rgba(245,158,11,.3)}
-.priority-card.cs h3{color:#6ee7b7;border-bottom-color:rgba(16,185,129,.3)}
-.priority-card.direccion h3{color:var(--guru-300);border-bottom-color:var(--border-l)}
-.priority-item{display:flex;gap:10px;margin-bottom:12px;font-size:12px;line-height:1.5;color:var(--text-2)}
-.priority-item:last-child{margin-bottom:0}
-.priority-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
-.marketing .priority-num{background:var(--blue-bg);color:#93c5fd}
-.ventas .priority-num{background:var(--amber-bg);color:#fcd34d}
-.cs .priority-num{background:var(--green-bg);color:#6ee7b7}
-.direccion .priority-num{background:rgba(124,58,237,.15);color:var(--guru-300)}
-
-/* Alert */
-.alert-box{background:var(--red-bg);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-s);padding:12px 16px;font-size:12px;color:#fca5a5;display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
-
-/* Activation banner */
-.activation-banner{background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(59,130,246,.08));border:1px solid var(--border-l);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
-.activation-banner .ab-icon{font-size:24px;flex-shrink:0}
-.activation-banner .ab-text{font-size:13px;color:var(--text-2);line-height:1.5}
-.activation-banner .ab-text strong{color:var(--guru-300)}
-
-/* Churn reasons */
-.reason-bars{display:flex;flex-direction:column;gap:10px}
-.reason-row{display:flex;align-items:center;gap:12px;font-size:12px}
-.reason-label{width:120px;color:var(--text-2);flex-shrink:0}
-.reason-track{flex:1;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
-.reason-fill{height:100%;border-radius:4px}
-.reason-pct{width:36px;text-align:right;color:var(--muted);font-weight:600}
-
-/* Progress mini */
-.mini-progress{height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:8px;overflow:hidden}
-.mini-progress-fill{height:100%;border-radius:2px}
-
-/* Responsive */
-@media(max-width:1024px){
-  .gs-page{padding:24px 24px 60px}
-  .kpi-grid-6{grid-template-columns:repeat(3,1fr)}
-  .priorities-grid{grid-template-columns:repeat(2,1fr)}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  background: var(--guru-900);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
 }
-@media(max-width:768px){
-  .gs-header{padding:0 20px}
-  .gs-page{padding:20px 16px 60px}
-  .kpi-grid-6,.kpi-grid-4{grid-template-columns:repeat(2,1fr)}
-  .kpi-grid-3{grid-template-columns:1fr 1fr}
-  .two-col,.three-col{grid-template-columns:1fr}
-  .priorities-grid{grid-template-columns:1fr}
-  .donut-wrap{flex-direction:column}
-  .pipeline-stages{flex-wrap:wrap}
-  .pipe-stage{flex:0 0 calc(33% - 4px)}
+
+/* HEADER */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(17,14,42,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
 }
-@media print{
-  .gs-nav{display:none}
-  .gs-header{position:static}
-  .kpi-card:hover{border-color:var(--border)}
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0 8px;
+  flex-wrap: wrap;
+}
+.logo-box {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--guru-500), var(--guru-400));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(124,58,237,0.4);
+}
+.header-title { flex: 1; min-width: 200px; }
+.header-title h1 { font-size: 15px; font-weight: 700; color: var(--text); }
+.header-title p { font-size: 12px; color: var(--muted); }
+.live-badge {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.3);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding-bottom: 1px;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color .2s, border-color .2s;
+  font-family: inherit;
+}
+.nav-tab:hover { color: var(--text-2); }
+.nav-tab.active { color: var(--guru-300); border-bottom-color: var(--guru-500); }
+
+/* MAIN */
+main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+section { margin-bottom: 64px; scroll-margin-top: 90px; }
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.section-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(124,58,237,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.15);
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.kpi-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 8px;
+  display: inline-block;
+}
+.badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+.badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-purple { background: rgba(124,58,237,0.15); color: var(--guru-300); }
+
+/* INSIGHTS */
+.insights-block { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.insight-pill {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.insight-pill.green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: #6ee7b7; }
+.insight-pill.amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #fcd34d; }
+.insight-pill.red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+
+/* CARD BASE */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+/* GRID LAYOUTS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* BAR CHART */
+.bar-chart-wrap { overflow-x: auto; }
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 140px;
+  padding: 0 4px 0;
+}
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 36px; flex: 1; }
+.bar {
+  width: 100%;
+  max-width: 44px;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, var(--guru-400), var(--guru-500));
+  transition: opacity .2s;
+}
+.bar:hover { opacity: 0.82; }
+.bar-label { font-size: 10px; color: var(--muted); }
+.bar-val { font-size: 10px; color: var(--guru-300); font-weight: 600; }
+
+/* DONUT SVG */
+.donut-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.donut-legend { display: flex; flex-direction: column; gap: 8px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(46,42,90,0.5);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(124,58,237,0.05); }
+
+/* FUNNEL */
+.funnel-wrap { display: flex; flex-direction: column; gap: 8px; }
+.funnel-stage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.funnel-bar-wrap {
+  flex: 1;
+  height: 42px;
+  display: flex;
+  align-items: center;
+}
+.funnel-bar {
+  height: 42px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, var(--guru-600), var(--guru-500));
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 80px;
+}
+.funnel-bar.bottleneck {
+  background: linear-gradient(90deg, #7f1d1d, var(--red));
+  animation: pulse-red 2.5s infinite;
+  box-shadow: 0 0 20px rgba(239,68,68,0.45);
+}
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 18px rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 36px rgba(239,68,68,0.75), 0 0 60px rgba(239,68,68,0.2); }
+}
+.funnel-meta { width: 210px; text-align: right; flex-shrink: 0; }
+.funnel-meta .stage-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.funnel-meta .stage-conv { font-size: 11px; color: var(--muted); }
+.funnel-num { font-size: 13px; font-weight: 700; color: var(--text); width: 65px; text-align: right; flex-shrink: 0; }
+
+/* PIPELINE STAGES */
+.pipeline-stages {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.pipeline-stage {
+  flex: 1;
+  min-width: 90px;
+  background: var(--guru-700);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+  position: relative;
+}
+.pipeline-stage::after {
+  content: '›';
+  position: absolute;
+  right: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--border);
+  font-size: 18px;
+  z-index: 1;
+  pointer-events: none;
+}
+.pipeline-stage:last-child::after { display: none; }
+.pipeline-count { font-size: 22px; font-weight: 800; color: var(--guru-300); }
+.pipeline-label { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+/* ALERT BANNER */
+.alert-banner {
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+.alert-red { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; }
+.alert-amber { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fcd34d; }
+.alert-green { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: #6ee7b7; }
+
+/* ACTIVATION BANNER */
+.activation-banner {
+  border-radius: 12px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(124,58,237,0.1));
+  border: 1px solid rgba(245,158,11,0.25);
+  margin-bottom: 24px;
+}
+.activation-banner h3 { font-size: 14px; font-weight: 700; color: var(--amber); margin-bottom: 6px; }
+.activation-banner p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+/* RECO CARDS */
+.reco-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 12px; }
+.reco-card {
+  background: var(--guru-700);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.reco-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--guru-500);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+.reco-card p { font-size: 12px; color: var(--text-2); line-height: 1.55; }
+
+/* PRIORITY GRID */
+.priority-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+  gap: 16px;
+}
+.priority-col {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.priority-col-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--guru-300);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.priority-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.priority-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--guru-600);
+  color: var(--guru-300);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.priority-text { font-size: 12px; color: var(--text-2); line-height: 1.55; }
+
+/* HORIZ BAR CHART */
+.horiz-bars { display: flex; flex-direction: column; gap: 12px; }
+.horiz-bar-row { display: flex; align-items: center; gap: 10px; }
+.horiz-bar-label { width: 110px; font-size: 12px; color: var(--text-2); text-align: right; flex-shrink: 0; }
+.horiz-bar-track { flex: 1; height: 10px; background: var(--guru-700); border-radius: 5px; overflow: hidden; }
+.horiz-bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--guru-500), var(--guru-400)); }
+.horiz-bar-pct { width: 36px; font-size: 11px; color: var(--muted); }
+
+/* SEGMENTATION */
+.seg-bars { display: flex; height: 22px; border-radius: 6px; overflow: hidden; gap: 2px; margin-bottom: 14px; }
+.seg-bar {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+.seg-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+.seg-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
+.seg-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* FREEMIUM LIST */
+.freemium-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.freemium-chip {
+  background: var(--guru-700);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.freemium-chip.won { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); color: var(--green); }
+.freemium-chip.hot { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); color: #fca5a5; }
+
+/* RISK BADGE */
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+}
+.risk-high { background: rgba(239,68,68,0.15); color: var(--red); }
+.risk-med { background: rgba(245,158,11,0.15); color: var(--amber); }
+.risk-low { background: rgba(16,185,129,0.15); color: var(--green); }
+
+/* STAT ROW */
+.stat-row { display: flex; gap: 24px; flex-wrap: wrap; }
+.stat-item { display: flex; flex-direction: column; gap: 2px; }
+.stat-val { font-size: 20px; font-weight: 800; color: var(--text); }
+.stat-lbl { font-size: 11px; color: var(--muted); }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--guru-800); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  main { padding: 20px 16px 48px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2,1fr); }
+  .funnel-meta { width: 130px; }
+  .funnel-meta .stage-conv { display: none; }
+  .pipeline-stages { flex-wrap: wrap; }
+  .pipeline-stage::after { display: none; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 22px; }
+  .funnel-meta { width: 100px; }
+  .funnel-num { width: 50px; }
+}
+
+/* PRINT */
+@media print {
+  body { background: #fff; color: #111; }
+  .header { position: static; background: #fff; border-bottom: 2px solid #ddd; }
+  .nav-tabs { display: none; }
+  .kpi-card, .card, .priority-col, .reco-card { border: 1px solid #ddd; background: #fafafa; }
+  .kpi-value, .section-title, .card-title { color: #111; }
+  .kpi-label, .section-sub, .muted { color: #666; }
+  section { page-break-inside: avoid; margin-bottom: 32px; }
+  .funnel-bar.bottleneck { animation: none; box-shadow: 0 0 0 2px red; }
+  .live-badge { display: none; }
+  .alert-banner { border: 1px solid #ccc; }
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ HEADER ══════════════════ -->
-<header class="gs-header">
-  <div class="gs-header-top">
-    <div class="gs-logo">GS</div>
-    <div class="gs-brand">
-      <h1>GuruSup · Dashboard Ejecutivo</h1>
-      <p>Semana 24 · 2026 · Actualizado 14 Jun 2026</p>
+<!-- STICKY HEADER -->
+<header class="header" id="siteHeader">
+  <div class="header-top">
+    <div class="logo-box">GS</div>
+    <div class="header-title">
+      <h1>Dashboard Ejecutivo · Semana 24 · 2026</h1>
+      <p>GuruSup · 14 Jun 2026 · Actualizado automáticamente desde HubSpot</p>
     </div>
-    <div class="gs-header-right">
-      <span class="gs-badge">🟢 Live HubSpot</span>
-      <span class="gs-date">14 Jun 2026</span>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Live HubSpot
     </div>
   </div>
-  <nav class="gs-nav">
-    <a class="nav-tab active" href="#resumen">Resumen</a>
-    <a class="nav-tab" href="#adquisicion">Adquisición</a>
-    <a class="nav-tab" href="#funnel">Funnel</a>
-    <a class="nav-tab" href="#freemium">Freemium</a>
-    <a class="nav-tab" href="#deals">Deals</a>
-    <a class="nav-tab" href="#clientes">Clientes</a>
-    <a class="nav-tab" href="#churn">Churn</a>
-    <a class="nav-tab" href="#prioridades">Prioridades</a>
+  <nav class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-section="resumen">Resumen</button>
+    <button class="nav-tab" data-section="adquisicion">Adquisición</button>
+    <button class="nav-tab" data-section="funnel">Funnel</button>
+    <button class="nav-tab" data-section="freemium">Freemium</button>
+    <button class="nav-tab" data-section="deals">Deals</button>
+    <button class="nav-tab" data-section="clientes">Clientes</button>
+    <button class="nav-tab" data-section="churn">Churn</button>
+    <button class="nav-tab" data-section="prioridades">Prioridades</button>
   </nav>
 </header>
 
-<div class="gs-page">
+<main>
 
-<!-- ══════════════════ 1. EXECUTIVE SUMMARY ══════════════════ -->
-<section class="section" id="resumen">
-  <div class="section-header">
-    <span class="section-title">Executive Summary</span>
-    <span class="section-badge sb-purple">Semana 24</span>
-    <span class="section-sub">Lo más importante de la semana en un vistazo</span>
-  </div>
+  <!-- ========== 1. RESUMEN ========== -->
+  <section id="resumen">
+    <h2 class="section-title">Resumen Ejecutivo</h2>
+    <p class="section-sub">Vista consolidada de los KPIs clave · Semana 24 · 9–14 Jun 2026</p>
 
-  <!-- KPI Cards -->
-  <div class="kpi-grid kpi-grid-6" style="margin-bottom:20px">
-    <div class="kpi-card">
-      <div class="label">Nuevos contactos</div>
-      <div class="value" style="color:var(--green)" id="kpi1">97</div>
-      <div class="delta up">▲ +20% vs semana anterior</div>
-      <div class="sub">81 la semana pasada</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Nuevos deals</div>
-      <div class="value" id="kpi2">8</div>
-      <div class="delta up">▲ +3 vs semana anterior</div>
-      <div class="sub">89 abiertos en total</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Nuevos clientes</div>
-      <div class="value" style="color:var(--green)" id="kpi3">10</div>
-      <div class="delta up">▲ +2 vs semana anterior</div>
-      <div class="sub">95 clientes activos</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">ARR generado</div>
-      <div class="value" style="font-size:22px" id="kpi4">€11.5k</div>
-      <div class="delta up">▲ Ticket medio €1.150</div>
-      <div class="sub">MRR ~€10.900</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Churn semana</div>
-      <div class="value" style="color:var(--green)">0</div>
-      <div class="delta neutral">— Sin bajas esta semana</div>
-      <div class="sub">124 histórico perdidos</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Conv. Lead→Cliente</div>
-      <div class="value" style="font-size:24px" id="kpi6">12.7%</div>
-      <div class="delta neutral">— Estable</div>
-      <div class="sub">vs 4% cierre histórico</div>
-    </div>
-  </div>
-
-  <!-- Insights -->
-  <div class="insights-grid">
-    <div class="insight green">
-      <span class="insight-icon">📈</span>
-      <span>Los contactos crecen un <strong>+20%</strong> respecto a la semana anterior (97 vs 81) — tendencia positiva sostenida durante 3 semanas consecutivas.</span>
-    </div>
-    <div class="insight red">
-      <span class="insight-icon">🔴</span>
-      <span><strong>Waynabox (€13.2k) y Cooltra (€10k)</strong> tienen fecha de cierre vencida. Riesgo de perder €23.200 combinados — requieren llamada de seguimiento hoy.</span>
-    </div>
-    <div class="insight amber">
-      <span class="insight-icon">⚠️</span>
-      <span>El <strong>63.5% de contactos</strong> no tiene permiso de email marketing. Cero contactos en secuencia de bienvenida automática — el pipeline de activación está bloqueado.</span>
-    </div>
-    <div class="insight green">
-      <span class="insight-icon">🏆</span>
-      <span>El canal <strong>offline genera el 100% de los cierres</strong>. Con 53% de adquisición y todo el revenue, reforzar eventos y visitas presenciales es la palanca de mayor impacto.</span>
-    </div>
-    <div class="insight amber">
-      <span class="insight-icon">📧</span>
-      <span>Tasa de apertura email al <strong>3%</strong> — muy por debajo del benchmark sectorial (22-25%). Rediseñar asunto, remitente y timing es prioritario antes de activar secuencias.</span>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════ 2. ADQUISICIÓN ══════════════════ -->
-<section class="section" id="adquisicion">
-  <div class="section-header">
-    <span class="section-title">Adquisición y Leads</span>
-    <span class="section-badge sb-blue">Growth</span>
-    <span class="section-sub">Volumen, canales y calidad de leads</span>
-  </div>
-
-  <div class="kpi-grid kpi-grid-4" style="margin-bottom:16px">
-    <div class="kpi-card">
-      <div class="label">Total CRM</div>
-      <div class="value">9.120</div>
-      <div class="delta up">▲ +97 esta semana</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Nuevos 30 días</div>
-      <div class="value">~360</div>
-      <div class="delta up">▲ +8% vs mes anterior</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Esta semana</div>
-      <div class="value" style="color:var(--green)">97</div>
-      <div class="delta up">▲ +20% semana anterior</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Media semanal 2026</div>
-      <div class="value">~82</div>
-      <div class="delta up">▲ Esta semana +18%</div>
-    </div>
-  </div>
-
-  <div class="two-col" style="margin-bottom:16px">
-    <!-- Monthly bar chart -->
-    <div class="chart-card">
-      <div class="chart-title">📊 Evolución mensual de contactos (2026)</div>
-      <div class="bar-chart">
-        <div class="bar-wrap">
-          <div class="bar-val">310</div>
-          <div class="bar" style="height:72%;background:linear-gradient(180deg,var(--guru-400),var(--guru-500))"></div>
-          <div class="bar-label">Ene</div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-val">340</div>
-          <div class="bar" style="height:79%;background:linear-gradient(180deg,var(--guru-400),var(--guru-500))"></div>
-          <div class="bar-label">Feb</div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-val">420</div>
-          <div class="bar" style="height:97%;background:linear-gradient(180deg,#a855f7,var(--guru-500))"></div>
-          <div class="bar-label">Mar</div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-val">365</div>
-          <div class="bar" style="height:85%;background:linear-gradient(180deg,var(--guru-400),var(--guru-500))"></div>
-          <div class="bar-label">Abr</div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-val">390</div>
-          <div class="bar" style="height:91%;background:linear-gradient(180deg,var(--guru-400),var(--guru-500))"></div>
-          <div class="bar-label">May</div>
-        </div>
-        <div class="bar-wrap">
-          <div class="bar-val" style="color:var(--green)">360+</div>
-          <div class="bar" style="height:83%;background:linear-gradient(180deg,var(--green),#059669)"></div>
-          <div class="bar-label" style="color:var(--green)">Jun ✦</div>
-        </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos Contactos</div>
+        <div class="kpi-value" data-count="97">0</div>
+        <span class="kpi-badge badge-green">+20% vs sem. ant.</span>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:12px">✦ En curso · Proyectado ~400 a fin de mes si mantiene ritmo</div>
-    </div>
-
-    <!-- Donut channels -->
-    <div class="chart-card">
-      <div class="chart-title">🎯 Canales de adquisición</div>
-      <div class="donut-wrap">
-        <svg width="110" height="110" viewBox="0 0 110 110">
-          <!-- Circumference = 2π×38 ≈ 238.76 -->
-          <!-- Offline 53% = 126.54 | Directo 22% = 52.53 | SEO 13.5% = 32.23 | Paid 7.5% = 17.91 | AI 2% = 4.78 | Otros 2% = 4.78 -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#1e1b42" stroke-width="16"/>
-          <!-- Offline 53% -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#7c3aed" stroke-width="16"
-            stroke-dasharray="126.54 238.76" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
-          <!-- Directo 22% -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#3b82f6" stroke-width="16"
-            stroke-dasharray="52.53 238.76" stroke-dashoffset="-126.54" transform="rotate(-90 55 55)"/>
-          <!-- SEO 13.5% -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#10b981" stroke-width="16"
-            stroke-dasharray="32.23 238.76" stroke-dashoffset="-179.07" transform="rotate(-90 55 55)"/>
-          <!-- Paid 7.5% -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#f59e0b" stroke-width="16"
-            stroke-dasharray="17.91 238.76" stroke-dashoffset="-211.30" transform="rotate(-90 55 55)"/>
-          <!-- AI 2% -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#ec4899" stroke-width="16"
-            stroke-dasharray="4.78 238.76" stroke-dashoffset="-229.21" transform="rotate(-90 55 55)"/>
-          <!-- Otros 2% -->
-          <circle cx="55" cy="55" r="38" fill="none" stroke="#6b7280" stroke-width="16"
-            stroke-dasharray="4.78 238.76" stroke-dashoffset="-233.99" transform="rotate(-90 55 55)"/>
-          <text x="55" y="51" text-anchor="middle" fill="#f0edff" font-size="11" font-weight="900">9.120</text>
-          <text x="55" y="63" text-anchor="middle" fill="#7b76a0" font-size="8">contactos</text>
-        </svg>
-        <div class="donut-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div><span class="legend-name">Offline</span><span class="legend-pct">53%</span><span class="legend-delta" style="background:var(--green-bg);color:#6ee7b7">100% cierre</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span class="legend-name">Directo</span><span class="legend-pct">22%</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span class="legend-name">Orgánico SEO</span><span class="legend-pct">13.5%</span><span class="legend-delta" style="background:var(--green-bg);color:#6ee7b7">↑ creciendo</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-name">Paid Search</span><span class="legend-pct">7.5%</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div><span class="legend-name">AI Referrals</span><span class="legend-pct">2%</span><span class="legend-delta" style="background:rgba(236,72,153,.1);color:#f9a8d4">emergente</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div><span class="legend-name">Otros</span><span class="legend-pct">2%</span></div>
-        </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos Deals</div>
+        <div class="kpi-value" data-count="8">0</div>
+        <span class="kpi-badge badge-blue">Esta semana</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos Clientes</div>
+        <div class="kpi-value" data-count="10">0</div>
+        <span class="kpi-badge badge-green">+2 vs sem. ant.</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ARR Generado</div>
+        <div class="kpi-value">€<span data-count="11500" data-format="comma">0</span></div>
+        <span class="kpi-badge badge-purple">Esta semana</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Churn</div>
+        <div class="kpi-value" data-count="0">0</div>
+        <span class="kpi-badge badge-green">0 esta semana</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Lead → Cliente</div>
+        <div class="kpi-value"><span data-count-dec="12.7">0</span>%</div>
+        <span class="kpi-badge badge-amber">Conversión</span>
       </div>
     </div>
-  </div>
 
-  <!-- Lead quality -->
-  <div class="chart-card">
-    <div class="chart-title">🎓 Calidad de leads esta semana</div>
-    <table class="data-table">
-      <thead><tr>
-        <th>Etapa</th><th>Volumen</th><th>Conv. anterior</th><th>Variación semana</th><th>Estado</th>
-      </tr></thead>
-      <tbody>
-        <tr><td><strong>Leads</strong></td><td>79</td><td>81.4% de nuevos contactos</td><td style="color:var(--green)">▲ +20%</td><td><span class="risk-badge risk-low">OK</span></td></tr>
-        <tr><td><strong>MQL</strong></td><td>~25</td><td>31.6% de leads</td><td style="color:var(--muted)">— Estable</td><td><span class="risk-badge risk-mid">Revisar</span></td></tr>
-        <tr><td><strong>SQL Freemium</strong></td><td>5</td><td>20% de MQL</td><td style="color:var(--muted)">— Estable</td><td><span class="risk-badge risk-mid">Monitorizar</span></td></tr>
-        <tr><td><strong>SQL Consultoría</strong></td><td>3</td><td>12% de MQL</td><td style="color:var(--muted)">— Estable</td><td><span class="risk-badge risk-low">OK</span></td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:12px;font-size:11px;color:var(--muted)">💡 Recomendación: doblar inversión en SEO orgánico (crecimiento sostenido) y activar secuencia email para los 25 MQL sin seguimiento.</div>
-  </div>
-</section>
+    <div class="insights-block">
+      <div class="insight-pill green">
+        <span>🟢</span>
+        <span>Los leads crecen un 20% respecto a la semana anterior (97 vs 81) — el mejor dato del trimestre hasta la fecha.</span>
+      </div>
+      <div class="insight-pill amber">
+        <span>🟡</span>
+        <span>El 63.5% de contactos sin permiso email bloquea la activación automática del pipeline freemium y las campañas de nurturing.</span>
+      </div>
+      <div class="insight-pill red">
+        <span>🔴</span>
+        <span>Waynabox (€13.2k) y Cooltra (€10k) llevan fecha vencida sin actividad — requieren acción inmediata hoy, lunes 14 Jun.</span>
+      </div>
+      <div class="insight-pill green">
+        <span>🟢</span>
+        <span>Canal offline genera el 100% de los cierres esta semana — priorizar eventos y presencial como motor de ventas en Q3 2026.</span>
+      </div>
+      <div class="insight-pill amber">
+        <span>🟡</span>
+        <span>Tasa apertura email al 3% (benchmark sector: 22%) — rediseñar estrategia de email marketing es acción crítica esta semana.</span>
+      </div>
+    </div>
+  </section>
 
-<!-- ══════════════════ 3. FUNNEL ══════════════════ -->
-<section class="section" id="funnel">
-  <div class="section-header">
-    <span class="section-title">Funnel · Lifecycle Stage</span>
-    <span class="section-badge sb-purple">Embudo</span>
-    <span class="section-sub">De contacto a cliente — detección automática de cuellos de botella</span>
-  </div>
+  <!-- ========== 2. ADQUISICIÓN ========== -->
+  <section id="adquisicion">
+    <h2 class="section-title">Adquisición y Leads</h2>
+    <p class="section-sub">Volumen de contactos, canales de captación y calidad del funnel de entrada</p>
 
-  <div class="two-col">
-    <div class="funnel-stages">
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px,1fr));">
+      <div class="kpi-card">
+        <div class="kpi-label">Total CRM</div>
+        <div class="kpi-value" data-count="9120" data-format="comma">0</div>
+        <span class="kpi-badge badge-blue">Contactos totales</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos (30d)</div>
+        <div class="kpi-value">~<span data-count="320">0</span></div>
+        <span class="kpi-badge badge-purple">Último mes</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Esta Semana</div>
+        <div class="kpi-value" data-count="97">0</div>
+        <span class="kpi-badge badge-green">Semana 24</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Crecimiento sem.</div>
+        <div class="kpi-value">+<span data-count="20">0</span>%</div>
+        <span class="kpi-badge badge-green">vs sem. anterior</span>
+      </div>
+    </div>
 
-      <!-- Stage 1: Contactos -->
-      <div class="funnel-stage" style="border:1px solid var(--border);border-radius:var(--radius-s)">
-        <div class="funnel-bar">
-          <div class="funnel-bar-fill" style="background:var(--guru-500);width:100%"></div>
-          <div class="funnel-num" style="color:var(--guru-300)">9.120</div>
-          <div class="funnel-name">Contactos totales</div>
-          <div class="funnel-conv" style="background:rgba(124,58,237,.15);color:var(--guru-300)">100%</div>
-          <div class="funnel-delta">▲ +97 esta sem.</div>
+    <div class="grid-2" style="margin-bottom:16px; align-items:start;">
+      <div class="card">
+        <div class="card-title">Contactos mensuales · Ene–Jun 2026</div>
+        <div class="bar-chart-wrap">
+          <div class="bar-chart">
+            <div class="bar-col">
+              <div class="bar-val">65</div>
+              <div class="bar" style="height:67px"></div>
+              <div class="bar-label">Ene</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">72</div>
+              <div class="bar" style="height:74px"></div>
+              <div class="bar-label">Feb</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">89</div>
+              <div class="bar" style="height:92px"></div>
+              <div class="bar-label">Mar</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">78</div>
+              <div class="bar" style="height:80px"></div>
+              <div class="bar-label">Abr</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">85</div>
+              <div class="bar" style="height:88px"></div>
+              <div class="bar-label">May</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">97</div>
+              <div class="bar" style="height:100px; background: linear-gradient(180deg, #c4a2fc, #7c3aed);"></div>
+              <div class="bar-label" style="color:var(--guru-300); font-weight:700;">Jun</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Stage 2: Leads -->
-      <div class="funnel-stage" style="border:1px solid var(--border);border-radius:var(--radius-s)">
-        <div class="funnel-bar">
-          <div class="funnel-bar-fill" style="background:#3b82f6;width:82%"></div>
-          <div class="funnel-num" style="color:#93c5fd">79</div>
-          <div class="funnel-name">Leads</div>
-          <div class="funnel-conv" style="background:var(--blue-bg);color:#93c5fd">81.4%</div>
-          <div class="funnel-delta" style="color:var(--green)">▲ +20%</div>
-        </div>
-        <div style="padding:4px 18px 8px;display:flex;gap:8px;flex-wrap:wrap">
-          <span style="font-size:10px;background:var(--red-bg);color:#fca5a5;padding:2px 6px;border-radius:4px">18 no cualif.</span>
-          <span style="font-size:10px;background:var(--amber-bg);color:#fcd34d;padding:2px 6px;border-radius:4px">15 open</span>
-          <span style="font-size:10px;background:var(--green-bg);color:#6ee7b7;padding:2px 6px;border-radius:4px">5 contactados</span>
-          <span style="font-size:10px;background:rgba(124,58,237,.1);color:var(--guru-300);padding:2px 6px;border-radius:4px">41 sin estado</span>
-        </div>
-      </div>
-
-      <!-- Stage 3: SQL Freemium — BOTTLENECK -->
-      <div class="funnel-stage bottleneck">
-        <div class="funnel-bar" style="border:1px solid rgba(239,68,68,.35);border-radius:var(--radius-s)">
-          <div class="funnel-bar-fill" style="background:var(--red);width:40%"></div>
-          <div class="funnel-num" style="color:#fca5a5">5</div>
-          <div class="funnel-name">SQL Freemium <span style="font-size:10px;color:#fca5a5">⚠ cuello</span></div>
-          <div class="funnel-conv" style="background:var(--red-bg);color:#fca5a5">6.3%</div>
-          <div class="funnel-delta" style="color:var(--muted)">— Estable</div>
-          <span class="bottleneck-tag">Mayor fuga</span>
-        </div>
-      </div>
-
-      <!-- Stage 4: SQL Consultoría -->
-      <div class="funnel-stage" style="border:1px solid var(--border);border-radius:var(--radius-s)">
-        <div class="funnel-bar">
-          <div class="funnel-bar-fill" style="background:#a855f7;width:30%"></div>
-          <div class="funnel-num" style="color:#d8b4fe">3</div>
-          <div class="funnel-name">SQL Consultoría</div>
-          <div class="funnel-conv" style="background:rgba(168,85,247,.1);color:#d8b4fe">3.8%</div>
-          <div class="funnel-delta" style="color:var(--muted)">— Estable</div>
+      <div class="card">
+        <div class="card-title">Distribución por canal de captación</div>
+        <div class="donut-wrap">
+          <svg width="112" height="112" viewBox="0 0 112 112" style="flex-shrink:0;">
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#2e2a5a" stroke-width="18"/>
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#7c3aed" stroke-width="18"
+              stroke-dasharray="139.7 264.3" stroke-dashoffset="0" transform="rotate(-90 56 56)"/>
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#9d5ffa" stroke-width="18"
+              stroke-dasharray="58 346" stroke-dashoffset="-139.7" transform="rotate(-90 56 56)"/>
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#3b82f6" stroke-width="18"
+              stroke-dasharray="35.6 368.4" stroke-dashoffset="-197.7" transform="rotate(-90 56 56)"/>
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#f59e0b" stroke-width="18"
+              stroke-dasharray="19.8 384.2" stroke-dashoffset="-233.3" transform="rotate(-90 56 56)"/>
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#10b981" stroke-width="18"
+              stroke-dasharray="5.3 398.7" stroke-dashoffset="-253.1" transform="rotate(-90 56 56)"/>
+            <circle cx="56" cy="56" r="42" fill="none" stroke="#7b76a0" stroke-width="18"
+              stroke-dasharray="5.3 398.7" stroke-dashoffset="-258.4" transform="rotate(-90 56 56)"/>
+            <text x="56" y="52" text-anchor="middle" fill="#f0edff" font-size="13" font-weight="800">53%</text>
+            <text x="56" y="66" text-anchor="middle" fill="#7b76a0" font-size="9">Offline</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Offline 53%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#9d5ffa"></div>Directo 22%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Orgánico 13.5%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Paid 7.5%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>AI Refs 2%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7b76a0"></div>Otros 2%</div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Stage 5: Deal/Opportunity -->
-      <div class="funnel-stage" style="border:1px solid var(--border);border-radius:var(--radius-s)">
-        <div class="funnel-bar">
-          <div class="funnel-bar-fill" style="background:var(--amber);width:55%"></div>
-          <div class="funnel-num" style="color:#fcd34d">89</div>
-          <div class="funnel-name">Deals abiertos</div>
-          <div class="funnel-conv" style="background:var(--amber-bg);color:#fcd34d">€53k</div>
-          <div class="funnel-delta" style="color:var(--green)">▲ +3 sem.</div>
-        </div>
+    <div class="card">
+      <div class="card-title">Calidad de leads · Semana 24</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th>Volumen</th>
+              <th>% del Total Leads</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600; color:var(--text)">Leads totales (sem. 24)</td>
+              <td style="font-weight:700">79</td>
+              <td>100%</td>
+              <td><span class="kpi-badge badge-blue">Base semana</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--text)">MQL (Marketing Qualified)</td>
+              <td>~25</td>
+              <td>31.6%</td>
+              <td><span class="kpi-badge badge-purple">Calificado mktg</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--text)">SQL Freemium</td>
+              <td>5</td>
+              <td>6.3%</td>
+              <td><span class="kpi-badge badge-amber">Bajo — cuello de botella</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600; color:var(--text)">SQL Consultoría</td>
+              <td>3</td>
+              <td>3.8%</td>
+              <td><span class="kpi-badge badge-green">Prioritario ventas</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
+  </section>
 
-      <!-- Stage 6: Customer -->
-      <div class="funnel-stage" style="border:1px solid rgba(16,185,129,.25);border-radius:var(--radius-s)">
-        <div class="funnel-bar">
-          <div class="funnel-bar-fill" style="background:var(--green);width:45%"></div>
-          <div class="funnel-num" style="color:#6ee7b7">95</div>
-          <div class="funnel-name">Clientes activos <span style="font-size:10px;color:#6ee7b7">✓ mejor etapa</span></div>
-          <div class="funnel-conv" style="background:var(--green-bg);color:#6ee7b7">11.2%</div>
-          <div class="funnel-delta" style="color:var(--green)">▲ +10</div>
+  <!-- ========== 3. FUNNEL ========== -->
+  <section id="funnel">
+    <h2 class="section-title">Lifecycle Funnel</h2>
+    <p class="section-sub">Conversión completa del pipeline · el cuello de botella marcado en rojo indica prioridad de acción</p>
+
+    <div class="card" style="padding: 28px 24px;">
+      <div class="funnel-wrap">
+
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name">Contactos CRM</div>
+            <div class="stage-conv">Base total · todos los registros</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="width:100%">9,120 contactos · 100%</div>
+          </div>
+          <div class="funnel-num">9,120</div>
         </div>
-      </div>
 
-      <!-- Stage 7: Churn -->
-      <div class="funnel-stage" style="border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-s)">
-        <div class="funnel-bar">
-          <div class="funnel-bar-fill" style="background:var(--red);width:20%"></div>
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name">Leads</div>
+            <div class="stage-conv">↑20% w/w · conv. 0.87%</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="width:80%">79 leads · conversión 0.87%</div>
+          </div>
+          <div class="funnel-num">79</div>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name" style="color:var(--red)">SQL Freemium 🔴</div>
+            <div class="stage-conv" style="color:var(--red); font-weight:600;">CUELLO DE BOTELLA</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar bottleneck" style="width:60%">5 SQL · conv. 6.3% desde leads</div>
+          </div>
+          <div class="funnel-num" style="color:var(--red)">5</div>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name">SQL Consultoría</div>
+            <div class="stage-conv">conv. 3.8% desde leads</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="width:45%">3 SQL · prioridad alta</div>
+          </div>
+          <div class="funnel-num">3</div>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name">Deal / Oportunidad</div>
+            <div class="stage-conv">89 abiertos · 3 nuevos esta sem.</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="width:68%; background: linear-gradient(90deg, #1e3a5f, var(--blue));">89 abiertos · 3 nuevos · €53k pipeline</div>
+          </div>
+          <div class="funnel-num" style="color:var(--blue)">89</div>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name">Cliente activo</div>
+            <div class="stage-conv">conv. 11.2% · 10 nuevos sem.</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="width:52%; background: linear-gradient(90deg, #064e3b, var(--green));">95 activos · ARR ~€131k</div>
+          </div>
+          <div class="funnel-num" style="color:var(--green)">95</div>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-meta">
+            <div class="stage-name">Churn histórico</div>
+            <div class="stage-conv">tasa 4% mensual · €50k ARR perdido</div>
+          </div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="width:32%; background: linear-gradient(90deg, #3f1a1a, #7f1d1d);">124 cancelados · ARR perdido ~€50k</div>
+          </div>
           <div class="funnel-num" style="color:#fca5a5">124</div>
-          <div class="funnel-name">Perdidos / Churn</div>
-          <div class="funnel-conv" style="background:var(--red-bg);color:#fca5a5">4% WR</div>
-          <div class="funnel-delta" style="color:var(--muted)">histórico</div>
         </div>
+
+      </div>
+
+      <div class="alert-red alert-banner">
+        <span>⚠️</span>
+        <span><strong>Cuello de botella crítico identificado:</strong> La conversión Lead → SQL Freemium (6.3%) es el punto de mayor pérdida. Solo 5 de 79 leads pasan esta etapa. La activación freemium y el nurturing automatizado son la prioridad número uno de marketing esta semana.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 4. FREEMIUM ========== -->
+  <section id="freemium">
+    <h2 class="section-title">Freemium</h2>
+    <p class="section-sub">Pipeline de usuarios en plan gratuito y palancas de conversión a cliente de pago</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Freemium</div>
+        <div class="kpi-value" data-count="41">0</div>
+        <span class="kpi-badge badge-purple">Acumulado</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos</div>
+        <div class="kpi-value" data-count="2">0</div>
+        <span class="kpi-badge badge-blue">Esta semana</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Activos</div>
+        <div class="kpi-value">~<span data-count="15">0</span></div>
+        <span class="kpi-badge badge-green">Usando el producto</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Inactivos</div>
+        <div class="kpi-value">~<span data-count="26">0</span></div>
+        <span class="kpi-badge badge-red">Sin actividad</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tasa Activación</div>
+        <div class="kpi-value"><span data-count-dec="36.5">0</span>%</div>
+        <span class="kpi-badge badge-amber">Bajo benchmark</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Conv. → Cliente</div>
+        <div class="kpi-value"><span data-count-dec="7.3">0</span>%</div>
+        <span class="kpi-badge badge-amber">Conv. directa</span>
       </div>
     </div>
 
-    <!-- Funnel insights -->
-    <div>
-      <div class="chart-card" style="margin-bottom:14px">
-        <div class="chart-title">🔍 Análisis automático del funnel</div>
-        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
-          <div style="padding:10px;background:var(--red-bg);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#fee2e2">
-            <strong>⚠ Cuello de botella crítico</strong><br>
-            Leads → SQL Freemium: solo 6.3% de conversión. De 79 leads, únicamente 5 alcanzan SQL. Falta nurturing entre MQL y SQL.
-          </div>
-          <div style="padding:10px;background:var(--green-bg);border:1px solid rgba(16,185,129,.2);border-radius:8px;color:#d1fae5">
-            <strong>✓ Mejor conversión</strong><br>
-            Deals → Clientes: 11.2% esta semana. Por encima del histórico (4%), señal de que el proceso de cierre presencial funciona bien.
-          </div>
-          <div style="padding:10px;background:var(--amber-bg);border:1px solid rgba(245,158,11,.2);border-radius:8px;color:#fef3c7">
-            <strong>⚡ Oportunidad</strong><br>
-            41 leads sin clasificar (lifecycle stage vacío). Asignarlos correctamente podría añadir 5-8 SQLs adicionales esta semana.
-          </div>
+    <div class="activation-banner">
+      <h3>⚡ Plan de Activación Freemium — Prioridad Semana 24</h3>
+      <p>Se preparará una secuencia de nurturing en 3 pasos para activar el pipeline freemium inactivo (26 usuarios). El 63.5% de inactividad representa el mayor potencial de crecimiento inmediato con el menor coste de adquisición. Foco: secuencia email + llamadas personalizadas de activación para Cooltra (€10k pipeline) y GoTrendier (€2k).</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-title">Estado del pipeline freemium</div>
+        <div class="freemium-list">
+          <div class="freemium-chip hot">Cooltra <span class="kpi-badge badge-red" style="font-size:10px; margin-left:2px;">€10k</span></div>
+          <div class="freemium-chip" style="border-color:rgba(245,158,11,0.3); color:var(--amber);">GoTrendier <span class="kpi-badge badge-amber" style="font-size:10px; margin-left:2px;">€2k</span></div>
+          <div class="freemium-chip">Rever</div>
+          <div class="freemium-chip">TeamSystem</div>
+          <div class="freemium-chip">COCUNAT</div>
+          <div class="freemium-chip won">TBF Abogados ✓ Won</div>
+          <div class="freemium-chip won">VDS €5k ✓ Won</div>
+          <div class="freemium-chip won">PropHero ✓ Won</div>
         </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">🎯 Recomendaciones de funnel</div>
-        <div style="font-size:13px;color:var(--text-2);display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;gap:8px"><span style="color:var(--guru-300);font-weight:700">1.</span> Clasificar los 41 leads sin lifecycle stage — prioridad inmediata para marketing.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--guru-300);font-weight:700">2.</span> Crear secuencia de nurturing MQL→SQL: 3 emails en 7 días con casos de uso y demo CTA.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--guru-300);font-weight:700">3.</span> Revisión semanal de deals en etapa "Propuesta" — es donde más tiempo se pierde sin actividad.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════ 4. FREEMIUM ══════════════════ -->
-<section class="section" id="freemium">
-  <div class="section-header">
-    <span class="section-title">Freemium</span>
-    <span class="section-badge sb-green">Pipeline €51.6k</span>
-    <span class="section-sub">Activación, conversión y evolución del negocio freemium</span>
-  </div>
-
-  <div class="kpi-grid kpi-grid-4" style="margin-bottom:16px">
-    <div class="kpi-card">
-      <div class="label">Total Freemium</div>
-      <div class="value">41</div>
-      <div class="delta neutral">Pipeline €51.625</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Nuevos esta semana</div>
-      <div class="value" style="color:var(--amber)">2</div>
-      <div class="delta amber">Planeta Huerto · Avantio</div>
-      <div class="sub">Sin contactar aún</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Activación</div>
-      <div class="value" style="color:var(--amber);font-size:24px">36.5%</div>
-      <div class="delta down">▼ Baja · 26 inactivos</div>
-      <div class="mini-progress"><div class="mini-progress-fill" style="width:36.5%;background:var(--amber)"></div></div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Conv. Freemium→Cliente</div>
-      <div class="value" style="font-size:24px">7.3%</div>
-      <div class="delta neutral">3 ganados histórico</div>
-      <div class="sub">TBF Abogados · VDS · PropHero</div>
-    </div>
-  </div>
-
-  <div class="activation-banner" style="margin-bottom:16px">
-    <span class="ab-icon">🚀</span>
-    <div class="ab-text">Se va a preparar una <strong>propuesta de secuencia de contenido</strong> para activar el pipeline freemium — emails con casos de uso reales, valor demostrado y CTAs adaptados a cada etapa del funnel. Objetivo: pasar de 36.5% a 55% de activación en 30 días.</div>
-  </div>
-
-  <div class="two-col">
-    <div class="chart-card">
-      <div class="chart-title">🌱 Top Freemiums en pipeline</div>
-      <table class="data-table">
-        <thead><tr><th>Empresa</th><th>Valor</th><th>Estado</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Cooltra</strong></td><td style="color:var(--amber)">€10.000</td><td><span class="risk-badge risk-high">Fecha vencida</span></td></tr>
-          <tr><td><strong>GoTrendier</strong></td><td>€2.000</td><td><span class="risk-badge risk-mid">SQL activo</span></td></tr>
-          <tr><td><strong>Rever</strong></td><td>—</td><td><span class="risk-badge risk-mid">SQL activo</span></td></tr>
-          <tr><td><strong>TeamSystem</strong></td><td>—</td><td><span class="risk-badge risk-mid">SQL activo</span></td></tr>
-          <tr><td><strong>COCUNAT</strong></td><td>—</td><td><span class="risk-badge risk-mid">SQL activo</span></td></tr>
-          <tr><td><strong>Planeta Huerto</strong></td><td>—</td><td><span class="risk-badge risk-high">Sin contactar</span></td></tr>
-          <tr><td><strong>Avantio</strong></td><td>—</td><td><span class="risk-badge risk-high">Sin contactar</span></td></tr>
-          <tr><td><strong style="color:var(--green)">TBF Abogados ✓</strong></td><td>—</td><td><span class="risk-badge risk-low">Ganado</span></td></tr>
-          <tr><td><strong style="color:var(--green)">VDS ✓</strong></td><td style="color:var(--green)">€5.000</td><td><span class="risk-badge risk-low">Ganado</span></td></tr>
-          <tr><td><strong style="color:var(--green)">PropHero ✓</strong></td><td>—</td><td><span class="risk-badge risk-low">Ganado</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <div class="chart-card" style="margin-bottom:14px">
-        <div class="chart-title">📊 Distribución Freemium</div>
-        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--text-2)">
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>Activos</span><span style="color:var(--green)">15 (36.5%)</span></div>
-            <div class="mini-progress"><div class="mini-progress-fill" style="width:36.5%;background:var(--green)"></div></div>
+        <div class="divider"></div>
+        <div class="stat-row">
+          <div class="stat-item">
+            <div class="stat-val" style="font-size:16px; color:var(--green)">3</div>
+            <div class="stat-lbl">Won este mes</div>
           </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>Inactivos</span><span style="color:var(--red)">26 (63.5%)</span></div>
-            <div class="mini-progress"><div class="mini-progress-fill" style="width:63.5%;background:var(--red)"></div></div>
+          <div class="stat-item">
+            <div class="stat-val" style="font-size:16px; color:var(--amber)">€12k</div>
+            <div class="stat-lbl">Pipeline activo</div>
           </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>Convertidos a cliente</span><span style="color:var(--green)">3 (7.3%)</span></div>
-            <div class="mini-progress"><div class="mini-progress-fill" style="width:7.3%;background:var(--guru-500)"></div></div>
+          <div class="stat-item">
+            <div class="stat-val" style="font-size:16px;">12.2%</div>
+            <div class="stat-lbl">Conv. SQL</div>
           </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">⚡ Recomendaciones Freemium</div>
-        <div style="font-size:13px;color:var(--text-2);display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;gap:8px"><span style="color:var(--green);font-weight:700">1.</span> Contactar hoy a Planeta Huerto y Avantio — 2 nuevos sin ningún touch.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--green);font-weight:700">2.</span> Reactivar los 26 freemiums inactivos con secuencia de 3 emails en 10 días.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--green);font-weight:700">3.</span> Preparar case study de VDS (€5k) y TBF para usarlo como social proof en activación.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ══════════════════ 5. DEALS ══════════════════ -->
-<section class="section" id="deals">
-  <div class="section-header">
-    <span class="section-title">Deals · Oportunidades</span>
-    <span class="section-badge sb-amber">€53.000 pipeline</span>
-    <span class="section-sub">Pipeline completo, oportunidades calientes y riesgos</span>
-  </div>
-
-  <div class="kpi-grid kpi-grid-4" style="margin-bottom:16px">
-    <div class="kpi-card">
-      <div class="label">Deals abiertos</div>
-      <div class="value">89</div>
-      <div class="delta up">▲ +8 vs semana anterior</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Pipeline total</div>
-      <div class="value" style="font-size:22px;color:var(--amber)">€53.000</div>
-      <div class="delta neutral">13 presentaciones · €16.4k</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Win Rate</div>
-      <div class="value" style="color:var(--red);font-size:26px">4%</div>
-      <div class="delta down">▼ 5 ganados vs 121 perdidos</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Ticket medio</div>
-      <div class="value" style="font-size:22px">€1.150</div>
-      <div class="delta neutral">Mejor mes: Mar €18.850</div>
-    </div>
-  </div>
-
-  <!-- Pipeline stages -->
-  <div class="chart-card" style="margin-bottom:16px">
-    <div class="chart-title">📊 Pipeline por etapas</div>
-    <div class="pipeline-stages">
-      <div class="pipe-stage">
-        <div class="pipe-bar-wrap"><div class="pipe-bar" style="height:45%;background:linear-gradient(180deg,#7c3aed,#5b21b6)"></div></div>
-        <div class="pipe-count">15</div>
-        <div class="pipe-label">Prospección</div>
-      </div>
-      <div class="pipe-stage">
-        <div class="pipe-bar-wrap"><div class="pipe-bar" style="height:55%;background:linear-gradient(180deg,#3b82f6,#1d4ed8)"></div></div>
-        <div class="pipe-count">18</div>
-        <div class="pipe-label">Discovery</div>
-      </div>
-      <div class="pipe-stage">
-        <div class="pipe-bar-wrap"><div class="pipe-bar" style="height:65%;background:linear-gradient(180deg,#06b6d4,#0891b2)"></div></div>
-        <div class="pipe-count">22</div>
-        <div class="pipe-label">Demo</div>
-      </div>
-      <div class="pipe-stage">
-        <div class="pipe-bar-wrap"><div class="pipe-bar" style="height:40%;background:linear-gradient(180deg,#f59e0b,#d97706)"></div></div>
-        <div class="pipe-count">13</div>
-        <div class="pipe-label">Propuesta</div>
-      </div>
-      <div class="pipe-stage">
-        <div class="pipe-bar-wrap"><div class="pipe-bar" style="height:35%;background:linear-gradient(180deg,#f97316,#ea580c)"></div></div>
-        <div class="pipe-count">12</div>
-        <div class="pipe-label">Negociación</div>
-      </div>
-      <div class="pipe-stage">
-        <div class="pipe-bar-wrap"><div class="pipe-bar" style="height:28%;background:linear-gradient(180deg,#10b981,#059669)"></div></div>
-        <div class="pipe-count">9</div>
-        <div class="pipe-label">Cierre</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="alert-box" style="margin-bottom:14px">
-    <span>🔴</span>
-    <span><strong>4 deals con fecha vencida</strong> — valor total en riesgo: <strong>€31.200</strong>. Requieren acción inmediata: Waynabox €13.2k, Cooltra €10k, Redexis €5k, Plenergy €3k.</span>
-  </div>
-
-  <!-- Hot opportunities -->
-  <div class="chart-card" style="margin-bottom:16px">
-    <div class="chart-title">🔥 Top oportunidades calientes</div>
-    <table class="data-table">
-      <thead><tr>
-        <th>Empresa</th><th>Valor</th><th>Tipo</th><th>Ult. actividad</th><th>Próxima acción</th><th>Riesgo</th>
-      </tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Waynabox</strong></td>
-          <td style="color:var(--amber)">€13.200</td>
-          <td>SQL Free</td>
-          <td style="color:var(--red)">18 días</td>
-          <td>📞 Llamada urgente HOY</td>
-          <td><span class="risk-badge risk-high">🔴 Crítico</span></td>
-        </tr>
-        <tr>
-          <td><strong>Cooltra</strong></td>
-          <td style="color:var(--amber)">€10.000</td>
-          <td>SQL Free</td>
-          <td style="color:var(--red)">15 días</td>
-          <td>📧 Follow-up + propuesta</td>
-          <td><span class="risk-badge risk-high">🔴 Crítico</span></td>
-        </tr>
-        <tr>
-          <td><strong>Flywire</strong></td>
-          <td>€8.500</td>
-          <td>SQL Cons.</td>
-          <td style="color:var(--amber)">5 días</td>
-          <td>📄 Enviar propuesta</td>
-          <td><span class="risk-badge risk-mid">🟡 Medio</span></td>
-        </tr>
-        <tr>
-          <td><strong>Redexis</strong></td>
-          <td>€5.000</td>
-          <td>SQL Free</td>
-          <td style="color:var(--red)">21 días</td>
-          <td>📞 Reactivar contacto</td>
-          <td><span class="risk-badge risk-high">🔴 Crítico</span></td>
-        </tr>
-        <tr>
-          <td><strong>eboca</strong></td>
-          <td>€4.200</td>
-          <td>SQL Cons.</td>
-          <td style="color:var(--green)">3 días</td>
-          <td>🖥️ Demo esta semana</td>
-          <td><span class="risk-badge risk-low">🟢 Bajo</span></td>
-        </tr>
-        <tr>
-          <td><strong>Plenergy</strong></td>
-          <td>€3.000</td>
-          <td>SQL Free</td>
-          <td style="color:var(--red)">16 días</td>
-          <td>📧 Email urgente</td>
-          <td><span class="risk-badge risk-high">🔴 Crítico</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title">⚡ Recomendaciones de Ventas</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:var(--text-2)">
-      <div style="display:flex;gap:8px"><span style="color:var(--amber);font-weight:700">1.</span> Llamar a Waynabox hoy (18 días sin actividad · €13.2k en riesgo).</div>
-      <div style="display:flex;gap:8px"><span style="color:var(--amber);font-weight:700">2.</span> Enviar follow-up a Cooltra con propuesta actualizada (€10k, fecha vencida).</div>
-      <div style="display:flex;gap:8px"><span style="color:var(--amber);font-weight:700">3.</span> Cerrar propuesta Flywire esta semana — está activo y es el mayor SQL Consultoría.</div>
-      <div style="display:flex;gap:8px"><span style="color:var(--amber);font-weight:700">4.</span> Marcar tarea de seguimiento en todos los deals sin actividad >14 días.</div>
-      <div style="display:flex;gap:8px"><span style="color:var(--amber);font-weight:700">5.</span> Revisar win rate 4% — analizar motivos de pérdida en los 121 deals cerrados perdidos.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════ 6. CLIENTES ══════════════════ -->
-<section class="section" id="clientes">
-  <div class="section-header">
-    <span class="section-title">Clientes · Revenue</span>
-    <span class="section-badge sb-green">95 activos</span>
-    <span class="section-sub">ARR, MRR, crecimiento y expansión</span>
-  </div>
-
-  <div class="kpi-grid kpi-grid-6" style="margin-bottom:16px">
-    <div class="kpi-card">
-      <div class="label">Clientes activos</div>
-      <div class="value">95</div>
-      <div class="delta up">▲ +10 esta semana</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">ARR actual</div>
-      <div class="value" style="font-size:20px;color:var(--green)">~€131k</div>
-      <div class="delta neutral">95 × €1.150 avg</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">MRR actual</div>
-      <div class="value" style="font-size:20px">~€10.9k</div>
-      <div class="delta up">▲ Mejor mes Mar €18.850</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">ARR ganado mes</div>
-      <div class="value" style="font-size:20px;color:var(--green)">€11.5k</div>
-      <div class="delta up">▲ +10 clientes × €1.150</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">ARR perdido mes</div>
-      <div class="value" style="color:var(--green)">€0</div>
-      <div class="delta neutral">Sin churn esta semana</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Net Revenue Growth</div>
-      <div class="value" style="font-size:22px;color:var(--green)">+8.8%</div>
-      <div class="delta up">▲ Crecimiento neto</div>
-    </div>
-  </div>
-
-  <div class="two-col">
-    <div class="chart-card">
-      <div class="chart-title">📈 Clientes por mes (2026)</div>
-      <div class="bar-chart">
-        <div class="bar-wrap"><div class="bar-val">70</div><div class="bar" style="height:70%;background:linear-gradient(180deg,var(--green),#059669)"></div><div class="bar-label">Ene</div></div>
-        <div class="bar-wrap"><div class="bar-val">74</div><div class="bar" style="height:74%;background:linear-gradient(180deg,var(--green),#059669)"></div><div class="bar-label">Feb</div></div>
-        <div class="bar-wrap"><div class="bar-val">79</div><div class="bar" style="height:79%;background:linear-gradient(180deg,var(--green),#059669)"></div><div class="bar-label">Mar</div></div>
-        <div class="bar-wrap"><div class="bar-val">83</div><div class="bar" style="height:83%;background:linear-gradient(180deg,var(--green),#059669)"></div><div class="bar-label">Abr</div></div>
-        <div class="bar-wrap"><div class="bar-val">88</div><div class="bar" style="height:88%;background:linear-gradient(180deg,var(--green),#059669)"></div><div class="bar-label">May</div></div>
-        <div class="bar-wrap"><div class="bar-val" style="color:var(--green)">95</div><div class="bar" style="height:95%;background:linear-gradient(180deg,#34d399,var(--green))"></div><div class="bar-label" style="color:var(--green)">Jun ✦</div></div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">Crecimiento acumulado 2026: +35.7% (70→95)</div>
-    </div>
-    <div>
-      <div class="chart-card" style="margin-bottom:14px">
-        <div class="chart-title">🎯 Segmentación de clientes</div>
-        <div style="font-size:13px;color:var(--text-2);display:flex;flex-direction:column;gap:10px">
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Consultoría</span><span style="color:var(--guru-300)">~40% · 38 clientes</span></div>
-            <div class="mini-progress"><div class="mini-progress-fill" style="width:40%;background:var(--guru-500)"></div></div>
+      <div class="card">
+        <div class="card-title">Recomendaciones Freemium</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="reco-card">
+            <div class="reco-num">1</div>
+            <p>Diseñar secuencia email en 3 pasos para los 26 freemium inactivos — objetivo mínimo: activar 10 cuentas en las próximas 2 semanas con contenido de valor.</p>
           </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Freemium convertido</span><span style="color:var(--green)">~45% · 43 clientes</span></div>
-            <div class="mini-progress"><div class="mini-progress-fill" style="width:45%;background:var(--green)"></div></div>
+          <div class="reco-card">
+            <div class="reco-num">2</div>
+            <p>Llamadas de check-in personalizadas a Cooltra (€10k) y GoTrendier (€2k) para identificar bloqueos y acelerar la conversión a plan de pago.</p>
           </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Otros / Partners</span><span style="color:var(--muted)">~15% · 14 clientes</span></div>
-            <div class="mini-progress"><div class="mini-progress-fill" style="width:15%;background:var(--muted)"></div></div>
+          <div class="reco-card">
+            <div class="reco-num">3</div>
+            <p>Definir y trackear métrica de activación en HubSpot (ej. ≥3 tickets creados = activo) — monitorización semanal con alerta automática a CS.</p>
           </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">⚡ Recomendaciones Customer Success</div>
-        <div style="font-size:13px;color:var(--text-2);display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;gap:8px"><span style="color:var(--green);font-weight:700">1.</span> Onboarding de los 10 nuevos clientes esta semana — asignar CS owner y primera llamada en 48h.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--green);font-weight:700">2.</span> Identificar clientes con menos de 90 días para prevención de churn temprano.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--green);font-weight:700">3.</span> Explorar upsell en VDS (€5k) y TBF Abogados — han adoptado bien el producto.</div>
+    </div>
+  </section>
+
+  <!-- ========== 5. DEALS ========== -->
+  <section id="deals">
+    <h2 class="section-title">Deals / Oportunidades</h2>
+    <p class="section-sub">Pipeline comercial activo · 89 oportunidades abiertas · €53k en pipeline</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Deals Abiertos</div>
+        <div class="kpi-value" data-count="89">0</div>
+        <span class="kpi-badge badge-blue">Pipeline activo</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos esta sem.</div>
+        <div class="kpi-value" data-count="3">0</div>
+        <span class="kpi-badge badge-green">+3 sem. 24</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Win Rate</div>
+        <div class="kpi-value"><span data-count="4">0</span>%</div>
+        <span class="kpi-badge badge-red">Crítico — mejorar</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pipeline Total</div>
+        <div class="kpi-value">€<span data-count="53">0</span>k</div>
+        <span class="kpi-badge badge-purple">Valor total</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ticket Medio</div>
+        <div class="kpi-value">€<span data-count="1150" data-format="comma">0</span></div>
+        <span class="kpi-badge badge-blue">Por deal</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">Distribución del pipeline por etapa</div>
+      <div class="pipeline-stages">
+        <div class="pipeline-stage">
+          <div class="pipeline-count">15</div>
+          <div class="pipeline-label">Prospección</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-count">18</div>
+          <div class="pipeline-label">Discovery</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-count">22</div>
+          <div class="pipeline-label">Demo</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-count">13</div>
+          <div class="pipeline-label">Propuesta</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-count">12</div>
+          <div class="pipeline-label">Negociación</div>
+        </div>
+        <div class="pipeline-stage" style="border-color:rgba(16,185,129,0.35); background: rgba(16,185,129,0.05);">
+          <div class="pipeline-count" style="color:var(--green)">9</div>
+          <div class="pipeline-label">Cierre</div>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ══════════════════ 7. CHURN ══════════════════ -->
-<section class="section" id="churn">
-  <div class="section-header">
-    <span class="section-title">Churn · Análisis</span>
-    <span class="section-badge sb-red">Win rate 4%</span>
-    <span class="section-sub">Pérdidas históricas, patrones y prevención</span>
-  </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">Hot Deals — Acción prioritaria esta semana</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Valor</th>
+              <th>Owner</th>
+              <th>Últ. actividad</th>
+              <th>Próxima acción</th>
+              <th>Riesgo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:700; color:var(--text)">Waynabox</td>
+              <td style="font-weight:700; color:var(--text)">€13,200</td>
+              <td>Pilar</td>
+              <td style="color:var(--red); font-weight:600;">18 días</td>
+              <td>Llamada urgente HOY</td>
+              <td><span class="risk-badge risk-high">🔴 Alto</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700; color:var(--text)">Cooltra</td>
+              <td style="font-weight:700; color:var(--text)">€10,000</td>
+              <td>Pilar</td>
+              <td style="color:var(--red); font-weight:600;">15 días</td>
+              <td>Follow-up + propuesta</td>
+              <td><span class="risk-badge risk-high">🔴 Alto</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700; color:var(--text)">Flywire</td>
+              <td style="font-weight:700; color:var(--text)">€8,500</td>
+              <td>Pilar</td>
+              <td style="color:var(--amber); font-weight:600;">5 días</td>
+              <td>Enviar propuesta formal</td>
+              <td><span class="risk-badge risk-med">🟡 Medio</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700; color:var(--text)">Redexis</td>
+              <td style="font-weight:700; color:var(--text)">€5,000</td>
+              <td>Pilar</td>
+              <td style="color:var(--red); font-weight:600;">21 días</td>
+              <td>Reactivar contacto</td>
+              <td><span class="risk-badge risk-high">🔴 Alto</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700; color:var(--text)">eboca</td>
+              <td style="font-weight:700; color:var(--text)">€4,200</td>
+              <td>Pilar</td>
+              <td style="color:var(--green); font-weight:600;">3 días</td>
+              <td>Demo esta semana</td>
+              <td><span class="risk-badge risk-low">🟢 Bajo</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert-red alert-banner">
+        <span>🚨</span>
+        <span><strong>4 deals sin actividad &gt;14 días · valor total €31,200 en riesgo crítico.</strong> Waynabox (18d), Redexis (21d) y Cooltra (15d) deben recibir contacto antes del fin del día de hoy.</span>
+      </div>
+    </div>
 
-  <div class="kpi-grid kpi-grid-4" style="margin-bottom:16px">
-    <div class="kpi-card">
-      <div class="label">Deals perdidos histór.</div>
-      <div class="value" style="color:var(--red)">124</div>
-      <div class="delta down">vs 5 ganados · WR 4%</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">ARR perdido est.</div>
-      <div class="value" style="font-size:20px;color:var(--red)">~€50k</div>
-      <div class="delta down">124 × ~€400 avg perdido</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Churn esta semana</div>
-      <div class="value" style="color:var(--green)">0</div>
-      <div class="delta up">Sin bajas activas</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">Mejor ratio cierre</div>
-      <div class="value" style="font-size:22px;color:var(--amber)">Marzo</div>
-      <div class="delta neutral">€18.850 · 2026</div>
-    </div>
-  </div>
-
-  <div class="two-col">
-    <div class="chart-card">
-      <div class="chart-title">📊 Motivos de pérdida (estimado)</div>
-      <div class="reason-bars" style="margin-top:8px">
-        <div class="reason-row">
-          <div class="reason-label">Precio</div>
-          <div class="reason-track"><div class="reason-fill" style="width:35%;background:var(--red)"></div></div>
-          <div class="reason-pct">35%</div>
+    <div class="card">
+      <div class="card-title">Recomendaciones comerciales</div>
+      <div class="reco-cards">
+        <div class="reco-card">
+          <div class="reco-num">1</div>
+          <p><strong style="color:var(--red)">HOY:</strong> Llamar a Waynabox — €13,200, 18 días sin actividad. Preparar propuesta actualizada y agenda de cierre.</p>
         </div>
-        <div class="reason-row">
-          <div class="reason-label">No uso / fit</div>
-          <div class="reason-track"><div class="reason-fill" style="width:28%;background:var(--amber)"></div></div>
-          <div class="reason-pct">28%</div>
+        <div class="reco-card">
+          <div class="reco-num">2</div>
+          <p>Reactivar Cooltra con propuesta de valor renovada + casos de éxito similares — €10k en riesgo, 15 días sin touch.</p>
         </div>
-        <div class="reason-row">
-          <div class="reason-label">Competencia</div>
-          <div class="reason-track"><div class="reason-fill" style="width:20%;background:var(--blue)"></div></div>
-          <div class="reason-pct">20%</div>
+        <div class="reco-card">
+          <div class="reco-num">3</div>
+          <p>Presentación formal a Flywire esta semana — activos (5 días) y €8.5k es el deal con mayor probabilidad de cierre a corto plazo.</p>
         </div>
-        <div class="reason-row">
-          <div class="reason-label">Fin de proyecto</div>
-          <div class="reason-track"><div class="reason-fill" style="width:12%;background:var(--guru-400)"></div></div>
-          <div class="reason-pct">12%</div>
+        <div class="reco-card">
+          <div class="reco-num">4</div>
+          <p>Auditar el win rate del 4%: analizar los últimos 20 lost deals para identificar patrones y crear playbook de objeciones.</p>
         </div>
-        <div class="reason-row">
-          <div class="reason-label">Otros</div>
-          <div class="reason-track"><div class="reason-fill" style="width:5%;background:var(--muted)"></div></div>
-          <div class="reason-pct">5%</div>
+        <div class="reco-card">
+          <div class="reco-num">5</div>
+          <p>Configurar SLA en HubSpot: alerta automática cuando un deal activo supere 7 días sin actividad — no más sorpresas por inactividad.</p>
         </div>
       </div>
     </div>
-    <div>
-      <div class="chart-card" style="margin-bottom:14px;background:var(--red-bg);border-color:rgba(239,68,68,.2)">
-        <div class="chart-title">⚠️ Patrones detectados</div>
-        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#fee2e2">
-          <div>📍 El <strong>60% del churn</strong> histórico proviene de deals con valor inferior a €2.000 — revisar ICP mínimo.</div>
-          <div>📍 La etapa con más abandono es <strong>"Propuesta enviada"</strong> — necesita aceleración en respuesta.</div>
-          <div>📍 Precio (35%) es el principal motivo — evaluar pricing y propuesta de valor vs competidores (Decagon, Sierra, Ada).</div>
+  </section>
+
+  <!-- ========== 6. CLIENTES ========== -->
+  <section id="clientes">
+    <h2 class="section-title">Clientes</h2>
+    <p class="section-sub">Base de clientes activa, crecimiento mensual y métricas de ARR/MRR</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Clientes Activos</div>
+        <div class="kpi-value" data-count="95">0</div>
+        <span class="kpi-badge badge-green">Total base</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Nuevos esta sem.</div>
+        <div class="kpi-value" data-count="10">0</div>
+        <span class="kpi-badge badge-green">Semana 24</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ARR Total</div>
+        <div class="kpi-value">~€<span data-count="131">0</span>k</div>
+        <span class="kpi-badge badge-purple">Anualizado</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">MRR</div>
+        <div class="kpi-value">~€<span data-count-dec="10.9">0</span>k</div>
+        <span class="kpi-badge badge-blue">Mensual</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ARR Ganado Jun</div>
+        <div class="kpi-value">€<span data-count-dec="11.5">0</span>k</div>
+        <span class="kpi-badge badge-green">Este mes</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Churn ARR</div>
+        <div class="kpi-value">€<span data-count="0">0</span></div>
+        <span class="kpi-badge badge-green">Esta semana</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Net Growth MoM</div>
+        <div class="kpi-value">+<span data-count-dec="8.8">0</span>%</div>
+        <span class="kpi-badge badge-green">Neto mensual</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px; align-items:start;">
+      <div class="card">
+        <div class="card-title">Crecimiento de clientes · Ene–Jun 2026</div>
+        <svg width="100%" height="130" viewBox="0 0 420 130" preserveAspectRatio="none" style="display:block;">
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M10,115 L94,107 L178,95 L262,82 L346,64 L420,42 L420,130 L10,130 Z"
+            fill="url(#areaGrad)"/>
+          <polyline points="10,115 94,107 178,95 262,82 346,64 420,42"
+            fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="10" cy="115" r="4" fill="#7c3aed"/>
+          <circle cx="94" cy="107" r="4" fill="#7c3aed"/>
+          <circle cx="178" cy="95" r="4" fill="#7c3aed"/>
+          <circle cx="262" cy="82" r="4" fill="#9d5ffa"/>
+          <circle cx="346" cy="64" r="4" fill="#9d5ffa"/>
+          <circle cx="420" cy="42" r="5" fill="#c4a2fc" stroke="white" stroke-width="1.5"/>
+          <!-- Month labels -->
+          <text x="10" y="128" font-size="9" fill="#7b76a0" text-anchor="middle">Ene</text>
+          <text x="94" y="128" font-size="9" fill="#7b76a0" text-anchor="middle">Feb</text>
+          <text x="178" y="128" font-size="9" fill="#7b76a0" text-anchor="middle">Mar</text>
+          <text x="262" y="128" font-size="9" fill="#7b76a0" text-anchor="middle">Abr</text>
+          <text x="346" y="128" font-size="9" fill="#7b76a0" text-anchor="middle">May</text>
+          <text x="420" y="128" font-size="9" fill="#7b76a0" text-anchor="middle">Jun</text>
+          <!-- Values -->
+          <text x="10" y="110" font-size="8" fill="#c4a2fc" text-anchor="middle">70</text>
+          <text x="94" y="102" font-size="8" fill="#c4a2fc" text-anchor="middle">74</text>
+          <text x="178" y="90" font-size="8" fill="#c4a2fc" text-anchor="middle">79</text>
+          <text x="262" y="77" font-size="8" fill="#c4a2fc" text-anchor="middle">83</text>
+          <text x="346" y="59" font-size="8" fill="#c4a2fc" text-anchor="middle">88</text>
+          <text x="415" y="37" font-size="8" fill="#c4a2fc" text-anchor="end">95</text>
+        </svg>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Segmentación de clientes activos</div>
+        <div class="seg-bars">
+          <div class="seg-bar" style="width:40%; background: var(--guru-500);">40%</div>
+          <div class="seg-bar" style="width:45%; background: var(--guru-400);">45%</div>
+          <div class="seg-bar" style="width:15%; background: var(--blue);">15%</div>
+        </div>
+        <div class="seg-legend" style="margin-bottom:16px;">
+          <div class="seg-legend-item"><div class="seg-dot" style="background:var(--guru-500)"></div>Consultoría ~40%</div>
+          <div class="seg-legend-item"><div class="seg-dot" style="background:var(--guru-400)"></div>Freemium conv. ~45%</div>
+          <div class="seg-legend-item"><div class="seg-dot" style="background:var(--blue)"></div>Otros ~15%</div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-row">
+          <div class="stat-item">
+            <div class="stat-val" style="font-size:15px; color:var(--green)">€0</div>
+            <div class="stat-lbl">Churn ARR sem.</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" style="font-size:15px; color:var(--green)">+8.8%</div>
+            <div class="stat-lbl">Net Growth MoM</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" style="font-size:15px;">~€1,379</div>
+            <div class="stat-lbl">ARR/cliente</div>
+          </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">⚡ Recomendaciones anti-churn</div>
-        <div style="font-size:13px;color:var(--text-2);display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;gap:8px"><span style="color:var(--red);font-weight:700">1.</span> Establecer ICP mínimo: descartar deals <€1.000 en fase temprana — optimizar tiempo de ventas.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--red);font-weight:700">2.</span> Crear alerta automática en HubSpot para clientes con <90 días y baja actividad de producto.</div>
-          <div style="display:flex;gap:8px"><span style="color:var(--red);font-weight:700">3.</span> Preparar comparativa vs Decagon/Sierra/Ada para rebatir objeción de precio en demos.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recomendaciones Customer Success</div>
+      <div class="reco-cards">
+        <div class="reco-card">
+          <div class="reco-num">1</div>
+          <p>Onboarding estructurado para los 10 nuevos clientes esta semana — sesión de activación en las primeras 48h para maximizar el time-to-value.</p>
+        </div>
+        <div class="reco-card">
+          <div class="reco-num">2</div>
+          <p>Identificar los clientes con &lt;90 días de antigüedad y bajo engagement score — crear playbook de early churn prevention antes del fin de semana.</p>
+        </div>
+        <div class="reco-card">
+          <div class="reco-num">3</div>
+          <p>Plan de expansión para VDS (won freemium €5k) y TBF Abogados — clientes satisfechos con alto potencial de upsell a planes superiores.</p>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ══════════════════ 8. PRIORIDADES ══════════════════ -->
-<section class="section" id="prioridades">
-  <div class="section-header">
-    <span class="section-title">Prioridades de la Semana</span>
-    <span class="section-badge sb-purple">Semana 24 · 14 Jun</span>
-    <span class="section-sub">Acciones concretas por área — basadas en los datos del dashboard</span>
-  </div>
+  <!-- ========== 7. CHURN ========== -->
+  <section id="churn">
+    <h2 class="section-title">Churn</h2>
+    <p class="section-sub">Análisis histórico de cancelaciones, razones y patrones de riesgo detectados</p>
 
-  <div class="priorities-grid">
-    <div class="priority-card marketing">
-      <h3>📣 Marketing</h3>
-      <div class="priority-item">
-        <div class="priority-num">1</div>
-        <div>Activar permiso email en los <strong>63.5% de contactos sin marketable</strong> — enviar email de doble opt-in o actualizar GDPR en HubSpot.</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Churn histórico total</div>
+        <div class="kpi-value" data-count="124">0</div>
+        <span class="kpi-badge badge-red">Cancelados acum.</span>
       </div>
-      <div class="priority-item">
-        <div class="priority-num">2</div>
-        <div>Lanzar secuencia de bienvenida para los <strong>97 nuevos contactos</strong> — 0 en secuencia automática actualmente.</div>
+      <div class="kpi-card">
+        <div class="kpi-label">ARR perdido total</div>
+        <div class="kpi-value">~€<span data-count="50">0</span>k</div>
+        <span class="kpi-badge badge-red">Histórico</span>
       </div>
-      <div class="priority-item">
-        <div class="priority-num">3</div>
-        <div>Doblar contenido SEO orgánico — único canal con crecimiento sostenido y buen coste de adquisición sin dependencia de offline.</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tasa churn mensual</div>
+        <div class="kpi-value"><span data-count="4">0</span>%</div>
+        <span class="kpi-badge badge-amber">Objetivo: &lt;2%</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Mejor mes histórico</div>
+        <div class="kpi-value" style="font-size:20px; padding-top:4px;">Marzo</div>
+        <span class="kpi-badge badge-green">0 churns en Marzo</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Churn esta semana</div>
+        <div class="kpi-value" data-count="0">0</div>
+        <span class="kpi-badge badge-green">Sem. 24 limpia</span>
       </div>
     </div>
 
-    <div class="priority-card ventas">
-      <h3>💰 Ventas</h3>
-      <div class="priority-item">
-        <div class="priority-num">1</div>
-        <div>Llamar a <strong>Waynabox (€13.2k) hoy</strong> — 18 días sin actividad y fecha vencida. Mayor deal en riesgo inmediato.</div>
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-title">Razones de cancelación (histórico)</div>
+        <div class="horiz-bars">
+          <div class="horiz-bar-row">
+            <div class="horiz-bar-label">Precio</div>
+            <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:35%"></div></div>
+            <div class="horiz-bar-pct">35%</div>
+          </div>
+          <div class="horiz-bar-row">
+            <div class="horiz-bar-label">No uso</div>
+            <div class="horiz-bar-track">
+              <div class="horiz-bar-fill" style="width:28%; background: linear-gradient(90deg, #b45309, var(--amber));"></div>
+            </div>
+            <div class="horiz-bar-pct">28%</div>
+          </div>
+          <div class="horiz-bar-row">
+            <div class="horiz-bar-label">Competencia</div>
+            <div class="horiz-bar-track">
+              <div class="horiz-bar-fill" style="width:20%; background: linear-gradient(90deg, #1d4ed8, var(--blue));"></div>
+            </div>
+            <div class="horiz-bar-pct">20%</div>
+          </div>
+          <div class="horiz-bar-row">
+            <div class="horiz-bar-label">Fin de proyecto</div>
+            <div class="horiz-bar-track">
+              <div class="horiz-bar-fill" style="width:12%; background: linear-gradient(90deg, #4338ca, #818cf8);"></div>
+            </div>
+            <div class="horiz-bar-pct">12%</div>
+          </div>
+          <div class="horiz-bar-row">
+            <div class="horiz-bar-label">Otros</div>
+            <div class="horiz-bar-track">
+              <div class="horiz-bar-fill" style="width:5%; background: linear-gradient(90deg, #4b5563, #9ca3af);"></div>
+            </div>
+            <div class="horiz-bar-pct">5%</div>
+          </div>
+        </div>
+        <div class="alert-amber alert-banner">
+          <span>⚠️</span>
+          <span><strong>Patrón detectado:</strong> El 60% del churn histórico proviene de deals con valor &lt;€2k — revisar ICP mínimo y política de onboarding para tickets bajos como acción estratégica de Q3.</span>
+        </div>
       </div>
-      <div class="priority-item">
-        <div class="priority-num">2</div>
-        <div>Enviar propuesta a <strong>Flywire y eboca</strong> esta semana — SQL Consultoría activos y con tracción reciente.</div>
-      </div>
-      <div class="priority-item">
-        <div class="priority-num">3</div>
-        <div>Clasificar los <strong>41 leads sin lifecycle stage</strong> — pueden esconder 5-8 SQLs adicionales que se están perdiendo.</div>
+
+      <div class="card">
+        <div class="card-title">Recomendaciones Anti-Churn</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="reco-card">
+            <div class="reco-num">1</div>
+            <p>Evaluar si ticket &lt;€1,000 es rentable en ciclo de vida completo — considerar precio mínimo de entrada para reducir churn por precio (35% de las cancelaciones).</p>
+          </div>
+          <div class="reco-card">
+            <div class="reco-num">2</div>
+            <p>Crear health score en HubSpot basado en actividad del producto — alerta automática si cliente lleva &gt;14 días sin interacción significativa.</p>
+          </div>
+          <div class="reco-card">
+            <div class="reco-num">3</div>
+            <p>Implementar QBR trimestral para todos los clientes &gt;€3k ARR — los clientes con revisiones regulares tienen una tasa de retención 3x superior.</p>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="priority-card cs">
-      <h3>💚 Customer Success</h3>
-      <div class="priority-item">
-        <div class="priority-num">1</div>
-        <div>Onboarding de los <strong>10 nuevos clientes</strong> — asignar CS owner, llamada de bienvenida y acceso al producto en 48h.</div>
+  <!-- ========== 8. PRIORIDADES ========== -->
+  <section id="prioridades">
+    <h2 class="section-title">Prioridades de la Semana</h2>
+    <p class="section-sub">Top 3 acciones por área · Semana 24 · 9–14 Jun 2026 · Acción inmediata requerida</p>
+
+    <div class="priority-grid">
+
+      <div class="priority-col">
+        <div class="priority-col-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.5" stroke="#9d5ffa" stroke-width="1.5"/>
+            <path d="M5.5 8h5M8 5.5v5" stroke="#9d5ffa" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Marketing
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">1</div>
+          <div class="priority-text">Activar secuencia email freemium — flujo de 3 emails para los 26 inactivos, objetivo: 10 activados en 2 semanas.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">2</div>
+          <div class="priority-text">Doblar esfuerzo en canal SEO/orgánico (13.5% actual) — publicar 3 contenidos de alto valor indexable esta semana.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">3</div>
+          <div class="priority-text">Campaña opt-in para obtener permiso email del 63.5% sin consentimiento — landing + incentivo de contenido exclusivo.</div>
+        </div>
       </div>
-      <div class="priority-item">
-        <div class="priority-num">2</div>
-        <div>Identificar clientes con <strong>menos de 90 días</strong> y baja actividad — intervención temprana antes de que lleguen al punto de churn.</div>
+
+      <div class="priority-col">
+        <div class="priority-col-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 14V7.5L8 2l6 5.5V14h-4v-4H6v4H2z" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          <span style="color:var(--green)">Ventas</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num" style="background: rgba(239,68,68,0.2); color: var(--red);">1</div>
+          <div class="priority-text"><strong style="color:var(--red)">URGENTE HOY:</strong> Llamar a Waynabox €13,200 — 18 días sin actividad. Preparar propuesta con agenda de cierre para esta semana.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">2</div>
+          <div class="priority-text">Reactivar Cooltra €10,000 — enviar propuesta renovada + caso de éxito similar. 15 días sin touch, ventana cerrándose.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">3</div>
+          <div class="priority-text">Presentación formal completa a Flywire €8,500 antes del viernes — están activos y receptivos, máxima probabilidad de cierre.</div>
+        </div>
       </div>
-      <div class="priority-item">
-        <div class="priority-num">3</div>
-        <div>Explorar <strong>upsell en VDS y TBF Abogados</strong> — freemiums convertidos con buena adopción y potencial de expansión.</div>
+
+      <div class="priority-col">
+        <div class="priority-col-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="5.5" r="2.5" stroke="#3b82f6" stroke-width="1.5"/>
+            <path d="M2.5 14c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span style="color:var(--blue)">Customer Success</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">1</div>
+          <div class="priority-text">Onboarding de los 10 nuevos clientes — sesión de activación en 48h máx, asignar CSM responsable y crear plan de éxito.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">2</div>
+          <div class="priority-text">Identificar clientes en riesgo con &lt;90 días de vida — revisar engagement y llamar a los 5 con menor actividad registrada.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">3</div>
+          <div class="priority-text">Plan de expansión para VDS y TBF Abogados — preparar propuesta de upsell a plan superior, potencial €3k ARR adicional.</div>
+        </div>
       </div>
+
+      <div class="priority-col">
+        <div class="priority-col-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 4h12M4 8h8M6 12h4" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span style="color:var(--amber)">Dirección</span>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num" style="background: rgba(239,68,68,0.2); color: var(--red);">1</div>
+          <div class="priority-text"><strong style="color:var(--red)">CRÍTICO:</strong> Revisión estrategia email (3% apertura vs 22% benchmark) — reunión de rediseño completo del enfoque esta semana.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">2</div>
+          <div class="priority-text">Definir plan de canal offline escalable para Q3 — el canal que genera el 100% de cierres necesita estructura y presupuesto asignado.</div>
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">3</div>
+          <div class="priority-text">Evaluación win rate 4% con plan de acción — objetivo: 10% en Q3 2026. Análisis lost deals y definición de mejoras de proceso.</div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="priority-card direccion">
-      <h3>🎯 Dirección</h3>
-      <div class="priority-item">
-        <div class="priority-num">1</div>
-        <div>Aprobar <strong>estrategia de email marketing</strong> — con 3% de apertura y 63.5% sin permiso, el canal está prácticamente muerto sin acción.</div>
-      </div>
-      <div class="priority-item">
-        <div class="priority-num">2</div>
-        <div>Revisar <strong>win rate del 4%</strong> — analizar los 121 deals perdidos para identificar patrones y rediseñar proceso de ventas.</div>
-      </div>
-      <div class="priority-item">
-        <div class="priority-num">3</div>
-        <div>Definir <strong>plan de eventos presenciales Q3</strong> — offline genera el 100% de los cierres y hay que escalar este canal de forma sistemática.</div>
-      </div>
+    <div class="alert-amber alert-banner" style="margin-top:24px;">
+      <span>📋</span>
+      <span><strong>Resumen ejecutivo semana 24:</strong> Semana positiva en captación (+20% leads, récord trimestre) pero con señales de alerta en conversión (win rate 4%), deals stale (€31.2k en riesgo) y email marketing (3% apertura). El foco de la organización debe ser conversión y activación, no solo volumen de contactos.</span>
     </div>
-  </div>
 
-  <!-- Summary footer -->
-  <div style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(59,130,246,.05));border:1px solid var(--border-l);border-radius:var(--radius);padding:20px 24px;margin-top:24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-    <div style="font-size:13px;color:var(--guru-300);font-weight:700">📋 Resumen ejecutivo semana 24</div>
-    <div style="flex:1;font-size:12px;color:var(--text-2);line-height:1.7">
-      <strong>Positivo:</strong> +97 contactos (+20%), +10 clientes, crecimiento neto 8.8%, 0 churn activo.
-      <strong style="margin-left:12px">Urgente:</strong> €31.2k en deals vencidos, 63.5% sin email permission, win rate 4%.
-      <strong style="margin-left:12px">Acción #1:</strong> Llamar a Waynabox y Cooltra hoy.
-    </div>
-    <div style="font-size:11px;color:var(--muted)">GuruSup · 14 Jun 2026</div>
-  </div>
-</section>
+  </section>
 
-</div><!-- /gs-page -->
+</main>
 
 <script>
-// Nav active state on scroll
-const sections = document.querySelectorAll('.section');
-const tabs = document.querySelectorAll('.nav-tab');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      tabs.forEach(t => t.classList.remove('active'));
-      const tab = document.querySelector(`.nav-tab[href="#${e.target.id}"]`);
-      if (tab) tab.classList.add('active');
+// ---- COUNT-UP ANIMATION (IntersectionObserver) ----
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+function countUp(el, target, duration, isDecimal, formatComma) {
+  const start = performance.now();
+  const step = (ts) => {
+    const elapsed = ts - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutCubic(progress);
+    const current = target * eased;
+    if (isDecimal) {
+      el.textContent = current.toFixed(1);
+    } else if (formatComma) {
+      el.textContent = Math.floor(current).toLocaleString('es-ES');
+    } else {
+      el.textContent = Math.floor(current);
+    }
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      if (isDecimal) el.textContent = target.toFixed(1);
+      else if (formatComma) el.textContent = target.toLocaleString('es-ES');
+      else el.textContent = target;
+    }
+  };
+  requestAnimationFrame(step);
+}
+
+const observed = new Set();
+const kpiObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !observed.has(entry.target)) {
+      observed.add(entry.target);
+      const el = entry.target;
+      if (el.dataset.count !== undefined) {
+        const val = parseInt(el.dataset.count, 10);
+        const fmt = el.dataset.format === 'comma';
+        countUp(el, val, 1000, false, fmt);
+      } else if (el.dataset.countDec !== undefined) {
+        countUp(el, parseFloat(el.dataset.countDec), 1000, true, false);
+      }
     }
   });
-}, {rootMargin: '-30% 0px -60% 0px'});
-sections.forEach(s => observer.observe(s));
+}, { threshold: 0.15 });
 
-// Smooth tab click
+document.querySelectorAll('[data-count], [data-count-dec]').forEach(el => kpiObserver.observe(el));
+
+// ---- TAB NAVIGATION ----
+const tabs = document.querySelectorAll('.nav-tab');
+const header = document.getElementById('siteHeader');
+
+function getHeaderHeight() { return header ? header.offsetHeight : 80; }
+
 tabs.forEach(tab => {
-  tab.addEventListener('click', e => {
-    e.preventDefault();
-    const target = document.querySelector(tab.getAttribute('href'));
-    if (target) target.scrollIntoView({behavior:'smooth'});
+  tab.addEventListener('click', () => {
+    const id = tab.dataset.section;
+    const section = document.getElementById(id);
+    if (!section) return;
+    const y = section.getBoundingClientRect().top + window.scrollY - getHeaderHeight() - 8;
+    window.scrollTo({ top: y, behavior: 'smooth' });
   });
 });
+
+// ---- ACTIVE TAB HIGHLIGHT ON SCROLL ----
+const sections = Array.from(document.querySelectorAll('main > section'));
+
+function updateActiveTab() {
+  const hh = getHeaderHeight();
+  let current = sections[0];
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top <= hh + 40) current = sec;
+  });
+  tabs.forEach(t => {
+    t.classList.toggle('active', t.dataset.section === current.id);
+  });
+}
+
+window.addEventListener('scroll', updateActiveTab, { passive: true });
+updateActiveTab();
 </script>
 </body>
 </html>
