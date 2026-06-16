@@ -72,64 +72,40 @@ body {
 }
 .section-label:first-child { margin-top: 0; }
 
-/* ══════════════════════════════════════════
-   FUNNEL HORIZONTAL
-══════════════════════════════════════════ */
-.funnel {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-}
+/* ══ FUNNEL HORIZONTAL ══ */
+.funnel { display: flex; align-items: stretch; gap: 0; }
 
 .f-arrow {
   display: flex; align-items: center; justify-content: center;
-  width: 28px; flex-shrink: 0; color: var(--muted);
+  width: 28px; flex-shrink: 0;
   font-size: 18px; opacity: .5; padding-bottom: 2px;
 }
-.f-arrow::after { content: '›'; }
+.f-arrow::after { content: '›'; color: var(--muted); }
 
 .f-card {
-  flex: 1;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 16px 14px;
-  position: relative;
-  overflow: hidden;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex: 1; background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 16px 14px;
+  position: relative; overflow: hidden; min-width: 0;
+  display: flex; flex-direction: column; gap: 4px;
 }
 .f-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--fc, var(--guru-500));
-  border-radius: 10px 10px 0 0;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--fc, var(--guru-500)); border-radius: 10px 10px 0 0;
 }
-.f-card .fc-label {
-  font-size: 10px; color: var(--muted); font-weight: 700;
-  text-transform: uppercase; letter-spacing: .07em;
-}
-.f-card .fc-value {
-  font-size: 28px; font-weight: 800; line-height: 1;
-  color: var(--fv, var(--text));
-}
-.f-card .fc-sub {
-  font-size: 11px; color: var(--muted); margin-top: 2px;
-}
+.f-card .fc-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.f-card .fc-value { font-size: 28px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); }
+.f-card .fc-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
 .f-card.f-hero {
   border-color: rgba(157,95,250,.4);
   background: rgba(124,58,237,.08);
   --fc: var(--guru-400);
 }
-.f-card.f-hero .fc-value { font-size: 38px; color: var(--guru-300); }
+.f-card.f-hero .fc-value { font-size: 52px; color: var(--guru-300); }
 .f-card.f-hero .fc-label { color: var(--guru-300); }
 
 .fc-inner {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
   display: flex; align-items: center; gap: 8px;
 }
 .fc-inner .fc-inner-num  { font-size: 18px; font-weight: 800; color: var(--green); }
@@ -139,6 +115,16 @@ body {
 .fc-opp-label { font-size: 10px; color: var(--green); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .fc-opp-total { font-size: 12px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .fc-opp-total strong { color: var(--text-2); }
+
+/* SQL breakdown inside funnel card */
+.fc-sql-breakdown {
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 5px;
+}
+.fc-sql-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
+.fc-sql-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.fc-sql-type { flex: 1; }
+.fc-sql-num  { font-weight: 700; color: var(--text); }
 
 .f-c-default { --fc: var(--guru-500); --fv: var(--text); }
 .f-c-purple  { --fc: var(--guru-400); --fv: var(--guru-400); }
@@ -158,12 +144,25 @@ body {
 .badge-purple { background: rgba(157,95,250,.15); color: var(--guru-400); border: 1px solid rgba(157,95,250,.3); }
 .badge-muted  { background: rgba(123,118,160,.12); color: var(--muted); border: 1px solid rgba(123,118,160,.25); }
 
-/* ── REVISION GRID ── */
-.rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-.rev-cell { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-.rev-num   { font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-.rev-stage { font-size: 12px; font-weight: 600; }
-.rev-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+/* ── REVISION FLOW ── */
+.rev-flow { display: flex; flex-direction: column; gap: 0; }
+.rev-flow-header {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 12px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+}
+.rev-flow-total { font-size: 40px; font-weight: 800; color: var(--blue); line-height: 1; }
+.rev-flow-label { font-size: 13px; color: var(--muted); }
+.rev-flow-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0 9px 4px;
+  border-bottom: 1px solid rgba(46,42,90,.4);
+}
+.rev-flow-row:last-child { border-bottom: none; }
+.rev-arrow { font-size: 13px; color: var(--muted); opacity: .6; flex-shrink: 0; }
+.rev-flow-num  { font-size: 22px; font-weight: 800; line-height: 1; min-width: 36px; }
+.rev-flow-info { flex: 1; }
+.rev-flow-name { font-size: 13px; font-weight: 600; }
+.rev-flow-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
 /* ── SQL MINI GRID ── */
 .sql-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -182,9 +181,6 @@ body {
 
 /* ── PILLS ── */
 .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-.pill-ok     { background: rgba(16,185,129,.15); color: var(--green); }
-.pill-dup    { background: rgba(124,58,237,.15); color: var(--guru-300); }
-.pill-disc   { background: rgba(239,68,68,.15);  color: var(--red); }
 .pill-demo   { background: rgba(16,185,129,.15); color: var(--green); }
 .pill-discov { background: rgba(124,58,237,.15); color: var(--guru-300); }
 .new-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: rgba(16,185,129,.2); color: var(--green); letter-spacing: .04em; text-transform: uppercase; }
@@ -199,8 +195,6 @@ body {
 
 /* ── ALERT ── */
 .alert { border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
-.alert-amber  { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); color: #d4a017; }
-.alert-purple { background: rgba(157,95,250,.08); border: 1px solid rgba(157,95,250,.25); color: #c4a2fc; }
 .alert-green  { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2);  color: #6ee7b7; }
 .alert-muted  { background: rgba(123,118,160,.06); border: 1px solid rgba(123,118,160,.2); color: var(--muted); }
 </style>
@@ -249,18 +243,22 @@ body {
 
     <div class="f-arrow"></div>
 
-    <div class="f-card f-c-purple">
-      <div class="fc-label">SQL-Freemium</div>
-      <div class="fc-value">1</div>
-      <div class="fc-sub">Brava Nails</div>
-    </div>
-
-    <div class="f-arrow"></div>
-
     <div class="f-card f-c-orange">
-      <div class="fc-label">SQL-Consultoría</div>
-      <div class="fc-value">2</div>
-      <div class="fc-sub">Netberry · Sector Vending</div>
+      <div class="fc-label">SQLs del período</div>
+      <div class="fc-value">3</div>
+      <div class="fc-sub">Freemium + Consultoría</div>
+      <div class="fc-sql-breakdown">
+        <div class="fc-sql-row">
+          <span class="fc-sql-dot" style="background:var(--guru-400)"></span>
+          <span class="fc-sql-type">SQL-Freemium</span>
+          <span class="fc-sql-num">1</span>
+        </div>
+        <div class="fc-sql-row">
+          <span class="fc-sql-dot" style="background:var(--orange)"></span>
+          <span class="fc-sql-type">SQL-Consultoría</span>
+          <span class="fc-sql-num">2</span>
+        </div>
+      </div>
       <div class="fc-inner">
         <div class="fc-inner-num">1</div>
         <div class="fc-inner-text">Demo<br>agendada</div>
@@ -287,42 +285,63 @@ body {
   </div>
 
 
+  <!-- ── REVISIÓN VENTAS ── -->
   <div class="section-label">Leads en revisión de ventas</div>
   <div class="card">
     <div class="card-header">
-      <span class="card-title">Estado de revisión · 17 contactos tratados</span>
+      <span class="card-title">Desglose por estado · leads tratados por ventas</span>
       <span class="badge badge-blue">17 de 18 leads</span>
     </div>
-    <div class="rev-grid">
-      <div class="rev-cell">
-        <div class="rev-num" style="color:var(--green)">14</div>
-        <div class="rev-stage" style="color:var(--green)">Ya gestionado</div>
-        <div class="rev-sub">Proceso completado</div>
+    <div class="rev-flow">
+      <div class="rev-flow-header">
+        <span class="rev-flow-total">17</span>
+        <span class="rev-flow-label">contactos tratados por ventas en el período</span>
       </div>
-      <div class="rev-cell">
-        <div class="rev-num" style="color:var(--amber)">1</div>
-        <div class="rev-stage" style="color:var(--amber)">Pendiente de revisión</div>
-        <div class="rev-sub">Sin asignar aún</div>
+      <div class="rev-flow-row">
+        <span class="rev-arrow">›</span>
+        <span class="rev-flow-num" style="color:var(--green)">14</span>
+        <div class="rev-flow-info">
+          <div class="rev-flow-name" style="color:var(--green)">Ya gestionado</div>
+          <div class="rev-flow-desc">Proceso completado por el equipo comercial</div>
+        </div>
       </div>
-      <div class="rev-cell">
-        <div class="rev-num" style="color:var(--guru-400)">2</div>
-        <div class="rev-stage" style="color:var(--guru-400)">Duplicado</div>
-        <div class="rev-sub">Contacto ya existente</div>
+      <div class="rev-flow-row">
+        <span class="rev-arrow">›</span>
+        <span class="rev-flow-num" style="color:var(--amber)">1</span>
+        <div class="rev-flow-info">
+          <div class="rev-flow-name" style="color:var(--amber)">Pendiente de revisión</div>
+          <div class="rev-flow-desc">Sin estado asignado aún</div>
+        </div>
       </div>
-      <div class="rev-cell">
-        <div class="rev-num" style="color:var(--red)">1</div>
-        <div class="rev-stage" style="color:var(--red)">No aplica / Descartado</div>
-        <div class="rev-sub">Sin potencial comercial</div>
+      <div class="rev-flow-row">
+        <span class="rev-arrow">›</span>
+        <span class="rev-flow-num" style="color:var(--guru-400)">2</span>
+        <div class="rev-flow-info">
+          <div class="rev-flow-name" style="color:var(--guru-400)">Duplicado</div>
+          <div class="rev-flow-desc">Contacto ya existente en la base de datos</div>
+        </div>
       </div>
-      <div class="rev-cell">
-        <div class="rev-num" style="color:var(--muted)">0</div>
-        <div class="rev-stage" style="color:var(--muted)">En revisión activa</div>
-        <div class="rev-sub">En proceso</div>
+      <div class="rev-flow-row">
+        <span class="rev-arrow">›</span>
+        <span class="rev-flow-num" style="color:var(--red)">1</span>
+        <div class="rev-flow-info">
+          <div class="rev-flow-name" style="color:var(--red)">No aplica / Descartado</div>
+          <div class="rev-flow-desc">Sin potencial comercial identificado</div>
+        </div>
+      </div>
+      <div class="rev-flow-row">
+        <span class="rev-arrow">›</span>
+        <span class="rev-flow-num" style="color:var(--muted)">0</span>
+        <div class="rev-flow-info">
+          <div class="rev-flow-name" style="color:var(--muted)">En revisión activa</div>
+          <div class="rev-flow-desc">Actualmente en proceso de valoración</div>
+        </div>
       </div>
     </div>
   </div>
 
 
+  <!-- ── SQL TOTALES ── -->
   <div class="section-label">Volumen SQL acumulado</div>
   <div class="card">
     <div class="card-header">
@@ -348,6 +367,7 @@ body {
   </div>
 
 
+  <!-- ── OPORTUNIDADES ACTIVAS ── -->
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
     <div class="card-header">
@@ -381,6 +401,7 @@ body {
   </div>
 
 
+  <!-- ── RAZONES DE DESCARTE · LEADS ── -->
   <div class="section-label">Razones de descarte · Leads del período</div>
   <div class="card">
     <div class="card-header">
@@ -408,6 +429,7 @@ body {
   </div>
 
 
+  <!-- ── RAZONES DE DESCARTE · DEALS ── -->
   <div class="section-label">Razones de descarte · Deals / Oportunidades</div>
   <div class="card">
     <div class="card-header">
