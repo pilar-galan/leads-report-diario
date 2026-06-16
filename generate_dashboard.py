@@ -40,7 +40,9 @@ REV_META = [
 ]
 
 FIXED_CHANNELS = {
-    "Referido": {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
+    "SEO Orgánico":    {"n": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
+    "Social orgánico": {"n": 0, "icon": "📱", "color": "#38bdf8", "lc": {}},
+    "Referido":        {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
 }
 
 
@@ -96,8 +98,10 @@ def is_import(src, d1):
 
 
 def is_test(rev, email):
+    # Sólo marcamos como test la marca explícita o dominios de prueba claros.
+    # NO usamos el prefijo "demo@" porque hay empresas reales (p.ej. demo@bravanails.com).
     e = (email or "").lower()
-    return ((rev or "") == "Test" or e.startswith("demo@") or "prueba" in e
+    return ((rev or "") == "Test" or "prueba" in e
             or "yanoestaenelcrm" in e or "@test." in e or e.endswith(".test"))
 
 
