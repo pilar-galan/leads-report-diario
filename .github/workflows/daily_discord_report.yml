@@ -63,9 +63,8 @@ jobs:
           MESES = ['enero','febrero','marzo','abril','mayo','junio','julio',
                    'agosto','septiembre','octubre','noviembre','diciembre']
           hoy    = f"{now.day} de {MESES[now.month-1]}"
-          periodo = "incluye el fin de semana (sábado y domingo)" if now.weekday() == 0 else "últimas 24h (8:30h a 8:30h)"
 
-          message = {"content": f"📊 **Informe diario GuruSup** · {hoy} ({periodo})\n{dashboard_url}"}
+          message = {"content": f"📊 **Informe diario GuruSup** · {hoy}\n{dashboard_url}"}
           url = f"{webhook}?thread_id={thread_id}"
           r = requests.post(url, json=message)
           print("Status:", r.status_code, r.text[:200])
