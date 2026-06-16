@@ -2,15 +2,21 @@ name: Daily Leads Report → Discord
 
 on:
   schedule:
-    # 06:30 UTC = 08:30 hora España (verano UTC+2). Solo lunes a viernes (1-5).
+    # Job 1: genera el dashboard a las 8:30h España (06:30 UTC verano)
     - cron: '30 6 * * 1-5'
+    # Job 2: envía aviso a Discord a las 9:00h España (07:00 UTC verano)
+    - cron: '0 7 * * 1-5'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-and-send:
+  # ── Job 1: genera y publica el dashboard ──────────────────────────────────
+  generate-dashboard:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.schedule == '30 6 * * 1-5'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,6 +39,13 @@ jobs:
             git push
           fi
 
+  # ── Job 2: envía aviso a Discord ──────────────────────────────────────────
+  send-discord:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.schedule == '0 7 * * 1-5'
+    runs-on: ubuntu-latest
+    steps:
       - name: Enviar aviso a Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -42,15 +55,15 @@ jobs:
           import os, requests
           from datetime import datetime, timedelta, timezone
 
-          webhook = os.environ['DISCORD_WEBHOOK_URL']
-          thread_id = os.environ['DISCORD_THREAD_ID']
+          webhook    = os.environ['DISCORD_WEBHOOK_URL']
+          thread_id  = os.environ['DISCORD_THREAD_ID']
           dashboard_url = 'https://pilar-galan.github.io/leads-report-diario/dashboard_diario.html'
 
           now = datetime.now(timezone.utc) + timedelta(hours=2)
           MESES = ['enero','febrero','marzo','abril','mayo','junio','julio',
                    'agosto','septiembre','octubre','noviembre','diciembre']
-          hoy = f"{now.day} de {MESES[now.month-1]}"
-          periodo = "incluye el fin de semana (sábado y domingo)" if now.weekday() == 0 else "últimas 24h"
+          hoy    = f"{now.day} de {MESES[now.month-1]}"
+          periodo = "incluye el fin de semana (sábado y domingo)" if now.weekday() == 0 else "últimas 24h (8:30h a 8:30h)"
 
           message = {"content": f"📊 **Informe diario GuruSup** · {hoy} ({periodo})\n{dashboard_url}"}
           url = f"{webhook}?thread_id={thread_id}"
