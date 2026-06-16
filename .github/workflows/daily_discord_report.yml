@@ -6,11 +6,34 @@ on:
     - cron: '30 6 * * 1-5'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  send-report:
+  build-and-send:
     runs-on: ubuntu-latest
     steps:
-      - name: Send to Discord
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generar dashboard con datos reales de HubSpot
+        env:
+          HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+        run: python3 generate_dashboard.py
+
+      - name: Publicar dashboard actualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dashboard_diario.html
+          if git diff --staged --quiet; then
+            echo "Sin cambios en el dashboard"
+          else
+            git commit -m "chore: actualización diaria del dashboard (datos HubSpot)"
+            git push
+          fi
+
+      - name: Enviar aviso a Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_THREAD_ID: ${{ secrets.DISCORD_THREAD_ID }}
@@ -23,25 +46,13 @@ jobs:
           thread_id = os.environ['DISCORD_THREAD_ID']
           dashboard_url = 'https://pilar-galan.github.io/leads-report-diario/dashboard_diario.html'
 
-          # Hora España (UTC+2 en verano)
           now = datetime.now(timezone.utc) + timedelta(hours=2)
           MESES = ['enero','febrero','marzo','abril','mayo','junio','julio',
                    'agosto','septiembre','octubre','noviembre','diciembre']
           hoy = f"{now.day} de {MESES[now.month-1]}"
+          periodo = "incluye el fin de semana (sábado y domingo)" if now.weekday() == 0 else "últimas 24h"
 
-          # Los lunes (weekday()==0) el informe cubre también el fin de semana
-          if now.weekday() == 0:
-              periodo = "incluye el fin de semana (sábado y domingo)"
-          else:
-              periodo = "últimas 24h"
-
-          message = {
-              "content": (
-                  f"📊 **Informe diario GuruSup** · {hoy} ({periodo})\n"
-                  f"{dashboard_url}"
-              )
-          }
-
+          message = {"content": f"📊 **Informe diario GuruSup** · {hoy} ({periodo})\n{dashboard_url}"}
           url = f"{webhook}?thread_id={thread_id}"
           r = requests.post(url, json=message)
           print("Status:", r.status_code, r.text[:200])
