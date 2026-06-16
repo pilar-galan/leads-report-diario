@@ -39,6 +39,10 @@ REV_META = [
     ("Aceptado para gestión comercial", "var(--orange)"),
 ]
 
+FIXED_CHANNELS = {
+    "Referido": {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
+}
+
 
 def api_post(path, payload):
     req = urllib.request.Request(
@@ -117,8 +121,6 @@ def main():
     tz_spain = timezone(timedelta(hours=2))
     es_now   = datetime.now(timezone.utc).astimezone(tz_spain)
 
-    # Ventana: lunes cubre fin de semana (3d), resto 1d — el script corre a las 8:30
-    # así que start = es_now - Xd es exactamente 8:30 del día anterior (o viernes)
     days_back = 3 if es_now.weekday() == 0 else 1
     start     = es_now - timedelta(days=days_back)
     start_iso = iso(start)
@@ -130,7 +132,6 @@ def main():
     if es_now.weekday() == 0:
         periodo_txt += " · incluye fin de semana"
 
-    # Contactos del período
     win_filters = [
         {"propertyName": "createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
         {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
@@ -154,14 +155,16 @@ def main():
         if is_import(src, d1):  imports += 1; continue
         real_leads.append({"src": src, "d1": d1, "lc": lc, "rev": rev, "email": email})
 
-    total_leads     = len(real_leads)
-    sql_consultoria = sum(1 for l in real_leads if l["lc"] == "salesqualifiedlead")
-    sql_freemium    = sum(1 for l in real_leads if l["lc"] == "1378463825")
-    sql_total       = sql_consultoria + sql_freemium
-    app_sin_cualif  = sum(1 for l in real_leads
-                          if "e3875d32" in l["d1"] and l["lc"] not in ("salesqualifiedlead","1378463825"))
+    total_leads      = len(real_leads)
+    sql_consultoria  = sum(1 for l in real_leads if l["lc"] == "salesqualifiedlead")
+    sql_freemium     = sum(1 for l in real_leads if l["lc"] == "1378463825")
+    sql_total        = sql_consultoria + sql_freemium
+    clientes_nuevos  = sum(1 for l in real_leads if l["lc"] == "customer")
+    pct_sql_leads    = round(sql_total / total_leads * 100) if total_leads else 0
+    app_sin_cualif   = sum(1 for l in real_leads
+                           if "e3875d32" in l["d1"] and l["lc"] not in ("salesqualifiedlead","1378463825"))
 
-    # Canales (sobre leads reales)
+    # Canales
     chan = {}
     for l in real_leads:
         label, icon, color = classify_channel(l["src"], l["d1"])
@@ -169,7 +172,11 @@ def main():
         chan[label]["n"] += 1
         lc_lbl = LC_LABELS.get(l["lc"], l["lc"] or "—")
         chan[label]["lc"][lc_lbl] = chan[label]["lc"].get(lc_lbl, 0) + 1
-    channels = sorted(chan.items(), key=lambda x: -x[1]["n"])
+    # Canales fijos (siempre visibles aunque estén a 0)
+    for fc_label, fc_data in FIXED_CHANNELS.items():
+        if fc_label not in chan:
+            chan[fc_label] = dict(fc_data)
+    channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
     # Revisión ventas
     rev_counts = {}
@@ -206,6 +213,8 @@ def main():
         "sql_total":        sql_total,
         "sql_freemium":     sql_freemium,
         "sql_consultoria":  sql_consultoria,
+        "pct_sql_leads":    pct_sql_leads,
+        "clientes_nuevos":  clientes_nuevos,
         "nuevos_demos":     len(nuevos_demos),
         "deals_activos":    deals_activos,
         "nuevos_deals":     len(nuevos_deals),
@@ -225,40 +234,41 @@ def main():
     with open("dashboard_diario.html", "w", encoding="utf-8") as f:
         f.write(html)
     print(f"OK · leads={total_leads} sql={sql_total} (cons={sql_consultoria} free={sql_freemium}) "
-          f"imports={imports} tests={tests} deals={deals_activos}")
+          f"clientes={clientes_nuevos} imports={imports} tests={tests} deals={deals_activos}")
 
 
 def render(d):
-    # Revisión ventas
+    # Revisión ventas — todos los estados, aunque estén a 0
     rev_blocks = ""
     for key, color in REV_META:
         n = d["rev_counts"].get(key, 0)
-        if n == 0: continue
         sub = ""
-        if key == "Ya gestionado":
+        if key == "Ya gestionado" and n > 0:
             parts = []
             if d["ya_sql"]:  parts.append(f'<span>{d["ya_sql"]} SQL-Consultoría</span>')
             if d["ya_free"]: parts.append(f'<span>{d["ya_free"]} SQL-Freemium</span>')
             if d["ya_lead"]: parts.append(f'<span>{d["ya_lead"]} leads en seguimiento</span>')
-            sub = f'<div class="rb-detail">{"" .join(parts)}</div>'
-        elif key == "No aplica / Descartado" and len(d["descartados"]) <= 3:
+            sub = f'<div class="rb-detail">{"".join(parts)}</div>'
+        elif key == "No aplica / Descartado" and 0 < len(d["descartados"]) <= 3:
             items = [f"{esc(em)} ({esc(c)})" for em,c in d["descartados"]]
             sub = f'<div class="rb-detail"><span>{", ".join(items)}</span></div>'
-        rev_blocks += (f'<div class="rev-block" style="--rbc:{color}">'
+        opacity = "" if n > 0 else ' style="opacity:.45"'
+        rev_blocks += (f'<div class="rev-block" style="--rbc:{color}"{opacity}>'
                        f'<div class="rb-num">{n}</div>'
                        f'<div class="rb-name">{esc(key)}</div>{sub}</div>\n')
 
     # Canales
     ch_cards = ""
     for label, c in d["channels"]:
-        p       = pct(c["n"], d["total_leads"])
-        lc_txt  = ", ".join(f"{cnt} {lbl}" for lbl,cnt in sorted(c["lc"].items(), key=lambda x:-x[1]))
-        note    = ""
+        p      = pct(c["n"], d["total_leads"]) if c["n"] > 0 else "—"
+        lc_txt = ", ".join(f"{cnt} {lbl}" for lbl,cnt in sorted(c["lc"].items(), key=lambda x:-x[1]))
+        note   = ""
         if label == "Inbox / Chat":
             note = '<div class="ch-note">*pendiente de revisar origen</div>'
         elif label == "App / Freemium":
             note = f'<div class="ch-note">Registro vía app · {d["app_sin_cualif"]} pendientes de cualificar</div>'
-        ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}">'
+        opacity = "" if c["n"] > 0 else ' style="opacity:.45"'
+        ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}"{opacity}>'
                      f'<div class="ch-icon">{c["icon"]}</div>'
                      f'<div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
@@ -290,6 +300,8 @@ def render(d):
         sql_total      =d["sql_total"],
         sql_freemium   =d["sql_freemium"],
         sql_consultoria=d["sql_consultoria"],
+        pct_sql_leads  =d["pct_sql_leads"],
+        clientes_nuevos=d["clientes_nuevos"],
         nuevos_demos   =d["nuevos_demos"],
         rev_blocks     =rev_blocks,
         ch_cards       =ch_cards,
@@ -318,7 +330,7 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 .section-label{{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:32px 0 14px}}
 .section-label:first-child{{margin-top:0}}
 .funnel{{display:flex;gap:10px;flex-wrap:wrap}}
-.f-card{{flex:1;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}}
+.f-card{{flex:1;min-width:200px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}}
 .f-card::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fc,var(--brand))}}
 .fc-label{{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}}
 .fc-value{{font-size:44px;font-weight:800;line-height:1.1;color:var(--fv,var(--text))}}
@@ -326,9 +338,7 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 .fc-pct{{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--brand);background:rgba(255,107,91,.12);padding:2px 8px;border-radius:20px}}
 .fc-breakdown{{display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}}
 .fbd-item{{text-align:center}}.fbd-num{{font-size:22px;font-weight:800}}.fbd-label{{font-size:10px;color:var(--muted);margin-top:2px}}
-.fbd-reunion{{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}}
-.fbd-reunion strong{{color:var(--green)}}
-.f-leads{{--fc:var(--brand);--fv:var(--brand)}}.f-sql{{--fc:var(--orange);--fv:var(--orange)}}.f-demo{{--fc:var(--green);--fv:var(--green)}}
+.f-leads{{--fc:var(--brand);--fv:var(--brand)}}.f-sql{{--fc:var(--orange);--fv:var(--orange)}}.f-demo{{--fc:var(--green);--fv:var(--green)}}.f-clients{{--fc:var(--guru-400);--fv:var(--guru-300)}}
 .rev-blocks{{display:flex;gap:10px;flex-wrap:wrap}}
 .rev-block{{flex:1;min-width:140px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}}
 .rev-block::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rbc,var(--border))}}
@@ -394,12 +404,16 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
         <div class="fbd-item"><div class="fbd-num" style="color:var(--guru-300)">{sql_freemium}</div><div class="fbd-label">SQL-Freemium</div></div>
         <div class="fbd-item"><div class="fbd-num" style="color:var(--orange)">{sql_consultoria}</div><div class="fbd-label">SQL-Consultoría</div></div>
       </div>
-      <div class="fbd-reunion">Reuniones agendadas (período): <strong>{nuevos_demos}</strong></div>
     </div>
     <div class="f-card f-demo">
       <div class="fc-label">Reuniones agendadas · período</div>
       <div class="fc-value">{nuevos_demos}</div>
       <div class="fc-sub" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">Total en pipeline: <strong style="color:var(--text)">{demos_pipeline}</strong></div>
+    </div>
+    <div class="f-card f-clients">
+      <div class="fc-label">Clientes nuevos · período</div>
+      <div class="fc-value">{clientes_nuevos}</div>
+      <div class="fc-sub">Deals cerrados en el período</div>
     </div>
   </div>
 
