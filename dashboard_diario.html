@@ -181,13 +181,6 @@ body {
 .badge-blue   { background: rgba(59,130,246,.15); color: var(--blue);  border: 1px solid rgba(59,130,246,.3); }
 .badge-muted  { background: rgba(123,118,160,.12); color: var(--muted); border: 1px solid rgba(123,118,160,.25); }
 
-/* ── SQL MINI GRID ── */
-.sql-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.sql-cell { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-.sql-num   { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-.sql-label { font-size: 12px; font-weight: 600; }
-.sql-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
 /* ── TABLE ── */
 .table { width: 100%; border-collapse: collapse; }
 .table th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 0 12px 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
@@ -214,22 +207,76 @@ body {
 .alert { border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
 .alert-green { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2);  color: #6ee7b7; }
 .alert-muted { background: rgba(123,118,160,.06); border: 1px solid rgba(123,118,160,.2); color: var(--muted); }
+
+/* ── LOGIN OVERLAY ── */
+#gs-gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0a0618;
+  display: flex; align-items: center; justify-content: center;
+}
+#gs-gate .box {
+  background: #1e1b42; border: 1px solid #2e2a5a; border-radius: 16px;
+  padding: 40px 36px; width: 340px; text-align: center;
+}
+#gs-gate .logo {
+  width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 20px;
+  background: linear-gradient(135deg,#7c3aed,#9d5ffa);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 17px; color: #fff;
+}
+#gs-gate h2 { font-size: 18px; font-weight: 700; color: #f0edff; margin-bottom: 4px; }
+#gs-gate p  { font-size: 13px; color: #7b76a0; margin-bottom: 24px; }
+#gs-gate input {
+  width: 100%; padding: 11px 14px; border-radius: 8px;
+  border: 1px solid #2e2a5a; background: #161330;
+  color: #f0edff; font-size: 15px; margin-bottom: 12px;
+  outline: none; letter-spacing: .08em;
+}
+#gs-gate input:focus { border-color: #7c3aed; }
+#gs-gate button {
+  width: 100%; padding: 11px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg,#7c3aed,#9d5ffa);
+  color: #fff; font-size: 15px; font-weight: 700;
+}
+#gs-gate .err { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; }
 </style>
 <script>
 (function(){
-  var k='gs_ok';
-  if(sessionStorage.getItem(k)!=='1'){
-    var p=prompt('GuruSup · Dashboard Diario\nAcceso restringido — introduce la contraseña:');
-    if(p!=='radar2026'){
-      document.documentElement.innerHTML='<body style="background:#0a0618;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#7b76a0;font-size:14px;">Acceso denegado</body>';
-      return;
+  if(sessionStorage.getItem('gs_ok')==='1') return;
+  document.addEventListener('DOMContentLoaded', function(){
+    var gate = document.getElementById('gs-gate');
+    var inp  = document.getElementById('gs-pwd');
+    var err  = document.getElementById('gs-err');
+    var btn  = document.getElementById('gs-btn');
+    gate.style.display = 'flex';
+    function check(){
+      if(inp.value==='radar2026'){
+        sessionStorage.setItem('gs_ok','1');
+        gate.style.display='none';
+      } else {
+        err.style.display='block';
+        inp.value=''; inp.focus();
+      }
     }
-    sessionStorage.setItem(k,'1');
-  }
+    btn.addEventListener('click', check);
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') check(); });
+  });
 })();
 <\/script>
 </head>
 <body>
+
+<!-- LOGIN OVERLAY -->
+<div id="gs-gate" style="display:none">
+  <div class="box">
+    <div class="logo">GS</div>
+    <h2>GuruSup · Dashboard Diario</h2>
+    <p>Acceso restringido</p>
+    <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus>
+    <button id="gs-btn">Entrar</button>
+    <div id="gs-err" class="err">Contraseña incorrecta</div>
+  </div>
+</div>
 
 <div class="header">
   <div class="header-inner">
