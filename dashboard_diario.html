@@ -6,173 +6,102 @@
 <title>GuruSup · Dashboard Diario · 16 jun 2026</title>
 <style>
 :root {
-  --guru-900: #0a0618;
-  --guru-800: #110e2a;
-  --guru-700: #1a1640;
-  --guru-600: #241f58;
-  --guru-500: #7c3aed;
-  --guru-400: #9d5ffa;
-  --guru-300: #c4a2fc;
-  --surface: #161330;
-  --card: #1e1b42;
-  --border: #2e2a5a;
-  --green: #10b981;
-  --amber: #f59e0b;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --orange: #f97316;
-  --text: #f0edff;
-  --text-2: #c4bfe0;
-  --muted: #7b76a0;
+  --guru-900: #0a0618; --guru-800: #110e2a; --guru-700: #1a1640; --guru-600: #241f58;
+  --guru-500: #7c3aed; --guru-400: #9d5ffa; --guru-300: #c4a2fc;
+  --surface: #161330; --card: #1e1b42; --border: #2e2a5a;
+  --green: #10b981; --amber: #f59e0b; --red: #ef4444; --blue: #3b82f6; --orange: #f97316;
+  --text: #f0edff; --text-2: #c4bfe0; --muted: #7b76a0;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; font-size: 15px; }
-body {
-  background: var(--guru-900);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  line-height: 1.5;
-  min-height: 100vh;
-}
-
-.header {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(17,14,42,0.96);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-}
+body { background: var(--guru-900); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; line-height: 1.5; min-height: 100vh; }
+.header { position: sticky; top: 0; z-index: 100; background: rgba(17,14,42,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 24px; }
 .header-inner { display: flex; align-items: center; gap: 16px; padding: 14px 0 12px; flex-wrap: wrap; }
-.logo-box {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, var(--guru-500), var(--guru-400));
-  border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(124,58,237,0.4);
-}
+.logo-box { width: 40px; height: 40px; background: linear-gradient(135deg, var(--guru-500), var(--guru-400)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0; box-shadow: 0 0 16px rgba(124,58,237,0.4); }
 .header-title { flex: 1; min-width: 180px; }
 .header-title h1 { font-size: 16px; font-weight: 700; color: var(--text); }
 .header-title p  { font-size: 12px; color: var(--muted); }
-.live-badge {
-  background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);
-  color: var(--green); font-size: 11px; font-weight: 600;
-  padding: 4px 10px; border-radius: 20px;
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
-}
+.live-badge { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: var(--green); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
 .main { max-width: 1160px; margin: 0 auto; padding: 24px 20px 60px; }
-.section-label {
-  font-size: 11px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 14px; margin-top: 32px;
-}
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; margin-top: 32px; }
 .section-label:first-child { margin-top: 0; }
 
+/* CHANNELS */
+.channels-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+@media(max-width:900px){ .channels-grid { grid-template-columns: repeat(3,1fr); } }
+@media(max-width:550px){ .channels-grid { grid-template-columns: repeat(2,1fr); } }
+.ch-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 12px; position: relative; overflow: hidden; }
+.ch-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--chc, var(--guru-500)); border-radius: 10px 10px 0 0; }
+.ch-icon  { font-size: 18px; margin-bottom: 6px; }
+.ch-num   { font-size: 30px; font-weight: 800; line-height: 1; color: var(--chc, var(--text)); }
+.ch-label { font-size: 11px; font-weight: 600; color: var(--text-2); margin-top: 4px; }
+.ch-pct   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* FUNNEL */
 .funnel { display: flex; align-items: stretch; gap: 0; }
-
-.f-arrow {
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; flex-shrink: 0;
-  font-size: 18px; opacity: .5; padding-bottom: 2px;
-}
+.f-arrow { display: flex; align-items: center; justify-content: center; width: 28px; flex-shrink: 0; font-size: 18px; opacity: .5; }
 .f-arrow::after { content: '›'; color: var(--muted); }
-
-.f-card {
-  flex: 1; background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 16px 14px;
-  position: relative; overflow: hidden; min-width: 0;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.f-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--fc, var(--guru-500)); border-radius: 10px 10px 0 0;
-}
-.f-card .fc-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
-.f-card .fc-value { font-size: 28px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); }
-.f-card .fc-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-.f-card.f-hero {
-  border-color: rgba(157,95,250,.4);
-  background: rgba(124,58,237,.08);
-  --fc: var(--guru-400);
-}
-.f-card.f-hero .fc-value { font-size: 52px; color: var(--guru-300); }
-.f-card.f-hero .fc-label { color: var(--guru-300); }
-
-.fc-inner {
-  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.fc-inner .fc-inner-num  { font-size: 18px; font-weight: 800; color: var(--green); }
-.fc-inner .fc-inner-text { font-size: 11px; color: var(--muted); line-height: 1.3; }
-
+.f-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 16px 14px; position: relative; overflow: hidden; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.f-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--fc, var(--guru-500)); border-radius: 10px 10px 0 0; }
+.fc-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.fc-value { font-size: 30px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); }
+.fc-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.fc-inner { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.fc-inner-num  { font-size: 18px; font-weight: 800; color: var(--green); }
+.fc-inner-text { font-size: 11px; color: var(--muted); line-height: 1.3; }
+.fc-sql-breakdown { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
+.fc-sql-row  { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
+.fc-sql-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.fc-sql-type { flex: 1; }
+.fc-sql-num  { font-weight: 700; color: var(--text); }
 .fc-opp-new   { font-size: 38px; font-weight: 800; color: var(--green); line-height: 1; }
 .fc-opp-label { font-size: 10px; color: var(--green); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .fc-opp-total { font-size: 12px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .fc-opp-total strong { color: var(--text-2); }
-
-.fc-sql-breakdown {
-  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 5px;
-}
-.fc-sql-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
-.fc-sql-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.fc-sql-type { flex: 1; }
-.fc-sql-num  { font-weight: 700; color: var(--text); }
-
 .f-c-default { --fc: var(--guru-500); --fv: var(--text); }
 .f-c-orange  { --fc: var(--orange);   --fv: var(--orange); }
 .f-c-green   { --fc: var(--green);    --fv: var(--green); }
 .f-c-muted   { --fc: #3a3660;         --fv: var(--muted); }
 
+/* REVISION BLOCKS */
+.rev-blocks { display: flex; gap: 10px; flex-wrap: wrap; }
+.rev-block { flex: 1; min-width: 130px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 16px 16px 14px; position: relative; overflow: hidden; }
+.rev-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--rbc, var(--border)); border-radius: 10px 10px 0 0; }
+.rb-num  { font-size: 34px; font-weight: 800; line-height: 1; color: var(--rbc, var(--muted)); margin-bottom: 6px; }
+.rb-name { font-size: 12px; font-weight: 600; color: var(--rbc, var(--muted)); }
+.rb-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* CARDS */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
 .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .card-title { font-size: 14px; font-weight: 700; color: var(--text); }
 .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: .04em; }
-.badge-green  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
-.badge-red    { background: rgba(239,68,68,.15);  color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
-.badge-blue   { background: rgba(59,130,246,.15); color: var(--blue);  border: 1px solid rgba(59,130,246,.3); }
-.badge-muted  { background: rgba(123,118,160,.12); color: var(--muted); border: 1px solid rgba(123,118,160,.25); }
+.badge-green { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
+.badge-red   { background: rgba(239,68,68,.15);  color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
+.badge-muted { background: rgba(123,118,160,.12); color: var(--muted); border: 1px solid rgba(123,118,160,.25); }
 
-.rev-flow { display: flex; flex-direction: column; gap: 0; }
-.rev-flow-header {
-  display: flex; align-items: baseline; gap: 10px;
-  padding: 12px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px;
-}
-.rev-flow-total { font-size: 40px; font-weight: 800; color: var(--blue); line-height: 1; }
-.rev-flow-label { font-size: 13px; color: var(--muted); }
-.rev-flow-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 0 9px 4px;
-  border-bottom: 1px solid rgba(46,42,90,.4);
-}
-.rev-flow-row:last-child { border-bottom: none; }
-.rev-arrow { font-size: 13px; color: var(--muted); opacity: .6; flex-shrink: 0; }
-.rev-flow-num  { font-size: 22px; font-weight: 800; line-height: 1; min-width: 36px; }
-.rev-flow-info { flex: 1; }
-.rev-flow-name { font-size: 13px; font-weight: 600; }
-.rev-flow-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
-
+/* SQL GRID */
 .sql-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .sql-cell { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
 .sql-num   { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
 .sql-label { font-size: 12px; font-weight: 600; }
 .sql-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
+/* TABLE */
 .table { width: 100%; border-collapse: collapse; }
 .table th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 0 12px 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
 .table td { font-size: 13px; color: var(--text-2); padding: 10px 12px 10px 0; border-bottom: 1px solid rgba(46,42,90,.5); vertical-align: middle; }
 .table tr:last-child td { border-bottom: none; }
 .table td strong { color: var(--text); font-weight: 600; }
 .table tr.stage-divider td { background: rgba(255,255,255,.03); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border); }
-
 .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
 .pill-demo   { background: rgba(16,185,129,.15); color: var(--green); }
 .pill-discov { background: rgba(124,58,237,.15); color: var(--guru-300); }
 .new-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: rgba(16,185,129,.2); color: var(--green); letter-spacing: .04em; text-transform: uppercase; }
 
+/* REASON BARS */
 .reason-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .reason-row:last-child { margin-bottom: 0; }
 .reason-label { font-size: 13px; color: var(--text-2); min-width: 220px; flex-shrink: 0; }
@@ -181,12 +110,11 @@ body {
 .reason-count { font-size: 13px; font-weight: 700; color: var(--text); min-width: 28px; text-align: right; }
 
 .alert { border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
-.alert-green  { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2);  color: #6ee7b7; }
-.alert-muted  { background: rgba(123,118,160,.06); border: 1px solid rgba(123,118,160,.2); color: var(--muted); }
+.alert-green { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2); color: #6ee7b7; }
+.alert-muted { background: rgba(123,118,160,.06); border: 1px solid rgba(123,118,160,.2); color: var(--muted); }
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-inner">
     <div class="logo-box">GS</div>
@@ -197,50 +125,33 @@ body {
     <span class="live-badge"><span class="live-dot"></span>Actualizado hoy</span>
   </div>
 </div>
-
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · 15 jun 09:00 → 16 jun 11:18</div>
+  <div class="section-label">Canales de adquisición · 18 leads del período</div>
+  <div class="channels-grid">
+    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">6</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">33% del total</div></div>
+    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">5</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">28% del total</div></div>
+    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">4</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">22% del total</div></div>
+    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">2</div><div class="ch-label">Referido / Offline</div><div class="ch-pct">11% del total</div></div>
+    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">📱</div><div class="ch-num">1</div><div class="ch-label">Social Media</div><div class="ch-pct">6% del total</div></div>
+    <div class="ch-card" style="--chc:#7b76a0"><div class="ch-icon">❓</div><div class="ch-num">0</div><div class="ch-label">Sin fuente</div><div class="ch-pct">No identificado</div></div>
+  </div>
 
+  <div class="section-label">Embudo de conversión · 15 jun 09:00 → 16 jun 11:18</div>
   <div class="funnel">
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">18</div>
-      <div class="fc-sub">Lifecycle: lead</div>
-    </div>
+    <div class="f-card f-c-default"><div class="fc-label">Contactos creados</div><div class="fc-value">18</div><div class="fc-sub">Lifecycle: lead</div></div>
     <div class="f-arrow"></div>
-    <div class="f-card f-hero">
-      <div class="fc-label">Leads reales</div>
-      <div class="fc-value">15</div>
-      <div class="fc-sub">–2 duplicados · –1 descartado</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">MQL</div>
-      <div class="fc-value">15</div>
-      <div class="fc-sub">Marketing qualified</div>
-    </div>
+    <div class="f-card f-c-default"><div class="fc-label">MQL</div><div class="fc-value">15</div><div class="fc-sub">Marketing qualified</div></div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-orange">
       <div class="fc-label">SQLs del período</div>
       <div class="fc-value">3</div>
       <div class="fc-sub">Freemium + Consultoría</div>
       <div class="fc-sql-breakdown">
-        <div class="fc-sql-row">
-          <span class="fc-sql-dot" style="background:var(--guru-400)"></span>
-          <span class="fc-sql-type">SQL-Freemium</span>
-          <span class="fc-sql-num">1</span>
-        </div>
-        <div class="fc-sql-row">
-          <span class="fc-sql-dot" style="background:var(--orange)"></span>
-          <span class="fc-sql-type">SQL-Consultoría</span>
-          <span class="fc-sql-num">2</span>
-        </div>
+        <div class="fc-sql-row"><span class="fc-sql-dot" style="background:var(--guru-400)"></span><span class="fc-sql-type">SQL-Freemium</span><span class="fc-sql-num">1</span></div>
+        <div class="fc-sql-row"><span class="fc-sql-dot" style="background:var(--orange)"></span><span class="fc-sql-type">SQL-Consultoría</span><span class="fc-sql-num">2</span></div>
       </div>
-      <div class="fc-inner">
-        <div class="fc-inner-num">1</div>
-        <div class="fc-inner-text">Demo<br>agendada</div>
-      </div>
+      <div class="fc-inner"><div class="fc-inner-num">1</div><div class="fc-inner-text">Demo<br>agendada</div></div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-green">
@@ -250,103 +161,36 @@ body {
       <div class="fc-opp-total"><strong>14</strong> oportunidades activas en total</div>
     </div>
     <div class="f-arrow"></div>
-    <div class="f-card f-c-muted">
-      <div class="fc-label">Clientes nuevos</div>
-      <div class="fc-value" style="font-size:28px">—</div>
-      <div class="fc-sub">0 en este período</div>
-    </div>
+    <div class="f-card f-c-muted"><div class="fc-label">Clientes nuevos</div><div class="fc-value" style="font-size:28px">—</div><div class="fc-sub">0 en este período</div></div>
   </div>
 
-
-  <div class="section-label">Leads en revisión de ventas</div>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Desglose por estado · leads tratados por ventas</span>
-      <span class="badge badge-blue">17 de 18 leads</span>
-    </div>
-    <div class="rev-flow">
-      <div class="rev-flow-header">
-        <span class="rev-flow-total">17</span>
-        <span class="rev-flow-label">contactos tratados por ventas en el período</span>
-      </div>
-      <div class="rev-flow-row">
-        <span class="rev-arrow">›</span>
-        <span class="rev-flow-num" style="color:var(--green)">14</span>
-        <div class="rev-flow-info">
-          <div class="rev-flow-name" style="color:var(--green)">Ya gestionado</div>
-          <div class="rev-flow-desc">Proceso completado por el equipo comercial</div>
-        </div>
-      </div>
-      <div class="rev-flow-row">
-        <span class="rev-arrow">›</span>
-        <span class="rev-flow-num" style="color:var(--amber)">1</span>
-        <div class="rev-flow-info">
-          <div class="rev-flow-name" style="color:var(--amber)">Pendiente de revisión</div>
-          <div class="rev-flow-desc">Sin estado asignado aún</div>
-        </div>
-      </div>
-      <div class="rev-flow-row">
-        <span class="rev-arrow">›</span>
-        <span class="rev-flow-num" style="color:var(--guru-400)">2</span>
-        <div class="rev-flow-info">
-          <div class="rev-flow-name" style="color:var(--guru-400)">Duplicado</div>
-          <div class="rev-flow-desc">Contacto ya existente en la base de datos</div>
-        </div>
-      </div>
-      <div class="rev-flow-row">
-        <span class="rev-arrow">›</span>
-        <span class="rev-flow-num" style="color:var(--red)">1</span>
-        <div class="rev-flow-info">
-          <div class="rev-flow-name" style="color:var(--red)">No aplica / Descartado</div>
-          <div class="rev-flow-desc">Sin potencial comercial identificado</div>
-        </div>
-      </div>
-      <div class="rev-flow-row">
-        <span class="rev-arrow">›</span>
-        <span class="rev-flow-num" style="color:var(--muted)">0</span>
-        <div class="rev-flow-info">
-          <div class="rev-flow-name" style="color:var(--muted)">En revisión activa</div>
-          <div class="rev-flow-desc">Actualmente en proceso de valoración</div>
-        </div>
-      </div>
+  <div class="section-label">Leads en revisión de ventas · 17 de 18</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks">
+      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">14</div><div class="rb-name">Ya gestionado</div><div class="rb-desc">Proceso completado</div></div>
+      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">1</div><div class="rb-name">Pendiente revisión</div><div class="rb-desc">Sin asignar aún</div></div>
+      <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">0</div><div class="rb-name">En revisión activa</div><div class="rb-desc">En proceso ahora</div></div>
+      <div class="rev-block" style="--rbc:var(--orange)"><div class="rb-num">0</div><div class="rb-name">Aceptado gestión</div><div class="rb-desc">Listo para comercial</div></div>
+      <div class="rev-block" style="--rbc:var(--guru-400)"><div class="rb-num">2</div><div class="rb-name">Duplicado</div><div class="rb-desc">Ya existía en BBDD</div></div>
+      <div class="rev-block" style="--rbc:var(--red)"><div class="rb-num">1</div><div class="rb-name">No aplica / Desc.</div><div class="rb-desc">Sin potencial</div></div>
+      <div class="rev-block" style="--rbc:var(--muted)"><div class="rb-num">0</div><div class="rb-name">Test</div><div class="rb-desc">Cuenta de prueba</div></div>
     </div>
   </div>
-
 
   <div class="section-label">Volumen SQL acumulado</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Total SQL por tipo · acumulado histórico</span>
-    </div>
+    <div class="card-header"><span class="card-title">Total SQL por tipo · acumulado histórico</span></div>
     <div class="sql-grid">
-      <div class="sql-cell">
-        <div class="sql-num" style="color:var(--orange)">4</div>
-        <div class="sql-label" style="color:var(--orange)">SQL-Consultoría</div>
-        <div class="sql-sub">Acumulado total</div>
-      </div>
-      <div class="sql-cell">
-        <div class="sql-num" style="color:var(--guru-400)">1.168</div>
-        <div class="sql-label" style="color:var(--guru-400)">SQL-Freemium</div>
-        <div class="sql-sub">Incluye importación BBDD (414)</div>
-      </div>
-      <div class="sql-cell">
-        <div class="sql-num" style="color:var(--text)">1.172</div>
-        <div class="sql-label">Total SQL</div>
-        <div class="sql-sub">Consultoría + Freemium</div>
-      </div>
+      <div class="sql-cell"><div class="sql-num" style="color:var(--orange)">4</div><div class="sql-label" style="color:var(--orange)">SQL-Consultoría</div><div class="sql-sub">Acumulado total</div></div>
+      <div class="sql-cell"><div class="sql-num" style="color:var(--guru-400)">1.168</div><div class="sql-label" style="color:var(--guru-400)">SQL-Freemium</div><div class="sql-sub">Incluye importación BBDD (414)</div></div>
+      <div class="sql-cell"><div class="sql-num" style="color:var(--text)">1.172</div><div class="sql-label">Total SQL</div><div class="sql-sub">Consultoría + Freemium</div></div>
     </div>
   </div>
 
-
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Deals activos desde Discovery en adelante</span>
-      <span class="badge badge-green">14 deals activos</span>
-    </div>
-    <div class="alert alert-green">
-      🆕 Nuevas este período: <strong>Blue Banana</strong> (16 jun) · <strong>DVD Dental Solution</strong> (15 jun) · <strong>Brava Nails</strong> (15 jun)
-    </div>
+    <div class="card-header"><span class="card-title">Deals activos desde Discovery en adelante</span><span class="badge badge-green">14 deals activos</span></div>
+    <div class="alert alert-green">🆕 Nuevas este período: <strong>Blue Banana</strong> (16 jun) · <strong>DVD Dental Solution</strong> (15 jun) · <strong>Brava Nails</strong> (15 jun)</div>
     <table class="table">
       <thead><tr><th>Empresa</th><th>Etapa</th></tr></thead>
       <tbody>
@@ -370,60 +214,23 @@ body {
     </table>
   </div>
 
-
   <div class="section-label">Razones de descarte · Leads del período</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Motivos por estado de revisión ventas</span>
-      <span class="badge badge-red">1 descartado · 2 duplicados</span>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">No aplica / sin potencial comercial</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:33%; background:var(--red)"></div></div>
-      <div class="reason-count">1</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Duplicado (contacto ya existente)</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:66%; background:var(--guru-400)"></div></div>
-      <div class="reason-count">2</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Test / cuenta interna</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <p style="font-size:12px; color:var(--muted); margin-top:14px;">
-      ℹ️ 43 cuentas <strong>@gurusup.com</strong> (importación BBDD, 15 jun) excluidas del conteo — lifecycle "other" automático.
-    </p>
+    <div class="card-header"><span class="card-title">Motivos por estado de revisión ventas</span><span class="badge badge-red">1 descartado · 2 duplicados</span></div>
+    <div class="reason-row"><div class="reason-label">No aplica / sin potencial comercial</div><div class="reason-bar-wrap"><div class="reason-bar" style="width:33%; background:var(--red)"></div></div><div class="reason-count">1</div></div>
+    <div class="reason-row"><div class="reason-label">Duplicado (contacto ya existente)</div><div class="reason-bar-wrap"><div class="reason-bar" style="width:66%; background:var(--guru-400)"></div></div><div class="reason-count">2</div></div>
+    <div class="reason-row"><div class="reason-label">Test / cuenta interna</div><div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div><div class="reason-count">0</div></div>
+    <p style="font-size:12px; color:var(--muted); margin-top:14px;">ℹ️ 43 cuentas <strong>@gurusup.com</strong> (importación BBDD, 15 jun) excluidas del conteo — lifecycle "other" automático.</p>
   </div>
-
 
   <div class="section-label">Razones de descarte · Deals / Oportunidades</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Oportunidades cerradas o perdidas en el período</span>
-      <span class="badge badge-muted">0 deals cerrados</span>
-    </div>
-    <div class="alert alert-muted">
-      ✓ Sin deals cerrados ni perdidos en este período. El pipeline activo se mantiene en 14 oportunidades.
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Closed Lost · sin motivo especificado</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">No encaja con ICP</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Precio / presupuesto</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
+    <div class="card-header"><span class="card-title">Oportunidades cerradas o perdidas en el período</span><span class="badge badge-muted">0 deals cerrados</span></div>
+    <div class="alert alert-muted">✓ Sin deals cerrados ni perdidos en este período. El pipeline activo se mantiene en 14 oportunidades.</div>
+    <div class="reason-row"><div class="reason-label">Closed Lost · sin motivo especificado</div><div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div><div class="reason-count">0</div></div>
+    <div class="reason-row"><div class="reason-label">No encaja con ICP</div><div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div><div class="reason-count">0</div></div>
+    <div class="reason-row"><div class="reason-label">Precio / presupuesto</div><div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div><div class="reason-count">0</div></div>
   </div>
-
 
   <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
     GuruSup · Dashboard Diario generado el 16 jun 2026 · 11:18 hora España<br>
