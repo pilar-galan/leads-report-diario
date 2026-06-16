@@ -129,6 +129,8 @@ def main():
     start     = es_now - timedelta(days=days_back)
     start_iso = iso(start)
     end_iso   = iso(es_now)
+    # Permite fijar manualmente el inicio del período (p.ej. ventana rolling personalizada)
+    start_iso = os.environ.get("REPORT_START_ISO", start_iso)
 
     fecha_larga = f"{DIAS[es_now.weekday()]}, {es_now.day} de {MESES[es_now.month-1]} de {es_now.year}"
     periodo_txt = (f"{start.day} {MESES[start.month-1][:3]} {start.strftime('%H:%M')} → "
