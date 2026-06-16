@@ -3,247 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GuruSup · Dashboard Diario · 16 jun 2026</title>
+<title>GuruSup · Dashboard Diario</title>
 <style>
 :root {
-  --guru-900: #0a0618;
-  --guru-800: #110e2a;
-  --guru-700: #1a1640;
-  --guru-600: #241f58;
-  --guru-500: #7c3aed;
-  --guru-400: #9d5ffa;
-  --guru-300: #c4a2fc;
-  --surface: #161330;
-  --card: #1e1b42;
-  --border: #2e2a5a;
-  --green: #10b981;
-  --amber: #f59e0b;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --orange: #f97316;
-  --text: #f0edff;
-  --text-2: #c4bfe0;
-  --muted: #7b76a0;
+  --guru-900:#0a0618;--guru-500:#7c3aed;--guru-400:#9d5ffa;--guru-300:#c4a2fc;
+  --brand:#FF6B5B;--brand-2:#ff8f82;
+  --surface:#161330;--card:#1e1b42;--border:#2e2a5a;--green:#10b981;--amber:#f59e0b;
+  --red:#ef4444;--blue:#3b82f6;--orange:#f97316;--text:#f0edff;--text-2:#c4bfe0;--muted:#7b76a0;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 15px; }
-body {
-  background: var(--guru-900);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  line-height: 1.5;
-  min-height: 100vh;
-}
-
-/* ── HEADER ── */
-.header {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(17,14,42,0.96);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-}
-.header-inner { display: flex; align-items: center; gap: 16px; padding: 14px 0 12px; flex-wrap: wrap; }
-.logo-box {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, var(--guru-500), var(--guru-400));
-  border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(124,58,237,0.4);
-}
-.header-title { flex: 1; min-width: 180px; }
-.header-title h1 { font-size: 16px; font-weight: 700; color: var(--text); }
-.header-title p  { font-size: 12px; color: var(--muted); }
-.live-badge {
-  background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);
-  color: var(--green); font-size: 11px; font-weight: 600;
-  padding: 4px 10px; border-radius: 20px;
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
-}
-.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-/* ── LAYOUT ── */
-.main { max-width: 1160px; margin: 0 auto; padding: 24px 20px 60px; }
-.section-label {
-  font-size: 11px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 14px; margin-top: 32px;
-}
-.section-label:first-child { margin-top: 0; }
-
-/* ══ CANALES DE ADQUISICIÓN ══ */
-.channels-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-}
-@media(max-width:900px){ .channels-grid { grid-template-columns: repeat(3,1fr); } }
-@media(max-width:550px){ .channels-grid { grid-template-columns: repeat(2,1fr); } }
-
-.ch-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 14px 12px;
-  position: relative;
-  overflow: hidden;
-}
-.ch-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--chc, var(--guru-500)); border-radius: 10px 10px 0 0;
-}
-.ch-icon  { font-size: 18px; margin-bottom: 6px; }
-.ch-num   { font-size: 30px; font-weight: 800; line-height: 1; color: var(--chc, var(--text)); }
-.ch-label { font-size: 11px; font-weight: 600; color: var(--text-2); margin-top: 4px; }
-.ch-pct   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-/* ══ FUNNEL HORIZONTAL ══ */
-.funnel { display: flex; align-items: stretch; gap: 0; }
-
-.f-arrow {
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; flex-shrink: 0; font-size: 18px; opacity: .5;
-}
-.f-arrow::after { content: '›'; color: var(--muted); }
-
-.f-card {
-  flex: 1; background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 16px 14px;
-  position: relative; overflow: hidden; min-width: 0;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.f-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--fc, var(--guru-500)); border-radius: 10px 10px 0 0;
-}
-.fc-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
-.fc-value { font-size: 30px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); }
-.fc-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-.fc-inner {
-  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.fc-inner-num  { font-size: 18px; font-weight: 800; color: var(--green); }
-.fc-inner-text { font-size: 11px; color: var(--muted); line-height: 1.3; }
-
-.fc-sql-breakdown {
-  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 5px;
-}
-.fc-sql-row  { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
-.fc-sql-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.fc-sql-type { flex: 1; }
-.fc-sql-num  { font-weight: 700; color: var(--text); }
-
-.fc-opp-new   { font-size: 38px; font-weight: 800; color: var(--green); line-height: 1; }
-.fc-opp-label { font-size: 10px; color: var(--green); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-.fc-opp-total { font-size: 12px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-.fc-opp-total strong { color: var(--text-2); }
-
-.f-c-default { --fc: var(--guru-500); --fv: var(--text); }
-.f-c-orange  { --fc: var(--orange);   --fv: var(--orange); }
-.f-c-green   { --fc: var(--green);    --fv: var(--green); }
-.f-c-muted   { --fc: #3a3660;         --fv: var(--muted); }
-
-/* ══ REVISIÓN — HORIZONTAL BLOCKS ══ */
-.rev-blocks {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.rev-block {
-  flex: 1;
-  min-width: 130px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 16px 14px;
-  position: relative;
-  overflow: hidden;
-}
-.rev-block::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--rbc, var(--border)); border-radius: 10px 10px 0 0;
-}
-.rb-num   { font-size: 34px; font-weight: 800; line-height: 1; color: var(--rbc, var(--muted)); margin-bottom: 6px; }
-.rb-name  { font-size: 12px; font-weight: 600; color: var(--rbc, var(--muted)); }
-.rb-desc  { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-/* ── CARDS ── */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
-.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
-.badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: .04em; }
-.badge-green  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
-.badge-red    { background: rgba(239,68,68,.15);  color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
-.badge-blue   { background: rgba(59,130,246,.15); color: var(--blue);  border: 1px solid rgba(59,130,246,.3); }
-.badge-muted  { background: rgba(123,118,160,.12); color: var(--muted); border: 1px solid rgba(123,118,160,.25); }
-
-/* ── TABLE ── */
-.table { width: 100%; border-collapse: collapse; }
-.table th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 0 12px 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
-.table td { font-size: 13px; color: var(--text-2); padding: 10px 12px 10px 0; border-bottom: 1px solid rgba(46,42,90,.5); vertical-align: middle; }
-.table tr:last-child td { border-bottom: none; }
-.table td strong { color: var(--text); font-weight: 600; }
-.table tr.stage-divider td { background: rgba(255,255,255,.03); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border); }
-
-/* ── PILLS ── */
-.pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-.pill-demo   { background: rgba(16,185,129,.15); color: var(--green); }
-.pill-discov { background: rgba(124,58,237,.15); color: var(--guru-300); }
-.new-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: rgba(16,185,129,.2); color: var(--green); letter-spacing: .04em; text-transform: uppercase; }
-
-/* ── REASON BARS ── */
-.reason-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.reason-row:last-child { margin-bottom: 0; }
-.reason-label { font-size: 13px; color: var(--text-2); min-width: 220px; flex-shrink: 0; }
-.reason-bar-wrap { flex: 1; background: rgba(255,255,255,.05); border-radius: 4px; height: 6px; }
-.reason-bar { height: 6px; border-radius: 4px; }
-.reason-count { font-size: 13px; font-weight: 700; color: var(--text); min-width: 28px; text-align: right; }
-
-/* ── ALERT ── */
-.alert { border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
-.alert-green { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2);  color: #6ee7b7; }
-.alert-muted { background: rgba(123,118,160,.06); border: 1px solid rgba(123,118,160,.2); color: var(--muted); }
-
-/* ── LOGIN OVERLAY ── */
-#gs-gate {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #0a0618;
-  display: flex; align-items: center; justify-content: center;
-}
-#gs-gate .box {
-  background: #1e1b42; border: 1px solid #2e2a5a; border-radius: 16px;
-  padding: 40px 36px; width: 340px; text-align: center;
-}
-#gs-gate .logo {
-  width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 20px;
-  background: linear-gradient(135deg,#7c3aed,#9d5ffa);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 17px; color: #fff;
-}
-#gs-gate h2 { font-size: 18px; font-weight: 700; color: #f0edff; margin-bottom: 4px; }
-#gs-gate p  { font-size: 13px; color: #7b76a0; margin-bottom: 24px; }
-#gs-gate input {
-  width: 100%; padding: 11px 14px; border-radius: 8px;
-  border: 1px solid #2e2a5a; background: #161330;
-  color: #f0edff; font-size: 15px; margin-bottom: 12px;
-  outline: none; letter-spacing: .08em;
-}
-#gs-gate input:focus { border-color: #7c3aed; }
-#gs-gate button {
-  width: 100%; padding: 11px; border-radius: 8px; border: none; cursor: pointer;
-  background: linear-gradient(135deg,#7c3aed,#9d5ffa);
-  color: #fff; font-size: 15px; font-weight: 700;
-}
-#gs-gate .err { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}
+body{background:var(--guru-900);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;line-height:1.5;min-height:100vh}
+.header{position:sticky;top:0;z-index:100;background:rgba(17,14,42,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px}
+.header-inner{display:flex;align-items:center;gap:16px;padding:14px 0 12px;flex-wrap:wrap}
+.logo-box{width:40px;height:40px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0;box-shadow:0 0 16px rgba(255,107,91,.4)}
+.header-title{flex:1;min-width:180px}
+.header-title h1{font-size:16px;font-weight:700}
+.header-title p{font-size:12px;color:var(--muted)}
+.live-badge{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.main{max-width:1160px;margin:0 auto;padding:24px 20px 60px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;margin-top:32px}
+.section-label:first-child{margin-top:0}
+.channels-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:900px){.channels-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:550px){.channels-grid{grid-template-columns:repeat(2,1fr)}}
+.ch-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 14px 12px;position:relative;overflow:hidden}
+.ch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--chc,var(--guru-500));border-radius:10px 10px 0 0}
+.ch-icon{font-size:18px;margin-bottom:6px}
+.ch-num{font-size:30px;font-weight:800;line-height:1;color:var(--chc,var(--text))}
+.ch-label{font-size:11px;font-weight:600;color:var(--text-2);margin-top:4px}
+.ch-pct{font-size:11px;color:var(--muted);margin-top:2px}
+.funnel{display:flex;align-items:stretch;gap:0}
+.f-arrow{display:flex;align-items:center;justify-content:center;width:28px;flex-shrink:0;font-size:18px;opacity:.5}
+.f-arrow::after{content:'\203a';color:var(--muted)}
+.f-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 16px 14px;position:relative;overflow:hidden;min-width:0;display:flex;flex-direction:column;gap:4px}
+.f-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fc,var(--guru-500));border-radius:10px 10px 0 0}
+.fc-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.fc-value{font-size:30px;font-weight:800;line-height:1;color:var(--fv,var(--text))}
+.fc-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.fc-sql-breakdown{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.fc-sql-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2)}
+.fc-sql-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fc-sql-type{flex:1}
+.fc-sql-num{font-weight:700;color:var(--text)}
+.fc-opp-new{font-size:38px;font-weight:800;color:var(--green);line-height:1}
+.fc-opp-label{font-size:10px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fc-opp-total{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.fc-opp-total strong{color:var(--text-2)}
+.f-c-default{--fc:var(--guru-500);--fv:var(--text)}
+.f-c-orange{--fc:var(--orange);--fv:var(--orange)}
+.f-c-green{--fc:var(--green);--fv:var(--green)}
+.f-c-muted{--fc:#3a3660;--fv:var(--muted)}
+.rev-blocks{display:flex;gap:10px;flex-wrap:wrap}
+.rev-block{flex:1;min-width:130px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:16px 16px 14px;position:relative;overflow:hidden}
+.rev-block::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rbc,var(--border));border-radius:10px 10px 0 0}
+.rb-num{font-size:34px;font-weight:800;line-height:1;color:var(--rbc,var(--muted));margin-bottom:6px}
+.rb-name{font-size:12px;font-weight:600;color:var(--rbc,var(--muted))}
+.rb-desc{font-size:11px;color:var(--muted);margin-top:3px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:12px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:700}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.04em}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.badge-muted{background:rgba(123,118,160,.12);color:var(--muted);border:1px solid rgba(123,118,160,.25)}
+.table{width:100%;border-collapse:collapse}
+.table th{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0 12px 10px 0;text-align:left;border-bottom:1px solid var(--border)}
+.table td{font-size:13px;color:var(--text-2);padding:10px 12px 10px 0;border-bottom:1px solid rgba(46,42,90,.5);vertical-align:middle}
+.table td strong{color:var(--text);font-weight:600}
+.table tr.stage-divider td{background:rgba(255,255,255,.03);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border)}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.pill-demo{background:rgba(16,185,129,.15);color:var(--green)}
+.pill-discov{background:rgba(124,58,237,.15);color:var(--guru-300)}
+.new-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(16,185,129,.2);color:var(--green);letter-spacing:.04em;text-transform:uppercase}
+.reason-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.reason-label{font-size:13px;color:var(--text-2);min-width:220px;flex-shrink:0}
+.reason-bar-wrap{flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:6px}
+.reason-bar{height:6px;border-radius:4px}
+.reason-count{font-size:13px;font-weight:700;color:var(--text);min-width:28px;text-align:right}
+.alert{border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px}
+.alert-muted{background:rgba(123,118,160,.06);border:1px solid rgba(123,118,160,.2);color:var(--muted)}
+#gs-gate{position:fixed;inset:0;z-index:9999;background:#0a0618;display:flex;align-items:center;justify-content:center}
+#gs-gate .box{background:#1e1b42;border:1px solid #2e2a5a;border-radius:16px;padding:40px 36px;width:340px;text-align:center}
+#gs-gate .logo{width:48px;height:48px;border-radius:12px;margin:0 auto 20px;background:linear-gradient(135deg,#FF6B5B,#ff8f82);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff}
+#gs-gate h2{font-size:18px;font-weight:700;color:#f0edff;margin-bottom:4px}
+#gs-gate p{font-size:13px;color:#7b76a0;margin-bottom:24px}
+#gs-gate input{width:100%;padding:11px 14px;border-radius:8px;border:1px solid #2e2a5a;background:#161330;color:#f0edff;font-size:15px;margin-bottom:12px;outline:none;letter-spacing:.08em}
+#gs-gate input:focus{border-color:#FF6B5B}
+#gs-gate button{width:100%;padding:11px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(135deg,#FF6B5B,#ff8f82);color:#fff;font-size:15px;font-weight:700}
+#gs-gate .err{color:#ef4444;font-size:12px;margin-top:8px;display:none}
 </style>
 </head>
 <body>
-
-<!-- LOGIN OVERLAY (visible por defecto, se oculta solo si ya autenticado) -->
 <div id="gs-gate">
   <div class="box">
     <div class="logo">GS</div>
@@ -260,7 +112,7 @@ body {
     <div class="logo-box">GS</div>
     <div class="header-title">
       <h1>GuruSup · Dashboard Diario</h1>
-      <p>Lunes, 16 de junio de 2026 · período: 15 jun 09:00 → 16 jun 11:18 (hora España)</p>
+      <p>Martes, 16 de junio de 2026 · 15 jun → 16 jun (hora España)</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Actualizado hoy</span>
   </div>
@@ -268,251 +120,107 @@ body {
 
 <div class="main">
 
-  <!-- ══ EMBUDO DE CONVERSIÓN ══ -->
-  <div class="section-label">Embudo de conversión · 15 jun 09:00 → 16 jun 11:18</div>
-
+  <div class="section-label">Embudo de conversión · 15 jun → 16 jun (hora España)</div>
   <div class="funnel">
-
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">18</div>
-      <div class="fc-sub">Lifecycle: lead</div>
-    </div>
-
+    <div class="f-card f-c-default"><div class="fc-label">Contactos creados</div><div class="fc-value">38</div><div class="fc-sub">Lifecycle: lead</div></div>
     <div class="f-arrow"></div>
-
-    <div class="f-card f-c-default">
-      <div class="fc-label">MQL</div>
-      <div class="fc-value">15</div>
-      <div class="fc-sub">Marketing qualified</div>
-    </div>
-
+    <div class="f-card f-c-default"><div class="fc-label">MQL</div><div class="fc-value">24</div><div class="fc-sub">Marketing qualified</div></div>
     <div class="f-arrow"></div>
-
-    <div class="f-card f-c-orange">
-      <div class="fc-label">SQLs del período</div>
-      <div class="fc-value">3</div>
-      <div class="fc-sub">Freemium + Consultoría</div>
+    <div class="f-card f-c-orange"><div class="fc-label">SQLs del período</div><div class="fc-value">4</div><div class="fc-sub">Freemium + Consultoría</div>
       <div class="fc-sql-breakdown">
-        <div class="fc-sql-row">
-          <span class="fc-sql-dot" style="background:var(--guru-400)"></span>
-          <span class="fc-sql-type">SQL-Freemium</span>
-          <span class="fc-sql-num">1</span>
-        </div>
-        <div class="fc-sql-row">
-          <span class="fc-sql-dot" style="background:var(--orange)"></span>
-          <span class="fc-sql-type">SQL-Consultoría</span>
-          <span class="fc-sql-num">2</span>
-        </div>
-      </div>
-      <div class="fc-inner">
-        <div class="fc-inner-num">1</div>
-        <div class="fc-inner-text">Demo<br>agendada</div>
-      </div>
-    </div>
-
+        <div class="fc-sql-row"><span class="fc-sql-dot" style="background:var(--guru-400)"></span><span class="fc-sql-type">SQL-Freemium</span><span class="fc-sql-num">0</span></div>
+        <div class="fc-sql-row"><span class="fc-sql-dot" style="background:var(--orange)"></span><span class="fc-sql-type">SQL-Consultoría</span><span class="fc-sql-num">4</span></div>
+      </div></div>
     <div class="f-arrow"></div>
-
-    <div class="f-card f-c-green">
-      <div class="fc-label">Oportunidades nuevas</div>
-      <div class="fc-opp-new">3</div>
-      <div class="fc-opp-label">en este período</div>
-      <div class="fc-opp-total"><strong>14</strong> oportunidades activas en total</div>
-    </div>
-
+    <div class="f-card f-c-green"><div class="fc-label">Oportunidades nuevas</div><div class="fc-opp-new">21</div><div class="fc-opp-label">en este período</div><div class="fc-opp-total"><strong>84</strong> oportunidades activas en total</div></div>
     <div class="f-arrow"></div>
-
-    <div class="f-card f-c-muted">
-      <div class="fc-label">Clientes nuevos</div>
-      <div class="fc-value" style="font-size:28px">—</div>
-      <div class="fc-sub">0 en este período</div>
-    </div>
-
+    <div class="f-card f-c-muted"><div class="fc-label">Clientes nuevos</div><div class="fc-value" style="font-size:28px">—</div><div class="fc-sub">en este período</div></div>
   </div>
 
-
-  <!-- ══ REVISIÓN VENTAS — HORIZONTAL ══ -->
-  <div class="section-label">Leads en revisión de ventas · 17 de 18</div>
+  <div class="section-label">Leads en revisión de ventas</div>
   <div class="card" style="padding:16px 20px;">
     <div class="rev-blocks">
-
       <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">14</div>
+        <div class="rb-num">10</div>
         <div class="rb-name">Ya gestionado</div>
         <div class="rb-desc">Proceso completado</div>
       </div>
-
       <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">1</div>
+        <div class="rb-num">0</div>
         <div class="rb-name">Pendiente revisión</div>
         <div class="rb-desc">Sin asignar aún</div>
       </div>
-
       <div class="rev-block" style="--rbc:var(--blue)">
         <div class="rb-num">0</div>
         <div class="rb-name">En revisión activa</div>
         <div class="rb-desc">En proceso ahora</div>
       </div>
-
       <div class="rev-block" style="--rbc:var(--orange)">
         <div class="rb-num">0</div>
         <div class="rb-name">Aceptado gestión</div>
         <div class="rb-desc">Listo para comercial</div>
       </div>
-
       <div class="rev-block" style="--rbc:var(--guru-400)">
         <div class="rb-num">2</div>
         <div class="rb-name">Duplicado</div>
         <div class="rb-desc">Ya existía en BBDD</div>
       </div>
-
       <div class="rev-block" style="--rbc:var(--red)">
-        <div class="rb-num">1</div>
+        <div class="rb-num">0</div>
         <div class="rb-name">No aplica / Desc.</div>
         <div class="rb-desc">Sin potencial</div>
       </div>
-
       <div class="rev-block" style="--rbc:var(--muted)">
-        <div class="rb-num">0</div>
+        <div class="rb-num">2</div>
         <div class="rb-name">Test</div>
         <div class="rb-desc">Cuenta de prueba</div>
       </div>
-
     </div>
   </div>
 
-
-  <!-- ── RAZONES DE DESCARTE · LEADS ── -->
-  <div class="section-label">Razones de descarte · Leads del período</div>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Motivos por estado de revisión ventas</span>
-      <span class="badge badge-red">1 descartado · 2 duplicados</span>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">No aplica / sin potencial comercial</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:33%; background:var(--red)"></div></div>
-      <div class="reason-count">1</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Duplicado (contacto ya existente)</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:66%; background:var(--guru-400)"></div></div>
-      <div class="reason-count">2</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Test / cuenta interna</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <p style="font-size:12px; color:var(--muted); margin-top:14px;">
-      ℹ️ 43 cuentas <strong>@gurusup.com</strong> (importación BBDD, 15 jun) excluidas del conteo — lifecycle &quot;other&quot; automático.
-    </p>
-  </div>
-
-
-  <!-- ── CANALES DE ADQUISICIÓN ── -->
-  <div class="section-label">Canales de adquisición · 18 leads del período</div>
+  <div class="section-label">Canales de adquisición</div>
   <div class="channels-grid">
-    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">6</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">33% del total</div></div>
-    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">5</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">28% del total</div></div>
-    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">4</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">22% del total</div></div>
-    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">2</div><div class="ch-label">Referido / Offline</div><div class="ch-pct">11% del total</div></div>
-    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">📱</div><div class="ch-num">1</div><div class="ch-label">Social Media</div><div class="ch-pct">6% del total</div></div>
-    <div class="ch-card" style="--chc:#7b76a0"><div class="ch-icon">❓</div><div class="ch-num">0</div><div class="ch-label">Sin fuente</div><div class="ch-pct">No identificado</div></div>
+    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">1</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">3% del total</div></div>
+    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">4</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">11% del total</div></div>
+    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">9</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">24% del total</div></div>
+    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">0</div><div class="ch-label">Referido</div><div class="ch-pct">0% del total</div></div>
+    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">📱</div><div class="ch-num">0</div><div class="ch-label">Social Media</div><div class="ch-pct">0% del total</div></div>
+    <div class="ch-card" style="--chc:#a78bfa"><div class="ch-icon">🏢</div><div class="ch-num">23</div><div class="ch-label">Offline</div><div class="ch-pct">61% del total</div></div>
   </div>
 
-
-  <!-- ── OPORTUNIDADES ACTIVAS ── -->
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Deals activos desde Discovery en adelante</span>
-      <span class="badge badge-green">14 deals activos</span>
-    </div>
-    <div class="alert alert-green">
-      🆕 Nuevas este período: <strong>Blue Banana</strong> (16 jun) · <strong>DVD Dental Solution</strong> (15 jun) · <strong>Brava Nails</strong> (15 jun)
-    </div>
+    <div class="card-header"><span class="card-title">Deals activos desde Discovery en adelante</span><span class="badge badge-green">84 deals activos</span></div>
     <table class="table">
       <thead><tr><th>Empresa</th><th>Etapa</th></tr></thead>
-      <tbody>
-        <tr class="stage-divider"><td colspan="2">🔍 Discovery &amp; Lead Qualification — 2 deals</td></tr>
-        <tr><td><strong>Blue Banana</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>DVD Dental Solution</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr class="stage-divider"><td colspan="2">📅 Demo / Reunión — 12 deals</td></tr>
-        <tr><td><strong>Brava Nails</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Rusticae</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>GlowWhite</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Grupo Alsea</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Davante</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Som Mobilitat</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Redexis</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Meit</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Gam Rentals</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Plenergy</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Nattivus</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-        <tr><td><strong>Dencanto Community</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td></tr>
-      </tbody>
+      <tbody><tr class="stage-divider"><td colspan="2">Discovery — 64 deals</td></tr><tr><td><strong>Bit2Me</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>RegalOriginal</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Wingo</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Mon Parnasse</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Asociacion Española Contra el Cancer</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Greyfinch</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>COS Global Services - Nuevo tipo de objeto Deal</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>CABE Trasteros</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>BlueSpace</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>milanaguilera95@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>hoshinggavin142@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>abnadleb08@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>imamuliyani845@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>mirofoxtryxx@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>mianbhai1465@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>sithumtharana0@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>sandeep.bachhawat1@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>u1857460878@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>woodazor305@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>f3144488@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>anastaciaogongo730@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>neizek001@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>kingsfordappiah91@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>islamimran440ii@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>tkai83@hotmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>cs9372469@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>arketipi@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>mininoxeixo28@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>langregorioiglesias@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>ramramgaund@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>sarasousa.beautyadvisor@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>m13357959@gmail.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Weekendesk</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>[DUPLICADO] Avantio</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Grupo Asesban</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>DVD DENTAL SOLUTION </strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Sonia Pladevall Ruiz alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Esther Escanciano alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Rafael Benitez Mozos alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Cesar Moreno alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Alejandra Hernandez Moreno alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Manuel Poveda Saenz alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Rafael Castillo Sancho alex@gurusup.com</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Egoitz Lazkano alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Jesica Letona alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Miguel Castellote alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Maria Lopez-Obrero Monge alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Fernando Fernandez alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>David Garcia Silva alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Blue banana</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Rodrigo Hernandez alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Emili Parreno alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Pol Oliva Marti alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Bilal Ahmed alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Kwaku Yeboah-Antwi alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Artur Krzystek alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Heikki Nousiainen alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Jiaqi Pan alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Raphael Steil alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Mateusz Wozniak alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Francesc Julia Ametller alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Jerzy Biernacki alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Botond Egri alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr><td><strong>Emilio Mosteiro alex@gurusup.com</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td></tr><tr class="stage-divider"><td colspan="2">Needs Validation — 14 deals</td></tr><tr><td><strong>Mizubath</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Xtrim</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Dencanto Community</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Nattivus</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Plenergy </strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Gam Rentals</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Meit </strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Redexis</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Som Mobilitat </strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Davante</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Grupo Alsea</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>GlowWhite</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Rusticae</strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr><td><strong>Brava Nails </strong></td><td><span class="pill pill-demo">Needs Validation</span></td></tr><tr class="stage-divider"><td colspan="2">Best Case — 2 deals</td></tr><tr><td><strong>danielamieva@eboca.com</strong></td><td><span class="pill pill-demo">Best Case</span></td></tr><tr><td><strong>Flywire</strong></td><td><span class="pill pill-demo">Best Case</span></td></tr></tbody>
     </table>
   </div>
 
-
-  <!-- ── RAZONES DE DESCARTE · DEALS ── -->
   <div class="section-label">Razones de descarte · Deals / Oportunidades</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Oportunidades cerradas o perdidas en el período</span>
-      <span class="badge badge-muted">0 deals cerrados</span>
-    </div>
-    <div class="alert alert-muted">
-      ✓ Sin deals cerrados ni perdidos en este período. El pipeline activo se mantiene en 14 oportunidades.
-    </div>
+    <div class="card-header"><span class="card-title">Oportunidades cerradas o perdidas en el período</span></div>
+    <div class="alert alert-muted">✓ Sin deals cerrados ni perdidos en este período.</div>
     <div class="reason-row">
-      <div class="reason-label">Closed Lost · sin motivo especificado</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">No encaja con ICP</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Precio / presupuesto</div>
+      <div class="reason-label">Sin deals perdidos en el período</div>
       <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
       <div class="reason-count">0</div>
     </div>
   </div>
 
-
-  <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
-    GuruSup · Dashboard Diario generado el 16 jun 2026 · 11:18 hora España<br>
-    Período: 15 jun 09:00 – 16 jun 11:18 (hora España · UTC+2)
+  <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
+    GuruSup · Dashboard Diario generado el 16 Jun 2026 · 16:13 (hora España) · datos en vivo desde HubSpot
   </div>
-
 </div>
 
 <script>
 function gsCheck(){
-  var inp=document.getElementById('gs-pwd');
-  var err=document.getElementById('gs-err');
-  if(inp.value==='radar2026'){
-    try{ sessionStorage.setItem('gs_ok','1'); }catch(e){}
-    document.getElementById('gs-gate').style.display='none';
-  } else {
-    err.style.display='block';
-    inp.value=''; inp.focus();
-  }
+  var inp=document.getElementById('gs-pwd');var err=document.getElementById('gs-err');
+  if(inp.value==='radar2026'){try{sessionStorage.setItem('gs_ok','1');}catch(e){}document.getElementById('gs-gate').style.display='none';}
+  else{err.style.display='block';inp.value='';inp.focus();}
 }
-try{
-  if(sessionStorage.getItem('gs_ok')==='1'){
-    document.getElementById('gs-gate').style.display='none';
-  }
-}catch(e){}
-document.addEventListener('keydown',function(e){
-  var g=document.getElementById('gs-gate');
-  if(e.key==='Enter'&&g&&g.style.display!=='none') gsCheck();
-});
+try{if(sessionStorage.getItem('gs_ok')==='1'){document.getElementById('gs-gate').style.display='none';}}catch(e){}
+document.addEventListener('keydown',function(e){var g=document.getElementById('gs-gate');if(e.key==='Enter'&&g&&g.style.display!=='none')gsCheck();});
 </script>
-
 </body>
 </html>
