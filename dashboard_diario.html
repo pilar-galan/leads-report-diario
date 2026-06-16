@@ -84,7 +84,7 @@ body {
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* LAYOUT */
-.main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+.main { max-width: 1140px; margin: 0 auto; padding: 24px 20px 60px; }
 
 /* SECTION TITLE */
 .section-label {
@@ -98,47 +98,108 @@ body {
 }
 .section-label:first-child { margin-top: 0; }
 
-/* KPI TOP ROW */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
-  margin-bottom: 8px;
-}
-@media(max-width:900px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
-@media(max-width:600px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+/* ── FUNNEL KPI BLOCK ── */
+.funnel-block { margin-bottom: 8px; }
 
-.kpi-card {
+.funnel-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 10px;
+}
+
+.funnel-row-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  width: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 12px;
+}
+
+.funnel-cells {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 1;
+}
+
+.funnel-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  flex-shrink: 0;
+  color: var(--border);
+  font-size: 14px;
+  position: relative;
+}
+.funnel-arrow::after {
+  content: '›';
+  font-size: 20px;
+  color: var(--muted);
+  opacity: .5;
+}
+
+.fkpi {
+  flex: 1;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px 16px 14px;
+  border-radius: 10px;
+  padding: 14px 16px 12px;
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
-.kpi-card::before {
+.fkpi::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: var(--accent, var(--guru-500));
-  border-radius: 12px 12px 0 0;
+  background: var(--faccent, var(--guru-500));
+  border-radius: 10px 10px 0 0;
 }
-.kpi-card .label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
-.kpi-card .value { font-size: 34px; font-weight: 800; color: var(--text); line-height: 1; }
-.kpi-card .sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-.kpi-card.accent-green { --accent: var(--green); }
-.kpi-card.accent-green .value { color: var(--green); }
-.kpi-card.accent-amber { --accent: var(--amber); }
-.kpi-card.accent-amber .value { color: var(--amber); }
-.kpi-card.accent-red { --accent: var(--red); }
-.kpi-card.accent-red .value { color: var(--red); }
-.kpi-card.accent-blue { --accent: var(--blue); }
-.kpi-card.accent-blue .value { color: var(--blue); }
-.kpi-card.accent-orange { --accent: var(--orange); }
-.kpi-card.accent-orange .value { color: var(--orange); }
-.kpi-card.accent-purple { --accent: var(--guru-400); }
-.kpi-card.accent-purple .value { color: var(--guru-400); }
+.fkpi .flabel {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fkpi .fvalue {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--fcolor, var(--text));
+}
+.fkpi .fsub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fkpi.c-default  { --faccent: var(--guru-500); --fcolor: var(--text); }
+.fkpi.c-blue     { --faccent: var(--blue);     --fcolor: var(--blue); }
+.fkpi.c-amber    { --faccent: var(--amber);    --fcolor: var(--amber); }
+.fkpi.c-red      { --faccent: var(--red);      --fcolor: var(--red); }
+.fkpi.c-green    { --faccent: var(--green);    --fcolor: var(--green); }
+.fkpi.c-purple   { --faccent: var(--guru-400); --fcolor: var(--guru-400); }
+.fkpi.c-orange   { --faccent: var(--orange);   --fcolor: var(--orange); }
+.fkpi.c-dim      { --faccent: #3a3660;         --fcolor: var(--muted); }
+
+.funnel-row.row2 .fkpi .fvalue { font-size: 26px; }
+.funnel-row.row3 .fkpi .fvalue { font-size: 26px; }
 
 /* CARDS */
 .card {
@@ -169,14 +230,12 @@ body {
 .badge-purple { background: rgba(157,95,250,.15); color: var(--guru-400); border: 1px solid rgba(157,95,250,.3); }
 .badge-orange { background: rgba(249,115,22,.15); color: var(--orange); border: 1px solid rgba(249,115,22,.3); }
 
-/* TABLE */
 .table { width: 100%; border-collapse: collapse; }
 .table th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 0 12px 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
 .table td { font-size: 13px; color: var(--text-2); padding: 10px 12px 10px 0; border-bottom: 1px solid rgba(46,42,90,.5); vertical-align: middle; }
 .table tr:last-child td { border-bottom: none; }
 .table td strong { color: var(--text); font-weight: 600; }
 
-/* STAGE PILL */
 .stage-pill {
   display: inline-block;
   font-size: 11px;
@@ -185,14 +244,12 @@ body {
   border-radius: 20px;
   white-space: nowrap;
 }
-.stage-ok       { background: rgba(16,185,129,.15); color: var(--green); }
-.stage-review   { background: rgba(59,130,246,.15); color: var(--blue); }
-.stage-pending  { background: rgba(245,158,11,.15); color: var(--amber); }
-.stage-discard  { background: rgba(239,68,68,.15);  color: var(--red); }
-.stage-dup      { background: rgba(124,58,237,.15); color: var(--guru-300); }
-.stage-accepted { background: rgba(249,115,22,.15); color: var(--orange); }
+.stage-ok      { background: rgba(16,185,129,.15); color: var(--green); }
+.stage-review  { background: rgba(59,130,246,.15); color: var(--blue); }
+.stage-pending { background: rgba(245,158,11,.15); color: var(--amber); }
+.stage-discard { background: rgba(239,68,68,.15);  color: var(--red); }
+.stage-dup     { background: rgba(124,58,237,.15); color: var(--guru-300); }
 
-/* PIPELINE STAGE */
 .deal-stage {
   display: inline-block;
   font-size: 11px;
@@ -203,29 +260,22 @@ body {
   color: var(--blue);
   white-space: nowrap;
 }
-.deal-stage.demo { background: rgba(16,185,129,.15); color: var(--green); }
+.deal-stage.demo      { background: rgba(16,185,129,.15); color: var(--green); }
 .deal-stage.discovery { background: rgba(124,58,237,.15); color: var(--guru-300); }
 
-/* REASON BARS */
 .reason-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .reason-row:last-child { margin-bottom: 0; }
 .reason-label { font-size: 13px; color: var(--text-2); min-width: 200px; flex-shrink: 0; }
 .reason-bar-wrap { flex: 1; background: rgba(255,255,255,.05); border-radius: 4px; height: 6px; }
-.reason-bar { height: 6px; border-radius: 4px; background: var(--guru-500); }
+.reason-bar { height: 6px; border-radius: 4px; }
 .reason-count { font-size: 13px; font-weight: 700; color: var(--text); min-width: 28px; text-align: right; }
 
-/* TWO COLS */
-.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media(max-width:700px){ .two-cols { grid-template-columns: 1fr; } }
-
-/* REVISION TABLE GRID */
 .revision-grid {
   display: grid;
   grid-template-columns: repeat(3,1fr);
   gap: 10px;
 }
 @media(max-width:700px){ .revision-grid { grid-template-columns: 1fr 1fr; } }
-
 .rev-cell {
   background: rgba(255,255,255,.03);
   border: 1px solid var(--border);
@@ -239,47 +289,24 @@ body {
 .rev-info .rev-stage { font-size: 12px; font-weight: 600; }
 .rev-info .rev-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* FREEMIUM LIST */
-.freemium-list { display: flex; flex-direction: column; gap: 0; }
-.freemium-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid rgba(46,42,90,.5);
-  font-size: 13px;
-}
-.freemium-row:last-child { border-bottom: none; }
-.freq-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--guru-500), var(--guru-400));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
-}
-.freq-name { font-weight: 600; color: var(--text); flex: 1; }
-.freq-co { font-size: 12px; color: var(--muted); }
-.freq-time { font-size: 11px; color: var(--muted); white-space: nowrap; }
-
-/* NEW BADGE */
 .new-tag {
   font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
   background: rgba(16,185,129,.2); color: var(--green);
   letter-spacing: .04em; text-transform: uppercase;
 }
-
-/* TIMESTAMP */
 .ts { font-size: 12px; color: var(--muted); }
 
-/* ALERT BANNER */
 .alert-banner {
-  background: rgba(245,158,11,.08);
-  border: 1px solid rgba(245,158,11,.25);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 12px;
-  color: #d4a017;
   margin-bottom: 14px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.25);
+  color: #d4a017;
 }
 </style>
 </head>
@@ -290,7 +317,7 @@ body {
     <div class="logo-box">GS</div>
     <div class="header-title">
       <h1>GuruSup · Dashboard Diario</h1>
-      <p>Lunes, 16 de junio de 2026 · 09:00 – 11:18 (hora España)</p>
+      <p>Lunes, 16 de junio de 2026 · 09:00 – 11:18 (hora España) · período: 15 jun 09:00 → 16 jun 11:18</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Actualizado hoy</span>
   </div>
@@ -298,49 +325,92 @@ body {
 
 <div class="main">
 
-  <!-- KPIs principales -->
-  <div class="section-label">KPIs del día · 15 jun 09:00 → 16 jun 11:18</div>
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="label">Leads del día</div>
-      <div class="value">18</div>
-      <div class="sub">Inbound (excl. importación)</div>
+  <div class="section-label">Embudo del día · de izquierda a derecha</div>
+  <div class="funnel-block">
+
+    <div class="funnel-row row1">
+      <div class="funnel-row-label">Leads</div>
+      <div class="funnel-cells">
+        <div class="fkpi c-default">
+          <div class="flabel">Total leads</div>
+          <div class="fvalue">18</div>
+          <div class="fsub">Inbound del período</div>
+        </div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-blue">
+          <div class="flabel">Tratados ventas</div>
+          <div class="fvalue">17</div>
+          <div class="fsub">Con revisión asignada</div>
+        </div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-amber">
+          <div class="flabel">Pendiente revisión</div>
+          <div class="fvalue">1</div>
+          <div class="fsub">Sin estado de ventas</div>
+        </div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-red">
+          <div class="flabel">Descartados</div>
+          <div class="fvalue">1</div>
+          <div class="fsub">admin@chorlibici</div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card accent-blue">
-      <div class="label">En revisión ventas</div>
-      <div class="value">17</div>
-      <div class="sub">Con estado asignado</div>
+
+    <div class="funnel-row row2">
+      <div class="funnel-row-label">Ciclo de vida</div>
+      <div class="funnel-cells">
+        <div class="fkpi c-default">
+          <div class="flabel">MQL</div>
+          <div class="fvalue">15</div>
+          <div class="fsub">Leads cualificados</div>
+        </div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-orange">
+          <div class="flabel">SQL-Consultoría</div>
+          <div class="fvalue">2</div>
+          <div class="fsub">Netberry · Sector Vending</div>
+        </div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-purple">
+          <div class="flabel">SQL-Freemium</div>
+          <div class="fvalue">1</div>
+          <div class="fsub">Brava Nails</div>
+        </div>
+        <div class="funnel-arrow" style="visibility:hidden"></div>
+        <div class="fkpi c-dim" style="visibility:hidden"><div class="fvalue">—</div></div>
+      </div>
     </div>
-    <div class="kpi-card accent-red">
-      <div class="label">Descartados</div>
-      <div class="value">43</div>
-      <div class="sub">Test / cuentas internas</div>
+
+    <div class="funnel-row row3">
+      <div class="funnel-row-label">Conversión</div>
+      <div class="funnel-cells">
+        <div class="fkpi c-dim" style="visibility:hidden"><div class="fvalue">—</div></div>
+        <div class="funnel-arrow" style="visibility:hidden"></div>
+        <div class="fkpi c-dim" style="visibility:hidden"><div class="fvalue">—</div></div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-green">
+          <div class="flabel">Demos agendadas</div>
+          <div class="fvalue">1</div>
+          <div class="fsub">Brava Nails · 15 jun</div>
+        </div>
+        <div class="funnel-arrow"></div>
+        <div class="fkpi c-blue">
+          <div class="flabel">Oportunidades activas</div>
+          <div class="fvalue">14</div>
+          <div class="fsub">3 nuevas este período</div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card accent-green">
-      <div class="label">Demo agendada</div>
-      <div class="value">1</div>
-      <div class="sub">Brava Nails · 15 jun</div>
-    </div>
-    <div class="kpi-card accent-orange">
-      <div class="label">SQL-Consultoría</div>
-      <div class="value">4</div>
-      <div class="sub">Total acumulado</div>
-    </div>
-    <div class="kpi-card accent-purple">
-      <div class="label">SQL-Freemium</div>
-      <div class="value">1.168</div>
-      <div class="sub">Total acumulado</div>
-    </div>
+
   </div>
 
-  <!-- Leads en revisión de ventas -->
   <div class="section-label">Leads en revisión de ventas</div>
   <div class="card">
     <div class="card-header">
       <span class="card-title">Estado de revisión de ventas</span>
       <span class="badge badge-blue">17 contactos</span>
     </div>
-
     <div class="revision-grid" style="margin-bottom:20px;">
       <div class="rev-cell">
         <div class="rev-num" style="color:var(--green)">14</div>
@@ -364,15 +434,9 @@ body {
         </div>
       </div>
     </div>
-
     <table class="table">
       <thead>
-        <tr>
-          <th>Contacto</th>
-          <th>Empresa</th>
-          <th>Estado revisión</th>
-          <th>Ciclo de vida</th>
-        </tr>
+        <tr><th>Contacto</th><th>Empresa</th><th>Estado revisión</th><th>Ciclo de vida</th></tr>
       </thead>
       <tbody>
         <tr><td><strong>Daria Kowalska</strong></td><td>Social4you</td><td><span class="stage-pill stage-ok">Ya gestionado</span></td><td><span class="ts">MQL</span></td></tr>
@@ -396,47 +460,33 @@ body {
     </table>
   </div>
 
-  <!-- Descartados -->
-  <div class="section-label">Descartados</div>
+  <div class="section-label">Descartados del día</div>
   <div class="card">
     <div class="card-header">
-      <span class="card-title">Contactos descartados en el período</span>
-      <span class="badge badge-red">43 contactos</span>
-    </div>
-    <div class="alert-banner">
-      ⚠️ Los 43 descartados son cuentas <strong>@gurusup.com internas</strong> creadas por la importación masiva de la BBDD de la app (15 jun ~11:20 UTC). Lifecycle: <strong>other</strong>.
+      <span class="card-title">Contactos descartados del total de leads del período</span>
+      <span class="badge badge-red">1 de 18 leads</span>
     </div>
     <div class="reason-row">
-      <div class="reason-label">Cuentas internas @gurusup.com</div>
+      <div class="reason-label">No aplica / sin potencial</div>
       <div class="reason-bar-wrap"><div class="reason-bar" style="width:100%; background:var(--red)"></div></div>
-      <div class="reason-count">43</div>
+      <div class="reason-count">1</div>
     </div>
-    <div class="reason-row">
-      <div class="reason-label">Spam / lifecycle Spam</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">Sin email</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:0%"></div></div>
-      <div class="reason-count">0</div>
-    </div>
+    <p style="font-size:12px; color:var(--muted); margin-top:12px;">
+      ℹ️ Nota: 43 cuentas internas <strong>@gurusup.com</strong> importadas el 15 jun (BBDD app) no se contabilizan como leads del día — se clasificaron como lifecycle "other" automáticamente.
+    </p>
   </div>
 
-  <!-- Nuevos Freemiums -->
   <div class="section-label">Nuevos SQL-Freemium</div>
   <div class="card">
     <div class="card-header">
       <span class="card-title">Importación BBDD Freemium · 15 jun</span>
-      <span class="badge badge-purple">414 contactos</span>
+      <span class="badge badge-purple">414 contactos · Total acumulado: 1.168</span>
     </div>
     <div class="alert-banner" style="background:rgba(157,95,250,.08); border-color:rgba(157,95,250,.25); color:#c4a2fc;">
-      📦 Importación masiva de contactos freemium de la app de GuruSup realizada el <strong>15 jun a las 11:20 UTC</strong>. Total acumulado SQL-Freemium: <strong>1.168</strong>.
+      📦 Importación masiva de contactos freemium de la app de GuruSup realizada el <strong>15 jun a las 11:20 UTC</strong>. Cuentas demo/test pendientes de limpieza.
     </div>
     <table class="table">
-      <thead>
-        <tr><th>Detalle</th><th>Valor</th></tr>
-      </thead>
+      <thead><tr><th>Detalle</th><th>Valor</th></tr></thead>
       <tbody>
         <tr><td>Contactos importados en período</td><td><strong>414</strong></td></tr>
         <tr><td>Método</td><td>Importación offline (BBDD app)</td></tr>
@@ -448,26 +498,17 @@ body {
     </table>
   </div>
 
-  <!-- Oportunidades activas -->
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
     <div class="card-header">
       <span class="card-title">Deals activos desde Discovery en adelante</span>
       <span class="badge badge-green">14 deals activos</span>
     </div>
-
     <div class="alert-banner" style="background:rgba(16,185,129,.06); border-color:rgba(16,185,129,.2); color:#6ee7b7;">
       🆕 Nuevas oportunidades del período: <strong>Blue Banana</strong> (16 jun) · <strong>DVD Dental Solution</strong> (15 jun) · <strong>Brava Nails</strong> (15 jun, demo agendada)
     </div>
-
     <table class="table">
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Etapa</th>
-          <th>Pipeline</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Empresa</th><th>Etapa</th><th>Pipeline</th></tr></thead>
       <tbody>
         <tr><td><strong>Brava Nails</strong> <span class="new-tag">NUEVO</span></td><td><span class="deal-stage demo">Demo · Reunión</span></td><td>Pipeline de ventas</td></tr>
         <tr><td><strong>Blue Banana</strong> <span class="new-tag">NUEVO</span></td><td><span class="deal-stage discovery">Discovery</span></td><td>Pipeline de ventas</td></tr>
@@ -487,26 +528,19 @@ body {
     </table>
   </div>
 
-  <!-- Razones de descarte -->
   <div class="section-label">Razones de descarte</div>
   <div class="card">
     <div class="card-header">
-      <span class="card-title">Distribución de motivos de descarte</span>
-      <span class="badge badge-red">44 total</span>
+      <span class="card-title">Motivos de descarte · leads del período</span>
+      <span class="badge badge-red">1 lead descartado</span>
     </div>
     <div class="reason-row">
-      <div class="reason-label">Cuenta interna / @gurusup.com</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:98%; background:var(--red)"></div></div>
-      <div class="reason-count">43</div>
-    </div>
-    <div class="reason-row">
-      <div class="reason-label">No aplica / sin potencial (admin@chorlibici)</div>
-      <div class="reason-bar-wrap"><div class="reason-bar" style="width:2%; background:var(--amber)"></div></div>
+      <div class="reason-label">No aplica / sin potencial comercial</div>
+      <div class="reason-bar-wrap"><div class="reason-bar" style="width:100%; background:var(--red)"></div></div>
       <div class="reason-count">1</div>
     </div>
   </div>
 
-  <!-- Footer -->
   <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
     GuruSup · Dashboard Diario generado el 16 jun 2026 · 11:18 hora España<br>
     Período de cobertura: 15 jun 09:00 – 16 jun 11:18 (hora España · UTC+2)
