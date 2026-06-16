@@ -187,6 +187,11 @@ def main():
     mail_open  = sum(1 for l in real_leads if l["biz"] == "si" and l["open"]  > 0)
     mail_click = sum(1 for l in real_leads if l["biz"] == "si" and l["click"] > 0)
     mail_form  = sum(1 for l in real_leads if l["biz"] == "si" and l["conv"]  > 1)
+    # Permite fijar métricas reales de la campaña de email (aperturas/clics sin bots)
+    mail_sent  = int(os.environ.get("MAIL_SENT",  mail_sent))
+    mail_open  = int(os.environ.get("MAIL_OPEN",  mail_open))
+    mail_click = int(os.environ.get("MAIL_CLICK", mail_click))
+    mail_form  = int(os.environ.get("MAIL_FORM",  mail_form))
 
     # Canales
     chan = {}
@@ -487,7 +492,7 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
       <div class="es-num">{mail_form}<span class="es-pct">{mail_form_pct}</span></div><div class="es-label">Formulario rellenado</div>
     </div>
   </div>
-  <p class="note">Aperturas y clics provienen de las métricas de email marketing de HubSpot; "Formulario rellenado" = leads con más de un envío de formulario (proxy).</p>
+  <p class="note">Datos de la campaña de email de bienvenida en HubSpot (aperturas y clics excluyendo bots). "Formulario rellenado" estimado por envíos de formulario.</p>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
