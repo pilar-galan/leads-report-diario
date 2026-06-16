@@ -241,39 +241,35 @@ body {
 #gs-gate .err { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; }
 </style>
 <script>
-(function(){
-  if(sessionStorage.getItem('gs_ok')==='1') return;
-  document.addEventListener('DOMContentLoaded', function(){
-    var gate = document.getElementById('gs-gate');
-    var inp  = document.getElementById('gs-pwd');
-    var err  = document.getElementById('gs-err');
-    var btn  = document.getElementById('gs-btn');
-    gate.style.display = 'flex';
-    function check(){
-      if(inp.value==='radar2026'){
-        sessionStorage.setItem('gs_ok','1');
-        gate.style.display='none';
-      } else {
-        err.style.display='block';
-        inp.value=''; inp.focus();
-      }
-    }
-    btn.addEventListener('click', check);
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') check(); });
-  });
-})();
-<\/script>
+if(sessionStorage.getItem('gs_ok')==='1'){
+  document.write('<style>#gs-gate{display:none!important}</style>');
+}
+function gsCheck(){
+  var inp=document.getElementById('gs-pwd');
+  var err=document.getElementById('gs-err');
+  if(inp.value==='radar2026'){
+    sessionStorage.setItem('gs_ok','1');
+    document.getElementById('gs-gate').style.display='none';
+  } else {
+    err.style.display='block';
+    inp.value=''; inp.focus();
+  }
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('gs-gate').style.display!=='none') gsCheck();
+});
+</script>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div id="gs-gate" style="display:none">
+<!-- LOGIN OVERLAY (visible por defecto, se oculta con JS si ya autenticado) -->
+<div id="gs-gate">
   <div class="box">
     <div class="logo">GS</div>
     <h2>GuruSup · Dashboard Diario</h2>
     <p>Acceso restringido</p>
     <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus>
-    <button id="gs-btn">Entrar</button>
+    <button id="gs-btn" onclick="gsCheck()">Entrar</button>
     <div id="gs-err" class="err">Contraseña incorrecta</div>
   </div>
 </div>
