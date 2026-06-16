@@ -129,8 +129,13 @@ def main():
     fecha_larga = f"{DIAS[es_now.weekday()]}, {es_now.day} de {MESES[es_now.month-1]} de {es_now.year}"
     periodo_txt = (f"{start.day} {MESES[start.month-1][:3]} {start.strftime('%H:%M')} → "
                    f"{es_now.day} {MESES[es_now.month-1][:3]} {es_now.strftime('%H:%M')} (hora España)")
+    if start.month == es_now.month:
+        periodo_corto = f"{start.day}–{es_now.day} {MESES[es_now.month-1][:3]}"
+    else:
+        periodo_corto = f"{start.day} {MESES[start.month-1][:3]}–{es_now.day} {MESES[es_now.month-1][:3]}"
     if es_now.weekday() == 0:
-        periodo_txt += " · incluye fin de semana"
+        periodo_txt   += " · incluye fin de semana"
+        periodo_corto += " · incl. finde"
 
     win_filters = [
         {"propertyName": "createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
@@ -139,6 +144,8 @@ def main():
     raw = fetch_all("contacts", win_filters, [
         "email", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas",
+        "email_bienvenida_enviado", "hs_email_open", "hs_email_click",
+        "num_conversion_events",
     ])
 
     real_leads = []
@@ -150,10 +157,15 @@ def main():
         d1    = p.get("hs_analytics_source_data_1") or ""
         lc    = p.get("lifecyclestage") or ""
         rev   = p.get("revision_ventas") or ""
+        biz   = p.get("email_bienvenida_enviado") or ""
+        opens = int(p.get("hs_email_open") or 0)
+        clicks= int(p.get("hs_email_click") or 0)
+        convs = int(p.get("num_conversion_events") or 0)
         if is_internal(email): internal += 1; continue
         if is_test(rev, email): tests += 1; continue
         if is_import(src, d1):  imports += 1; continue
-        real_leads.append({"src": src, "d1": d1, "lc": lc, "rev": rev, "email": email})
+        real_leads.append({"src": src, "d1": d1, "lc": lc, "rev": rev, "email": email,
+                           "biz": biz, "open": opens, "click": clicks, "conv": convs})
 
     total_leads      = len(real_leads)
     sql_consultoria  = sum(1 for l in real_leads if l["lc"] == "salesqualifiedlead")
@@ -163,6 +175,12 @@ def main():
     pct_sql_leads    = round(sql_total / total_leads * 100) if total_leads else 0
     app_sin_cualif   = sum(1 for l in real_leads
                            if "e3875d32" in l["d1"] and l["lc"] not in ("salesqualifiedlead","1378463825"))
+
+    # Email de bienvenida (enviado a nuevos leads del período)
+    mail_sent  = sum(1 for l in real_leads if l["biz"] == "si")
+    mail_open  = sum(1 for l in real_leads if l["biz"] == "si" and l["open"]  > 0)
+    mail_click = sum(1 for l in real_leads if l["biz"] == "si" and l["click"] > 0)
+    mail_form  = sum(1 for l in real_leads if l["biz"] == "si" and l["conv"]  > 1)
 
     # Canales
     chan = {}
@@ -206,10 +224,15 @@ def main():
     data = {
         "fecha_larga":      fecha_larga,
         "periodo_txt":      periodo_txt,
+        "periodo_corto":    periodo_corto,
         "total_leads":      total_leads,
         "imports":          imports,
         "tests":            tests,
         "internal":         internal,
+        "mail_sent":        mail_sent,
+        "mail_open":        mail_open,
+        "mail_click":       mail_click,
+        "mail_form":        mail_form,
         "sql_total":        sql_total,
         "sql_freemium":     sql_freemium,
         "sql_consultoria":  sql_consultoria,
@@ -266,7 +289,7 @@ def render(d):
         if label == "Inbox / Chat":
             note = '<div class="ch-note">*pendiente de revisar origen</div>'
         elif label == "App / Freemium":
-            note = f'<div class="ch-note">Registro vía app · {d["app_sin_cualif"]} pendientes de cualificar</div>'
+            note = f'<div class="ch-note">Registro vía app (signup). {d["app_sin_cualif"]} pendientes de cualificar</div>'
         opacity = "" if c["n"] > 0 else ' style="opacity:.45"'
         ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}"{opacity}>'
                      f'<div class="ch-icon">{c["icon"]}</div>'
@@ -295,8 +318,11 @@ def render(d):
 
     return TEMPLATE.format(
         fecha_larga    =esc(d["fecha_larga"]),
-        periodo_txt    =esc(d["periodo_txt"]),
+        periodo_corto  =esc(d["periodo_corto"]),
         total_leads    =d["total_leads"],
+        imports        =d["imports"],
+        tests          =d["tests"],
+        internal       =d["internal"],
         sql_total      =d["sql_total"],
         sql_freemium   =d["sql_freemium"],
         sql_consultoria=d["sql_consultoria"],
@@ -305,6 +331,13 @@ def render(d):
         nuevos_demos   =d["nuevos_demos"],
         rev_blocks     =rev_blocks,
         ch_cards       =ch_cards,
+        mail_sent      =d["mail_sent"],
+        mail_open      =d["mail_open"],
+        mail_open_pct  =pct(d["mail_open"],  d["mail_sent"]),
+        mail_click     =d["mail_click"],
+        mail_click_pct =pct(d["mail_click"], d["mail_sent"]),
+        mail_form      =d["mail_form"],
+        mail_form_pct  =pct(d["mail_form"],  d["mail_sent"]),
         deal_rows      =deal_rows,
         deals_activos  =d["deals_activos"],
         nuevos_deals   =d["nuevos_deals"],
@@ -330,7 +363,7 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 .section-label{{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:32px 0 14px}}
 .section-label:first-child{{margin-top:0}}
 .funnel{{display:flex;gap:10px;flex-wrap:wrap}}
-.f-card{{flex:1;min-width:200px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}}
+.f-card{{flex:1;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}}
 .f-card::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fc,var(--brand))}}
 .fc-label{{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}}
 .fc-value{{font-size:44px;font-weight:800;line-height:1.1;color:var(--fv,var(--text))}}
@@ -339,6 +372,13 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 .fc-breakdown{{display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}}
 .fbd-item{{text-align:center}}.fbd-num{{font-size:22px;font-weight:800}}.fbd-label{{font-size:10px;color:var(--muted);margin-top:2px}}
 .f-leads{{--fc:var(--brand);--fv:var(--brand)}}.f-sql{{--fc:var(--orange);--fv:var(--orange)}}.f-demo{{--fc:var(--green);--fv:var(--green)}}.f-clients{{--fc:var(--guru-400);--fv:var(--guru-300)}}
+.note{{font-size:12px;color:var(--muted);margin-top:10px}}
+.email-strip{{display:flex;gap:10px;flex-wrap:wrap}}
+.email-stat{{flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}}
+.email-stat::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ec,var(--brand))}}
+.es-num{{font-size:26px;font-weight:800;color:var(--ec,var(--text))}}
+.es-pct{{font-size:11px;font-weight:700;color:var(--ec);opacity:.7;margin-left:3px}}
+.es-label{{font-size:11px;color:var(--muted);font-weight:600;margin-top:3px}}
 .rev-blocks{{display:flex;gap:10px;flex-wrap:wrap}}
 .rev-block{{flex:1;min-width:140px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}}
 .rev-block::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rbc,var(--border))}}
@@ -385,7 +425,7 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
   <div id="gs-err" class="err">Contraseña incorrecta</div>
 </div></div>
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
-<div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>{fecha_larga} · {periodo_txt}</p></div>
+<div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>{fecha_larga} · período {periodo_corto} · hora España</p></div>
 <span class="live-badge">● Datos en vivo · HubSpot</span></div></div>
 <div class="main">
 
@@ -416,6 +456,7 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
       <div class="fc-sub">Deals cerrados en el período</div>
     </div>
   </div>
+  <p class="note">ℹ️ Excluidos: <strong>{imports}</strong> importaciones · <strong>{tests}</strong> tests · <strong>{internal}</strong> cuenta interna.</p>
 
   <div class="section-label">Leads en revisión de ventas · {total_leads} leads reales</div>
   <div class="card" style="padding:16px 20px">
@@ -424,6 +465,23 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 
   <div class="section-label">Canales de adquisición · {total_leads} leads reales</div>
   <div class="channels-strip">{ch_cards}</div>
+
+  <div class="section-label">Email de bienvenida · enviado a nuevos leads del período</div>
+  <div class="email-strip">
+    <div class="email-stat" style="--ec:var(--brand)">
+      <div class="es-num">{mail_sent}</div><div class="es-label">Enviados</div>
+    </div>
+    <div class="email-stat" style="--ec:var(--blue)">
+      <div class="es-num">{mail_open}<span class="es-pct">{mail_open_pct}</span></div><div class="es-label">Abiertos</div>
+    </div>
+    <div class="email-stat" style="--ec:var(--orange)">
+      <div class="es-num">{mail_click}<span class="es-pct">{mail_click_pct}</span></div><div class="es-label">Clics</div>
+    </div>
+    <div class="email-stat" style="--ec:var(--green)">
+      <div class="es-num">{mail_form}<span class="es-pct">{mail_form_pct}</span></div><div class="es-label">Formulario rellenado</div>
+    </div>
+  </div>
+  <p class="note">Aperturas y clics provienen de las métricas de email marketing de HubSpot; "Formulario rellenado" = leads con más de un envío de formulario (proxy).</p>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
