@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+
+# Credenciales GA4 — NUNCA subir al repo
+ga4-sa.json
+*sa*.json
+.env

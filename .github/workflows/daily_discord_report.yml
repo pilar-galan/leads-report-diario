@@ -22,9 +22,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias (GA4)
+        run: pip install google-analytics-data
+
       - name: Generar dashboard con datos reales de HubSpot
         env:
           HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
         run: python3 generate_dashboard.py
 
       - name: Publicar dashboard actualizado

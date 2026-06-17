@@ -7,6 +7,8 @@ Lunes cubre fin de semana: viernes 8:30 → lunes 8:30.
 import os, sys, json, urllib.request, urllib.error
 from datetime import datetime, timedelta, timezone
 
+import ga4_report
+
 TOKEN = os.environ.get("HUBSPOT_TOKEN", "")
 
 # Email de bienvenida — actualizar manualmente hasta tener acceso API Marketing Hub
@@ -199,6 +201,9 @@ def main():
         {"propertyName": "pipeline",     "operator": "EQ", "value": "default"},
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
     ]
+    # Datos de tráfico web (GA4) — opcional, no rompe si faltan credenciales
+    ga4 = ga4_report.fetch_ga4(start, es_now)
+
     all_deals = fetch_all("deals", deal_filters, ["dealname","dealstage","createdate"])
     deals          = [d for d in all_deals if "@" not in (d["properties"].get("dealname") or "")]
     deals_activos  = len(deals)
@@ -231,13 +236,16 @@ def main():
         "ya_lead":          ya_lead,
         "descartados":      descartados,
         "app_sin_cualif":   app_sin_cualif,
+        "ga4":              ga4,
         "generado":         es_now.strftime("%d %b %Y · %H:%M"),
     }
     html = render(data)
     with open("dashboard_diario.html", "w", encoding="utf-8") as f:
         f.write(html)
+    ga4_txt = (f"ga4_sessions={ga4['totals']['sessions']}" if ga4.get("available")
+               else "ga4=off")
     print(f"OK · leads={total_leads} sql={sql_total} (cons={sql_consultoria} free={sql_freemium}) "
-          f"clientes={clientes_nuevos} imports={imports} tests={tests} deals={deals_activos}")
+          f"clientes={clientes_nuevos} imports={imports} tests={tests} deals={deals_activos} {ga4_txt}")
 
 
 def render(d):
@@ -296,11 +304,55 @@ def render(d):
                           f'<td><span class="pill {pill}">{esc(label)}</span></td>'
                           f'<td class="td-date">{cd}</td></tr>')
 
+    # Sección GA4 (tráfico web) — solo si hay datos disponibles
+    ga4_section = ""
+    ga4 = d.get("ga4") or {}
+    if ga4.get("available"):
+        t = ga4["totals"]
+        # Tarjetas de canal (sesiones + usuarios)
+        ga4_chips = ""
+        max_sess = max((s for *_, s, _u in ga4["channels"]), default=0)
+        for label, icon, color, sessions, users in ga4["channels"]:
+            bar = round(sessions / max_sess * 100) if max_sess else 0
+            ga4_chips += (
+                f'<div class="ch-card" style="--chc:{color}">'
+                f'<div class="ch-icon">{icon}</div>'
+                f'<div class="ch-num">{sessions}</div>'
+                f'<div class="ch-label">{esc(label)}</div>'
+                f'<div class="ch-pct">{users} usuarios</div>'
+                f'<div class="ga4-bar"><span style="width:{bar}%"></span></div>'
+                f'</div>\n'
+            )
+        # Páginas top
+        pages_rows = ""
+        for path, views in ga4["top_pages"]:
+            pages_rows += (f'<tr><td><strong>{esc(path)}</strong></td>'
+                           f'<td class="td-date">{views} vistas</td></tr>')
+        pages_block = ""
+        if pages_rows:
+            pages_block = (
+                '<div class="card" style="margin-top:12px"><div class="card-header">'
+                '<span class="card-title">Páginas más vistas</span></div>'
+                '<table class="table"><thead><tr><th>Página</th><th>Vistas</th></tr></thead>'
+                f'<tbody>{pages_rows}</tbody></table></div>'
+            )
+        ga4_section = (
+            '<div class="section-label">Tráfico web · Google Analytics 4</div>'
+            '<div class="email-strip">'
+            f'<div class="email-stat" style="--ec:var(--blue)"><div class="es-num">{t["sessions"]}</div><div class="es-label">Sesiones</div></div>'
+            f'<div class="email-stat" style="--ec:var(--guru-400)"><div class="es-num">{t["users"]}</div><div class="es-label">Usuarios</div></div>'
+            f'<div class="email-stat" style="--ec:var(--green)"><div class="es-num">{t["key_events"]}</div><div class="es-label">Conversiones (key events)</div></div>'
+            '</div>'
+            f'<div class="channels-strip" style="margin-top:10px">{ga4_chips}</div>'
+            f'{pages_block}'
+        )
+
     e = EMAIL_STATS
     email_pct_open  = round(e["abiertos"]/e["enviados"]*100) if e["enviados"] else 0
     email_pct_clics = round(e["clics"]/e["enviados"]*100)    if e["enviados"] else 0
 
     return TEMPLATE.format(
+        ga4_section    =ga4_section,
         fecha_larga    =esc(d["fecha_larga"]),
         periodo_txt    =esc(d["periodo_txt"]),
         total_leads    =d["total_leads"],
@@ -368,6 +420,8 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 .ch-pct{{font-size:11px;font-weight:700;color:var(--brand);margin-top:1px}}
 .ch-lc{{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.4}}
 .ch-note{{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.4;font-style:italic}}
+.ga4-bar{{margin-top:6px;height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}}
+.ga4-bar span{{display:block;height:100%;background:var(--chc,var(--brand));border-radius:3px}}
 .email-strip{{display:flex;gap:10px;flex-wrap:wrap}}
 .email-stat{{flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}}
 .email-stat::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ec,var(--brand))}}
@@ -443,6 +497,8 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 
   <div class="section-label">Canales de adquisición · {total_leads} leads reales</div>
   <div class="channels-strip">{ch_cards}</div>
+
+  {ga4_section}
 
   <div class="section-label">Email de bienvenida · enviado a nuevos leads del período</div>
   <div class="email-strip">
