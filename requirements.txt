@@ -2,3 +2,5 @@ feedparser
 requests
 anthropic
 playwright
+google-analytics-data
+python-dotenv
