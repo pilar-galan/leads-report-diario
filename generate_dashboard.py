@@ -9,8 +9,6 @@ from datetime import datetime, timedelta, timezone
 
 TOKEN = os.environ.get("HUBSPOT_TOKEN", "")
 
-# Email de bienvenida — actualizar manualmente hasta tener acceso API Marketing Hub
-EMAIL_STATS = {"enviados": 10, "abiertos": 8, "clics": 1, "respuestas": 0}
 BASE  = "https://api.hubapi.com"
 
 MESES = ["enero","febrero","marzo","abril","mayo","junio","julio",
@@ -298,10 +296,6 @@ def render(d):
                           f'<td><span class="pill {pill}">{esc(label)}</span></td>'
                           f'<td class="td-date">{cd}</td></tr>')
 
-    e = EMAIL_STATS
-    email_pct_open  = round(e["abiertos"]/e["enviados"]*100) if e["enviados"] else 0
-    email_pct_clics = round(e["clics"]/e["enviados"]*100)    if e["enviados"] else 0
-
     return TEMPLATE.format(
         fecha_larga    =esc(d["fecha_larga"]),
         periodo_txt    =esc(d["periodo_txt"]),
@@ -319,12 +313,6 @@ def render(d):
         nuevos_deals   =d["nuevos_deals"],
         demos_pipeline =d["demos_pipeline"],
         generado          =esc(d["generado"]),
-        email_enviados    =EMAIL_STATS["enviados"],
-        email_abiertos    =EMAIL_STATS["abiertos"],
-        email_clics       =EMAIL_STATS["clics"],
-        email_respuestas  =EMAIL_STATS["respuestas"],
-        email_pct_open    =email_pct_open,
-        email_pct_clics   =email_pct_clics,
     )
 
 
@@ -445,14 +433,6 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 
   <div class="section-label">Canales de adquisición · {total_leads} leads reales</div>
   <div class="channels-strip">{ch_cards}</div>
-
-  <div class="section-label">Email de bienvenida · enviado a nuevos leads del período</div>
-  <div class="email-strip">
-    <div class="email-stat" style="--ec:var(--brand)"><div class="es-num">{email_enviados}</div><div class="es-label">Entregados</div></div>
-    <div class="email-stat" style="--ec:var(--blue)"><div class="es-num">{email_abiertos}<span class="es-pct">{email_pct_open}%</span></div><div class="es-label">Abiertos</div></div>
-    <div class="email-stat" style="--ec:var(--orange)"><div class="es-num">{email_clics}<span class="es-pct">{email_pct_clics}%</span></div><div class="es-label">Clics</div></div>
-    <div class="email-stat" style="--ec:var(--green)"><div class="es-num">{email_respuestas}</div><div class="es-label">Respuestas</div></div>
-  </div>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
