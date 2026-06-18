@@ -207,7 +207,10 @@ def main():
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
     ]
     all_deals = fetch_all("deals", deal_filters, ["dealname","dealstage","createdate"])
-    deals          = [d for d in all_deals if "@" not in (d["properties"].get("dealname") or "")]
+    def is_valid_deal(name):
+        n = (name or "").lower()
+        return "@" not in n and "[duplicado]" not in n and not n.rstrip().endswith("new deal") and "- new deal" not in n
+    deals          = [d for d in all_deals if is_valid_deal(d["properties"].get("dealname",""))]
     deals_activos  = len(deals)
     nuevos_deals   = [d for d in deals if (d["properties"].get("createdate") or "") >= start_iso]
     demos_pipeline = [d for d in deals if d["properties"].get("dealstage") == "presentationscheduled"]
