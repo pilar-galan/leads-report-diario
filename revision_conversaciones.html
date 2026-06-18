@@ -2,22 +2,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>GuruSup · Revisión de conversaciones Sales</title><style>
 :root{
-  --bg:#ffffff;--bg-soft:#fbf8ff;
+  --bg:#ffe9e3;--bg-soft:#fff6f4;
   --brand:#FF6B5B;--brand-2:#ff8f82;--brand-soft:#fff1ef;--brand-ink:#e0493a;
   --purple:#9d5ffa;--purple-ink:#7c3aed;--orange:#f97316;
   --green:#0ea671;--amber:#d98a00;--blue:#2563eb;
   --ink:#1c1638;--text:#2c2648;--text-2:#5c5675;--muted:#9b95ad;
   --card:#ffffff;--border:#ece9f3;--border-2:#f2f0f8;
-  --shadow-sm:0 1px 2px rgba(28,22,56,.05);
-  --shadow:0 2px 6px rgba(28,22,56,.05),0 12px 28px rgba(28,22,56,.05);
+  --shadow-sm:0 2px 6px rgba(224,73,58,.07),0 1px 2px rgba(28,22,56,.04);
+  --shadow:0 4px 10px rgba(224,73,58,.08),0 16px 34px rgba(224,73,58,.08);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased}
+body{background:linear-gradient(180deg,#ffe3db 0%,#ffe9e3 32%,#fff1ee 100%) fixed;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 
 /* ===== HEADER ===== */
-.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px}
+.header{position:sticky;top:0;z-index:100;background:rgba(255,233,227,.78);backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid rgba(255,107,91,.16);padding:0 24px}
 .header-inner{display:flex;align-items:center;gap:16px;padding:13px 0;flex-wrap:wrap;max-width:1080px;margin:0 auto}
 .logo-box{width:40px;height:40px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;box-shadow:0 4px 14px rgba(255,107,91,.35);flex-shrink:0}
 .header-title{flex:1;min-width:180px}
@@ -28,8 +28,8 @@ a{color:inherit;text-decoration:none}
 .main{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
 
 /* ===== HERO ===== */
-.hero{position:relative;border:1px solid var(--border);border-radius:20px;padding:36px 36px 32px;overflow:hidden;box-shadow:var(--shadow);
-  background:radial-gradient(130% 150% at 100% 0%,#fff2ef 0%,transparent 50%),radial-gradient(120% 150% at 0% 100%,#f6eeff 0%,transparent 52%),#fff}
+.hero{position:relative;border:1px solid #fff;border-radius:24px;padding:38px 38px 34px;overflow:hidden;box-shadow:0 10px 30px rgba(224,73,58,.10),0 2px 6px rgba(28,22,56,.04);
+  background:radial-gradient(130% 150% at 100% 0%,#fff4f1 0%,transparent 52%),#fff}
 .hero .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-ink)}
 .hero h2{font-size:31px;font-weight:800;line-height:1.13;letter-spacing:-.025em;margin:11px 0 13px;max-width:760px;color:var(--ink)}
 .hero p{font-size:15.5px;color:var(--text-2);max-width:690px}
@@ -102,7 +102,7 @@ a{color:inherit;text-decoration:none}
 .placeholder-note{font-size:13px;color:var(--text-2);font-style:italic;background:#fffaf0;border:1px dashed #e9cf95;border-radius:11px;padding:12px 16px;display:flex;gap:9px;align-items:center}
 
 /* ===== "EN PREPARACIÓN" sections ===== */
-.soon{display:flex;align-items:center;gap:16px;border:1px dashed var(--border);border-radius:16px;background:var(--bg-soft);padding:20px 24px;margin-bottom:12px;scroll-margin-top:84px}
+.soon{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:18px;background:#fff;padding:20px 24px;margin-bottom:12px;scroll-margin-top:84px;box-shadow:var(--shadow-sm)}
 .soon .s-num{flex-shrink:0;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--ac,var(--brand));border:1px solid color-mix(in srgb,var(--ac,var(--brand)) 30%,transparent);background:color-mix(in srgb,var(--ac,var(--brand)) 9%,#fff)}
 .soon .s-body{flex:1;min-width:0}
 .soon .s-body h4{font-size:15px;font-weight:700;color:var(--ink)}
