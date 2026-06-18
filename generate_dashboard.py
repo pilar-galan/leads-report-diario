@@ -124,8 +124,10 @@ def main():
     tz_spain = timezone(timedelta(hours=2))
     es_now   = datetime.now(timezone.utc).astimezone(tz_spain)
 
+    # Inicio siempre anclado a las 8:30h del día anterior (no 24h atrás desde ahora)
+    today_830 = es_now.replace(hour=8, minute=30, second=0, microsecond=0)
     days_back = 3 if es_now.weekday() == 0 else 1
-    start     = es_now - timedelta(days=days_back)
+    start     = today_830 - timedelta(days=days_back)
     start_iso = iso(start)
     end_iso   = iso(es_now)
 
