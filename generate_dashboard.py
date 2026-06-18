@@ -41,7 +41,13 @@ REV_META = [
 ]
 
 FIXED_CHANNELS = {
-    "Referido": {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
+    "App / Freemium":  {"n": 0, "icon": "⚡", "color": "#f59e0b", "lc": {}},
+    "Google Ads":      {"n": 0, "icon": "🔍", "color": "#4285F4", "lc": {}},
+    "Meta Ads":        {"n": 0, "icon": "📣", "color": "#ec4899", "lc": {}},
+    "Social orgánico": {"n": 0, "icon": "📱", "color": "#38bdf8", "lc": {}},
+    "SEO Orgánico":    {"n": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
+    "Web directo":     {"n": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
+    "Referido":        {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
 }
 
 
