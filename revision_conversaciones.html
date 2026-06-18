@@ -101,6 +101,15 @@ a{color:inherit;text-decoration:none}
 
 .placeholder-note{font-size:13px;color:var(--text-2);font-style:italic;background:rgba(251,191,36,.09);border:1px dashed rgba(251,191,36,.4);border-radius:11px;padding:12px 16px;display:flex;gap:9px;align-items:center}
 
+/* ===== CASOS (sub-bloques dentro de un hallazgo) ===== */
+.finding-lead{font-size:14.5px;color:var(--text-2);margin-top:16px}
+.finding-lead strong{color:var(--ink);font-weight:600}
+.case{margin-top:18px}
+.case-head{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.case-tag{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--ac,var(--brand)),color-mix(in srgb,var(--ac,var(--brand)) 72%,#fff 8%));padding:4px 11px;border-radius:8px;box-shadow:0 3px 10px color-mix(in srgb,var(--ac,var(--brand)) 38%,transparent)}
+.case-head h4{font-size:15px;font-weight:700;color:var(--ink)}
+.case .blocks{margin-top:12px}
+
 /* ===== "EN PREPARACIÓN" sections ===== */
 .soon{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:18px;background:var(--card-2);padding:20px 24px;margin-bottom:12px;scroll-margin-top:84px;box-shadow:var(--shadow-sm)}
 .soon .s-num{flex-shrink:0;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--ac,var(--brand));border:1px solid color-mix(in srgb,var(--ac,var(--brand)) 40%,transparent);background:color-mix(in srgb,var(--ac,var(--brand)) 16%,transparent)}
@@ -137,7 +146,7 @@ a{color:inherit;text-decoration:none}
   </div>
 
   <!-- ÍNDICE DE HALLAZGOS -->
-  <div class="section-label">Las 5 áreas · de mayor a menor prioridad</div>
+  <div class="section-label">Las 6 áreas · de mayor a menor prioridad</div>
   <div class="index-grid">
 
     <a class="idx-card" href="#h1" style="--ac:var(--brand)">
@@ -155,14 +164,26 @@ a{color:inherit;text-decoration:none}
     <a class="idx-card" href="#h2" style="--ac:var(--orange)">
       <div class="idx-num">2</div>
       <div class="idx-body">
+        <div class="idx-title">Fricción entre canal Voz y Escrito</div>
+        <div class="idx-desc">Comportamientos de chat que no funcionan en voz (enlaces, transferencias).</div>
+        <div class="idx-tags">
+          <span class="tag tag-prio-high">Prioridad alta</span>
+          <span class="tag tag-pending">○ Acción propuesta</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="idx-card" href="#h3" style="--ac:var(--amber)">
+      <div class="idx-num">3</div>
+      <div class="idx-body">
         <div class="idx-title">Precios, planes y contratación</div>
         <div class="idx-desc">Gestión mejorable de preguntas sobre precios y planes.</div>
         <div class="idx-tags"><span class="tag tag-prio-high">Prioridad alta</span></div>
       </div>
     </a>
 
-    <a class="idx-card" href="#h3" style="--ac:var(--amber)">
-      <div class="idx-num">3</div>
+    <a class="idx-card" href="#h4" style="--ac:var(--green)">
+      <div class="idx-num">4</div>
       <div class="idx-body">
         <div class="idx-title">Consistencia e identidad de los agentes</div>
         <div class="idx-desc">Problemas de coherencia entre respuestas e identidad.</div>
@@ -170,20 +191,20 @@ a{color:inherit;text-decoration:none}
       </div>
     </a>
 
-    <a class="idx-card" href="#h4" style="--ac:var(--purple)">
-      <div class="idx-num">4</div>
+    <a class="idx-card" href="#h5" style="--ac:var(--purple)">
+      <div class="idx-num">5</div>
       <div class="idx-body">
-        <div class="idx-title">Posicionamiento de GuruSup y GuruSup Brain</div>
+        <div class="idx-title">Posicionamiento de GuruSup y Company Brain</div>
         <div class="idx-desc">Cómo explicamos el producto y posicionamos la nueva solución.</div>
         <div class="idx-tags">
           <span class="tag tag-prio-med">Prioridad media</span>
-          <span class="tag tag-new">★ GuruSup Brain</span>
+          <span class="tag tag-new">★ Company Brain</span>
         </div>
       </div>
     </a>
 
-    <a class="idx-card" href="#h5" style="--ac:var(--blue)">
-      <div class="idx-num">5</div>
+    <a class="idx-card" href="#h6" style="--ac:var(--blue)">
+      <div class="idx-num">6</div>
       <div class="idx-body">
         <div class="idx-title">Bugs e incidencias en onboarding</div>
         <div class="idx-desc">Posibles incidencias detectadas durante el onboarding.</div>
@@ -248,15 +269,92 @@ a{color:inherit;text-decoration:none}
     </div>
   </section>
 
-  <!-- ===== GURUSUP BRAIN — POSICIONAMIENTO ===== -->
+  <!-- ===== HALLAZGO 2 · VOZ vs ESCRITO ===== -->
+  <section class="finding" id="h2" style="--ac:var(--orange)">
+    <div class="finding-head">
+      <div class="fh-num">2</div>
+      <div class="fh-body">
+        <h3>Fricción entre canal Voz y canal Escrito</h3>
+        <div class="fh-tags">
+          <span class="tag tag-prio-high">Prioridad alta</span>
+          <span class="tag tag-pending">○ Acción propuesta</span>
+        </div>
+      </div>
+    </div>
+    <div class="finding-body">
+      <p class="finding-lead">Existen respuestas y comportamientos que <strong>funcionan en chat/escrito pero no son compatibles con la experiencia telefónica o de voz</strong>. El comportamiento debe diferenciarse explícitamente por canal.</p>
+
+      <!-- Caso A -->
+      <div class="case">
+        <div class="case-head"><span class="case-tag">Caso A</span><h4>Envío de agendas o enlaces</h4></div>
+        <div class="blocks">
+          <div class="block b-detect">
+            <div class="block-head"><div class="block-icon">🔍</div><div class="block-title">Situación detectada</div></div>
+            <ul>
+              <li>Definido: tras validar que el cliente tiene <strong>+500 consultas/mes</strong>, el sistema facilita el enlace de agenda de Agus.</li>
+              <li>En el canal de <strong>voz no es posible enviar enlaces</strong> directamente al usuario.</li>
+              <li>Algunas conversaciones aplican la misma lógica que en chat → experiencia inconsistente.</li>
+            </ul>
+          </div>
+          <div class="block b-action">
+            <div class="block-head"><div class="block-icon">🛠️</div><div class="block-title">Acción propuesta</div></div>
+            <ul>
+              <li>Detectar explícitamente si la interacción es por <strong>voz o por escrito</strong>.</li>
+              <li>Mantener el envío de enlaces solo en canales que permitan compartir URLs.</li>
+              <li>Alternativa para voz: pedir un canal de contacto, capturar datos para seguimiento o derivar a una acción posterior.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso B -->
+      <div class="case">
+        <div class="case-head"><span class="case-tag">Caso B</span><h4>Transferencia a agente humano</h4></div>
+        <div class="blocks">
+          <div class="block b-detect">
+            <div class="block-head"><div class="block-icon">🔍</div><div class="block-title">Situación detectada</div></div>
+            <ul>
+              <li>En voz, el asistente indica que va a <strong>transferir la llamada</strong> o pasar con un agente humano.</li>
+              <li>La transferencia real <strong>no se produce</strong>.</li>
+              <li>El usuario queda esperando una acción que nunca ocurre.</li>
+              <li>Genera mala experiencia y <strong>pérdida de confianza</strong>.</li>
+            </ul>
+          </div>
+          <div class="block b-action">
+            <div class="block-head"><div class="block-icon">🛠️</div><div class="block-title">Acción propuesta</div></div>
+            <ul>
+              <li>Revisar respuestas tipo «pasar a un agente», «transferir la llamada» o «te comunico con un compañero».</li>
+              <li>Diferenciar claramente las capacidades reales de cada canal.</li>
+              <li>En voz, <strong>nunca prometer una transferencia inmediata</strong> si la funcionalidad no existe.</li>
+              <li>Sustituir por alternativas compatibles con el flujo real disponible.</li>
+              <li>Definir reglas específicas para voz y para chat/escrito.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="blocks">
+        <div class="block b-impact span-2">
+          <div class="block-head"><div class="block-icon">🎯</div><div class="block-title">Resultado esperado</div></div>
+          <ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px 24px">
+            <li>Acciones y respuestas <strong>coherentes con las capacidades reales de cada canal</strong>.</li>
+            <li>Fricciones entre voz y escrito eliminadas.</li>
+            <li>Sin expectativas que el sistema no pueda cumplir.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPANY BRAIN — POSICIONAMIENTO ===== -->
   <div class="section-label">Quiénes somos · Nuestro ecosistema de producto</div>
   <div class="brain-card">
     <div class="brain-inner">
       <div class="brain-emoji">🧠</div>
       <div class="brain-text">
         <span class="kicker">★ Nuevo · A posicionar</span>
-        <h3>GuruSup Brain</h3>
-        <p>Junto a la plataforma de agentes de GuruSup, <strong style="color:var(--ink)">GuruSup Brain</strong> es nuestra nueva solución y un foco clave de posicionamiento. Allá donde se cuente la historia de GuruSup y quiénes somos, GuruSup Brain debe aparecer como parte del relato.</p>
+        <h3>Company Brain</h3>
+        <p>Junto a la plataforma de agentes de GuruSup, <strong style="color:var(--ink)">Company Brain</strong> es nuestra nueva solución y un foco clave de posicionamiento. Allá donde se cuente la historia de GuruSup y quiénes somos, Company Brain debe aparecer como parte del relato.</p>
       </div>
       <span class="tag tag-new" style="align-self:flex-start">★ Nuevo producto</span>
     </div>
@@ -265,26 +363,26 @@ a{color:inherit;text-decoration:none}
   <!-- ===== HALLAZGOS 2–5 (EN PREPARACIÓN) ===== -->
   <div class="section-label">Pendientes de contenido</div>
 
-  <div class="soon" id="h2" style="--ac:var(--orange)">
-    <div class="s-num">2</div>
+  <div class="soon" id="h3" style="--ac:var(--amber)">
+    <div class="s-num">3</div>
     <div class="s-body"><h4>Precios, planes y contratación</h4><p>Listo para incorporar Situación · Acción · Impacto · Aprendizaje.</p></div>
     <span class="tag tag-pending">En preparación</span>
   </div>
 
-  <div class="soon" id="h3" style="--ac:var(--amber)">
-    <div class="s-num">3</div>
+  <div class="soon" id="h4" style="--ac:var(--green)">
+    <div class="s-num">4</div>
     <div class="s-body"><h4>Consistencia e identidad de los agentes</h4><p>Listo para incorporar Situación · Acción · Impacto · Aprendizaje.</p></div>
     <span class="tag tag-pending">En preparación</span>
   </div>
 
-  <div class="soon" id="h4" style="--ac:var(--purple)">
-    <div class="s-num">4</div>
-    <div class="s-body"><h4>Posicionamiento de GuruSup y GuruSup Brain</h4><p>Listo para incorporar Situación · Acción · Impacto · Aprendizaje · posicionamiento de GuruSup Brain.</p></div>
-    <span class="tag tag-new">★ GuruSup Brain</span>
+  <div class="soon" id="h5" style="--ac:var(--purple)">
+    <div class="s-num">5</div>
+    <div class="s-body"><h4>Posicionamiento de GuruSup y Company Brain</h4><p>Listo para incorporar Situación · Acción · Impacto · Aprendizaje · posicionamiento de Company Brain.</p></div>
+    <span class="tag tag-new">★ Company Brain</span>
   </div>
 
-  <div class="soon" id="h5" style="--ac:var(--blue)">
-    <div class="s-num">5</div>
+  <div class="soon" id="h6" style="--ac:var(--blue)">
+    <div class="s-num">6</div>
     <div class="s-body"><h4>Bugs e incidencias en onboarding</h4><p>Listo para incorporar Situación · Acción · Impacto · Aprendizaje.</p></div>
     <span class="tag tag-pending">En preparación</span>
   </div>
