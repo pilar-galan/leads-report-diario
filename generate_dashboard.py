@@ -5,6 +5,7 @@ Ventana: 8:30h dia anterior → 8:30h hoy (hora España).
 Lunes cubre fin de semana: viernes 8:30 → lunes 8:30.
 """
 import os, sys, json, urllib.request, urllib.error
+import re
 from datetime import datetime, timedelta, timezone
 
 TOKEN = os.environ.get("HUBSPOT_TOKEN", "")
@@ -284,21 +285,61 @@ def render(d):
                      f'<div class="ch-pct">{p} de leads</div>'
                      f'<div class="ch-lc">{esc(lc_txt)}</div>{note}</div>\n')
 
-    # Tabla deals
+    # Tabla deals — detección de duplicados
+    import re
+    def normalize_name(n):
+        n = (n or "").strip().lower()
+        n = re.sub(r'^\[duplicado\]\s*', '', n)
+        n = re.sub(r'\s*-\s*new deal\s*$', '', n)
+        return n.strip()
+
     by_stage = {}
     for deal in d["deals"]:
         st = deal["properties"].get("dealstage","")
         by_stage.setdefault(st,[]).append(deal)
+
+    # Detectar duplicados: mismo nombre normalizado
+    name_to_occurrences = {}  # normalized -> [(stage, deal_id)]
+    for deal in d["deals"]:
+        nname = normalize_name(deal["properties"].get("dealname",""))
+        st = deal["properties"].get("dealstage","")
+        name_to_occurrences.setdefault(nname, []).append((st, deal["id"]))
+
+    dup_same_stage = set()   # misma etapa, segundo+ ocurrencia
+    dup_cross_stage = set()  # aparece en discovery Y demo (error de pipeline)
+    for nname, occs in name_to_occurrences.items():
+        if len(occs) < 2:
+            continue
+        stage_groups = {}
+        for st, did in occs:
+            stage_groups.setdefault(st, []).append(did)
+        # Mismo stage: marcar 2º+ como duplicado
+        for st, ids in stage_groups.items():
+            for did in ids[1:]:
+                dup_same_stage.add(did)
+        # Cross-stage: mismo nombre en discovery Y demo
+        stages = {s for s, _ in occs}
+        if "1107496610" in stages and "presentationscheduled" in stages:
+            for _, did in occs:
+                dup_cross_stage.add(did)
+
     deal_rows = ""
     for st_id, label, pill in STAGE_LABELS:
         group = by_stage.get(st_id, [])
         if not group: continue
-        deal_rows += f'<tr class="stage-divider"><td colspan="3">{esc(label)} · {len(group)} deals</td></tr>'
+        deal_rows += f'<tr class="stage-divider"><td colspan="4">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
             name = esc(deal["properties"].get("dealname","—"))
             cd   = (deal["properties"].get("createdate","") or "")[:10]
-            tag  = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
-            deal_rows += (f'<tr><td><strong>{name}</strong>{tag}</td>'
+            new_tag = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
+            dup_tag = ""
+            if deal["id"] in dup_cross_stage:
+                dup_tag = ' <span class="dup-tag dup-cross">⚠ CROSS-ETAPA</span>'
+            elif deal["id"] in dup_same_stage or "[duplicado]" in (deal["properties"].get("dealname","")).lower():
+                dup_tag = ' <span class="dup-tag">DUPLICADO</span>'
+            row_class = ' class="row-dup"' if (deal["id"] in dup_same_stage or deal["id"] in dup_cross_stage or "[duplicado]" in (deal["properties"].get("dealname","")).lower()) else ""
+            deal_rows += (f'<tr{row_class} data-name="{esc(deal["properties"].get("dealname","").lower())}">'
+                          f'<td><strong>{name}</strong>{new_tag}{dup_tag}</td>'
                           f'<td><span class="pill {pill}">{esc(label)}</span></td>'
                           f'<td class="td-date">{cd}</td></tr>')
 
@@ -380,6 +421,9 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 .pill{{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}}
 .pill-demo{{background:rgba(16,185,129,.15);color:var(--green)}}.pill-discov{{background:rgba(124,58,237,.15);color:var(--guru-300)}}.pill-best{{background:rgba(245,158,11,.15);color:var(--amber)}}
 .new-tag{{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:rgba(255,107,91,.18);color:var(--brand);text-transform:uppercase;border:1px solid rgba(255,107,91,.4)}}
+.dup-tag{{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,.18);color:var(--amber);text-transform:uppercase;border:1px solid rgba(245,158,11,.4);margin-left:4px}}
+.dup-tag.dup-cross{{background:rgba(239,68,68,.18);color:var(--red);border-color:rgba(239,68,68,.4)}}
+tr.row-dup td{{opacity:.7}}
 .deal-footer{{display:flex;gap:32px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}}
 .df-item .df-num{{font-size:36px;font-weight:800;line-height:1}}
 .df-item .df-label{{font-size:11px;color:var(--muted);margin-top:3px}}
@@ -442,8 +486,15 @@ body{{background:var(--guru-900);color:var(--text);font-family:-apple-system,Bli
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
-    <div class="card-header"><span class="card-title">Deals activos (excl. freemium/signups)</span></div>
-    <table class="table"><thead><tr><th>Empresa</th><th>Etapa</th><th>Entrada</th></tr></thead>
+    <div class="card-header" style="flex-direction:column;align-items:flex-start;gap:12px">
+      <span class="card-title">Deals activos · pipeline de ventas</span>
+      <div style="position:relative;width:100%;max-width:320px">
+        <input id="deal-search" type="text" placeholder="🔍 Buscar empresa..."
+          style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#161330;color:var(--text);font-size:13px;outline:none"
+          oninput="filterDeals(this.value)">
+      </div>
+    </div>
+    <table class="table" id="deals-table"><thead><tr><th>Empresa</th><th>Etapa</th><th>Entrada</th></tr></thead>
     <tbody>{deal_rows}</tbody></table>
     <div class="deal-footer">
       <div class="df-item"><div class="df-num" style="color:var(--brand)">{nuevos_deals}</div><div class="df-label">Oportunidades nuevas hoy</div></div>
@@ -462,6 +513,21 @@ if(inp.value==='radar2026'){{try{{sessionStorage.setItem('gs_ok','1');}}catch(e)
 else{{err.style.display='block';inp.value='';inp.focus();}}}}
 try{{if(sessionStorage.getItem('gs_ok')==='1'){{document.getElementById('gs-gate').style.display='none';}}}}catch(e){{}}
 document.addEventListener('keydown',function(e){{var g=document.getElementById('gs-gate');if(e.key==='Enter'&&g&&g.style.display!=='none')gsCheck();}});
+function filterDeals(q){{
+  q=q.toLowerCase().trim();
+  var rows=document.querySelectorAll('#deals-table tbody tr:not(.stage-divider)');
+  rows.forEach(function(r){{r.style.display=(!q||r.dataset.name.includes(q))?'':'none';}});
+  // Hide stage-divider if all deals in that stage are hidden
+  var dividers=document.querySelectorAll('#deals-table tbody tr.stage-divider');
+  dividers.forEach(function(div){{
+    var next=div.nextElementSibling;var hasVisible=false;
+    while(next&&!next.classList.contains('stage-divider')){{
+      if(next.style.display!=='none')hasVisible=true;
+      next=next.nextElementSibling;
+    }}
+    div.style.display=hasVisible||!q?'':'none';
+  }});
+}}
 </script></body></html>"""
 
 
