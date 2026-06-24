@@ -170,7 +170,6 @@ def main():
     sql_consultoria  = sum(1 for l in real_leads if l["lc"] == "salesqualifiedlead")
     sql_freemium     = sum(1 for l in real_leads if l["lc"] == "1378463825" or "e3875d32" in l["d1"])
     sql_total        = sql_consultoria + sql_freemium
-    clientes_nuevos  = sum(1 for l in real_leads if l["lc"] == "customer")
     pct_sql_leads    = round(sql_total / total_leads * 100) if total_leads else 0
     app_sin_cualif   = sum(1 for l in real_leads
                            if "e3875d32" in l["d1"] and l["lc"] not in ("salesqualifiedlead","1378463825"))
@@ -202,7 +201,7 @@ def main():
     descartados = [(l["email"], classify_channel(l["src"],l["d1"])[0])
                    for l in real_leads if l["rev"]=="No aplica / Descartado"]
 
-    # Deals
+    # Deals activos en pipeline
     deal_filters = [
         {"propertyName": "pipeline",     "operator": "EQ", "value": "default"},
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
@@ -216,6 +215,16 @@ def main():
     nuevos_deals   = [d for d in deals if (d["properties"].get("createdate") or "") >= start_iso]
     demos_pipeline = [d for d in deals if d["properties"].get("dealstage") == "presentationscheduled"]
     nuevos_demos   = [d for d in nuevos_deals if d["properties"].get("dealstage") == "presentationscheduled"]
+
+    # Clientes nuevos = contactos nuevos con lc=customer + deals cerrados como ganados en el período
+    clientes_nuevos_contacts = sum(1 for l in real_leads if l["lc"] == "customer")
+    closed_won = fetch_all("deals", [
+        {"propertyName": "dealstage", "operator": "EQ",      "value": "closedwon"},
+        {"propertyName": "closedate",  "operator": "GTE",     "value": start_iso},
+        {"propertyName": "closedate",  "operator": "LTE",     "value": end_iso},
+    ], ["dealname","closedate"])
+    closed_won = [d for d in closed_won if is_valid_deal(d["properties"].get("dealname",""))]
+    clientes_nuevos = max(clientes_nuevos_contacts, len(closed_won))
 
     data = {
         "fecha_larga":      fecha_larga,
