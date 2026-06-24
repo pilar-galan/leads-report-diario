@@ -47,8 +47,9 @@ FIXED_CHANNELS = {
     "Meta Ads":        {"n": 0, "icon": "📣", "color": "#ec4899", "lc": {}},
     "Social orgánico": {"n": 0, "icon": "📱", "color": "#38bdf8", "lc": {}},
     "SEO Orgánico":    {"n": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
-    "Web directo":     {"n": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
-    "Referido":        {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
+    "Web directo":          {"n": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
+    "Referido":             {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
+    "TIC Negocios · Webinar": {"n": 0, "icon": "🎓", "color": "#6366f1", "lc": {}},
 }
 
 
@@ -96,7 +97,7 @@ def classify_channel(src, d1):
         return ("Web directo", "🔗", "#94a3b8")
     if src == "OFFLINE" and d1 == "CONVERSATIONS":
         return ("Inbox / Chat", "💬", "#06b6d4")
-    return ("Otros", "❓", "#7b76a0")
+    return ("TIC Negocios · Webinar", "🎓", "#6366f1")
 
 
 def is_import(src, d1):
@@ -167,7 +168,7 @@ def main():
 
     total_leads      = len(real_leads)
     sql_consultoria  = sum(1 for l in real_leads if l["lc"] == "salesqualifiedlead")
-    sql_freemium     = sum(1 for l in real_leads if l["lc"] == "1378463825")
+    sql_freemium     = sum(1 for l in real_leads if l["lc"] == "1378463825" or "e3875d32" in l["d1"])
     sql_total        = sql_consultoria + sql_freemium
     clientes_nuevos  = sum(1 for l in real_leads if l["lc"] == "customer")
     pct_sql_leads    = round(sql_total / total_leads * 100) if total_leads else 0
