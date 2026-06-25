@@ -49,7 +49,6 @@ FIXED_CHANNELS = {
     "SEO Orgánico":    {"n": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
     "Web directo":          {"n": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
     "Referido":             {"n": 0, "icon": "🤝", "color": "#a78bfa", "lc": {}},
-    "TIC Negocios · Webinar": {"n": 0, "icon": "🎓", "color": "#6366f1", "lc": {}},
 }
 
 
@@ -97,7 +96,7 @@ def classify_channel(src, d1):
         return ("Web directo", "🔗", "#94a3b8")
     if src == "OFFLINE" and d1 == "CONVERSATIONS":
         return ("Inbox / Chat", "💬", "#06b6d4")
-    return ("TIC Negocios · Webinar", "🎓", "#6366f1")
+    return ("App / Freemium", "⚡", "#f59e0b")
 
 
 def is_import(src, d1):
@@ -468,7 +467,7 @@ tr.row-dup td{{opacity:.7}}
       <div class="fc-label">Leads reales generados</div>
       <div class="fc-value">{total_leads}</div>
       <div class="fc-sub">Paid · Social Ads · Orgánico · App · Directo · Social orgánico</div>
-      <div class="webinar-badge">⚡ Incluye nuevos del webinar TIC Negocios · solo se cuentan los que no estaban en BBDD</div>
+      <div class="webinar-badge">⚡ Incluye registros freemium con importación retrasada · solo se cuentan los nuevos en BBDD</div>
     </div>
     <div class="f-card f-sql-consult">
       <div class="fc-label">SQL · Consultoría</div>
@@ -549,4 +548,5 @@ function filterDeals(q){{
 
 if __name__ == "__main__":
     main()
+
 
