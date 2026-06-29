@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GuruSup · Informe CRM comité de inversores — junio 2026</title>
+<meta name="description" content="Estado del CRM de HubSpot y embudo comercial de GuruSup (1–29 jun 2026): leads, SQL, freemiums, oportunidades, clientes y atribución por canal.">
+<style>html,body{margin:0;padding:0}body{background:#F6F7F5}</style>
+</head>
+<body>
+<style>
+  :root{
+    --ink:#0E1C18; --ink-2:#1C302A; --paper:#F6F7F5; --card:#FFFFFF;
+    --line:#DBE3DF; --line-2:#EAEEEB; --muted:#5C6B64; --text:#1A2521;
+    --accent:#12B886; --accent-deep:#0B6E4F; --accent-soft:#E4F5EE;
+    --blue:#3E6CB5; --blue-soft:#E7EDF8; --warn:#B96E2E; --warn-soft:#F6ECDF;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  .gs{
+    background:var(--paper); color:var(--text); font-family:var(--sans);
+    line-height:1.55; -webkit-font-smoothing:antialiased; padding:0 0 72px;
+  }
+  .gs .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+  .gs h1,.gs h2,.gs h3{text-wrap:balance;margin:0}
+  .gs p{margin:0}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .eyebrow{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+
+  /* Masthead */
+  .gs .masthead{background:var(--ink);color:#EAF2EE;padding:34px 0 30px;border-bottom:3px solid var(--accent)}
+  .gs .masthead .wrap{display:flex;flex-direction:column;gap:18px}
+  .gs .mast-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .gs .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.01em}
+  .gs .brand .dot{width:13px;height:13px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(18,184,134,.22)}
+  .gs .badge{color:#9FB7AE;border:1px solid #2C4239;border-radius:999px;padding:5px 12px}
+  .gs .masthead h1{font-size:32px;line-height:1.1;font-weight:700;letter-spacing:-.015em;max-width:20ch}
+  .gs .masthead h1 span{color:var(--accent)}
+  .gs .mast-meta{display:flex;gap:28px;flex-wrap:wrap;color:#A9C0B7;font-size:13.5px;padding-top:4px;border-top:1px solid #243730;margin-top:4px}
+  .gs .mast-meta b{color:#EAF2EE;font-weight:600}
+
+  /* Section scaffolding */
+  .gs section{padding-top:54px}
+  .gs .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+  .gs .sec-head .idx{font-family:var(--mono);color:var(--accent-deep);font-size:13px;font-weight:600;padding-top:3px}
+  .gs .sec-head h2{font-size:21px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+  .gs .sec-head .rule{flex:1;height:1px;background:var(--line);align-self:center}
+  .gs .lede{color:var(--muted);font-size:14.5px;max-width:74ch;margin:-8px 0 24px}
+
+  /* KPI grid */
+  .gs .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .gs .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:7px;position:relative;overflow:hidden}
+  .gs .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
+  .gs .kpi.alt::before{background:var(--blue)}
+  .gs .kpi .k-label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.01em}
+  .gs .kpi .k-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:38px;line-height:1;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+  .gs .kpi .k-sub{font-size:12.5px;color:var(--muted)}
+  .gs .kpi .k-sub b{color:var(--accent-deep);font-weight:600}
+  .gs .kpi.alt .k-sub b{color:var(--blue)}
+
+  /* Funnel */
+  .gs .funnel{display:flex;flex-direction:column;gap:0}
+  .gs .entry{background:var(--ink);color:#fff;border-radius:13px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .gs .entry .e-l{display:flex;flex-direction:column;gap:3px}
+  .gs .entry .e-tag{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#9FB7AE;font-weight:600}
+  .gs .entry .e-name{font-size:18px;font-weight:700}
+  .gs .entry .e-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:40px;font-weight:600;letter-spacing:-.02em}
+  .gs .entry .e-pct{color:var(--accent);font-family:var(--mono);font-size:14px}
+
+  .gs .split-label{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12.5px;margin:14px 0 4px;font-weight:600}
+  .gs .split-label::after{content:"";flex:1;height:1px;background:var(--line)}
+  .gs .split-label .pill{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid var(--line)}
+
+  .gs .lane{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px;margin-bottom:14px}
+  .gs .lane-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .gs .lane-top .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:4px 10px;border-radius:6px}
+  .gs .lane.sales .tag{background:var(--accent-soft);color:var(--accent-deep)}
+  .gs .lane.product .tag{background:var(--blue-soft);color:var(--blue)}
+  .gs .lane-top .tag-desc{font-size:13px;color:var(--muted)}
+
+  .gs .flow{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;overflow-x:auto}
+  .gs .stage{flex:1 1 0;min-width:150px;display:flex;flex-direction:column;gap:9px;padding:4px 2px}
+  .gs .stage .s-name{font-size:12.5px;font-weight:600;color:var(--ink);min-height:32px}
+  .gs .stage .s-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:30px;font-weight:600;color:var(--ink);line-height:1;letter-spacing:-.02em}
+  .gs .stage .s-of{font-size:12px;color:var(--muted)}
+  .gs .bar{height:8px;border-radius:5px;background:var(--line-2);overflow:hidden}
+  .gs .bar i{display:block;height:100%;border-radius:5px}
+  .gs .lane.sales .bar i{background:linear-gradient(90deg,var(--accent),var(--accent-deep))}
+  .gs .lane.product .bar i{background:linear-gradient(90deg,#5E86C8,var(--blue))}
+
+  .gs .conn{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted)}
+  .gs .conn .arrow{font-size:18px;color:var(--line);line-height:1}
+  .gs .conn .cv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:var(--accent-deep);background:var(--accent-soft);padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .gs .conn .cv-lbl{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;text-align:center;line-height:1.2}
+  .gs .lane.product .end{flex:1 1 0;min-width:150px;display:flex;align-items:center;padding-left:8px}
+  .gs .lane.product .end p{font-size:13px;color:var(--muted)}
+  .gs .lane.product .end b{color:var(--blue)}
+
+  /* Tables */
+  .gs .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;background:var(--card)}
+  .gs table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:660px}
+  .gs th,.gs td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+  .gs th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;background:#F0F3F1;position:sticky;top:0}
+  .gs td.r,.gs th.r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .gs tbody tr:last-child td{border-bottom:none}
+  .gs tr.sub td{background:#FBFCFB;color:var(--muted);font-size:12.5px}
+  .gs tr.sub td:first-child{padding-left:34px;position:relative}
+  .gs tr.sub td:first-child::before{content:"└";position:absolute;left:18px;color:var(--line)}
+  .gs tr.total td{font-weight:700;background:#F0F3F1;color:var(--ink);border-top:2px solid var(--line)}
+  .gs .chan{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--text)}
+  .gs .swatch{width:9px;height:9px;border-radius:2px;flex:none}
+  .gs .tag-mini{font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .gs .tag-mini.sql{background:var(--accent-soft);color:var(--accent-deep);border-color:transparent}
+  .gs .barcell{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+  .gs .barcell .mini{width:74px;height:7px;border-radius:4px;background:var(--line-2);overflow:hidden;flex:none}
+  .gs .barcell .mini i{display:block;height:100%;background:var(--accent)}
+
+  /* Cards / news */
+  .gs .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .gs .ncard{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;display:flex;flex-direction:column;gap:11px}
+  .gs .ncard h3{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px}
+  .gs .ncard h3 .n{font-family:var(--mono);font-size:12px;color:var(--accent-deep);border:1px solid var(--accent);border-radius:6px;width:24px;height:24px;display:grid;place-items:center;flex:none}
+  .gs .ncard ul{margin:0;padding-left:17px;display:flex;flex-direction:column;gap:8px}
+  .gs .ncard li{font-size:13.3px;color:var(--text)}
+  .gs .ncard li b{color:var(--accent-deep);font-weight:600}
+  .gs .ncard .src{font-size:11px;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px solid var(--line-2)}
+
+  .gs .impact{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  .gs .imp{background:var(--ink);color:#EAF2EE;border-radius:13px;padding:18px;display:flex;flex-direction:column;gap:6px}
+  .gs .imp .i-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:26px;font-weight:600;color:var(--accent)}
+  .gs .imp .i-txt{font-size:13px;color:#C3D5CE}
+
+  /* Notes */
+  .gs .notes{background:var(--warn-soft);border:1px solid #E6D2BC;border-left:3px solid var(--warn);border-radius:11px;padding:18px 22px}
+  .gs .notes h3{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--warn);font-weight:700;margin-bottom:10px}
+  .gs .notes ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+  .gs .notes li{font-size:12.8px;color:#6B543B}
+  .gs .notes li b{color:#5A4327}
+  .gs .foot{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+
+  @media (max-width:760px){
+    .gs .kpis,.gs .cards,.gs .impact{grid-template-columns:1fr}
+    .gs .masthead h1{font-size:25px}
+    .gs .entry .e-val{font-size:32px}
+  }
+</style>
+
+<div class="gs">
+  <header class="masthead">
+    <div class="wrap">
+      <div class="mast-top">
+        <div class="brand"><span class="dot"></span> GuruSup</div>
+        <span class="badge">Confidencial · Comité de inversores</span>
+      </div>
+      <h1>Estado del CRM y embudo comercial — <span>junio 2026</span></h1>
+      <div class="mast-meta">
+        <span><b>Periodo</b> · 1 – 29 jun 2026</span>
+        <span><b>Fuente</b> · HubSpot (fuente única de verdad)</span>
+        <span><b>Owner RevOps</b> · Pilar</span>
+        <span><b>Generado</b> · 29 jun 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- 1. RESUMEN -->
+    <section>
+      <div class="sec-head"><span class="idx">01</span><h2>Resumen ejecutivo</h2><span class="rule"></span></div>
+      <p class="lede">Métricas de adquisición y pipeline del mes. Mes de consolidación del CRM: migración a etapas nativas de ciclo de vida, nuevo workflow de clasificación de freemiums y arreglo de la atribución de formularios — el embudo es, por primera vez, medible y trazable de punta a punta.</p>
+      <div class="kpis">
+        <div class="kpi">
+          <span class="k-label">Nuevos leads generados</span>
+          <span class="k-val">1.254</span>
+          <span class="k-sub">contactos nuevos en el periodo</span>
+        </div>
+        <div class="kpi">
+          <span class="k-label">SQL Consultoría</span>
+          <span class="k-val">71</span>
+          <span class="k-sub"><b>5,7%</b> de los leads · solicitan reunión con ventas</span>
+        </div>
+        <div class="kpi alt">
+          <span class="k-label">Freemiums registrados</span>
+          <span class="k-val">554</span>
+          <span class="k-sub"><b>44,2%</b> de los leads · signup self-service en la app</span>
+        </div>
+        <div class="kpi">
+          <span class="k-label">Reuniones con ventas</span>
+          <span class="k-val">71</span>
+          <span class="k-sub">agendadas/solicitadas (= SQL Consultoría, ver nota)</span>
+        </div>
+        <div class="kpi">
+          <span class="k-label">Oportunidades en pipeline</span>
+          <span class="k-val">210</span>
+          <span class="k-sub"><b>Ventas 132</b> + <b>GuruSup Brain 78</b> (+1 Clientes)</span>
+        </div>
+        <div class="kpi">
+          <span class="k-label">Clientes nuevos</span>
+          <span class="k-val">12</span>
+          <span class="k-sub">contactos que alcanzan etapa Cliente</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. EMBUDO -->
+    <section>
+      <div class="sec-head"><span class="idx">02</span><h2>Embudo de conversión</h2><span class="rule"></span></div>
+      <p class="lede">Cohorte de contactos creados en junio. Tras la cualificación, el embudo se bifurca en dos motores: la <b>rama Ventas</b> (contactos que piden reunión → pipeline comercial) y la <b>rama Producto</b> (freemiums que usan la app de forma autónoma). Las barras son proporcionales al volumen; los chips muestran la conversión entre etapas.</p>
+
+      <div class="funnel">
+        <div class="entry">
+          <div class="e-l">
+            <span class="e-tag">Entrada</span>
+            <span class="e-name">Leads totales</span>
+          </div>
+          <div style="text-align:right">
+            <div class="e-val">1.254</div>
+            <div class="e-pct">100% de la entrada</div>
+          </div>
+        </div>
+
+        <div class="split-label">El total de leads se reparte en dos ramas <span class="pill">SQL 5,7% · Freemium 44,2%</span></div>
+
+        <!-- Rama Ventas -->
+        <div class="lane sales">
+          <div class="lane-top"><span class="tag">Rama Ventas</span><span class="tag-desc">demanda generada · van a ventas</span></div>
+          <div class="flow">
+            <div class="stage">
+              <span class="s-name">SQL Consultoría<br>(reunión con ventas)</span>
+              <span class="s-val">71</span>
+              <div class="bar"><i style="width:5.7%"></i></div>
+              <span class="s-of">5,7% de los leads</span>
+            </div>
+            <div class="conn"><span class="cv">73,2%</span><span class="arrow">▶</span><span class="cv-lbl">SQL →<br>Oport.</span></div>
+            <div class="stage">
+              <span class="s-name">Oportunidad<br>(deal en pipeline)</span>
+              <span class="s-val">52</span>
+              <div class="bar"><i style="width:4.15%"></i></div>
+              <span class="s-of">4,1% de los leads</span>
+            </div>
+            <div class="conn"><span class="cv">23,1%</span><span class="arrow">▶</span><span class="cv-lbl">Oport. →<br>Cliente</span></div>
+            <div class="stage">
+              <span class="s-name">Cliente<br>(cuenta activa)</span>
+              <span class="s-val">12</span>
+              <div class="bar"><i style="width:0.96%"></i></div>
+              <span class="s-of">1,0% de los leads</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rama Producto -->
+        <div class="lane product">
+          <div class="lane-top"><span class="tag">Rama Producto</span><span class="tag-desc">signup self-service · uso autónomo</span></div>
+          <div class="flow">
+            <div class="stage">
+              <span class="s-name">Freemiums<br>(registro en la app)</span>
+              <span class="s-val">554</span>
+              <div class="bar"><i style="width:44.2%"></i></div>
+              <span class="s-of">44,2% de los leads</span>
+            </div>
+            <div class="conn"><span class="arrow">▶</span></div>
+            <div class="end">
+              <p><b>Activación pendiente.</b> El freemium se excluye del nurturing de demanda generada; la conversión a oportunidad aún no es medible (cuello de botella de self-onboarding documentado). Es la palanca de mayor recorrido del trimestre.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CANALES -->
+    <section>
+      <div class="sec-head"><span class="idx">03</span><h2>Atribución por canal de entrada</h2><span class="rule"></span></div>
+      <p class="lede">Origen de los 1.254 contactos nuevos (HubSpot <em>Original Traffic Source</em>). Se muestra el volumen de leads, su peso, y cuántos de cada canal llegan a <b>SQL Consultoría</b> — el indicador de calidad. <b>Paid Search (Google Ads)</b> es el motor de demanda cualificada; <b>Offline</b> concentra el volumen pero son mayoritariamente signups de la app e importaciones.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Canal</th>
+              <th>Tipo</th>
+              <th class="r">Leads</th>
+              <th class="r">% de leads</th>
+              <th class="r">SQL Consult.</th>
+              <th class="r">% a SQL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#8A9A93"></span>Offline / eventos + imports</span></td>
+              <td><span class="tag-mini">Lead</span></td>
+              <td class="r">832</td>
+              <td class="r">66,3%</td>
+              <td class="r">0</td>
+              <td class="r">0%</td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#3E6CB5"></span>Tráfico directo</span></td>
+              <td><span class="tag-mini">Lead</span></td>
+              <td class="r">229</td>
+              <td class="r">18,3%</td>
+              <td class="r">14</td>
+              <td class="r">6,1%</td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#2E8C6A"></span>SEO / búsqueda orgánica</span></td>
+              <td><span class="tag-mini">Lead</span></td>
+              <td class="r">78</td>
+              <td class="r">6,2%</td>
+              <td class="r">15</td>
+              <td class="r">19,2%</td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#12B886"></span>Tráfico pagado / Google Ads</span></td>
+              <td><span class="tag-mini sql">SQL alto</span></td>
+              <td class="r">61</td>
+              <td class="r">4,9%</td>
+              <td class="r">32</td>
+              <td class="r">52,5%</td>
+            </tr>
+            <tr class="sub">
+              <td>Google Ads</td><td></td><td class="r">60</td><td class="r">4,8%</td><td class="r">—</td><td class="r"></td>
+            </tr>
+            <tr class="sub">
+              <td>Bing</td><td></td><td class="r">1</td><td class="r">0,1%</td><td class="r">—</td><td class="r"></td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#7A5FB0"></span>Social ads (paid)</span></td>
+              <td><span class="tag-mini">Lead</span></td>
+              <td class="r">38</td>
+              <td class="r">3,0%</td>
+              <td class="r">6</td>
+              <td class="r">15,8%</td>
+            </tr>
+            <tr class="sub">
+              <td>Meta (Facebook/Instagram)</td><td></td><td class="r">24</td><td class="r">1,9%</td><td class="r">—</td><td class="r"></td>
+            </tr>
+            <tr class="sub">
+              <td>LinkedIn Ads</td><td></td><td class="r">14</td><td class="r">1,1%</td><td class="r">—</td><td class="r"></td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#C9803A"></span>Referrals</span></td>
+              <td><span class="tag-mini sql">SQL alto</span></td>
+              <td class="r">5</td>
+              <td class="r">0,4%</td>
+              <td class="r">3</td>
+              <td class="r">60,0%</td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#B0563E"></span>Redes sociales orgánicas</span></td>
+              <td><span class="tag-mini">Lead</span></td>
+              <td class="r">2</td>
+              <td class="r">0,2%</td>
+              <td class="r">0</td>
+              <td class="r">0%</td>
+            </tr>
+            <tr>
+              <td><span class="chan"><span class="swatch" style="background:#9AA39E"></span>Otras campañas / AI referrals</span></td>
+              <td><span class="tag-mini">Lead</span></td>
+              <td class="r">9</td>
+              <td class="r">0,7%</td>
+              <td class="r">1</td>
+              <td class="r">11,1%</td>
+            </tr>
+            <tr class="total">
+              <td>Total</td><td></td><td class="r">1.254</td><td class="r">100%</td><td class="r">71</td><td class="r">5,7%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="margin-top:16px;margin-bottom:0">Lectura: el <b>66%</b> del volumen es Offline (signups de app + importaciones, 0 SQL), por lo que el mix real de <em>demanda generada</em> lo lideran Directo, SEO, Google Ads y Social Ads. En calidad manda <b>Google Ads (32 de los 71 SQL)</b>, seguido de SEO (15) y Directo (14). <b>Meta ya genera 24 leads</b> tras estar a cero en mayo.</p>
+    </section>
+
+    <!-- 4. NOVEDADES -->
+    <section>
+      <div class="sec-head"><span class="idx">04</span><h2>Novedades y acciones en el CRM</h2><span class="rule"></span></div>
+      <p class="lede">Junio fue el mes de profesionalización del CRM bajo RevOps (Pilar). Cuatro frentes con impacto directo en la medición que sustenta este informe.</p>
+      <div class="cards">
+        <div class="ncard">
+          <h3><span class="n">1</span> Cambio de etapa de funnel</h3>
+          <ul>
+            <li>Migración del objeto <b>"Lead"</b> de HubSpot a <b>etapas nativas de ciclo de vida</b>: curiosos → MQL → SQL → Freemium → Oportunidad → Cliente. Canvas único de oportunidades.</li>
+            <li>Nueva etapa <b>"SQL Consultoría/Demo"</b>, reservada solo a quien solicita reunión con ventas (contacto inmediato).</li>
+            <li>Nueva etapa/propiedad <b>"Freemiums"</b> (antes "SQL Freemium") para signups de la app, excluidos del nurturing de demanda generada.</li>
+          </ul>
+          <span class="src">Workflow 16-jun · nomenclatura oficial 23-jun</span>
+        </div>
+        <div class="ncard">
+          <h3><span class="n">2</span> Mejoras en los flujos / automatización</h3>
+          <ul>
+            <li>Workflows de gestión de leads: <b>asignación de tarea</b> al entrar el lead, <b>recordatorio si no se contacta en 2h</b>, reasignación, y aviso de deals con <b>&gt;15 días sin actividad</b>.</li>
+            <li><b>Mail de bienvenida</b> activo (semana del 16-jun) con CTA a un formulario de precualificación de 3 preguntas.</li>
+            <li>Workflow que <b>etiqueta y excluye freemiums</b> del nurturing; secuencias de nurturing por email y closed-lost a newsletter.</li>
+          </ul>
+          <span class="src">Sales operations · Pilar</span>
+        </div>
+        <div class="ncard">
+          <h3><span class="n">3</span> Trazabilidad</h3>
+          <ul>
+            <li>HubSpot como <b>fuente única de verdad</b>: consigna de volcar <b>todos</b> los contactos y oportunidades (no solo las reuniones) para atribución multitoque.</li>
+            <li>Llamadas de ventas <b>registradas desde la app móvil</b> de HubSpot → trazabilidad completa del pipeline.</li>
+            <li>Detectada <b>captura rota de leads</b> (de ~8/día, 2-3 reales no se veían); objetivo de <b>primer contacto &lt;15 min</b> (un lead cuesta 300-400 €).</li>
+            <li>Arreglo de atribución: los formularios en JS registraban mal como tráfico directo → subdominio dedicado <b>forms.gurusup.com</b>.</li>
+          </ul>
+          <span class="src">Auditoría CRM · jun 2026</span>
+        </div>
+        <div class="ncard">
+          <h3><span class="n">4</span> Estado de los nuevos contactos</h3>
+          <ul>
+            <li><b>1.254</b> contactos nuevos en junio sobre una base auditada de <b>~8.800</b>.</li>
+            <li>Depuración en curso: clientes mal clasificados (importaciones antiguas marcadas como Oportunidad), contactos sin email/teléfono y dominios internos.</li>
+            <li><b>Freemium = palanca y reto:</b> entran cientos de cuentas/mes pero casi ninguna se activa (self-onboarding aún manual). Es el mayor foco de crecimiento si se resuelve la activación.</li>
+          </ul>
+          <span class="src">RevOps · estado a 29-jun</span>
+        </div>
+      </div>
+
+      <div class="impact">
+        <div class="imp"><span class="i-val">+24</span><span class="i-txt">leads de <b style="color:#fff">Meta Ads</b> en junio, tras <b style="color:#fff">0</b> en mayo</span></div>
+        <div class="imp"><span class="i-val">45%</span><span class="i-txt">de los SQL provienen de <b style="color:#fff">Google Ads</b> (32 de 71)</span></div>
+        <div class="imp"><span class="i-val">100%</span><span class="i-txt">del funnel ahora <b style="color:#fff">medible y trazable</b> tras la migración</span></div>
+      </div>
+    </section>
+
+    <!-- 5. METODOLOGIA -->
+    <section>
+      <div class="sec-head"><span class="idx">05</span><h2>Metodología y notas</h2><span class="rule"></span></div>
+      <div class="notes">
+        <h3>Cómo leer estas cifras</h3>
+        <ul>
+          <li><b>Fuente y ventana:</b> HubSpot, contactos y deals con fecha de creación entre el 1 y el 29 de junio de 2026 (extracción 29-jun).</li>
+          <li><b>Embudo:</b> cohorte de contactos de junio por etapa de ciclo de vida actual (snapshot); las conversiones son aproximadas. SQL y Freemium son ramas <em>paralelas</em> — al contrario de lo esperado, no están equilibradas: el freemium (554) multiplica por ~8 al SQL Consultoría (71).</li>
+          <li><b>Reuniones:</b> el objeto Meetings no es accesible con los permisos actuales. Se usa <b>SQL Consultoría</b> (= contactos que solicitan reunión con ventas, definición oficial) como proxy; la herramienta de reuniones solo registra 5 porque ventas registra las llamadas manualmente.</li>
+          <li><b>Oportunidades (210):</b> son deals creados en junio en los pipelines de Ventas (132) y GuruSup Brain (78); incluyen todas las cohortes y el motion founder-led/outbound del Brain, por eso superan a los 52 contactos-oportunidad del cohorte de junio.</li>
+          <li><b>Offline (832):</b> agrupa signups de la app (freemium), importaciones y eventos — no es solo eventos. <b>Tráfico directo</b> puede estar inflado por la atribución de formularios previa al arreglo de forms.gurusup.com.</li>
+          <li><b>Clientes (12):</b> contactos que alcanzan etapa Cliente en el periodo; los cierres se registran en pipelines/propiedades específicas, en depuración.</li>
+        </ul>
+      </div>
+      <div class="foot">
+        <span>GuruSup · Informe para el comité de inversores</span>
+        <span>Datos: HubSpot CRM · Contexto: GuruSup Brain · Periodo 1–29 jun 2026</span>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+</body>
+</html>
