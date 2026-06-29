@@ -193,7 +193,7 @@
         <div class="kpi">
           <span class="k-label">Oportunidades en pipeline</span>
           <span class="k-val">210</span>
-          <span class="k-sub"><b>Ventas 132</b> + <b>GuruSup Brain 78</b> (+1 Clientes)</span>
+          <span class="k-sub"><b>Ventas 132</b> + <b>GuruSup Brain 78</b> (+1 Clientes) · importe cargado en ~5%</span>
         </div>
         <div class="kpi">
           <span class="k-label">Clientes nuevos</span>
@@ -429,8 +429,9 @@
         <ul>
           <li><b>Fuente y ventana:</b> HubSpot, contactos y deals con fecha de creación entre el 1 y el 29 de junio de 2026 (extracción 29-jun).</li>
           <li><b>Embudo:</b> cohorte de contactos de junio por etapa de ciclo de vida actual (snapshot); las conversiones son aproximadas. SQL y Freemium son ramas <em>paralelas</em> — al contrario de lo esperado, no están equilibradas: el freemium (554) multiplica por ~8 al SQL Consultoría (71).</li>
-          <li><b>Reuniones:</b> el objeto Meetings no es accesible con los permisos actuales. Se usa <b>SQL Consultoría</b> (= contactos que solicitan reunión con ventas, definición oficial) como proxy; la herramienta de reuniones solo registra 5 porque ventas registra las llamadas manualmente.</li>
+          <li><b>Reuniones:</b> el objeto Meetings no es accesible con los permisos actuales (reautorización del conector pendiente). Se usa <b>SQL Consultoría</b> (= contactos que solicitan reunión con ventas, definición oficial) como proxy; la herramienta de reuniones solo registra 5 porque ventas registra las llamadas manualmente.</li>
           <li><b>Oportunidades (210):</b> son deals creados en junio en los pipelines de Ventas (132) y GuruSup Brain (78); incluyen todas las cohortes y el motion founder-led/outbound del Brain, por eso superan a los 52 contactos-oportunidad del cohorte de junio.</li>
+          <li><b>Valor de pipeline (€):</b> aún no reportable de forma fiable — solo ~11 de los 210 deals tienen importe cargado (≈20.100 € en Ventas + 10.000 € en Brain). Acción de higiene de datos para RevOps antes de poder reportar pipeline value y ARR.</li>
           <li><b>Offline (832):</b> agrupa signups de la app (freemium), importaciones y eventos — no es solo eventos. <b>Tráfico directo</b> puede estar inflado por la atribución de formularios previa al arreglo de forms.gurusup.com.</li>
           <li><b>Clientes (12):</b> contactos que alcanzan etapa Cliente en el periodo; los cierres se registran en pipelines/propiedades específicas, en depuración.</li>
         </ul>
