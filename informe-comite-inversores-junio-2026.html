@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GuruSup · Informe CRM comité de inversores — junio 2026</title>
-<meta name="description" content="Estado del CRM de HubSpot y embudo comercial de GuruSup (1–29 jun 2026): leads, SQL, freemiums, oportunidades, clientes, atribución por canal y desglose de offline.">
+<meta name="description" content="Estado del CRM de HubSpot y embudo comercial de GuruSup (1–29 jun 2026): leads, SQL, freemiums, oportunidades, clientes, atribución por canal (eventos separados de offline) y agendas de ventas.">
 <style>html,body{margin:0;padding:0}body{background:#F5F6FB}</style>
 </head>
 <body>
@@ -170,7 +170,7 @@
         <div class="kpi"><span class="k-label">Nuevos leads generados</span><span class="k-val">1.254</span><span class="k-sub">contactos nuevos en el periodo</span></div>
         <div class="kpi"><span class="k-label">SQL Consultoría</span><span class="k-val">71</span><span class="k-sub"><b>5,7%</b> de los leads · solicitan reunión con ventas</span></div>
         <div class="kpi alt"><span class="k-label">Freemiums registrados</span><span class="k-val">554</span><span class="k-sub"><b>44,2%</b> de los leads · signup self-service en la app</span></div>
-        <div class="kpi"><span class="k-label">Reuniones con ventas</span><span class="k-val">71</span><span class="k-sub">agendadas/solicitadas (= SQL Consultoría, ver nota)</span></div>
+        <div class="kpi"><span class="k-label">Agendas de ventas solicitadas</span><span class="k-val">71</span><span class="k-sub">= SQL Consultoría · piden reunión con ventas (act. 29-jun)</span></div>
         <div class="kpi"><span class="k-label">Oportunidades en pipeline</span><span class="k-val">210</span><span class="k-sub"><b>Ventas 132</b> + <b>GuruSup Brain 78</b> (+1 Clientes) · importe en ~5%</span></div>
         <div class="kpi"><span class="k-label">Clientes nuevos</span><span class="k-val">12</span><span class="k-sub">contactos que alcanzan etapa Cliente</span></div>
       </div>
@@ -210,13 +210,14 @@
     <!-- 3. CANALES -->
     <section>
       <div class="sec-head"><span class="idx">03</span><h2>Atribución por canal de entrada</h2><span class="rule"></span></div>
-      <p class="lede">Origen de los 1.254 contactos nuevos (HubSpot <em>Original Traffic Source</em>): volumen de leads, su peso, y cuántos llegan a <b>SQL Consultoría</b> — el indicador de calidad. <b>Google Ads</b> es el motor de demanda cualificada; <b>Offline</b> concentra el volumen pero es mayoritariamente importaciones y un webinar puntual (desglose abajo).</p>
+      <p class="lede">Origen de los 1.254 contactos nuevos (HubSpot <em>Original Traffic Source</em>): volumen de leads, su peso, y cuántos llegan a <b>SQL Consultoría</b> — el indicador de calidad. <b>Eventos</b> (webinar con el partner de medios Tech Negocios, 93) se muestra ya como canal propio, separado del <b>Offline</b> (739), que es mayoritariamente importaciones (desglose abajo). <b>Google Ads</b> es el motor de demanda cualificada.</p>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>Canal</th><th class="r">Leads</th><th class="r">% de leads</th><th class="r">SQL Consult.</th><th class="r">% a SQL</th></tr></thead>
           <tbody>
-            <tr><td><span class="chan"><span class="swatch" style="background:#9AA1BE"></span>Offline / eventos + imports</span></td><td class="r">832</td><td class="r">66,3%</td><td class="r">0</td><td class="r">0%</td></tr>
+            <tr><td><span class="chan"><span class="swatch" style="background:#9AA1BE"></span>Offline / imports (BBDD + integración)</span></td><td class="r">739</td><td class="r">58,9%</td><td class="r">0</td><td class="r">0%</td></tr>
             <tr><td><span class="chan"><span class="swatch" style="background:#2E7CC0"></span>Tráfico directo</span></td><td class="r">229</td><td class="r">18,3%</td><td class="r">14</td><td class="r">6,1%</td></tr>
+            <tr><td><span class="chan"><span class="swatch" style="background:#3DA35D"></span>Eventos · webinar Tech Negocios</span></td><td class="r">93</td><td class="r">7,4%</td><td class="r">0</td><td class="r">0%</td></tr>
             <tr><td><span class="chan"><span class="swatch" style="background:#16238C"></span>SEO / búsqueda orgánica</span></td><td class="r">78</td><td class="r">6,2%</td><td class="r">15</td><td class="r">19,2%</td></tr>
             <tr><td><span class="chan"><span class="swatch" style="background:#2540E6"></span>Tráfico pagado / Google Ads</span></td><td class="r">61</td><td class="r">4,9%</td><td class="r hi">32</td><td class="r hi">52,5%</td></tr>
             <tr class="sub"><td>Google Ads</td><td class="r">60</td><td class="r">4,8%</td><td class="r">—</td><td class="r"></td></tr>
@@ -232,21 +233,19 @@
         </table>
       </div>
 
-      <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:26px 0 6px">Dentro del Offline (832): qué hay realmente</h3>
-      <p class="lede" style="margin-bottom:16px">El Offline no es tráfico de eventos puro: lo componen sobre todo una importación de base de datos y un webinar puntual. Separarlo evita leer mal el mix de adquisición.</p>
+      <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:26px 0 6px">Dentro del Offline (739): qué hay realmente</h3>
+      <p class="lede" style="margin-bottom:16px">Con los <b>Eventos (webinar Tech Negocios, 93)</b> ya separados como canal propio en la tabla, el Offline restante (739) es sobre todo una <b>importación de base de datos histórica de freemiums</b> y prospección. Conviene leerlo aparte de la demanda inbound.</p>
       <div class="stack">
-        <span style="width:54.4%;background:#E0A23A">453 · 54%</span>
-        <span style="width:11.2%;background:#2540E6">93</span>
-        <span style="width:6.0%;background:#2E7CC0"></span>
-        <span style="width:2.5%;background:#5A6EEE"></span>
-        <span style="width:25.8%;background:#9AA1BE">215 · 26%</span>
+        <span style="width:61.3%;background:#E0A23A">453 · 61%</span>
+        <span style="width:6.8%;background:#2E7CC0">50</span>
+        <span style="width:2.8%;background:#5A6EEE"></span>
+        <span style="width:29.1%;background:#9AA1BE">215 · 29%</span>
       </div>
       <div class="legend">
-        <div class="lg"><span class="sw" style="background:#E0A23A"></span><div><div class="lg-t"><b>453</b> · Importación lista Freemium — BBDD Victor Jun26</div><div class="lg-d">54,4% del offline · base histórica de freemiums, no altas orgánicas del periodo</div></div></div>
-        <div class="lg"><span class="sw" style="background:#2540E6"></span><div><div class="lg-t"><b>93</b> · Webinar "Pon a prueba agentes de IA en vivo"</div><div class="lg-d">11,2% · evento puntual con partner de medios (Tech Negocios), 26-jun</div></div></div>
-        <div class="lg"><span class="sw" style="background:#2E7CC0"></span><div><div class="lg-t"><b>50</b> · Apollo — prospección outbound importada</div><div class="lg-d">6,0% · contactos de prospección, no inbound</div></div></div>
-        <div class="lg"><span class="sw" style="background:#5A6EEE"></span><div><div class="lg-t"><b>21</b> · Extensión de prospección</div><div class="lg-d">2,5% · captura manual vía extensión de navegador</div></div></div>
-        <div class="lg"><span class="sw" style="background:#9AA1BE"></span><div><div class="lg-t"><b>215</b> · Integración app / conversaciones / otras imports</div><div class="lg-d">25,8% · incluye signups de la app vía integración y otras cargas</div></div></div>
+        <div class="lg"><span class="sw" style="background:#E0A23A"></span><div><div class="lg-t"><b>453</b> · Importación lista Freemium — BBDD Victor Jun26</div><div class="lg-d">61,3% del offline · base histórica de freemiums, no altas orgánicas del periodo</div></div></div>
+        <div class="lg"><span class="sw" style="background:#2E7CC0"></span><div><div class="lg-t"><b>50</b> · Apollo — prospección outbound importada</div><div class="lg-d">6,8% · contactos de prospección, no inbound</div></div></div>
+        <div class="lg"><span class="sw" style="background:#5A6EEE"></span><div><div class="lg-t"><b>21</b> · Extensión de prospección</div><div class="lg-d">2,8% · captura manual vía extensión de navegador</div></div></div>
+        <div class="lg"><span class="sw" style="background:#9AA1BE"></span><div><div class="lg-t"><b>215</b> · Integración app / conversaciones / otras imports</div><div class="lg-d">29,1% · incluye signups de la app vía integración y otras cargas</div></div></div>
       </div>
 
       <p class="lede" style="margin-top:20px;margin-bottom:0"><b>Lectura.</b> En calidad manda <b>Google Ads (32 de los 71 SQL)</b>, seguido de SEO (15) y Directo (14); <b>Referrals</b> convierte al 60%. <b>Meta ya genera 24 leads</b> tras estar a cero en mayo. Y atención al volumen: cerca de la mitad de los leads de junio es <b>importado o puntual</b> — la importación de freemiums (BBDD histórica, ~453 contactos que no entraban identificados y recogen varios periodos) y el webinar con Tech Negocios (93 en un único evento). A futuro, la <b>revisión mes a mes</b> reflejará la base orgánica recurrente real (paid + SEO + directo + signups de la app), sin el efecto de esa carga puntual.</p>
