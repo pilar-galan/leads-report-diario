@@ -300,7 +300,7 @@ body {
     <div class="logo-box">GS</div>
     <div class="header-title">
       <h1>GuruSup · Dashboard Diario</h1>
-      <p>Lunes, 29 de junio de 2026 · período: 28 jun 00:00 → 29 jun 08:00 (hora España)</p>
+      <p>Lunes, 29 de junio de 2026 · período: 26 jun (vie) → 29 jun (lun) 08:00 (hora España)</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
     <button class="refresh-btn" id="refresh-btn" onclick="doRefresh()"><span id="refresh-icon">↻</span> Actualizar</button>
@@ -311,44 +311,41 @@ body {
 <div class="main">
 
   <!-- ══ EMBUDO DE CONVERSIÓN ══ -->
-  <div class="section-label">Embudo de conversión · 28 jun 00:00 → 29 jun 08:00</div>
+  <div class="section-label">Embudo de conversión · 26 jun (vie) → 29 jun (lun) 08:00</div>
 
   <div class="funnel">
 
     <div class="f-card f-c-default">
       <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">20</div>
-      <div class="fc-sub">Lifecycle: lead · 28–29 jun</div>
-    </div>
-
-    <div class="f-arrow"></div>
-
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">1</div>
-      <div class="fc-sub">Alta en plataforma GuruSup</div>
+      <div class="fc-value">45</div>
+      <div class="fc-sub">Lifecycle: lead · 26–29 jun</div>
     </div>
 
     <div class="f-arrow"></div>
 
     <div class="f-card f-c-orange">
       <div class="fc-label">SQLs del período</div>
-      <div class="fc-value">7</div>
+      <div class="fc-value">16</div>
       <div class="fc-sub">salesqualifiedlead</div>
       <div class="fc-sql-breakdown">
         <div class="fc-sql-row">
           <span class="fc-sql-dot" style="background:var(--blue)"></span>
           <span class="fc-sql-type">Google Ads</span>
-          <span class="fc-sql-num">4</span>
+          <span class="fc-sql-num">10</span>
         </div>
         <div class="fc-sql-row">
           <span class="fc-sql-dot" style="background:var(--green)"></span>
           <span class="fc-sql-type">SEO</span>
-          <span class="fc-sql-num">2</span>
+          <span class="fc-sql-num">3</span>
         </div>
         <div class="fc-sql-row">
           <span class="fc-sql-dot" style="background:var(--orange)"></span>
           <span class="fc-sql-type">Directo</span>
+          <span class="fc-sql-num">2</span>
+        </div>
+        <div class="fc-sql-row">
+          <span class="fc-sql-dot" style="background:var(--guru-400)"></span>
+          <span class="fc-sql-type">Referido</span>
           <span class="fc-sql-num">1</span>
         </div>
       </div>
@@ -375,18 +372,18 @@ body {
 
 
   <!-- ══ REVISIÓN VENTAS — HORIZONTAL ══ -->
-  <div class="section-label">Leads en revisión de ventas · 28–29 jun · 20 contactos</div>
+  <div class="section-label">Leads en revisión de ventas · 26–29 jun · 45 contactos</div>
   <div class="card" style="padding:16px 20px;">
     <div class="rev-blocks">
 
       <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">4</div>
+        <div class="rb-num">14</div>
         <div class="rb-name">Ya gestionado</div>
         <div class="rb-desc">Proceso completado</div>
       </div>
 
       <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">16</div>
+        <div class="rb-num">31</div>
         <div class="rb-name">Pendiente revisión</div>
         <div class="rb-desc">Sin asignar aún</div>
       </div>
@@ -433,7 +430,7 @@ body {
       <span class="badge badge-green">0 descartados en el período</span>
     </div>
     <div class="alert alert-muted">
-      ✓ Ningún lead descartado, duplicado ni marcado como test en este período. 16 contactos pendientes de revisión.
+      ✓ Ningún lead descartado, duplicado ni marcado como test en este período. 31 contactos pendientes de revisión.
     </div>
     <div class="reason-row">
       <div class="reason-label">No aplica / sin potencial comercial</div>
@@ -454,14 +451,14 @@ body {
 
 
   <!-- ── CANALES DE ADQUISICIÓN ── -->
-  <div class="section-label">Canales de adquisición · 20 contactos · 28–29 jun</div>
+  <div class="section-label">Canales de adquisición · 45 contactos · 26–29 jun</div>
   <div class="channels-grid">
-    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">8</div><div class="ch-label">Social Ads</div><div class="ch-pct">40% del total</div></div>
-    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">4</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">20% del total</div></div>
-    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">3</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">15% del total</div></div>
-    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">3</div><div class="ch-label">Referido / Offline</div><div class="ch-pct">15% del total</div></div>
-    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">1</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">5% del total</div></div>
-    <div class="ch-card" style="--chc:#7b76a0"><div class="ch-icon">❓</div><div class="ch-num">1</div><div class="ch-label">Otros / Campañas</div><div class="ch-pct">5% del total</div></div>
+    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">13</div><div class="ch-label">Social Ads</div><div class="ch-pct">29% del total</div></div>
+    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">12</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">27% del total</div></div>
+    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">8</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">18% del total</div></div>
+    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">5</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">11% del total</div></div>
+    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">5</div><div class="ch-label">Referido / Offline</div><div class="ch-pct">11% del total</div></div>
+    <div class="ch-card" style="--chc:#7b76a0"><div class="ch-icon">❓</div><div class="ch-num">2</div><div class="ch-label">Otros / Campañas</div><div class="ch-pct">4% del total</div></div>
   </div>
 
 
@@ -529,7 +526,7 @@ body {
 
   <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
     GuruSup · Dashboard Diario generado el 29 jun 2026 · 08:00 hora España<br>
-    Período: 28 jun 00:00 – 29 jun 08:00 (hora España · UTC+2)
+    Período: 26 jun (vie) 00:00 – 29 jun (lun) 08:00 (hora España · UTC+2)
   </div>
 
 </div>
