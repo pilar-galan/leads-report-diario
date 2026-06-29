@@ -103,9 +103,9 @@ body {
 
 .f-arrow {
   display: flex; align-items: center; justify-content: center;
-  width: 28px; flex-shrink: 0; font-size: 18px; opacity: .5;
+  width: 34px; flex-shrink: 0; font-size: 30px; opacity: .8;
 }
-.f-arrow::after { content: '›'; color: var(--muted); }
+.f-arrow::after { content: '›'; color: var(--guru-400); font-weight: 700; }
 
 .f-card {
   flex: 1; background: var(--card); border: 1px solid var(--border);
@@ -117,9 +117,9 @@ body {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   background: var(--fc, var(--guru-500)); border-radius: 10px 10px 0 0;
 }
-.fc-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
-.fc-value { font-size: 30px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); }
-.fc-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.fc-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.fc-value { font-size: 48px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); margin-top: 4px; }
+.fc-sub   { font-size: 13px; color: var(--text-2); font-weight: 600; margin-top: 6px; }
 
 .fc-inner {
   margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
@@ -137,7 +137,7 @@ body {
 .fc-sql-type { flex: 1; }
 .fc-sql-num  { font-weight: 700; color: var(--text); }
 
-.fc-opp-new   { font-size: 38px; font-weight: 800; color: var(--green); line-height: 1; }
+.fc-opp-new   { font-size: 48px; font-weight: 800; color: var(--green); line-height: 1; margin-top: 4px; }
 .fc-opp-label { font-size: 10px; color: var(--green); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .fc-opp-total { font-size: 12px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .fc-opp-total strong { color: var(--text-2); }
@@ -167,7 +167,7 @@ body {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   background: var(--rbc, var(--border)); border-radius: 10px 10px 0 0;
 }
-.rb-num   { font-size: 34px; font-weight: 800; line-height: 1; color: var(--rbc, var(--muted)); margin-bottom: 6px; }
+.rb-num   { font-size: 26px; font-weight: 800; line-height: 1; color: var(--rbc, var(--muted)); margin-bottom: 6px; }
 .rb-name  { font-size: 12px; font-weight: 600; color: var(--rbc, var(--muted)); }
 .rb-desc  { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
