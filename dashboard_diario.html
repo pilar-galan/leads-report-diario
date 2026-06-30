@@ -228,6 +228,17 @@ body {
   .header { padding: 0 14px; }
   .live-badge { display: none; }
   .refresh-btn { margin-left: auto; padding: 7px 16px; font-size: 12px; }
+  .main { padding: 18px 14px 50px; }
+  /* embudo en vertical */
+  .funnel { flex-direction: column; gap: 8px; }
+  .f-arrow { width: 100%; height: 22px; transform: rotate(90deg); }
+  .fc-value, .fc-opp-new { font-size: 40px; }
+  /* bloques de estado / pipeline a 2 columnas */
+  .rev-block { min-width: calc(50% - 5px); }
+  /* tablas con scroll horizontal */
+  .card { padding: 16px 14px; overflow-x: auto; }
+  .table { min-width: 320px; }
+  .section-label { font-size: 10px; }
 }
 
 /* ── LOGIN OVERLAY ── */
@@ -322,7 +333,7 @@ body {
 
     <div class="f-card f-c-default">
       <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">58</div>
+      <div class="fc-value">44</div>
       <div class="fc-sub">Leads · 29–30 jun</div>
     </div>
 
@@ -331,7 +342,7 @@ body {
     <div class="f-card f-c-orange">
       <div class="fc-label">SQL Consultoría</div>
       <div class="fc-value">12</div>
-      <div class="fc-sub">20,7% del total de leads</div>
+      <div class="fc-sub">27,3% del total de leads</div>
     </div>
 
     <div class="f-arrow"></div>
@@ -339,7 +350,7 @@ body {
     <div class="f-card f-c-default">
       <div class="fc-label">Freemium</div>
       <div class="fc-value">9</div>
-      <div class="fc-sub">15,5% del total de leads</div>
+      <div class="fc-sub">20,5% del total de leads</div>
     </div>
 
     <div class="f-arrow"></div>
@@ -355,7 +366,7 @@ body {
 
 
   <!-- ══ REVISIÓN VENTAS — HORIZONTAL ══ -->
-  <div class="section-label">Leads en revisión de ventas · 29–30 jun · 58 contactos</div>
+  <div class="section-label">Leads en revisión de ventas · 29–30 jun · 44 contactos</div>
   <div class="card" style="padding:16px 20px;">
     <div class="rev-blocks">
 
@@ -366,7 +377,7 @@ body {
       </div>
 
       <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">33</div>
+        <div class="rb-num">19</div>
         <div class="rb-name">Pendiente revisión</div>
         <div class="rb-desc">Sin asignar aún</div>
       </div>
@@ -406,25 +417,14 @@ body {
 
 
   <!-- ── CANALES DE ADQUISICIÓN ── -->
-  <div class="section-label">Canales de adquisición · 58 contactos · 29–30 jun</div>
+  <div class="section-label">Canales de adquisición · 44 contactos · 29–30 jun</div>
   <div class="channels-grid">
-    <div class="ch-card" style="--chc:#06b6d4"><div class="ch-icon">🧩</div><div class="ch-num">14</div><div class="ch-label">Extensión Sales</div><div class="ch-pct">24% · 14 lead · heredan etapa</div></div>
-    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">10</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">17% · 5 lead · 2 freem · 3 SQL</div></div>
-    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">10</div><div class="ch-label">Social Ads</div><div class="ch-pct">17% · 10 lead · 0 freem · 0 SQL</div></div>
-    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">9</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">16% · 2 lead · 6 freem · 1 SQL</div></div>
-    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">7</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">12% · 0 lead · 0 freem · 7 SQL</div></div>
-    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">6</div><div class="ch-label">Offline / Manual</div><div class="ch-pct">10% · 4 lead · 2 oportunidad</div></div>
-    <div class="ch-card" style="--chc:#7b76a0"><div class="ch-icon">✉️</div><div class="ch-num">2</div><div class="ch-label">Otros / Campañas</div><div class="ch-pct">3% · 1 freem · 1 SQL</div></div>
-  </div>
-
-  <div class="alert alert-green" style="margin-top:14px;align-items:flex-start;">
-    <span style="font-size:15px;">🧩</span>
-    <div>
-      <strong style="color:var(--guru-300);">Extensión de Sales · herencia de etapa.</strong>
-      Los contactos creados con la extensión de Sales <strong>heredan la etapa del ciclo de vida del deal de su empresa</strong>
-      cuando ya existe una oportunidad en pipeline (en vez de entrar como lead nuevo).
-      <br><span style="color:var(--muted);">Ej.: un nuevo contacto <em>@revolut</em> entra en la misma etapa que la oportunidad de Revolut. Este período: <strong style="color:#6ee7b7;">14 contactos</strong> por esta vía.</span>
-    </div>
+    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">10</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">23% · 5 lead · 2 freem · 3 SQL</div></div>
+    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">10</div><div class="ch-label">Social Ads</div><div class="ch-pct">23% · 10 lead · 0 freem · 0 SQL</div></div>
+    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">9</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">20% · 2 lead · 6 freem · 1 SQL</div></div>
+    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">7</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">16% · 0 lead · 0 freem · 7 SQL</div></div>
+    <div class="ch-card" style="--chc:#f97316"><div class="ch-icon">🤝</div><div class="ch-num">6</div><div class="ch-label">Offline / Manual</div><div class="ch-pct">14% · 4 lead · 2 oportunidad</div></div>
+    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">🎪</div><div class="ch-num">2</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">5% · fuente: otras campañas · 1 freem · 1 SQL</div></div>
   </div>
 
 
