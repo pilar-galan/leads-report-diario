@@ -1,13 +1,3 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GuruSup · Informe CRM comité de inversores — junio 2026</title>
-<meta name="description" content="Informe para el comité de inversores de GuruSup (jun 2026): embudo Leads → SQL → Oportunidad → Cliente, cuentas premium, atribución por canal, auditoría del CRM y valor de negocio.">
-<style>html,body{margin:0;padding:0}body{background:#F5F6FB}</style>
-</head>
-<body>
 <style>
   :root{
     --ink:#0B1230; --ink-2:#18204A; --paper:#F5F6FB; --card:#FFFFFF;
@@ -95,6 +85,53 @@
   .gs .rcell.amber .rv{color:var(--amber)}
   .gs .rcell .rt{font-size:11.5px;color:#C3CAE8;margin-top:6px}
   .gs .fn-note{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+
+  /* ===== DUAL FUNNEL ===== */
+  .gs .leadbar{background:linear-gradient(180deg,#2EC0CE,#1499A8);border-radius:14px;padding:15px 22px;display:flex;align-items:center;justify-content:center;gap:14px;color:#fff;box-shadow:0 8px 22px rgba(12,100,116,.20)}
+  .gs .leadbar .lv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:36px;font-weight:800;letter-spacing:-.02em}
+  .gs .leadbar .lt{font-size:13px;font-weight:600;opacity:.95;text-transform:uppercase;letter-spacing:.06em}
+  .gs .dualfunnel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+  .gs .fcol{border:1px solid var(--line);border-radius:14px;padding:15px 16px 16px;background:var(--card)}
+  .gs .fcol.ventas{border-top:4px solid #0E8A9A}
+  .gs .fcol.producto{border-top:4px solid var(--amber)}
+  .gs .colh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .gs .colh .ct{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .gs .colh .cm{font-size:10px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:999px}
+  .gs .fcol.ventas .cm{background:#DFF3F5;color:#0A5E6E}
+  .gs .fcol.producto .cm{background:#F4E2C3;color:var(--amber-deep)}
+  .gs .entrconv{text-align:center;margin:6px 0 9px}
+  .gs .entrconv span{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;border-radius:8px;padding:3px 11px;display:inline-block}
+  .gs .fcol.ventas .entrconv span{color:#0A5E6E;background:#DFF3F5;border:1px solid #B6E2E7}
+  .gs .fcol.producto .entrconv span{color:var(--amber-deep);background:#F7E9CF;border:1px solid #E6CF9F}
+  .gs .objbox{border:1.5px dashed #E0B870;border-radius:11px;padding:14px;text-align:center;background:#FCF6EA;margin-top:9px}
+  .gs .objbox .ob-t{font-size:12.5px;font-weight:700;color:var(--amber-deep)}
+  .gs .objbox .ob-d{font-size:11.5px;color:#8A6A33;margin-top:5px;line-height:1.5}
+  .gs .fcol .foot{margin-top:12px;font-size:12px;color:var(--muted);text-align:center}
+  .gs .fcol .foot b{color:#0A5E6E;font-family:var(--mono)}
+
+  /* ===== CHANNEL BARS ===== */
+  .gs .chanlist{display:flex;flex-direction:column;gap:10px}
+  .gs .crow{display:grid;grid-template-columns:200px 1fr 116px;gap:16px;align-items:center}
+  .gs .crow.head div{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .gs .crow.head div:last-child{text-align:right}
+  .gs .cname{font-size:13px;font-weight:600;color:var(--text)}
+  .gs .cname .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:middle}
+  .gs .cname .csub{display:block;font-size:11px;color:var(--muted);font-weight:500;margin:2px 0 0 18px;font-family:var(--mono)}
+  .gs .cbar{position:relative;height:30px;background:var(--line-2);border-radius:7px;overflow:hidden}
+  .gs .cbar i{position:absolute;left:0;top:0;bottom:0;border-radius:7px;min-width:4px}
+  .gs .cbar .cv{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;color:var(--ink)}
+  .gs .csql{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .gs .csql .sqv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;padding:3px 11px;border-radius:999px;line-height:1.2}
+  .gs .csql .sqp{font-size:10.5px;color:var(--muted)}
+  .gs .sq-hi{background:var(--ink);color:#fff}
+  .gs .sq-mid{background:var(--blue-soft);color:var(--blue-deep)}
+  .gs .sq-lo{background:#EEF0F6;color:#9098B5}
+  .gs .crow.total-row{border-top:2px solid var(--line);padding-top:9px;margin-top:3px}
+  .gs .crow.total-row .cv{font-weight:800}
+
+  /* Audit polish */
+  .gs .ncard{border-top:3px solid var(--blue)}
+  .gs .astat{border-left:3px solid var(--blue)}
 
   /* Tables */
   .gs .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;background:var(--card)}
@@ -211,44 +248,50 @@
     <!-- 2. EMBUDO -->
     <section>
       <div class="sec-head"><span class="idx">02</span><h2>Embudo de conversión</h2><span class="rule"></span></div>
-      <p class="lede">Del total de leads a la empresa cliente. El <b>embudo comercial</b> avanza <b>Leads → SQL Consultoría → Oportunidad → Cliente</b> (gestionado por el proceso comercial); en paralelo, las <b>cuentas premium</b> entran por producto y se trabajan con <b>automatizaciones de CRM y marketing</b>. Cada salto muestra su conversión real del mes.</p>
-      <div class="splitrow">
-        <div class="track sales">
-          <div class="th"><span class="tt">Embudo comercial</span><span class="tm">Proceso comercial</span></div>
+      <p class="lede">Del total de leads a la empresa cliente. El <b>embudo comercial</b> avanza <b>Lead / Contacto → SQL Consultoría → Oportunidad → Cliente</b> (proceso comercial); en paralelo, las <b>cuentas premium</b> entran directamente por producto y se trabajan con <b>automatizaciones de CRM y marketing</b>.</p>
+      <div class="dualfunnel">
+        <div class="fcol ventas">
+          <div class="colh"><span class="ct">Embudo Comercial</span><span class="cm">Proceso comercial</span></div>
           <div class="tier">
             <div class="shape" style="background:linear-gradient(180deg,#2BBBC9,#1FA6B4);clip-path:polygon(0 0,100% 0,82% 100%,18% 100%)"></div>
-            <div class="lbl"><span class="v">1.254</span><span class="nm">Total leads</span><span class="pf">100% · entrada</span></div>
+            <div class="lbl"><span class="v">1.254</span><span class="nm">Lead / Contacto</span><span class="pf">100% · entrada</span></div>
           </div>
-          <div class="convbig"><span class="cp">5,7%</span><span class="cl">leads → SQL ▾</span></div>
+          <div class="entrconv"><span>5,7% → SQL</span></div>
           <div class="tier">
             <div class="shape" style="background:linear-gradient(180deg,#1FA6B4,#149AA9);clip-path:polygon(18% 0,82% 0,70% 100%,30% 100%)"></div>
-            <div class="lbl"><span class="v">71</span><span class="nm">SQL Consultoría</span><span class="pf">5,7% de leads · piden reunión</span></div>
+            <div class="lbl"><span class="v">71</span><span class="nm">SQL Consultoría</span><span class="pf">5,7% · piden reunión</span></div>
           </div>
-          <div class="convbig"><span class="cp">73,2%</span><span class="cl">SQL → oportunidad ▾</span></div>
+          <div class="entrconv"><span>73,2% → oportunidad</span></div>
           <div class="tier">
             <div class="shape" style="background:linear-gradient(180deg,#149AA9,#0E7E8E);clip-path:polygon(30% 0,70% 0,63% 100%,37% 100%)"></div>
             <div class="lbl"><span class="v">52</span><span class="nm">Oportunidad</span><span class="pf">4,1% de leads</span></div>
           </div>
-          <div class="convbig"><span class="cp">9,6%</span><span class="cl">oportunidad → cliente ▾</span></div>
+          <div class="entrconv"><span>9,6% → cliente</span></div>
           <div class="tier">
             <div class="shape" style="background:linear-gradient(180deg,#0E7E8E,#0A5E6E);clip-path:polygon(37% 0,63% 0,57% 100%,43% 100%)"></div>
             <div class="lbl"><span class="v">5</span><span class="nm">Clientes (empresas)</span><span class="pf">0,4% de leads</span></div>
           </div>
           <div class="foot">Conversión global lead → cliente: <b>0,40%</b></div>
         </div>
-        <div class="track prod">
-          <div class="th"><span class="tt">Rama Producto</span><span class="tm">Automatización CRM + mkt</span></div>
-          <span class="bn">Cuentas premium · signup self-service</span>
-          <div class="bv">554</div>
-          <div class="bpct">44,2% de los leads</div>
-          <div class="bd">Entran por producto sin pasar por ventas; se gestionan con <b>automatizaciones de CRM y marketing</b>, no por el proceso comercial. <b>En marcha una estrategia de contenido</b> para empujar estas cuentas hacia <b>SQL Consultoría</b> y activar su conversión a ventas.</div>
+        <div class="fcol producto">
+          <div class="colh"><span class="ct">Rama Producto / Automatización</span><span class="cm">Automatización CRM + mkt</span></div>
+          <div class="tier">
+            <div class="shape" style="background:linear-gradient(180deg,#E0A23A,#C78B22);clip-path:polygon(0 0,100% 0,82% 100%,18% 100%)"></div>
+            <div class="lbl"><span class="v">1.254</span><span class="nm">Lead / Contacto</span><span class="pf">100% · mismo origen</span></div>
+          </div>
+          <div class="entrconv"><span style="color:var(--amber-deep);background:#F7E9CF;border:1px solid #E6CF9F;font-family:var(--mono);font-size:13px;font-weight:800;border-radius:8px;padding:3px 11px;display:inline-block">44,2% → premium</span></div>
+          <div class="tier">
+            <div class="shape" style="background:linear-gradient(180deg,#E0A23A,#B97E22);clip-path:polygon(18% 0,82% 0,60% 100%,40% 100%)"></div>
+            <div class="lbl"><span class="v">554</span><span class="nm">Premium · self-service</span><span class="pf">44,2% de leads</span></div>
+          </div>
+          <div style="background:rgba(224,162,58,.1);border:1px dashed #E0B870;border-radius:10px;padding:11px 13px;margin-top:10px;font-size:12px;color:#8A6A33;line-height:1.5">
+            <b style="color:#7A5512">Gestión automatizada:</b> workflows de CRM, nurturing por email, mail de bienvenida con precualificación y exclusión automática de freemiums.
+          </div>
+          <div class="objbox">
+            <div class="ob-t">Objetivo: activar conversión hacia Ventas</div>
+            <div class="ob-d">Estrategia de contenido en marcha para empujar cuentas premium hacia <b>SQL Consultoría</b> y activar su proceso de venta.</div>
+          </div>
         </div>
-      </div>
-      <div class="readstrip">
-        <div class="rcell"><div class="rv">~6</div><div class="rt">de cada 100 leads llegan a SQL Consultoría</div></div>
-        <div class="rcell"><div class="rv">~4</div><div class="rt">llegan a oportunidad</div></div>
-        <div class="rcell"><div class="rv">0,4</div><div class="rt">se convierten en empresa cliente</div></div>
-        <div class="rcell amber"><div class="rv">44</div><div class="rt">entran por producto (premium)</div></div>
       </div>
       <p class="fn-note">Anchos ilustrativos (no a escala lineal). Conversiones reales de junio · HubSpot. Oportunidad del embudo = contactos del cohorte que alcanzan esa etapa (52); el total de oportunidades en pipeline (210 deals) incluye Brain y otras cohortes.</p>
     </section>
@@ -256,27 +299,86 @@
     <!-- 3. CANALES -->
     <section>
       <div class="sec-head"><span class="idx">03</span><h2>Atribución por canal</h2><span class="rule"></span></div>
-      <p class="lede">Origen de los 1.254 contactos (HubSpot <em>Original Traffic Source</em>), ordenado por volumen, con cuántos llegan a <b>SQL</b> (calidad). <b>Google Ads</b> es el motor de demanda cualificada; <b>Eventos</b> (webinar Tech Negocios) va separado del <b>Offline</b> (importaciones).</p>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Canal</th><th class="r">Leads</th><th class="r">% de leads</th><th class="r">SQL</th><th class="r">% a SQL</th></tr></thead>
-          <tbody>
-            <tr><td><span class="chan"><span class="swatch" style="background:#9AA1BE"></span>Offline / imports (BBDD + integración)</span></td><td class="r">739</td><td class="r">58,9%</td><td class="r">0</td><td class="r">0%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#2E7CC0"></span>Tráfico directo</span></td><td class="r">229</td><td class="r">18,3%</td><td class="r">14</td><td class="r">6,1%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#2B335E"></span>Eventos · webinar Tech Negocios</span></td><td class="r">93</td><td class="r">7,4%</td><td class="r">0</td><td class="r">0%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#16238C"></span>SEO / búsqueda orgánica</span></td><td class="r">78</td><td class="r">6,2%</td><td class="r">15</td><td class="r">19,2%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#2540E6"></span>Tráfico pagado / Google Ads</span></td><td class="r">61</td><td class="r">4,9%</td><td class="r hi">32</td><td class="r hi">52,5%</td></tr>
-            <tr class="sub"><td>Google Ads</td><td class="r">60</td><td class="r">4,8%</td><td class="r">—</td><td class="r"></td></tr>
-            <tr class="sub"><td>Bing</td><td class="r">1</td><td class="r">0,1%</td><td class="r">—</td><td class="r"></td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#5A6EEE"></span>Social ads (paid)</span></td><td class="r">38</td><td class="r">3,0%</td><td class="r">6</td><td class="r">15,8%</td></tr>
-            <tr class="sub"><td>Meta (Facebook/Instagram)</td><td class="r">24</td><td class="r">1,9%</td><td class="r">—</td><td class="r"></td></tr>
-            <tr class="sub"><td>LinkedIn Ads</td><td class="r">14</td><td class="r">1,1%</td><td class="r">—</td><td class="r"></td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#C8CDE2"></span>Otras campañas / AI referrals</span></td><td class="r">9</td><td class="r">0,7%</td><td class="r">1</td><td class="r">11,1%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#E0A23A"></span>Referrals</span></td><td class="r">5</td><td class="r">0,4%</td><td class="r hi">3</td><td class="r hi">60,0%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#B97E22"></span>Redes sociales orgánicas</span></td><td class="r">2</td><td class="r">0,2%</td><td class="r">0</td><td class="r">0%</td></tr>
-            <tr class="total"><td>Total</td><td class="r">1.254</td><td class="r">100%</td><td class="r">71</td><td class="r">5,7%</td></tr>
-          </tbody>
-        </table>
+      <p class="lede">Origen de los 1.254 contactos (HubSpot <em>Original Traffic Source</em>). Los canales inbound/paid están ordenados de mayor a menor <b>conversión a SQL</b>; el bloque Offline (no inbound) se detalla abajo. <b>Google Ads</b> es el motor de demanda cualificada; <b>Referrals</b> convierte al 60% aunque con poco volumen.</p>
+
+      <div class="chanlist" style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 20px">
+        <div class="crow head">
+          <div>Canal</div>
+          <div>Volumen de leads</div>
+          <div>SQL (calidad)</div>
+        </div>
+
+        <!-- Referrals - mejor conversión -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#E0A23A"></span>Referrals<span class="csub">3 SQL de 5 leads</span></div>
+          <div class="cbar"><i style="width:1.9%;background:#E0A23A"></i><span class="cv">5</span></div>
+          <div class="csql"><span class="sqv sq-hi">3</span><span class="sqp">60,0% a SQL</span></div>
+        </div>
+
+        <!-- Google Ads - motor principal -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#2540E6"></span>Google Ads<span class="csub">60 Google · 1 Bing</span></div>
+          <div class="cbar"><i style="width:22.6%;background:#2540E6"></i><span class="cv">61</span></div>
+          <div class="csql"><span class="sqv sq-hi">32</span><span class="sqp">52,5% a SQL</span></div>
+        </div>
+
+        <!-- SEO -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#16238C"></span>SEO / búsqueda orgánica<span class="csub">19,2% conv. SQL</span></div>
+          <div class="cbar"><i style="width:29.0%;background:#16238C"></i><span class="cv">78</span></div>
+          <div class="csql"><span class="sqv sq-hi">15</span><span class="sqp">19,2% a SQL</span></div>
+        </div>
+
+        <!-- Social ads -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#5A6EEE"></span>Social ads (paid)<span class="csub">Meta 24 · LinkedIn 14</span></div>
+          <div class="cbar"><i style="width:14.1%;background:#5A6EEE"></i><span class="cv">38</span></div>
+          <div class="csql"><span class="sqv sq-mid">6</span><span class="sqp">15,8% a SQL</span></div>
+        </div>
+
+        <!-- Otras -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#C8CDE2"></span>Otras · AI referrals<span class="csub">11,1% conv. SQL</span></div>
+          <div class="cbar"><i style="width:3.3%;background:#C8CDE2"></i><span class="cv">9</span></div>
+          <div class="csql"><span class="sqv sq-lo">1</span><span class="sqp">11,1% a SQL</span></div>
+        </div>
+
+        <!-- Tráfico directo -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#2E7CC0"></span>Tráfico directo<span class="csub">6,1% conv. SQL</span></div>
+          <div class="cbar"><i style="width:85%;background:#2E7CC0"></i><span class="cv">229</span></div>
+          <div class="csql"><span class="sqv sq-mid">14</span><span class="sqp">6,1% a SQL</span></div>
+        </div>
+
+        <!-- Eventos - puntual, 0 SQL -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#2B335E"></span>Eventos · webinar<span class="csub">puntual · 0 SQL</span></div>
+          <div class="cbar"><i style="width:34.5%;background:#2B335E;opacity:.5"></i><span class="cv">93</span></div>
+          <div class="csql"><span class="sqv sq-lo" style="color:var(--muted)">0</span><span class="sqp">puntual</span></div>
+        </div>
+
+        <!-- RRSS -->
+        <div class="crow">
+          <div class="cname"><span class="sw" style="background:#B97E22"></span>RRSS orgánicas<span class="csub">0% SQL</span></div>
+          <div class="cbar"><i style="width:0.7%;background:#B97E22"></i><span class="cv">2</span></div>
+          <div class="csql"><span class="sqv sq-lo" style="color:var(--muted)">0</span><span class="sqp"></span></div>
+        </div>
+
+        <!-- Separator: offline -->
+        <div style="border-top:2px dashed var(--line);padding-top:10px;margin-top:4px">
+          <div class="crow">
+            <div class="cname"><span class="sw" style="background:#9AA1BE"></span><span style="color:var(--muted)">Offline / imports<span class="csub">no inbound · ver desglose</span></span></div>
+            <div class="cbar"><i style="width:85%;background:#9AA1BE;opacity:.4"></i><span class="cv" style="color:var(--muted)">739</span></div>
+            <div class="csql"><span class="sqv sq-lo" style="color:var(--muted)">—</span><span class="sqp">0% SQL</span></div>
+          </div>
+        </div>
+
+        <!-- Total row -->
+        <div class="crow total-row">
+          <div class="cname" style="font-weight:700;color:var(--ink);font-size:13.5px">Total</div>
+          <div style="font-family:var(--mono);font-weight:800;font-size:14px;color:var(--ink)">1.254</div>
+          <div class="csql"><span class="sqv sq-hi">71</span><span class="sqp">5,7% global</span></div>
+        </div>
       </div>
 
       <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:26px 0 6px">Dentro del Offline (739)</h3>
@@ -306,11 +408,46 @@
         <div class="astat"><div class="av">&lt;15 min</div><div class="at">objetivo de 1er contacto a un lead</div></div>
         <div class="astat"><div class="av">forms.gurusup.com</div><div class="at">atribución de formularios corregida</div></div>
       </div>
+      <!-- Welcome email hero card -->
+      <div style="background:linear-gradient(135deg,var(--ink) 0%,var(--blue-deep) 100%);border-radius:16px;padding:24px 26px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(54,201,216,.18),transparent 65%)"></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:1">
+          <div style="flex:1;min-width:240px">
+            <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#8AADFF;margin-bottom:8px">Acción estrella del mes · Automatización &amp; Ventas</div>
+            <div style="font-size:20px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:7px">Mail de bienvenida + precualificación de leads</div>
+            <div style="font-size:13px;color:#C3CAE8;max-width:54ch;line-height:1.55">Se activa <b style="color:#EAEDFB">automáticamente</b> para todos los contactos inbound que solicitan demo, desde cualquier canal de marketing.</div>
+          </div>
+          <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:16px 24px;text-align:center;flex-shrink:0">
+            <div style="font-family:var(--mono);font-size:46px;font-weight:800;color:#36C9D8;line-height:1">1.200+</div>
+            <div style="font-size:12px;color:#A8B0D8;margin-top:5px;font-weight:600;letter-spacing:.04em">envíos realizados</div>
+            <div style="font-size:11px;color:#6070A0;margin-top:2px">junio 2026</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;position:relative;z-index:1">
+          <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:16px">
+            <div style="font-size:11px;font-weight:700;color:#36C9D8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Objetivo 1 — Precualificación</div>
+            <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:8px;color:#EAEDFB;font-size:12.5px;line-height:1.5">
+              <li>Formulario de <b>3–4 preguntas</b>: el lead describe su situación, necesidades y puntos de dolor antes de la primera reunión</li>
+              <li>Ventas llega con <b>contexto completo</b> → reuniones más personalizadas y dirigidas al problema real del cliente</li>
+              <li>Permite <b>priorizar el pipeline</b> y detectar potencial comercial antes de invertir tiempo del equipo</li>
+            </ul>
+          </div>
+          <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Objetivo 2 — Limpieza del CRM</div>
+            <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:8px;color:#EAEDFB;font-size:12.5px;line-height:1.5">
+              <li>Contactos que <b>rebotan o caen en spam</b> → lista de exclusión automática desde el primer toque</li>
+              <li>Depuración continua: filtra <b>contactos no válidos o irreales</b> y aprende qué fuentes los generan</li>
+              <li>Datos para <b>tomar decisiones</b> sobre calidad de captación por canal a futuro</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="cards">
         <div class="ncard">
           <h3><span class="n">1</span> Cambio de etapa de funnel</h3>
           <ul>
-            <li>Migración del objeto <b>"Lead"</b> a <b>etapas nativas</b>: curiosos → MQL → SQL → Freemium → Oportunidad → Cliente. Canvas único de oportunidades.</li>
+            <li>Migración del objeto <b>"Lead"</b> a <b>etapas nativas</b>: Lead / Contacto → MQL → SQL → Freemium → Oportunidad → Cliente. Canvas único de oportunidades.</li>
             <li>Nueva etapa <b>SQL Consultoría/Demo</b> (solo quien pide reunión) y <b>Freemiums</b> (signups de app, excluidos del nurturing de demanda).</li>
           </ul>
           <span class="src">Workflow 16-jun · nomenclatura oficial 23-jun</span>
@@ -319,7 +456,7 @@
           <h3><span class="n">2</span> Flujos y automatización</h3>
           <ul>
             <li>Workflows de gestión de leads: asignación de tarea, <b>recordatorio a 2h</b> sin contacto, reasignación, aviso de deals <b>&gt;15 días</b> inactivos.</li>
-            <li>Mail de bienvenida con CTA a precualificación (3 preguntas); nurturing por email; etiquetado y exclusión automática de freemiums.</li>
+            <li>Nurturing por email; etiquetado y exclusión automática de freemiums. Mail de bienvenida + precualificación: ver tarjeta arriba.</li>
           </ul>
           <span class="src">Sales operations · Pilar</span>
         </div>
@@ -441,6 +578,3 @@
 
   </div>
 </div>
-
-</body>
-</html>
