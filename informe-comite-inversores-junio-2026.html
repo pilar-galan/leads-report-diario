@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GuruSup · Informe CRM comité de inversores — junio 2026</title>
-<meta name="description" content="Informe para el comité de inversores de GuruSup (jun 2026): embudo de conversión con ramas Ventas y Producto, atribución por canal, auditoría del CRM y valor de negocio.">
+<meta name="description" content="Informe para el comité de inversores de GuruSup (jun 2026): embudo Leads → SQL → Oportunidad → Cliente, cuentas premium, atribución por canal, auditoría del CRM y valor de negocio.">
 <style>html,body{margin:0;padding:0}body{background:#F5F6FB}</style>
 </head>
 <body>
@@ -51,7 +51,7 @@
   .gs .kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:7px;position:relative;overflow:hidden}
   .gs .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue)}
   .gs .kpi.alt::before{background:var(--amber)}
-  .gs .kpi.win::before{background:var(--green)}
+  .gs .kpi.win::before{background:var(--ink)}
   .gs .kpi .k-label{font-size:12.5px;color:var(--muted);font-weight:600}
   .gs .kpi .k-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:38px;line-height:1;font-weight:600;color:var(--ink);letter-spacing:-.02em}
   .gs .kpi .k-sub{font-size:12.5px;color:var(--muted)}
@@ -141,7 +141,7 @@
   .gs .vcard .vmain{display:flex;align-items:baseline;gap:8px}
   .gs .vcard .vbig{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;color:var(--ink);line-height:1}
   .gs .vcard .vtag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px}
-  .gs .tag-up{background:var(--green-soft);color:var(--green)}
+  .gs .tag-up{background:var(--ink);color:#EAEDFB}
   .gs .tag-dn{background:#F7E4E9;color:var(--red)}
   .gs .vcard .vlist{display:flex;flex-direction:column;gap:6px;font-size:12.8px;color:var(--text)}
   .gs .vcard .vlist div{display:flex;justify-content:space-between;gap:10px}
@@ -154,7 +154,7 @@
 
   .gs .deals{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 4px;margin-top:14px;overflow-x:auto}
   .gs .deals table{min-width:560px}
-  .gs .deals .pot{font-family:var(--mono);color:var(--green);font-weight:600}
+  .gs .deals .pot{font-family:var(--mono);color:var(--blue-deep);font-weight:600}
   .gs .pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;background:var(--blue-soft);color:var(--blue-deep);font-weight:600}
 
   /* Notes */
@@ -200,10 +200,9 @@
       <div class="sec-head"><span class="idx">01</span><h2>Resumen ejecutivo</h2><span class="rule"></span></div>
       <p class="lede">Mes de consolidación del CRM y de salto en adquisición. Por primera vez el embudo es <b>medible y trazable de punta a punta</b> tras migrar a etapas nativas de ciclo de vida. Nota de volumen: el dato de leads incluye una importación histórica de freemiums y un webinar puntual (ver §3).</p>
       <div class="kpis">
-        <div class="kpi"><span class="k-label">Nuevos leads generados</span><span class="k-val">1.254</span><span class="k-sub">contactos nuevos en el periodo</span></div>
+        <div class="kpi"><span class="k-label">Total leads del mes</span><span class="k-val">1.254</span><span class="k-sub">contactos nuevos en el periodo</span></div>
+        <div class="kpi alt"><span class="k-label">Cuentas premium</span><span class="k-val">554</span><span class="k-sub"><b>44,2%</b> de los leads · signup self-service en la app</span></div>
         <div class="kpi"><span class="k-label">SQL Consultoría</span><span class="k-val">71</span><span class="k-sub"><b>5,7%</b> de los leads · piden reunión con ventas</span></div>
-        <div class="kpi"><span class="k-label">Reuniones de ventas agendadas</span><span class="k-val">28</span><span class="k-sub">demos en pipeline (jun) · +14 en Brain</span></div>
-        <div class="kpi alt"><span class="k-label">Freemiums registrados</span><span class="k-val">554</span><span class="k-sub"><b>44,2%</b> de los leads · signup self-service</span></div>
         <div class="kpi"><span class="k-label">Oportunidades en pipeline</span><span class="k-val">210</span><span class="k-sub"><b>Ventas 132</b> + <b>Brain 78</b></span></div>
         <div class="kpi win"><span class="k-label">Clientes nuevos</span><span class="k-val">5</span><span class="k-sub">empresas · 38 activas al cierre · −2 churn</span></div>
       </div>
@@ -212,46 +211,46 @@
     <!-- 2. EMBUDO -->
     <section>
       <div class="sec-head"><span class="idx">02</span><h2>Embudo de conversión</h2><span class="rule"></span></div>
-      <p class="lede">Del primer contacto a la empresa cliente. Tras la cualificación, los leads se reparten en dos motores: <b>Ventas</b> (SQL → reunión → cierre, gestionado por el <b>proceso comercial</b>) y <b>Producto</b> (freemium self-service, gestionado por <b>automatizaciones de CRM y marketing</b>). Cada salto muestra su tasa de conversión real del mes.</p>
-      <div class="entrybar">
-        <div><div class="e-tag">Entrada</div><div class="e-nm">Leads totales</div></div>
-        <span class="e-v">1.254</span>
-      </div>
-      <div class="splitpip">↓ se reparten en dos ramas ↓</div>
+      <p class="lede">Del total de leads a la empresa cliente. El <b>embudo comercial</b> avanza <b>Leads → SQL Consultoría → Oportunidad → Cliente</b> (gestionado por el proceso comercial); en paralelo, las <b>cuentas premium</b> entran por producto y se trabajan con <b>automatizaciones de CRM y marketing</b>. Cada salto muestra su conversión real del mes.</p>
       <div class="splitrow">
         <div class="track sales">
-          <div class="th"><span class="tt">Rama Ventas</span><span class="tm">Proceso comercial</span></div>
+          <div class="th"><span class="tt">Embudo comercial</span><span class="tm">Proceso comercial</span></div>
           <div class="tier">
-            <div class="shape" style="background:linear-gradient(180deg,#23B4C2,#149AA9);clip-path:polygon(0 0,100% 0,80% 100%,20% 100%)"></div>
+            <div class="shape" style="background:linear-gradient(180deg,#2BBBC9,#1FA6B4);clip-path:polygon(0 0,100% 0,82% 100%,18% 100%)"></div>
+            <div class="lbl"><span class="v">1.254</span><span class="nm">Total leads</span><span class="pf">100% · entrada</span></div>
+          </div>
+          <div class="convbig"><span class="cp">5,7%</span><span class="cl">leads → SQL ▾</span></div>
+          <div class="tier">
+            <div class="shape" style="background:linear-gradient(180deg,#1FA6B4,#149AA9);clip-path:polygon(18% 0,82% 0,70% 100%,30% 100%)"></div>
             <div class="lbl"><span class="v">71</span><span class="nm">SQL Consultoría</span><span class="pf">5,7% de leads · piden reunión</span></div>
           </div>
-          <div class="convbig"><span class="cp">39,4%</span><span class="cl">SQL → reunión ▾</span></div>
+          <div class="convbig"><span class="cp">73,2%</span><span class="cl">SQL → oportunidad ▾</span></div>
           <div class="tier">
-            <div class="shape" style="background:linear-gradient(180deg,#149AA9,#0E7E8E);clip-path:polygon(20% 0,80% 0,68% 100%,32% 100%)"></div>
-            <div class="lbl"><span class="v">28</span><span class="nm">Reunión agendada</span><span class="pf">2,2% de leads · demo en pipeline</span></div>
+            <div class="shape" style="background:linear-gradient(180deg,#149AA9,#0E7E8E);clip-path:polygon(30% 0,70% 0,63% 100%,37% 100%)"></div>
+            <div class="lbl"><span class="v">52</span><span class="nm">Oportunidad</span><span class="pf">4,1% de leads</span></div>
           </div>
-          <div class="convbig"><span class="cp">17,9%</span><span class="cl">reunión → cliente ▾</span></div>
+          <div class="convbig"><span class="cp">9,6%</span><span class="cl">oportunidad → cliente ▾</span></div>
           <div class="tier">
-            <div class="shape" style="background:linear-gradient(180deg,#0E7E8E,#0A5E6E);clip-path:polygon(32% 0,68% 0,61% 100%,39% 100%)"></div>
+            <div class="shape" style="background:linear-gradient(180deg,#0E7E8E,#0A5E6E);clip-path:polygon(37% 0,63% 0,57% 100%,43% 100%)"></div>
             <div class="lbl"><span class="v">5</span><span class="nm">Clientes (empresas)</span><span class="pf">0,4% de leads</span></div>
           </div>
           <div class="foot">Conversión global lead → cliente: <b>0,40%</b></div>
         </div>
         <div class="track prod">
           <div class="th"><span class="tt">Rama Producto</span><span class="tm">Automatización CRM + mkt</span></div>
-          <span class="bn">Freemiums · signup self-service</span>
+          <span class="bn">Cuentas premium · signup self-service</span>
           <div class="bv">554</div>
           <div class="bpct">44,2% de los leads</div>
-          <div class="bd">Entran por producto sin pasar por ventas; se gestionan con <b>automatizaciones de CRM y marketing</b> (nurturing, exclusión de la demanda generada), no por el proceso comercial. Uso autónomo de la app; activación aún manual → mayor palanca de crecimiento si se automatiza el onboarding.</div>
+          <div class="bd">Entran por producto sin pasar por ventas; se gestionan con <b>automatizaciones de CRM y marketing</b>, no por el proceso comercial. <b>En marcha una estrategia de contenido</b> para empujar estas cuentas hacia <b>SQL Consultoría</b> y activar su conversión a ventas.</div>
         </div>
       </div>
       <div class="readstrip">
-        <div class="rcell"><div class="rv">~6</div><div class="rt">de cada 100 leads piden reunión (SQL)</div></div>
-        <div class="rcell"><div class="rv">~2</div><div class="rt">agendan demo</div></div>
+        <div class="rcell"><div class="rv">~6</div><div class="rt">de cada 100 leads llegan a SQL Consultoría</div></div>
+        <div class="rcell"><div class="rv">~4</div><div class="rt">llegan a oportunidad</div></div>
         <div class="rcell"><div class="rv">0,4</div><div class="rt">se convierten en empresa cliente</div></div>
-        <div class="rcell amber"><div class="rv">44</div><div class="rt">entran por producto (freemium)</div></div>
+        <div class="rcell amber"><div class="rv">44</div><div class="rt">entran por producto (premium)</div></div>
       </div>
-      <p class="fn-note">Anchos ilustrativos (no a escala lineal). Conversiones reales de junio · HubSpot. Reunión = deals que entran en demo agendada (proxy de pipeline).</p>
+      <p class="fn-note">Anchos ilustrativos (no a escala lineal). Conversiones reales de junio · HubSpot. Oportunidad del embudo = contactos del cohorte que alcanzan esa etapa (52); el total de oportunidades en pipeline (210 deals) incluye Brain y otras cohortes.</p>
     </section>
 
     <!-- 3. CANALES -->
@@ -264,7 +263,7 @@
           <tbody>
             <tr><td><span class="chan"><span class="swatch" style="background:#9AA1BE"></span>Offline / imports (BBDD + integración)</span></td><td class="r">739</td><td class="r">58,9%</td><td class="r">0</td><td class="r">0%</td></tr>
             <tr><td><span class="chan"><span class="swatch" style="background:#2E7CC0"></span>Tráfico directo</span></td><td class="r">229</td><td class="r">18,3%</td><td class="r">14</td><td class="r">6,1%</td></tr>
-            <tr><td><span class="chan"><span class="swatch" style="background:#2F9E60"></span>Eventos · webinar Tech Negocios</span></td><td class="r">93</td><td class="r">7,4%</td><td class="r">0</td><td class="r">0%</td></tr>
+            <tr><td><span class="chan"><span class="swatch" style="background:#2B335E"></span>Eventos · webinar Tech Negocios</span></td><td class="r">93</td><td class="r">7,4%</td><td class="r">0</td><td class="r">0%</td></tr>
             <tr><td><span class="chan"><span class="swatch" style="background:#16238C"></span>SEO / búsqueda orgánica</span></td><td class="r">78</td><td class="r">6,2%</td><td class="r">15</td><td class="r">19,2%</td></tr>
             <tr><td><span class="chan"><span class="swatch" style="background:#2540E6"></span>Tráfico pagado / Google Ads</span></td><td class="r">61</td><td class="r">4,9%</td><td class="r hi">32</td><td class="r hi">52,5%</td></tr>
             <tr class="sub"><td>Google Ads</td><td class="r">60</td><td class="r">4,8%</td><td class="r">—</td><td class="r"></td></tr>
@@ -429,7 +428,6 @@
         <ul>
           <li><b>Fuente y ventana:</b> HubSpot (contactos y deals creados 1–29 jun 2026, extracción 29-jun) + reportes de equipo (CS, Ventas, Paid Media) para clientes, upsells, inversión y pipeline destacado.</li>
           <li><b>Embudo:</b> cohorte de junio por etapa actual (snapshot); conversiones aproximadas. SQL y Freemium son ramas paralelas — el freemium (554) multiplica por ~8 al SQL (71). Anchos del funnel ilustrativos, no a escala lineal.</li>
-          <li><b>Reuniones de ventas agendadas (28):</b> proxy = deals del pipeline de Ventas que entran en la etapa de demo/presentación agendada en junio; el conteo actual en esa etapa (29) coincide con el reporte de Ventas. El objeto Meetings aún no es accesible (scope del conector + bloqueo de API por política de red); pendiente para separar agendadas vs celebradas.</li>
           <li><b>Clientes (5 empresas):</b> confirmadas por Ventas y CS (Wild Audience, TBF, Flywire, Eboca, Albacete); 38 activas y 2 churns (Mundo Marino, Abastores). Se mide por <b>empresa/cuenta</b>, no por contacto: en HubSpot constan 12 contactos en etapa Cliente (varios por empresa); los cierres no estaban marcados como closed-won por <code>closedate</code> → brecha de higiene a corregir.</li>
           <li><b>Atribución de paid:</b> HubSpot atribuye 99 leads a pago (Google Ads 61 + Social 38); Paid Media reporta ~120 (incluye Reddit/AdRoll/programática y conteo de plataforma). A nivel canal coinciden (Google ~60, LinkedIn 14, Meta ~23-24, Bing 1-5).</li>
           <li><b>Valor de pipeline (€):</b> aún no reportable de forma fiable — solo ~11 de 210 deals tienen importe cargado. Acción de higiene de datos para RevOps. Las cifras de "pipeline destacado" son potenciales aportados por Ventas, no compromisos.</li>
