@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GuruSup · Informe CRM comité de inversores — junio 2026</title>
-<meta name="description" content="Informe para el comité de inversores de GuruSup (jun 2026): embudo de conversión visual, atribución por canal, auditoría del CRM y valor de negocio (cartera, expansión, paid, pipeline destacado).">
+<meta name="description" content="Informe para el comité de inversores de GuruSup (jun 2026): embudo de conversión con ramas Ventas y Producto, atribución por canal, auditoría del CRM y valor de negocio.">
 <style>html,body{margin:0;padding:0}body{background:#F5F6FB}</style>
 </head>
 <body>
@@ -58,33 +58,43 @@
   .gs .kpi .k-sub b{color:var(--blue-deep);font-weight:600}
   .gs .kpi.alt .k-sub b{color:var(--amber-deep)}
 
-  /* ===== FUNNEL ===== */
-  .gs .fn{display:grid;grid-template-columns:1.55fr 1fr;gap:24px;align-items:stretch;margin-top:6px}
-  .gs .fn-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px 18px}
-  .gs .fn-stack{display:flex;flex-direction:column;gap:7px}
-  .gs .tier{position:relative;height:94px}
+  /* ===== FUNNEL (turquesa) ===== */
+  .gs .entrybar{background:linear-gradient(180deg,#1FAEBD,#127E8E);border-radius:14px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:#fff;box-shadow:0 8px 20px rgba(12,100,116,.22)}
+  .gs .entrybar .e-tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;font-weight:600}
+  .gs .entrybar .e-nm{font-size:17px;font-weight:700}
+  .gs .entrybar .e-v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:42px;font-weight:800;letter-spacing:-.02em}
+  .gs .splitpip{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin:10px 0 2px}
+  .gs .splitrow{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+  .gs .track{border-radius:16px;padding:16px 18px;border:1px solid var(--line);background:var(--card)}
+  .gs .track.sales{border-top:4px solid #0E8A9A}
+  .gs .track.prod{border-top:4px solid var(--amber);background:linear-gradient(170deg,#FCF3E2,#FBEFD9);border-color:#EAD6B4;display:flex;flex-direction:column}
+  .gs .track .th{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+  .gs .track .th .tt{font-size:13px;font-weight:700;color:var(--ink)}
+  .gs .track .th .tm{font-size:10px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:999px}
+  .gs .track.sales .th .tm{background:#DFF3F5;color:#0A5E6E}
+  .gs .track.prod .th .tm{background:#F4E2C3;color:var(--amber-deep)}
+  .gs .tier{position:relative;height:74px}
   .gs .tier .shape{position:absolute;inset:0;border-radius:5px}
-  .gs .tier .lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.28)}
-  .gs .tier .lbl .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:32px;font-weight:700;line-height:1;letter-spacing:-.01em}
-  .gs .tier .lbl .nm{font-size:12.5px;letter-spacing:.03em;margin-top:4px;font-weight:600}
-  .gs .tier .lbl .pf{font-size:11px;opacity:.82;font-family:var(--mono);margin-top:1px}
-  .gs .conv{display:flex;justify-content:center;height:1px;position:relative;z-index:2}
-  .gs .conv span{position:relative;top:-11px;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:11.5px;font-weight:700;color:var(--blue-deep);background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 12px;box-shadow:0 2px 6px rgba(20,30,80,.10)}
-  .gs .fn-note{font-size:11px;color:var(--muted);text-align:center;margin-top:12px}
-
-  .gs .fn-side{display:flex;flex-direction:column;gap:14px}
-  .gs .branch{background:linear-gradient(160deg,#FCF3E2,#FBEFD9);border:1px solid #EAD6B4;border-radius:16px;padding:20px;position:relative}
-  .gs .branch .tag{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--amber-deep)}
-  .gs .branch .bv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:42px;font-weight:700;color:var(--amber-deep);line-height:1;margin:6px 0 2px}
-  .gs .branch .bn{font-size:13.5px;font-weight:600;color:#7A5512}
-  .gs .branch .bd{font-size:12.5px;color:#8A6A33;margin-top:8px}
-  .gs .readbox{background:var(--ink);color:#EAEDFB;border-radius:16px;padding:20px;flex:1}
-  .gs .readbox h4{margin:0 0 12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#A8B0D8;font-weight:700}
-  .gs .read-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #232C57}
-  .gs .read-row:last-child{border-bottom:none}
-  .gs .read-row .rv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;color:var(--blue-mid);min-width:62px}
-  .gs .read-row .rt{font-size:12.5px;color:#C3CAE8}
-  .gs .read-row.amber .rv{color:var(--amber)}
+  .gs .tier .lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.30)}
+  .gs .tier .lbl .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;line-height:1}
+  .gs .tier .lbl .nm{font-size:11.5px;font-weight:600;margin-top:3px}
+  .gs .tier .lbl .pf{font-size:10.5px;opacity:.86;font-family:var(--mono);margin-top:1px}
+  .gs .convbig{display:flex;align-items:center;justify-content:center;gap:10px;margin:9px 0}
+  .gs .convbig .cp{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:22px;font-weight:800;color:#0A5E6E;background:#DFF3F5;border:1px solid #B6E2E7;border-radius:10px;padding:3px 13px;letter-spacing:-.01em}
+  .gs .convbig .cl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .gs .track.sales .foot{margin-top:13px;font-size:12.5px;color:var(--muted);text-align:center}
+  .gs .track.sales .foot b{color:#0A5E6E;font-family:var(--mono)}
+  .gs .track.prod .bn{font-size:13px;font-weight:700;color:#7A5512}
+  .gs .track.prod .bv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:50px;font-weight:800;color:var(--amber-deep);line-height:1;margin:4px 0 0}
+  .gs .track.prod .bpct{font-family:var(--mono);font-size:14px;font-weight:800;color:var(--amber-deep)}
+  .gs .track.prod .bd{font-size:12.5px;color:#8A6A33;margin-top:11px}
+  .gs .track.prod .bd b{color:#7A5512}
+  .gs .readstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .gs .rcell{background:var(--ink);color:#EAEDFB;border-radius:12px;padding:14px 14px;text-align:center}
+  .gs .rcell .rv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:27px;font-weight:800;color:#36C9D8;line-height:1}
+  .gs .rcell.amber .rv{color:var(--amber)}
+  .gs .rcell .rt{font-size:11.5px;color:#C3CAE8;margin-top:6px}
+  .gs .fn-note{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
 
   /* Tables */
   .gs .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;background:var(--card)}
@@ -160,7 +170,7 @@
     .gs .auditstrip{grid-template-columns:1fr 1fr}
   }
   @media (max-width:680px){
-    .gs .fn,.gs .cards,.gs .legend{grid-template-columns:1fr}
+    .gs .splitrow,.gs .cards,.gs .legend{grid-template-columns:1fr}
     .gs .kpis,.gs .vgrid,.gs .auditstrip{grid-template-columns:1fr 1fr}
     .gs .masthead h1{font-size:25px}
   }
@@ -195,55 +205,53 @@
         <div class="kpi"><span class="k-label">Reuniones de ventas agendadas</span><span class="k-val">28</span><span class="k-sub">demos en pipeline (jun) · +14 en Brain</span></div>
         <div class="kpi alt"><span class="k-label">Freemiums registrados</span><span class="k-val">554</span><span class="k-sub"><b>44,2%</b> de los leads · signup self-service</span></div>
         <div class="kpi"><span class="k-label">Oportunidades en pipeline</span><span class="k-val">210</span><span class="k-sub"><b>Ventas 132</b> + <b>Brain 78</b></span></div>
-        <div class="kpi win"><span class="k-label">Clientes nuevos</span><span class="k-val">5</span><span class="k-sub">logos · 38 activos al cierre · −2 churn</span></div>
+        <div class="kpi win"><span class="k-label">Clientes nuevos</span><span class="k-val">5</span><span class="k-sub">empresas · 38 activas al cierre · −2 churn</span></div>
       </div>
     </section>
 
     <!-- 2. EMBUDO -->
     <section>
       <div class="sec-head"><span class="idx">02</span><h2>Embudo de conversión</h2><span class="rule"></span></div>
-      <p class="lede">Del primer contacto al cliente. Tras la cualificación el recorrido se bifurca en dos motores: <b>Ventas</b> (piden reunión → demo → cierre) y <b>Producto</b> (freemium self-service). Cada salto muestra su tasa de conversión real del mes.</p>
-      <div class="fn">
-        <div class="fn-panel">
-          <div class="fn-stack">
-            <div class="tier">
-              <div class="shape" style="background:linear-gradient(180deg,#6E80F2,#5A6EEE);clip-path:polygon(0 0,100% 0,84% 100%,16% 100%)"></div>
-              <div class="lbl"><span class="v">1.254</span><span class="nm">Leads totales</span><span class="pf">100% · entrada</span></div>
-            </div>
-            <div class="conv"><span>Lead → SQL · 5,7%</span></div>
-            <div class="tier">
-              <div class="shape" style="background:linear-gradient(180deg,#4356E9,#3A52E8);clip-path:polygon(16% 0,84% 0,72% 100%,28% 100%)"></div>
-              <div class="lbl"><span class="v">71</span><span class="nm">SQL Consultoría</span><span class="pf">5,7% de leads · piden reunión</span></div>
-            </div>
-            <div class="conv"><span>SQL → reunión · 39,4%</span></div>
-            <div class="tier">
-              <div class="shape" style="background:linear-gradient(180deg,#2A47E6,#2540E6);clip-path:polygon(28% 0,72% 0,64% 100%,36% 100%)"></div>
-              <div class="lbl"><span class="v">28</span><span class="nm">Reunión agendada</span><span class="pf">2,2% de leads · demo en pipeline</span></div>
-            </div>
-            <div class="conv"><span>reunión → cliente · 17,9%</span></div>
-            <div class="tier">
-              <div class="shape" style="background:linear-gradient(180deg,#1A2C9A,#16238C);clip-path:polygon(36% 0,64% 0,60% 100%,40% 100%)"></div>
-              <div class="lbl"><span class="v">5</span><span class="nm">Clientes nuevos</span><span class="pf">0,4% de leads · logos cerrados</span></div>
-            </div>
+      <p class="lede">Del primer contacto a la empresa cliente. Tras la cualificación, los leads se reparten en dos motores: <b>Ventas</b> (SQL → reunión → cierre, gestionado por el <b>proceso comercial</b>) y <b>Producto</b> (freemium self-service, gestionado por <b>automatizaciones de CRM y marketing</b>). Cada salto muestra su tasa de conversión real del mes.</p>
+      <div class="entrybar">
+        <div><div class="e-tag">Entrada</div><div class="e-nm">Leads totales</div></div>
+        <span class="e-v">1.254</span>
+      </div>
+      <div class="splitpip">↓ se reparten en dos ramas ↓</div>
+      <div class="splitrow">
+        <div class="track sales">
+          <div class="th"><span class="tt">Rama Ventas</span><span class="tm">Proceso comercial</span></div>
+          <div class="tier">
+            <div class="shape" style="background:linear-gradient(180deg,#23B4C2,#149AA9);clip-path:polygon(0 0,100% 0,80% 100%,20% 100%)"></div>
+            <div class="lbl"><span class="v">71</span><span class="nm">SQL Consultoría</span><span class="pf">5,7% de leads · piden reunión</span></div>
           </div>
-          <p class="fn-note">Anchos ilustrativos (no a escala lineal). Conversiones reales de junio · HubSpot. Reunión = deals que entran en demo agendada (proxy de pipeline).</p>
+          <div class="convbig"><span class="cp">39,4%</span><span class="cl">SQL → reunión ▾</span></div>
+          <div class="tier">
+            <div class="shape" style="background:linear-gradient(180deg,#149AA9,#0E7E8E);clip-path:polygon(20% 0,80% 0,68% 100%,32% 100%)"></div>
+            <div class="lbl"><span class="v">28</span><span class="nm">Reunión agendada</span><span class="pf">2,2% de leads · demo en pipeline</span></div>
+          </div>
+          <div class="convbig"><span class="cp">17,9%</span><span class="cl">reunión → cliente ▾</span></div>
+          <div class="tier">
+            <div class="shape" style="background:linear-gradient(180deg,#0E7E8E,#0A5E6E);clip-path:polygon(32% 0,68% 0,61% 100%,39% 100%)"></div>
+            <div class="lbl"><span class="v">5</span><span class="nm">Clientes (empresas)</span><span class="pf">0,4% de leads</span></div>
+          </div>
+          <div class="foot">Conversión global lead → cliente: <b>0,40%</b></div>
         </div>
-        <div class="fn-side">
-          <div class="branch">
-            <span class="tag">Rama Producto · paralela</span>
-            <div class="bv">554</div>
-            <div class="bn">Freemiums (signup self-service)</div>
-            <div class="bd"><b>44,2% de los leads</b> entran por producto sin pasar por ventas. Uso autónomo de la app; activación aún manual → mayor palanca de crecimiento del trimestre si se automatiza el onboarding.</div>
-          </div>
-          <div class="readbox">
-            <h4>De cada 100 leads</h4>
-            <div class="read-row"><span class="rv">~6</span><span class="rt">piden reunión con ventas (SQL)</span></div>
-            <div class="read-row"><span class="rv">~2</span><span class="rt">agendan una demo</span></div>
-            <div class="read-row"><span class="rv">0,4</span><span class="rt">se convierten en cliente</span></div>
-            <div class="read-row amber"><span class="rv">44</span><span class="rt">entran por producto (freemium)</span></div>
-          </div>
+        <div class="track prod">
+          <div class="th"><span class="tt">Rama Producto</span><span class="tm">Automatización CRM + mkt</span></div>
+          <span class="bn">Freemiums · signup self-service</span>
+          <div class="bv">554</div>
+          <div class="bpct">44,2% de los leads</div>
+          <div class="bd">Entran por producto sin pasar por ventas; se gestionan con <b>automatizaciones de CRM y marketing</b> (nurturing, exclusión de la demanda generada), no por el proceso comercial. Uso autónomo de la app; activación aún manual → mayor palanca de crecimiento si se automatiza el onboarding.</div>
         </div>
       </div>
+      <div class="readstrip">
+        <div class="rcell"><div class="rv">~6</div><div class="rt">de cada 100 leads piden reunión (SQL)</div></div>
+        <div class="rcell"><div class="rv">~2</div><div class="rt">agendan demo</div></div>
+        <div class="rcell"><div class="rv">0,4</div><div class="rt">se convierten en empresa cliente</div></div>
+        <div class="rcell amber"><div class="rv">44</div><div class="rt">entran por producto (freemium)</div></div>
+      </div>
+      <p class="fn-note">Anchos ilustrativos (no a escala lineal). Conversiones reales de junio · HubSpot. Reunión = deals que entran en demo agendada (proxy de pipeline).</p>
     </section>
 
     <!-- 3. CANALES -->
@@ -344,7 +352,7 @@
           <span class="vh">Cartera de clientes</span>
           <div class="vmain"><span class="vbig">38</span><span class="vtag tag-up">neto +3</span></div>
           <div class="vlist">
-            <div><span>Nuevos logos (jun)</span><b>+5</b></div>
+            <div><span>Nuevas empresas (jun)</span><b>+5</b></div>
             <div><span>Churn</span><b>−2</b></div>
             <div><span>Activos al cierre</span><b>38</b></div>
           </div>
@@ -422,7 +430,7 @@
           <li><b>Fuente y ventana:</b> HubSpot (contactos y deals creados 1–29 jun 2026, extracción 29-jun) + reportes de equipo (CS, Ventas, Paid Media) para clientes, upsells, inversión y pipeline destacado.</li>
           <li><b>Embudo:</b> cohorte de junio por etapa actual (snapshot); conversiones aproximadas. SQL y Freemium son ramas paralelas — el freemium (554) multiplica por ~8 al SQL (71). Anchos del funnel ilustrativos, no a escala lineal.</li>
           <li><b>Reuniones de ventas agendadas (28):</b> proxy = deals del pipeline de Ventas que entran en la etapa de demo/presentación agendada en junio; el conteo actual en esa etapa (29) coincide con el reporte de Ventas. El objeto Meetings aún no es accesible (scope del conector + bloqueo de API por política de red); pendiente para separar agendadas vs celebradas.</li>
-          <li><b>Clientes (5 logos):</b> confirmados por Ventas y CS (Wild Audience, TBF, Flywire, Eboca, Albacete); 38 activos y 2 churns (Mundo Marino, Abastores). En HubSpot constan 12 contactos en etapa Cliente (varios por cuenta); los cierres no estaban marcados como closed-won por <code>closedate</code> → brecha de higiene a corregir.</li>
+          <li><b>Clientes (5 empresas):</b> confirmadas por Ventas y CS (Wild Audience, TBF, Flywire, Eboca, Albacete); 38 activas y 2 churns (Mundo Marino, Abastores). Se mide por <b>empresa/cuenta</b>, no por contacto: en HubSpot constan 12 contactos en etapa Cliente (varios por empresa); los cierres no estaban marcados como closed-won por <code>closedate</code> → brecha de higiene a corregir.</li>
           <li><b>Atribución de paid:</b> HubSpot atribuye 99 leads a pago (Google Ads 61 + Social 38); Paid Media reporta ~120 (incluye Reddit/AdRoll/programática y conteo de plataforma). A nivel canal coinciden (Google ~60, LinkedIn 14, Meta ~23-24, Bing 1-5).</li>
           <li><b>Valor de pipeline (€):</b> aún no reportable de forma fiable — solo ~11 de 210 deals tienen importe cargado. Acción de higiene de datos para RevOps. Las cifras de "pipeline destacado" son potenciales aportados por Ventas, no compromisos.</li>
         </ul>
