@@ -111,21 +111,24 @@
 
   /* ===== CHANNEL BARS ===== */
   .gs .chanlist{display:flex;flex-direction:column;gap:10px}
-  .gs .crow{display:grid;grid-template-columns:200px 1fr 116px;gap:16px;align-items:center}
+  .gs .crow{display:grid;grid-template-columns:200px 1fr 100px 100px;gap:12px;align-items:center}
   .gs .crow.head div{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
-  .gs .crow.head div:last-child{text-align:right}
+  .gs .crow.head div:nth-child(3),.gs .crow.head div:nth-child(4){text-align:right}
   .gs .cname{font-size:13px;font-weight:600;color:var(--text)}
   .gs .cname .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:middle}
   .gs .cname .csub{display:block;font-size:11px;color:var(--muted);font-weight:500;margin:2px 0 0 18px;font-family:var(--mono)}
   .gs .cbar{position:relative;height:30px;background:var(--line-2);border-radius:7px;overflow:hidden}
   .gs .cbar i{position:absolute;left:0;top:0;bottom:0;border-radius:7px;min-width:4px}
   .gs .cbar .cv{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;color:var(--ink)}
-  .gs .csql{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-  .gs .csql .sqv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;padding:3px 11px;border-radius:999px;line-height:1.2}
-  .gs .csql .sqp{font-size:10.5px;color:var(--muted)}
+  .gs .csql,.gs .cfree{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .gs .csql .sqv,.gs .cfree .frv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;padding:3px 11px;border-radius:999px;line-height:1.2}
+  .gs .csql .sqp,.gs .cfree .frp{font-size:10.5px;color:var(--muted)}
   .gs .sq-hi{background:var(--ink);color:#fff}
   .gs .sq-mid{background:var(--blue-soft);color:var(--blue-deep)}
   .gs .sq-lo{background:#EEF0F6;color:#9098B5}
+  .gs .fr-hi{background:var(--amber-soft);color:var(--amber-deep)}
+  .gs .fr-mid{background:#FEF5E5;color:#B97E22}
+  .gs .fr-lo{background:#F7F3EE;color:#C4A870}
   .gs .crow.total-row{border-top:2px solid var(--line);padding-top:9px;margin-top:3px}
   .gs .crow.total-row .cv{font-weight:800}
 
@@ -305,13 +308,15 @@
         <div class="crow head">
           <div>Canal</div>
           <div>Volumen de leads</div>
-          <div>SQL (calidad)</div>
+          <div>Freemium</div>
+          <div>SQL</div>
         </div>
 
         <!-- Referrals - mejor conversión -->
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#E0A23A"></span>Referrals<span class="csub">3 SQL de 5 leads</span></div>
           <div class="cbar"><i style="width:1.9%;background:#E0A23A"></i><span class="cv">5</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-hi">3</span><span class="sqp">60,0% a SQL</span></div>
         </div>
 
@@ -319,6 +324,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#2540E6"></span>Google Ads<span class="csub">60 Google · 1 Bing</span></div>
           <div class="cbar"><i style="width:22.6%;background:#2540E6"></i><span class="cv">61</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-hi">32</span><span class="sqp">52,5% a SQL</span></div>
         </div>
 
@@ -326,6 +332,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#16238C"></span>SEO / búsqueda orgánica<span class="csub">19,2% conv. SQL</span></div>
           <div class="cbar"><i style="width:29.0%;background:#16238C"></i><span class="cv">78</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-hi">15</span><span class="sqp">19,2% a SQL</span></div>
         </div>
 
@@ -333,6 +340,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#5A6EEE"></span>Social ads (paid)<span class="csub">Meta 24 · LinkedIn 14</span></div>
           <div class="cbar"><i style="width:14.1%;background:#5A6EEE"></i><span class="cv">38</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-mid">6</span><span class="sqp">15,8% a SQL</span></div>
         </div>
 
@@ -340,6 +348,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#C8CDE2"></span>Otras · AI referrals<span class="csub">11,1% conv. SQL</span></div>
           <div class="cbar"><i style="width:3.3%;background:#C8CDE2"></i><span class="cv">9</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-lo">1</span><span class="sqp">11,1% a SQL</span></div>
         </div>
 
@@ -347,6 +356,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#2E7CC0"></span>Tráfico directo<span class="csub">6,1% conv. SQL</span></div>
           <div class="cbar"><i style="width:85%;background:#2E7CC0"></i><span class="cv">229</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-mid">14</span><span class="sqp">6,1% a SQL</span></div>
         </div>
 
@@ -354,6 +364,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#2B335E"></span>Eventos · webinar<span class="csub">puntual · 0 SQL</span></div>
           <div class="cbar"><i style="width:34.5%;background:#2B335E;opacity:.5"></i><span class="cv">93</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-lo" style="color:var(--muted)">0</span><span class="sqp">puntual</span></div>
         </div>
 
@@ -361,6 +372,7 @@
         <div class="crow">
           <div class="cname"><span class="sw" style="background:#B97E22"></span>RRSS orgánicas<span class="csub">0% SQL</span></div>
           <div class="cbar"><i style="width:0.7%;background:#B97E22"></i><span class="cv">2</span></div>
+          <div class="cfree"><span class="frv fr-lo">—</span><span class="frp"></span></div>
           <div class="csql"><span class="sqv sq-lo" style="color:var(--muted)">0</span><span class="sqp"></span></div>
         </div>
 
@@ -369,6 +381,7 @@
           <div class="crow">
             <div class="cname"><span class="sw" style="background:#9AA1BE"></span><span style="color:var(--muted)">Offline / imports<span class="csub">no inbound · ver desglose</span></span></div>
             <div class="cbar"><i style="width:85%;background:#9AA1BE;opacity:.4"></i><span class="cv" style="color:var(--muted)">739</span></div>
+            <div class="cfree"><span class="frv fr-hi">453</span><span class="frp">61,3% freem.</span></div>
             <div class="csql"><span class="sqv sq-lo" style="color:var(--muted)">—</span><span class="sqp">0% SQL</span></div>
           </div>
         </div>
@@ -377,9 +390,11 @@
         <div class="crow total-row">
           <div class="cname" style="font-weight:700;color:var(--ink);font-size:13.5px">Total</div>
           <div style="font-family:var(--mono);font-weight:800;font-size:14px;color:var(--ink)">1.254</div>
+          <div class="cfree"><span class="frv fr-hi">554</span><span class="frp">44,2% global</span></div>
           <div class="csql"><span class="sqv sq-hi">71</span><span class="sqp">5,7% global</span></div>
         </div>
       </div>
+      <p class="fn-note" style="margin-top:10px">Columna Freemium: dato por canal pendiente de extracción desde HubSpot (filtro lifecycle stage = Freemium por fuente de origen). El total de 554 y los 453 de Offline (importación BBDD Freemium) están confirmados.</p>
 
       <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:26px 0 6px">Dentro del Offline (739)</h3>
       <p class="lede" style="margin-bottom:16px">Con los Eventos separados, el Offline restante es sobre todo una <b>importación de BBDD histórica de freemiums</b> y prospección — no demanda inbound del periodo.</p>
