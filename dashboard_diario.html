@@ -10,9 +10,9 @@
   --guru-800: #110e2a;
   --guru-700: #1a1640;
   --guru-600: #241f58;
-  --guru-500: #7c3aed;
-  --guru-400: #9d5ffa;
-  --guru-300: #c4a2fc;
+  --guru-500: #FF6B5B;
+  --guru-400: #E55A4C;
+  --guru-300: #FAE5DC;
   --surface: #161330;
   --card: #1e1b42;
   --border: #2e2a5a;
@@ -49,7 +49,7 @@ body {
   background: linear-gradient(135deg, var(--guru-500), var(--guru-400));
   border-radius: 10px; display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(124,58,237,0.4);
+  box-shadow: 0 0 16px rgba(255,107,91,0.4);
 }
 .header-title { flex: 1; min-width: 180px; }
 .header-title h1 { font-size: 16px; font-weight: 700; color: var(--text); }
@@ -192,7 +192,7 @@ body {
 /* ── PILLS ── */
 .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
 .pill-demo   { background: rgba(16,185,129,.15); color: var(--green); }
-.pill-discov { background: rgba(124,58,237,.15); color: var(--guru-300); }
+.pill-discov { background: rgba(255,107,91,.15); color: #F5D5C8; }
 .new-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: rgba(16,185,129,.2); color: var(--green); letter-spacing: .04em; text-transform: uppercase; }
 
 /* ── REASON BARS ── */
@@ -210,13 +210,13 @@ body {
 
 /* ── REFRESH ── */
 .refresh-btn {
-  background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.35);
+  background: rgba(255,107,91,.15); border: 1px solid rgba(255,107,91,.35);
   color: var(--guru-300); font-size: 11px; font-weight: 700;
   padding: 5px 13px; border-radius: 20px; cursor: pointer;
   display: flex; align-items: center; gap: 5px; white-space: nowrap;
   transition: background .15s;
 }
-.refresh-btn:hover { background: rgba(124,58,237,.28); }
+.refresh-btn:hover { background: rgba(255,107,91,.28); }
 .refresh-btn.spinning #refresh-icon { display: inline-block; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
