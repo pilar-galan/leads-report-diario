@@ -1,631 +1,183 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GuruSup · Dashboard Diario · 2 jul 2026</title>
-<style>
-:root {
-  --guru-900: #0a0618;
-  --guru-800: #110e2a;
-  --guru-700: #1a1640;
-  --guru-600: #241f58;
-  --guru-500: #7c3aed;
-  --guru-400: #9d5ffa;
-  --guru-300: #c4a2fc;
-  --surface: #161330;
-  --card: #1e1b42;
-  --border: #2e2a5a;
-  --green: #10b981;
-  --amber: #f59e0b;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --orange: #f97316;
-  --text: #f0edff;
-  --text-2: #c4bfe0;
-  --muted: #7b76a0;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 15px; }
-body {
-  background: var(--guru-900);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  line-height: 1.5;
-  min-height: 100vh;
-}
-
-/* ── HEADER ── */
-.header {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(17,14,42,0.96);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-}
-.header-inner { display: flex; align-items: center; gap: 16px; padding: 14px 0 12px; flex-wrap: wrap; }
-.logo-box {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, var(--guru-500), var(--guru-400));
-  border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(124,58,237,0.4);
-}
-.header-title { flex: 1; min-width: 180px; }
-.header-title h1 { font-size: 16px; font-weight: 700; color: var(--text); }
-.header-title p  { font-size: 12px; color: var(--muted); }
-.live-badge {
-  background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);
-  color: var(--green); font-size: 11px; font-weight: 600;
-  padding: 4px 10px; border-radius: 20px;
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
-}
-.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-/* ── LAYOUT ── */
-.main { max-width: 1160px; margin: 0 auto; padding: 24px 20px 60px; }
-.section-label {
-  font-size: 11px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 14px; margin-top: 32px;
-}
-.section-label:first-child { margin-top: 0; }
-
-/* ══ CANALES DE ADQUISICIÓN ══ */
-.channels-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-}
-@media(max-width:900px){ .channels-grid { grid-template-columns: repeat(3,1fr); } }
-@media(max-width:550px){ .channels-grid { grid-template-columns: repeat(2,1fr); } }
-
-.ch-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 14px 12px;
-  position: relative;
-  overflow: hidden;
-}
-.ch-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--chc, var(--guru-500)); border-radius: 10px 10px 0 0;
-}
-.ch-icon  { font-size: 18px; margin-bottom: 6px; }
-.ch-num   { font-size: 30px; font-weight: 800; line-height: 1; color: var(--chc, var(--text)); }
-.ch-label { font-size: 11px; font-weight: 600; color: var(--text-2); margin-top: 4px; }
-.ch-pct   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-/* ══ FUNNEL HORIZONTAL ══ */
-.funnel { display: flex; align-items: stretch; gap: 0; }
-
-.f-arrow {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; flex-shrink: 0; font-size: 30px; opacity: .8;
-}
-.f-arrow::after { content: '›'; color: var(--guru-400); font-weight: 700; }
-
-.f-card {
-  flex: 1; background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 16px 14px;
-  position: relative; overflow: hidden; min-width: 0;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.f-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--fc, var(--guru-500)); border-radius: 10px 10px 0 0;
-}
-.fc-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
-.fc-value { font-size: 48px; font-weight: 800; line-height: 1; color: var(--fv, var(--text)); margin-top: 4px; }
-.fc-sub   { font-size: 13px; color: var(--text-2); font-weight: 600; margin-top: 6px; }
-
-.fc-inner {
-  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.fc-inner-num  { font-size: 18px; font-weight: 800; color: var(--green); }
-.fc-inner-text { font-size: 11px; color: var(--muted); line-height: 1.3; }
-
-.fc-sql-breakdown {
-  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 5px;
-}
-.fc-sql-row  { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
-.fc-sql-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.fc-sql-type { flex: 1; }
-.fc-sql-num  { font-weight: 700; color: var(--text); }
-
-.fc-opp-new   { font-size: 48px; font-weight: 800; color: var(--green); line-height: 1; margin-top: 4px; }
-.fc-opp-label { font-size: 10px; color: var(--green); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-.fc-opp-total { font-size: 12px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-.fc-opp-total strong { color: var(--text-2); }
-
-.f-c-default { --fc: var(--guru-500); --fv: var(--text); }
-.f-c-orange  { --fc: var(--orange);   --fv: var(--orange); }
-.f-c-green   { --fc: var(--green);    --fv: var(--green); }
-.f-c-muted   { --fc: #3a3660;         --fv: var(--muted); }
-
-/* ══ REVISIÓN — HORIZONTAL BLOCKS ══ */
-.rev-blocks {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.rev-block {
-  flex: 1;
-  min-width: 130px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 16px 14px;
-  position: relative;
-  overflow: hidden;
-}
-.rev-block::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--rbc, var(--border)); border-radius: 10px 10px 0 0;
-}
-.rb-num   { font-size: 26px; font-weight: 800; line-height: 1; color: var(--rbc, var(--muted)); margin-bottom: 6px; }
-.rb-name  { font-size: 12px; font-weight: 600; color: var(--rbc, var(--muted)); }
-.rb-desc  { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-/* ── CARDS ── */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
-.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
-.badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: .04em; }
-.badge-green  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
-.badge-red    { background: rgba(239,68,68,.15);  color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
-.badge-blue   { background: rgba(59,130,246,.15); color: var(--blue);  border: 1px solid rgba(59,130,246,.3); }
-.badge-muted  { background: rgba(123,118,160,.12); color: var(--muted); border: 1px solid rgba(123,118,160,.25); }
-
-/* ── TABLE ── */
-.table { width: 100%; border-collapse: collapse; }
-.table th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 0 12px 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
-.table td { font-size: 13px; color: var(--text-2); padding: 10px 12px 10px 0; border-bottom: 1px solid rgba(46,42,90,.5); vertical-align: middle; }
-.table tr:last-child td { border-bottom: none; }
-.table td strong { color: var(--text); font-weight: 600; }
-.table tr.stage-divider td { background: rgba(255,255,255,.03); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border); }
-
-/* ── PILLS ── */
-.pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-.pill-demo   { background: rgba(16,185,129,.15); color: var(--green); }
-.pill-discov { background: rgba(124,58,237,.15); color: var(--guru-300); }
-.new-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: rgba(16,185,129,.2); color: var(--green); letter-spacing: .04em; text-transform: uppercase; }
-
-/* ── REASON BARS ── */
-.reason-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.reason-row:last-child { margin-bottom: 0; }
-.reason-label { font-size: 13px; color: var(--text-2); min-width: 220px; flex-shrink: 0; }
-.reason-bar-wrap { flex: 1; background: rgba(255,255,255,.05); border-radius: 4px; height: 6px; }
-.reason-bar { height: 6px; border-radius: 4px; }
-.reason-count { font-size: 13px; font-weight: 700; color: var(--text); min-width: 28px; text-align: right; }
-
-/* ── ALERT ── */
-.alert { border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
-.alert-green { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2);  color: #6ee7b7; }
-.alert-muted { background: rgba(123,118,160,.06); border: 1px solid rgba(123,118,160,.2); color: var(--muted); }
-
-/* ── REFRESH ── */
-.refresh-btn {
-  background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.35);
-  color: var(--guru-300); font-size: 11px; font-weight: 700;
-  padding: 5px 13px; border-radius: 20px; cursor: pointer;
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
-  transition: background .15s;
-}
-.refresh-btn:hover { background: rgba(124,58,237,.28); }
-.refresh-btn.spinning #refresh-icon { display: inline-block; animation: spin .7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.sync-bar {
-  font-size: 11px; color: var(--muted);
-  padding: 5px 24px 6px; border-top: 1px solid rgba(46,42,90,.6);
-  background: rgba(17,14,42,.7);
-}
-@media(max-width:600px){
-  .header { padding: 0 14px; }
-  .live-badge { display: none; }
-  .refresh-btn { margin-left: auto; padding: 7px 16px; font-size: 12px; }
-  .main { padding: 18px 14px 50px; }
-  /* embudo en vertical */
-  .funnel { flex-direction: column; gap: 8px; }
-  .f-arrow { width: 100%; height: 22px; transform: rotate(90deg); }
-  .fc-value, .fc-opp-new { font-size: 40px; }
-  /* bloques de estado / pipeline a 2 columnas */
-  .rev-block { min-width: calc(50% - 5px); }
-  /* tablas con scroll horizontal */
-  .card { padding: 16px 14px; overflow-x: auto; }
-  .table { min-width: 320px; }
-  .section-label { font-size: 10px; }
-}
-
-/* ── LOGIN OVERLAY ── */
-#gs-gate {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #0a0618;
-  display: flex; align-items: center; justify-content: center;
-}
-#gs-gate .box {
-  background: #1e1b42; border: 1px solid #2e2a5a; border-radius: 16px;
-  padding: 40px 36px; width: 340px; text-align: center;
-}
-#gs-gate .logo {
-  width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 20px;
-  background: linear-gradient(135deg,#ff6b5b,#ff8b7d);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 17px; color: #fff;
-}
-#gs-gate h2 { font-size: 18px; font-weight: 700; color: #f0edff; margin-bottom: 4px; }
-#gs-gate p  { font-size: 13px; color: #7b76a0; margin-bottom: 24px; }
-#gs-gate input {
-  width: 100%; padding: 11px 14px; border-radius: 8px;
-  border: 1px solid #2e2a5a; background: #161330;
-  color: #f0edff; font-size: 15px; margin-bottom: 12px;
-  outline: none; letter-spacing: .08em;
-}
-#gs-gate input:focus { border-color: #ff6b5b; }
-#gs-gate button {
-  width: 100%; padding: 11px; border-radius: 8px; border: none; cursor: pointer;
-  background: linear-gradient(135deg,#ff6b5b,#ff8b7d);
-  color: #fff; font-size: 15px; font-weight: 700;
-}
-#gs-gate .err { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; }
-</style>
-<script>
-(function(){
-  if(sessionStorage.getItem('gs_ok')==='1') return;
-  document.addEventListener('DOMContentLoaded', function(){
-    var gate = document.getElementById('gs-gate');
-    var inp  = document.getElementById('gs-pwd');
-    var err  = document.getElementById('gs-err');
-    var btn  = document.getElementById('gs-btn');
-    gate.style.display = 'flex';
-    function check(){
-      if(inp.value==='radar2026'){
-        sessionStorage.setItem('gs_ok','1');
-        gate.style.display='none';
-      } else {
-        err.style.display='block';
-        inp.value=''; inp.focus();
-      }
-    }
-    btn.addEventListener('click', check);
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') check(); });
-  });
-})();
-</script>
-</head>
-<body>
-
-<!-- LOGIN OVERLAY -->
-<div id="gs-gate" style="display:none">
-  <div class="box">
-    <div class="logo">GS</div>
-    <h2>GuruSup · Dashboard Diario</h2>
-    <p>Acceso restringido</p>
-    <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus>
-    <button id="gs-btn">Entrar</button>
-    <div id="gs-err" class="err">Contraseña incorrecta</div>
-  </div>
-</div>
-
-<div class="header">
-  <div class="header-inner">
-    <div class="logo-box">GS</div>
-    <div class="header-title">
-      <h1>GuruSup · Dashboard Diario</h1>
-      <p>Jueves, 2 de julio de 2026 · período: 1 jul → 2 jul · últimas 24h (hora España)</p>
-    </div>
-    <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
-    <button class="refresh-btn" id="refresh-btn" onclick="doRefresh()"><span id="refresh-icon">↻</span> Actualizar</button>
-  </div>
-  <div class="sync-bar">Datos de las últimas 24h · sincronizado <span id="sync-ts"></span></div>
-</div>
-
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GuruSup · Dashboard Diario</title><style>
+:root{--guru-900:#0a0618;--guru-400:#9d5ffa;--guru-300:#c4a2fc;--brand:#FF6B5B;--brand-2:#ff8f82;
+--card:#1e1b42;--border:#2e2a5a;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;
+--orange:#f97316;--text:#f0edff;--text-2:#c4bfe0;--muted:#7b76a0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--guru-900);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;font-size:15px}
+.header{position:sticky;top:0;z-index:100;background:rgba(17,14,42,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px}
+.header-inner{display:flex;align-items:center;gap:16px;padding:14px 0;flex-wrap:wrap}
+.logo-box{width:40px;height:40px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;box-shadow:0 0 16px rgba(255,107,91,.4)}
+.header-title{flex:1;min-width:180px}.header-title h1{font-size:16px;font-weight:700}.header-title p{font-size:12px;color:var(--muted)}
+.live-badge{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px}
+.main{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:32px 0 14px}
+.section-label:first-child{margin-top:0}
+.funnel{display:flex;gap:10px;flex-wrap:wrap}
+.f-card{flex:1;min-width:140px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}
+.webinar-badge{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:5px 10px;border-radius:8px;background:rgba(157,95,250,.12);border:1px solid rgba(157,95,250,.3);font-size:10px;font-weight:600;color:var(--guru-300);line-height:1.4}
+.f-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fc,var(--brand))}
+.fc-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.fc-value{font-size:44px;font-weight:800;line-height:1.1;color:var(--fv,var(--text))}
+.fc-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.fc-pct{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--brand);background:rgba(255,107,91,.12);padding:2px 8px;border-radius:20px}
+.fc-breakdown{display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.fbd-item{text-align:center}.fbd-num{font-size:22px;font-weight:800}.fbd-label{font-size:10px;color:var(--muted);margin-top:2px}
+.f-leads{--fc:var(--brand);--fv:var(--brand)}.f-sql-consult{--fc:var(--orange);--fv:var(--orange)}.f-sql-free{--fc:var(--guru-300);--fv:var(--guru-300)}.f-demo{--fc:var(--green);--fv:var(--green)}.f-clients{--fc:var(--guru-400);--fv:var(--guru-300)}
+.rev-blocks{display:flex;gap:10px;flex-wrap:wrap}
+.rev-block{flex:1;min-width:140px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.rev-block::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rbc,var(--border))}
+.rb-num{font-size:30px;font-weight:800;color:var(--rbc,var(--muted))}.rb-name{font-size:11px;font-weight:600;color:var(--rbc,var(--muted));margin-top:4px}
+.rb-detail{font-size:11px;color:var(--text-2);margin-top:8px;line-height:1.7;border-top:1px solid rgba(255,255,255,.09);padding-top:8px}
+.rb-detail span{display:block;color:var(--text);font-weight:600}
+.channels-strip{display:flex;gap:10px;flex-wrap:nowrap}
+@media(max-width:640px){.channels-strip{flex-wrap:wrap}.channels-strip .ch-card{min-width:calc(50% - 5px)}}
+.ch-card{flex:1;min-width:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.ch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--chc,var(--brand))}
+.ch-icon{font-size:16px;margin-bottom:4px}
+.ch-num{font-size:42px;font-weight:800;color:var(--chc,var(--text));line-height:1}
+.ch-label{font-size:10px;font-weight:600;color:var(--text-2);margin-top:5px}
+.ch-pct{font-size:11px;font-weight:700;color:var(--brand);margin-top:1px}
+.ch-lc{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.4}
+.ch-note{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.4;font-style:italic}
+.email-strip{display:flex;gap:10px;flex-wrap:wrap}
+.email-stat{flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+.email-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ec,var(--brand))}
+.es-num{font-size:26px;font-weight:800;color:var(--ec,var(--text))}
+.es-pct{font-size:11px;font-weight:700;color:var(--ec);opacity:.7;margin-left:3px}
+.es-label{font-size:11px;color:var(--muted);font-weight:600;margin-top:3px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:12px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.card-title{font-size:14px;font-weight:700}
+.table{width:100%;border-collapse:collapse}
+.table th{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:0 12px 10px 0;text-align:left;border-bottom:1px solid var(--border)}
+.table td{font-size:13px;color:var(--text-2);padding:9px 12px 9px 0;border-bottom:1px solid rgba(46,42,90,.5)}.table td strong{color:var(--text)}
+.table tr.stage-divider td{background:rgba(255,255,255,.03);font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:6px 0}
+.td-date{font-size:11px;color:var(--muted);white-space:nowrap}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.pill-demo{background:rgba(16,185,129,.15);color:var(--green)}.pill-discov{background:rgba(124,58,237,.15);color:var(--guru-300)}.pill-best{background:rgba(245,158,11,.15);color:var(--amber)}
+.new-tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:rgba(255,107,91,.18);color:var(--brand);text-transform:uppercase;border:1px solid rgba(255,107,91,.4)}
+.dup-tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,.18);color:var(--amber);text-transform:uppercase;border:1px solid rgba(245,158,11,.4);margin-left:4px}
+.dup-tag.dup-cross{background:rgba(239,68,68,.18);color:var(--red);border-color:rgba(239,68,68,.4)}
+tr.row-dup td{opacity:.7}
+.deal-footer{display:flex;gap:32px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.df-item .df-num{font-size:36px;font-weight:800;line-height:1}
+.df-item .df-label{font-size:11px;color:var(--muted);margin-top:3px}
+#gs-gate{position:fixed;inset:0;z-index:9999;background:#0a0618;display:flex;align-items:center;justify-content:center}
+#gs-gate .box{background:#1e1b42;border:1px solid #2e2a5a;border-radius:16px;padding:40px 36px;width:340px;text-align:center}
+#gs-gate .logo{width:48px;height:48px;border-radius:12px;margin:0 auto 20px;background:linear-gradient(135deg,#FF6B5B,#ff8f82);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff}
+#gs-gate h2{font-size:18px;font-weight:700;margin-bottom:4px}#gs-gate p{font-size:13px;color:#7b76a0;margin-bottom:24px}
+#gs-gate input{width:100%;padding:11px 14px;border-radius:8px;border:1px solid #2e2a5a;background:#161330;color:#f0edff;font-size:15px;margin-bottom:12px;outline:none;letter-spacing:.08em}
+#gs-gate input:focus{border-color:#FF6B5B}
+#gs-gate button{width:100%;padding:11px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(135deg,#FF6B5B,#ff8f82);color:#fff;font-size:15px;font-weight:700}
+#gs-gate .err{color:#ef4444;font-size:12px;margin-top:8px;display:none}
+</style></head><body>
+<div id="gs-gate"><div class="box">
+  <div class="logo">GS</div>
+  <h2>GuruSup · Dashboard Diario</h2><p>Acceso restringido</p>
+  <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus>
+  <button onclick="gsCheck()">Entrar</button>
+  <div id="gs-err" class="err">Contraseña incorrecta</div>
+</div></div>
+<div class="header"><div class="header-inner"><div class="logo-box">GS</div>
+<div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Jueves, 2 de julio de 2026 · 1 jul 08:30 → 2 jul 15:16 (hora España)</p></div>
+<span class="live-badge">● Datos en vivo · HubSpot</span></div></div>
 <div class="main">
 
-  <!-- ══ EMBUDO DE CONVERSIÓN ══ -->
-  <div class="section-label">Embudo de conversión · 1 jul → 2 jul · últimas 24h</div>
-
+  <div class="section-label">Embudo de leads</div>
   <div class="funnel">
-
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">25</div>
-      <div class="fc-sub">Total del período · 1 – 2 jul</div>
+    <div class="f-card f-leads">
+      <div class="fc-label">Leads reales generados</div>
+      <div class="fc-value">31</div>
+      <div class="fc-sub">Paid · Social Ads · Orgánico · App · Directo · Social orgánico</div>
+      <div class="webinar-badge">⚡ Incluye registros freemium con importación retrasada · solo se cuentan los nuevos en BBDD</div>
     </div>
-
-    <div class="f-arrow"></div>
-
-    <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">13</div>
-      <div class="fc-sub">52% del total de contactos</div>
+    <div class="f-card f-sql-consult">
+      <div class="fc-label">SQL · Consultoría</div>
+      <div class="fc-value">9</div>
+      <div class="fc-sub">Leads cualificados para consultoría</div>
     </div>
-
-    <div class="f-arrow"></div>
-
-    <div class="f-card f-c-orange">
-      <div class="fc-label">SQL Consultoría</div>
-      <div class="fc-value">8</div>
-      <div class="fc-sub">32% del total de contactos</div>
+    <div class="f-card f-sql-free">
+      <div class="fc-label">SQL · Freemium</div>
+      <div class="fc-value">3</div>
+      <div class="fc-sub">Registros vía app cualificados</div>
     </div>
-
-    <div class="f-arrow"></div>
-
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">4</div>
-      <div class="fc-sub">16% del total de contactos</div>
-    </div>
-
-    <div class="f-arrow"></div>
-
-    <div class="f-card f-c-green">
-      <div class="fc-label">Reuniones agendadas</div>
+    <div class="f-card f-demo">
+      <div class="fc-label">Reuniones agendadas · período</div>
       <div class="fc-value">0</div>
-      <div class="fc-sub">agendadas en este período</div>
-      <div class="fc-opp-total"><strong>20</strong> demos activas en pipeline</div>
+      <div class="fc-sub" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">Total en pipeline: <strong style="color:var(--text)">27</strong></div>
     </div>
-
-    <div class="f-arrow"></div>
-
-    <div class="f-card f-c-green">
-      <div class="fc-label">Oportunidades</div>
-      <div class="fc-value">1</div>
-      <div class="fc-sub">4% del total de contactos</div>
-    </div>
-
-  </div>
-
-
-  <!-- ══ REVISIÓN VENTAS — HORIZONTAL ══ -->
-  <div class="section-label">Leads en revisión de ventas · 1 – 2 jul · 25 contactos</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">
-
-      <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">3</div>
-        <div class="rb-name">Ya gestionado</div>
-        <div class="rb-desc">Proceso completado</div>
-      </div>
-
-      <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">20</div>
-        <div class="rb-name">Pendiente revisión</div>
-        <div class="rb-desc">Sin asignar aún</div>
-      </div>
-
-      <div class="rev-block" style="--rbc:var(--blue)">
-        <div class="rb-num">0</div>
-        <div class="rb-name">En revisión activa</div>
-        <div class="rb-desc">En proceso ahora</div>
-      </div>
-
-      <div class="rev-block" style="--rbc:var(--orange)">
-        <div class="rb-num">0</div>
-        <div class="rb-name">Aceptado gestión</div>
-        <div class="rb-desc">Listo para comercial</div>
-      </div>
-
-      <div class="rev-block" style="--rbc:var(--guru-400)">
-        <div class="rb-num">0</div>
-        <div class="rb-name">Duplicado</div>
-        <div class="rb-desc">Ya existía en BBDD</div>
-      </div>
-
-      <div class="rev-block" style="--rbc:var(--red)">
-        <div class="rb-num">2</div>
-        <div class="rb-name">No aplica / Desc.</div>
-        <div class="rb-desc">Sin potencial</div>
-      </div>
-
-      <div class="rev-block" style="--rbc:var(--muted)">
-        <div class="rb-num">0</div>
-        <div class="rb-name">Test</div>
-        <div class="rb-desc">Cuenta de prueba</div>
-      </div>
-
+    <div class="f-card f-clients">
+      <div class="fc-label">Clientes nuevos · período</div>
+      <div class="fc-value">0</div>
+      <div class="fc-sub">Deals cerrados en el período</div>
     </div>
   </div>
 
-
-  <!-- ══ ESTADO SQL ══ -->
-  <div class="section-label">Estado y seguimiento de las SQL · 8 SQL del período</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">
-      <div class="rev-block" style="--rbc:var(--muted)">
-        <div class="rb-num">3</div>
-        <div class="rb-name">Nuevo / sin trabajar</div>
-        <div class="rb-desc">Aún sin primer contacto</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">2</div>
-        <div class="rb-name">Intento de contacto</div>
-        <div class="rb-desc">Llamada/email sin conectar</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--guru-400)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Usuario free</div>
-        <div class="rb-desc">Ya usa la plataforma</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Oportunidad</div>
-        <div class="rb-desc">En demo/reunión</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--blue)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Otro estado</div>
-        <div class="rb-desc">En cualificación</div>
-      </div>
-    </div>
+  <div class="section-label">Leads en revisión de ventas · 31 leads reales</div>
+  <div class="card" style="padding:16px 20px">
+    <div class="rev-blocks"><div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">17</div><div class="rb-name">Ya gestionado</div><div class="rb-detail"><span>6 SQL-Consultoría</span><span>11 leads en seguimiento</span></div></div>
+<div class="rev-block" style="--rbc:var(--muted)"><div class="rb-num">10</div><div class="rb-name">Sin revisar</div></div>
+<div class="rev-block" style="--rbc:var(--guru-400)"><div class="rb-num">1</div><div class="rb-name">Duplicado</div></div>
+<div class="rev-block" style="--rbc:var(--red)"><div class="rb-num">3</div><div class="rb-name">No aplica / Descartado</div><div class="rb-detail"><span>vfernandezg@cosgs.com (Google Ads), beatriz@gruponivel29.com (Google Ads), emilio.payeras@inventum.es (App / Freemium)</span></div></div>
+<div class="rev-block" style="--rbc:var(--amber)" style="opacity:.45"><div class="rb-num">0</div><div class="rb-name">Pendiente de revisión</div></div>
+<div class="rev-block" style="--rbc:var(--blue)" style="opacity:.45"><div class="rb-num">0</div><div class="rb-name">En revisión</div></div>
+<div class="rev-block" style="--rbc:var(--orange)" style="opacity:.45"><div class="rb-num">0</div><div class="rb-name">Aceptado para gestión comercial</div></div>
+</div>
   </div>
 
+  <div class="section-label">Canales de adquisición · 31 leads reales</div>
+  <div class="channels-strip"><div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">📣</div><div class="ch-num">15</div><div class="ch-label">Meta Ads</div><div class="ch-pct">48% de leads</div><div class="ch-lc">15 Lead</div></div>
+<div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">7</div><div class="ch-label">Google Ads</div><div class="ch-pct">23% de leads</div><div class="ch-lc">6 SQL-Consultoría, 1 1367096838</div></div>
+<div class="ch-card" style="--chc:#f59e0b"><div class="ch-icon">⚡</div><div class="ch-num">6</div><div class="ch-label">App / Freemium</div><div class="ch-pct">19% de leads</div><div class="ch-lc">3 Lead, 2 SQL-Freemium, 1 SQL-Consultoría</div><div class="ch-note">Registro vía app · 0 pendientes de cualificar</div></div>
+<div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">2</div><div class="ch-label">Web directo</div><div class="ch-pct">6% de leads</div><div class="ch-lc">1 Lead, 1 SQL-Consultoría</div></div>
+<div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">1</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">3% de leads</div><div class="ch-lc">1 SQL-Consultoría</div></div>
+<div class="ch-card" style="--chc:#a78bfa" style="opacity:.45"><div class="ch-icon">🤝</div><div class="ch-num">0</div><div class="ch-label">Referido</div><div class="ch-pct">— de leads</div><div class="ch-lc"></div></div>
+<div class="ch-card" style="--chc:#38bdf8" style="opacity:.45"><div class="ch-icon">📱</div><div class="ch-num">0</div><div class="ch-label">Social orgánico</div><div class="ch-pct">— de leads</div><div class="ch-lc"></div></div>
+</div>
 
-  <!-- ══ LLAMADAS Y SEGUIMIENTO COMERCIAL ══ -->
-  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">SQL de paid media · estado de contacto por ventas</span>
-      <span class="badge badge-green">📞 Llamada telefónica activa</span>
-    </div>
-    <div class="alert alert-green" style="align-items:flex-start;">
-      <span>📞</span>
-      <div>Ventas ha empezado a <strong>llamar por teléfono (integrado en HubSpot)</strong> a los contactos que piden demo directa. Seguimiento el <strong>mismo día</strong> de la creación en la mayoría de SQL (nota/llamada registrada · 2 SDR asignados).</div>
-    </div>
-    <table class="table">
-      <thead><tr><th>SQL</th><th>Empresa · campaña</th><th>Estado de contacto</th></tr></thead>
-      <tbody>
-        <tr><td><strong>vanesa</strong></td><td>COS Global · Google <em>Brand</em></td><td><span class="pill pill-demo">🗓️ Oportunidad · en demo/reunión</span></td></tr>
-        <tr><td><strong>Beatriz</strong></td><td>Nivel 29 · Google <em>Industrias/Agentes</em></td><td><span class="pill pill-demo">📞 Llamada hecha · usuario free</span></td></tr>
-        <tr><td><strong>Britni</strong></td><td>— · Google <em>PMAX genérico</em></td><td><span class="pill" style="background:rgba(245,158,11,.15);color:var(--amber)">📞 Contactada · poco cualificada</span></td></tr>
-        <tr><td><strong>Dennis</strong></td><td>— · Google <em>PMAX genérico</em></td><td><span class="pill" style="background:rgba(245,158,11,.15);color:var(--amber)">☎️ Intento · sin conectar</span></td></tr>
-        <tr><td><strong>Ivan</strong></td><td>Consultin · Google <em>Industrias/Agentes</em></td><td><span class="pill pill-discov">⏳ Pendiente de llamar</span></td></tr>
-        <tr><td><strong>Jose Javier</strong></td><td>Cabo Soluciones · Google <em>Chatbot</em></td><td><span class="pill pill-discov">⏳ Recién entrado</span></td></tr>
-        <tr><td><strong>Jordi</strong></td><td>Swing Maniacs · Google <em>Competidores</em></td><td><span class="pill pill-discov">⏳ Recién entrado</span></td></tr>
-      </tbody>
-    </table>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>💡</span>
-      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
-      <br>• <strong>Brand = intención alta</strong>: el SQL de campaña de marca (COS Global) ha avanzado a <strong>oportunidad</strong> (demo/reunión) → la marca trae leads que progresan rápido en pipeline.
-      <br>• <strong>PMAX genérico = menor calidad</strong>: leads contactados pero poco cualificados o sin empresa/difíciles de conectar → revisar segmentación y creatividades de PMAX.
-      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; ventas los está llamando el mismo día — medir su conversión a demo/oportunidad.
-      <br>• <strong>Buen SLA de ventas</strong>: contacto el mismo día de entrada del lead.
-      <br><span style="color:var(--muted);font-size:11px;">Basado en estado del lead + notas/actividad de seguimiento. El contenido íntegro de transcripciones se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
-    </div>
-  </div>
-
-
-  <!-- ── CANALES DE ADQUISICIÓN ── -->
-  <div class="section-label">Canales de adquisición · 25 contactos · 1 – 2 jul</div>
-  <div class="channels-grid">
-    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">12</div><div class="ch-label">Social Ads</div><div class="ch-pct">48% · 12 lead · 0 freem · 0 SQL</div></div>
-    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">6</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">24% · 1 lead · 3 freem · 2 SQL</div></div>
-    <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">5</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">20% · 0 lead · 0 freem · 5 SQL</div></div>
-    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">1</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">4% · 0 lead · 0 freem · 1 SQL</div></div>
-    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">🎪</div><div class="ch-num">1</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">4% · fuente: otras campañas · 1 freem</div></div>
-    <div class="ch-card" style="--chc:#22d3ee"><div class="ch-icon">💬</div><div class="ch-num">0</div><div class="ch-label">Chat web</div><div class="ch-pct">0% en este período</div></div>
-  </div>
-
-
-  <!-- ── PIPELINE DE VENTAS ── -->
   <div class="section-label">Oportunidades activas · Pipeline de ventas</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Empresas en pipeline por etapa</span>
-      <span class="badge badge-green">35 empresas activas</span>
-    </div>
-    <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
-      style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
-    <table class="table" id="emp-table">
-      <thead><tr><th>Empresa</th><th>Etapa</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Leganés Club de Fútbol</strong> <span class="new-tag">nuevo</span></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Azora Real Estate</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Fever</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Linkia FP</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Ayete Partners</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Racovi</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Gijón Impulsa</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Telefónica B2B</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Publicis Groupe</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Vivienda5</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Grupo Proeduca</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>The Venture City</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Grupo Asesban</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
-        <tr><td><strong>Redexis</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Bluespace</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Equipzilla</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Kosac Consultores</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Estiro</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Weekendesk</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Docline</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Centro Médico Lámar</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Sector Vending</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Factorydea</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Bicimarket</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Netberry</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Mon Parnasse</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>COS Global</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>PC Componentes</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Reload</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Total Energies</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>DVD Dental Solution</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Brava Nails</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>Planeta Huerto</strong></td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr>
-        <tr><td><strong>San Fernando Fitness</strong></td><td><span class="pill" style="background:rgba(245,158,11,.15);color:var(--amber)">Freemium seguim.</span></td></tr>
-        <tr><td><strong>Yrceseguridad</strong></td><td><span class="pill" style="background:rgba(245,158,11,.15);color:var(--amber)">Freemium seguim.</span></td></tr>
-      </tbody>
-    </table>
-    <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-
-    <div class="rev-blocks" style="margin-top:16px;">
-      <div class="rev-block" style="--rbc:var(--guru-300)">
-        <div class="rb-num">35</div>
-        <div class="rb-name">Oportunidades en pipeline</div>
-        <div class="rb-desc">Pipeline de ventas (canales medidos)</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">20</div>
-        <div class="rb-name">Reuniones previstas</div>
-        <div class="rb-desc">Demos agendadas en pipeline</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Nuevas oportunidades</div>
-        <div class="rb-desc">En el período 1 – 2 jul</div>
+    <div class="card-header" style="flex-direction:column;align-items:flex-start;gap:12px">
+      <span class="card-title">Deals activos · pipeline de ventas</span>
+      <div style="position:relative;width:100%;max-width:320px">
+        <input id="deal-search" type="text" placeholder="🔍 Buscar empresa..."
+          style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#161330;color:var(--text);font-size:13px;outline:none"
+          oninput="filterDeals(this.value)">
       </div>
     </div>
-    <div class="alert alert-green" style="margin-top:14px;margin-bottom:0;">
-      ✦ 1 nueva oportunidad en el período (Leganés Club de Fútbol) · 0 reuniones agendadas.
+    <table class="table" id="deals-table"><thead><tr><th>Empresa</th><th>Etapa</th><th>Entrada</th></tr></thead>
+    <tbody><tr class="stage-divider"><td colspan="4">Discovery · 18 deals</td></tr><tr data-name="bit2me"><td><strong>Bit2Me</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2025-10-30</td></tr><tr data-name="nattivus"><td><strong>Nattivus</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-04-23</td></tr><tr data-name="wingo"><td><strong>Wingo</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-05-21</td></tr><tr data-name="asociacion española contra el cancer"><td><strong>Asociacion Española Contra el Cancer</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-05-25</td></tr><tr data-name="greyfinch"><td><strong>Greyfinch</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-05-25</td></tr><tr data-name="cabe trasteros"><td><strong>CABE Trasteros</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-05</td></tr><tr class="row-dup" data-name="bluespace"><td><strong>BlueSpace</strong> <span class="dup-tag dup-cross">⚠ CROSS-ETAPA</span></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-05</td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-11</td></tr><tr data-name="reload "><td><strong>Reload </strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="grupo proeduca"><td><strong>Grupo Proeduca</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="publicis groupe"><td><strong>Publicis Groupe</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="telefónica b2b "><td><strong>Telefónica B2B </strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="gijón impulsa"><td><strong>Gijón Impulsa</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="ayete partners"><td><strong>Ayete Partners</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-29</td></tr><tr data-name="linkia fp"><td><strong>Linkia FP</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-29</td></tr><tr data-name="fever"><td><strong>Fever</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-29</td></tr><tr data-name="azora real estate"><td><strong>Azora Real Estate</strong></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-06-29</td></tr><tr data-name="leganes club de futbol"><td><strong>Leganes Club de Futbol</strong> <span class="new-tag">NUEVO</span></td><td><span class="pill pill-discov">Discovery</span></td><td class="td-date">2026-07-01</td></tr><tr class="stage-divider"><td colspan="4">Demo · Reunión · 27 deals</td></tr><tr data-name="mizubath"><td><strong>Mizubath</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-01-11</td></tr><tr data-name="xtrim"><td><strong>Xtrim</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-02-27</td></tr><tr data-name="dencanto community"><td><strong>Dencanto Community</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-03-13</td></tr><tr data-name="plenergy "><td><strong>Plenergy </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-05-04</td></tr><tr data-name="meit "><td><strong>Meit </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-05-11</td></tr><tr data-name="redexis"><td><strong>Redexis</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-05-11</td></tr><tr data-name="som mobilitat "><td><strong>Som Mobilitat </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-05-26</td></tr><tr data-name="davante"><td><strong>Davante</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-01</td></tr><tr data-name="cos global services - nuevo tipo de objeto deal"><td><strong>COS Global Services - Nuevo tipo de objeto Deal</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-04</td></tr><tr data-name="grupo alsea"><td><strong>Grupo Alsea</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-04</td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-10</td></tr><tr data-name="planeta huerto"><td><strong>Planeta Huerto</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-11</td></tr><tr data-name="brava nails "><td><strong>Brava Nails </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-15</td></tr><tr data-name="dvd dental solution "><td><strong>DVD DENTAL SOLUTION </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-15</td></tr><tr data-name="estiro "><td><strong>Estiro </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="pc componentes "><td><strong>PC Componentes </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="cos global "><td><strong>COS Global </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="mon parnasse "><td><strong>Mon Parnasse </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="netberry "><td><strong>Netberry </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="bicimarket "><td><strong>Bicimarket </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-17</td></tr><tr data-name="sector vending "><td><strong>Sector Vending </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-19</td></tr><tr data-name="centro médico lámar "><td><strong>Centro Médico Lámar </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-19</td></tr><tr data-name="docline "><td><strong>Docline </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-23</td></tr><tr data-name="kosac consultores "><td><strong>Kosac Consultores </strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-29</td></tr><tr data-name="equipzilla"><td><strong>Equipzilla</strong></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-29</td></tr><tr class="row-dup" data-name="bluespace"><td><strong>Bluespace</strong> <span class="dup-tag dup-cross">⚠ CROSS-ETAPA</span></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-29</td></tr><tr class="row-dup" data-name="redexis"><td><strong>Redexis</strong> <span class="dup-tag">DUPLICADO</span></td><td><span class="pill pill-demo">Demo · Reunión</span></td><td class="td-date">2026-06-29</td></tr><tr class="stage-divider"><td colspan="4">Best Case · 3 deals</td></tr><tr data-name="gam rentals"><td><strong>Gam Rentals</strong></td><td><span class="pill pill-best">Best Case</span></td><td class="td-date">2026-05-08</td></tr><tr data-name="glowwhite"><td><strong>GlowWhite</strong></td><td><span class="pill pill-best">Best Case</span></td><td class="td-date">2026-06-05</td></tr><tr data-name="rusticae"><td><strong>Rusticae</strong></td><td><span class="pill pill-best">Best Case</span></td><td class="td-date">2026-06-05</td></tr></tbody></table>
+    <div class="deal-footer">
+      <div class="df-item"><div class="df-num" style="color:var(--brand)">1</div><div class="df-label">Oportunidades nuevas hoy</div></div>
+      <div class="df-item"><div class="df-num" style="color:var(--green)">27</div><div class="df-label">En demo / reunión</div></div>
+      <div class="df-item"><div class="df-num">50</div><div class="df-label">Total en pipeline</div></div>
     </div>
   </div>
 
-
-  <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
-    GuruSup · Dashboard Diario generado el 2 jul 2026 hora España<br>
-    Período: 1 jul – 2 jul · últimas 24h (hora España · UTC+2)
+  <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted)">
+    GuruSup · Dashboard Diario · generado el 02 Jul 2026 · 15:16 (hora España)
   </div>
-
 </div>
 <script>
-(function(){
-  var MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  function fmtNow() {
-    var d = new Date();
-    return d.getDate()+' '+MESES[d.getMonth()]+' · '+
-      String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  }
-  var tsEl = document.getElementById('sync-ts');
-  if(tsEl) tsEl.textContent = fmtNow();
-
-  window.doRefresh = function(){
-    var btn = document.getElementById('refresh-btn');
-    btn.classList.add('spinning'); btn.disabled = true;
-    setTimeout(function(){
-      if(tsEl) tsEl.textContent = fmtNow();
-      btn.classList.remove('spinning'); btn.disabled = false;
-    }, 1400);
-  };
-
-  window.filtrarEmpresas = function(){
-    var q = document.getElementById('emp-search').value.toLowerCase().trim();
-    var rows = document.querySelectorAll('#emp-table tbody tr');
-    var visibles = 0;
-    rows.forEach(function(r){
-      var name = r.querySelector('td strong');
-      var match = name && name.textContent.toLowerCase().indexOf(q) !== -1;
-      r.style.display = match ? '' : 'none';
-      if(match) visibles++;
-    });
-    var empty = document.getElementById('emp-empty');
-    if(empty) empty.style.display = visibles === 0 ? 'block' : 'none';
-  };
-})();
-</script>
-</body>
-</html>
+function gsCheck(){var inp=document.getElementById('gs-pwd');var err=document.getElementById('gs-err');
+if(inp.value==='radar2026'){try{sessionStorage.setItem('gs_ok','1');}catch(e){}document.getElementById('gs-gate').style.display='none';}
+else{err.style.display='block';inp.value='';inp.focus();}}
+try{if(sessionStorage.getItem('gs_ok')==='1'){document.getElementById('gs-gate').style.display='none';}}catch(e){}
+document.addEventListener('keydown',function(e){var g=document.getElementById('gs-gate');if(e.key==='Enter'&&g&&g.style.display!=='none')gsCheck();});
+function filterDeals(q){
+  q=q.toLowerCase().trim();
+  var rows=document.querySelectorAll('#deals-table tbody tr:not(.stage-divider)');
+  rows.forEach(function(r){r.style.display=(!q||r.dataset.name.includes(q))?'':'none';});
+  // Hide stage-divider if all deals in that stage are hidden
+  var dividers=document.querySelectorAll('#deals-table tbody tr.stage-divider');
+  dividers.forEach(function(div){
+    var next=div.nextElementSibling;var hasVisible=false;
+    while(next&&!next.classList.contains('stage-divider')){
+      if(next.style.display!=='none')hasVisible=true;
+      next=next.nextElementSibling;
+    }
+    div.style.display=hasVisible||!q?'':'none';
+  });
+}
+</script></body></html>
