@@ -219,6 +219,17 @@ body {
 .refresh-btn:hover { background: rgba(124,58,237,.28); }
 .refresh-btn.spinning #refresh-icon { display: inline-block; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TABS ── */
+.tab-nav { display: flex; gap: 6px; margin-bottom: 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.tab-btn {
+  background: none; border: none; color: var(--muted); font-size: 14px; font-weight: 700;
+  padding: 10px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text-2); }
+.tab-btn.active { color: var(--guru-300); border-bottom-color: var(--guru-400); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 .sync-bar {
   font-size: 11px; color: var(--muted);
   padding: 5px 24px 6px; border-top: 1px solid rgba(46,42,90,.6);
@@ -325,6 +336,13 @@ body {
 </div>
 
 <div class="main">
+
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tabbtn-dashboard" onclick="switchTab('dashboard')">📊 Dashboard diario</button>
+    <button class="tab-btn" id="tabbtn-emailing" onclick="switchTab('emailing')">✉️ Campañas de emailing</button>
+  </div>
+
+  <div id="tab-dashboard" class="tab-content active">
 
   <!-- ══ EMBUDO DE CONVERSIÓN ══ -->
   <div class="section-label">Embudo de conversión · 1 jul → 2 jul · últimas 24h</div>
@@ -495,50 +513,6 @@ body {
   </div>
 
 
-  <!-- ══ REACTIVACIÓN FREEMIUM ══ -->
-  <div class="section-label">Reactivación · Fase 1 · «Activación Freemiums»</div>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Email de reactivación a freemium activos (marketing-contactables)</span>
-      <span class="badge badge-green">📧 Campaña enviada</span>
-    </div>
-    <div class="rev-blocks">
-      <div class="rev-block" style="--rbc:var(--guru-300)">
-        <div class="rb-num">306</div>
-        <div class="rb-name">Emails enviados</div>
-        <div class="rb-desc">Freemium activos &lt;6 meses</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">36%</div>
-        <div class="rb-name">Tasa de apertura</div>
-        <div class="rb-desc">111 aperturas</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--blue)">
-        <div class="rb-num">2%</div>
-        <div class="rb-name">Tasa de clics</div>
-        <div class="rb-desc">6 clics · CTA plataforma</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">5,5%</div>
-        <div class="rb-name">Clic sobre apertura</div>
-        <div class="rb-desc">CTR de los que abren</div>
-      </div>
-    </div>
-    <div class="alert alert-muted" style="margin-top:14px;align-items:flex-start;">
-      <span>🎬</span>
-      <div>Email con <strong>vídeo de 1 min</strong> animando a volver a la plataforma · CTA = acceso directo. <strong>Flujo:</strong> a los que no abren se les envía un 2º email con una <strong>guía en PDF</strong>.</div>
-    </div>
-    <div class="alert alert-green" style="margin-top:10px;align-items:flex-start;">
-      <span>💡</span>
-      <div><strong style="color:var(--guru-300);">Lectura para negocio / marketing:</strong>
-      <br>• <strong>Apertura 36%</strong>: por encima del benchmark habitual (~20–25%) → la base freemium sigue viva y el asunto conecta.
-      <br>• <strong>Clic 2% (5,5% sobre apertura)</strong>: abren pero pocos pulsan el CTA → el salto «ver vídeo → volver a la plataforma» es el cuello de botella; probar CTA más claro/arriba o un incentivo.
-      <br>• El 2º email (guía PDF) a los ~195 no-abridores medirá si otro formato reengancha.
-      <br><span style="color:var(--muted);font-size:11px;">Métricas derivadas de la actividad de email a nivel de contacto (freemium, últimos días); se afinarán con el reporte de campaña cuando el conector tenga acceso a Marketing Email.</span></div>
-    </div>
-  </div>
-
-
   <!-- ── CANALES DE ADQUISICIÓN ── -->
   <div class="section-label">Canales de adquisición · 40 contactos · 1 – 2 jul</div>
   <div class="channels-grid">
@@ -612,6 +586,76 @@ body {
     Período: 1 jul – 2 jul · últimas 24h (hora España · UTC+2)
   </div>
 
+  </div><!-- /tab-dashboard -->
+
+  <div id="tab-emailing" class="tab-content">
+
+    <!-- ══ ACTIVACIÓN FREEMIUM ══ -->
+    <div class="section-label">Activación de cuentas freemium · «Activación Freemiums»</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Email de reactivación a freemium activos (marketing-contactables)</span>
+        <span class="badge badge-green">📧 Enviada</span>
+      </div>
+      <div class="rev-blocks">
+        <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">306</div><div class="rb-name">Emails enviados</div><div class="rb-desc">Freemium activos &lt;6 meses</div></div>
+        <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">36%</div><div class="rb-name">Tasa de apertura</div><div class="rb-desc">111 aperturas</div></div>
+        <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">2%</div><div class="rb-name">Tasa de clics</div><div class="rb-desc">6 clics · CTA plataforma</div></div>
+        <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">5,5%</div><div class="rb-name">Clic sobre apertura</div><div class="rb-desc">CTR de los que abren</div></div>
+      </div>
+      <div class="alert alert-muted" style="margin-top:14px;align-items:flex-start;">
+        <span>🎬</span>
+        <div>Email con <strong>vídeo de 1 min</strong> animando a volver a la plataforma · CTA = acceso directo. <strong>Flujo:</strong> a los que no abren se les envía un 2º email con una <strong>guía en PDF</strong>.</div>
+      </div>
+      <div class="alert alert-green" style="margin-top:10px;align-items:flex-start;">
+        <span>💡</span>
+        <div><strong style="color:var(--guru-300);">Lectura:</strong> apertura <strong>36%</strong> (base viva) pero clic <strong>2%</strong> → el salto «vídeo → volver a la plataforma» es el cuello de botella. El 2º email (guía PDF) a los ~195 no-abridores medirá el reenganche.</div>
+      </div>
+    </div>
+
+
+    <!-- ══ EMAIL DE BIENVENIDA ══ -->
+    <div class="section-label">Email de bienvenida · nuevos registros</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Email automático de bienvenida al registrarse</span>
+        <span class="badge badge-blue">🔁 Automatizado</span>
+      </div>
+      <div class="rev-blocks">
+        <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">1.580</div><div class="rb-name">Emails enviados</div><div class="rb-desc">Total histórico</div></div>
+        <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">—</div><div class="rb-name">Tasa de apertura</div><div class="rb-desc">Pendiente de dato</div></div>
+        <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">—</div><div class="rb-name">Tasa de clics</div><div class="rb-desc">Pendiente de dato</div></div>
+      </div>
+      <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
+        <span>ℹ️</span>
+        <div>Volumen tomado del marcador de contacto «email bienvenida enviado» (1.580 histórico). La <strong>apertura y clics</strong> del email de bienvenida requieren acceso a <em>Marketing Email</em> en el conector (no disponible ahora). En cuanto se habilite, relleno apertura/clics y el volumen del período.</div>
+      </div>
+    </div>
+
+
+    <!-- ══ SECUENCIA EBOOK INMOBILIARIA ══ -->
+    <div class="section-label">Secuencia de nurturing · Ebook Inmobiliaria</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Secuencia de emails del ebook (sector inmobiliario)</span>
+        <span class="badge badge-blue">🔁 Autoresponder</span>
+      </div>
+      <table class="table">
+        <thead><tr><th>Email</th><th>Enviados</th><th>Apertura</th><th>Clics</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1 · Autoresponder</strong> (entrega ebook)</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td><strong>2 · Seguimiento</strong></td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td><strong>3 · Seguimiento</strong></td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
+        <span>ℹ️</span>
+        <div>Secuencia de 3 emails (autoresponder + 2 seguimientos). Las métricas de <strong>envíos, apertura y clics por email</strong> requieren acceso a <em>Marketing Email / Campaigns</em> en el conector (no disponible ahora). En cuanto se habilite, relleno los datos del período.</div>
+      </div>
+    </div>
+
+  </div><!-- /tab-emailing -->
+
 </div>
 <script>
 (function(){
@@ -623,6 +667,14 @@ body {
   }
   var tsEl = document.getElementById('sync-ts');
   if(tsEl) tsEl.textContent = fmtNow();
+
+  window.switchTab = function(tab){
+    document.getElementById('tab-dashboard').classList.toggle('active', tab==='dashboard');
+    document.getElementById('tab-emailing').classList.toggle('active', tab==='emailing');
+    document.getElementById('tabbtn-dashboard').classList.toggle('active', tab==='dashboard');
+    document.getElementById('tabbtn-emailing').classList.toggle('active', tab==='emailing');
+    window.scrollTo(0,0);
+  };
 
   window.doRefresh = function(){
     var btn = document.getElementById('refresh-btn');
