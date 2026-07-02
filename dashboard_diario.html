@@ -366,42 +366,6 @@ body {
 
 
   <!-- ══ REVISIÓN VENTAS — HORIZONTAL ══ -->
-  <!-- ══ ESTADO SQL ══ -->
-  <div class="section-label">Estado y seguimiento de las SQL · 8 SQL del período</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">
-      <div class="rev-block" style="--rbc:var(--muted)">
-        <div class="rb-num">3</div>
-        <div class="rb-name">Nuevo / sin trabajar</div>
-        <div class="rb-desc">Aún sin primer contacto</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">2</div>
-        <div class="rb-name">Intento de contacto</div>
-        <div class="rb-desc">Llamada/email sin conectar</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--guru-400)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Usuario free</div>
-        <div class="rb-desc">Ya usa la plataforma</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Cliente</div>
-        <div class="rb-desc">Ya convertido</div>
-      </div>
-      <div class="rev-block" style="--rbc:var(--blue)">
-        <div class="rb-num">1</div>
-        <div class="rb-name">Otro estado</div>
-        <div class="rb-desc">En cualificación</div>
-      </div>
-    </div>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;">
-      ℹ️ El detalle de <strong>llamadas</strong> (nº de llamadas y motivo del resultado) no está disponible: el objeto <em>Calls</em> de HubSpot no es accesible con los permisos actuales. El estado mostrado proviene del <em>lead status</em> de cada SQL (ej. "Intento de contacto" = se intentó llamar/escribir sin conectar).
-    </div>
-  </div>
-
-
   <div class="section-label">Leads en revisión de ventas · 1 – 2 jul · 25 contactos</div>
   <div class="card" style="padding:16px 20px;">
     <div class="rev-blocks">
@@ -448,6 +412,74 @@ body {
         <div class="rb-desc">Cuenta de prueba</div>
       </div>
 
+    </div>
+  </div>
+
+
+  <!-- ══ ESTADO SQL ══ -->
+  <div class="section-label">Estado y seguimiento de las SQL · 8 SQL del período</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks">
+      <div class="rev-block" style="--rbc:var(--muted)">
+        <div class="rb-num">3</div>
+        <div class="rb-name">Nuevo / sin trabajar</div>
+        <div class="rb-desc">Aún sin primer contacto</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--amber)">
+        <div class="rb-num">2</div>
+        <div class="rb-name">Intento de contacto</div>
+        <div class="rb-desc">Llamada/email sin conectar</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--guru-400)">
+        <div class="rb-num">1</div>
+        <div class="rb-name">Usuario free</div>
+        <div class="rb-desc">Ya usa la plataforma</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--green)">
+        <div class="rb-num">1</div>
+        <div class="rb-name">Cliente</div>
+        <div class="rb-desc">Ya convertido</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--blue)">
+        <div class="rb-num">1</div>
+        <div class="rb-name">Otro estado</div>
+        <div class="rb-desc">En cualificación</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ LLAMADAS Y SEGUIMIENTO COMERCIAL ══ -->
+  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">SQL de paid media · estado de contacto por ventas</span>
+      <span class="badge badge-green">📞 Llamada telefónica activa</span>
+    </div>
+    <div class="alert alert-green" style="align-items:flex-start;">
+      <span>📞</span>
+      <div>Ventas ha empezado a <strong>llamar por teléfono (integrado en HubSpot)</strong> a los contactos que piden demo directa. Seguimiento el <strong>mismo día</strong> de la creación en la mayoría de SQL (nota/llamada registrada · 2 SDR asignados).</div>
+    </div>
+    <table class="table">
+      <thead><tr><th>SQL</th><th>Empresa · campaña</th><th>Estado de contacto</th></tr></thead>
+      <tbody>
+        <tr><td><strong>vanesa</strong></td><td>COS Global · Google <em>Brand</em></td><td><span class="pill pill-demo">✅ Cliente</span></td></tr>
+        <tr><td><strong>Beatriz</strong></td><td>Nivel 29 · Google <em>Industrias/Agentes</em></td><td><span class="pill pill-demo">📞 Llamada hecha · usuario free</span></td></tr>
+        <tr><td><strong>Britni</strong></td><td>— · Google <em>PMAX genérico</em></td><td><span class="pill" style="background:rgba(245,158,11,.15);color:var(--amber)">📞 Contactada · poco cualificada</span></td></tr>
+        <tr><td><strong>Dennis</strong></td><td>— · Google <em>PMAX genérico</em></td><td><span class="pill" style="background:rgba(245,158,11,.15);color:var(--amber)">☎️ Intento · sin conectar</span></td></tr>
+        <tr><td><strong>Ivan</strong></td><td>Consultin · Google <em>Industrias/Agentes</em></td><td><span class="pill pill-discov">⏳ Pendiente de llamar</span></td></tr>
+        <tr><td><strong>Jose Javier</strong></td><td>Cabo Soluciones · Google <em>Chatbot</em></td><td><span class="pill pill-discov">⏳ Recién entrado</span></td></tr>
+        <tr><td><strong>Jordi</strong></td><td>Swing Maniacs · Google <em>Competidores</em></td><td><span class="pill pill-discov">⏳ Recién entrado</span></td></tr>
+      </tbody>
+    </table>
+    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
+      <span>💡</span>
+      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
+      <br>• <strong>Brand convierte</strong>: el SQL de campaña de marca (COS Global) ya es <strong>cliente</strong> → intención alta, buen retorno.
+      <br>• <strong>PMAX genérico = menor calidad</strong>: leads contactados pero poco cualificados o sin empresa/difíciles de conectar → revisar segmentación y creatividades de PMAX.
+      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; ventas los está llamando el mismo día — medir su conversión a demo/oportunidad.
+      <br>• <strong>Buen SLA de ventas</strong>: contacto el mismo día de entrada del lead.
+      <br><span style="color:var(--muted);font-size:11px;">Basado en estado del lead + notas/actividad de seguimiento. El contenido íntegro de transcripciones se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
     </div>
   </div>
 
