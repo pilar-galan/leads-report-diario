@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GuruSup · Dashboard Diario · 1 jul 2026</title>
+<title>GuruSup · Dashboard Diario · 2 jul 2026</title>
 <style>
 :root {
   --guru-900: #0a0618;
@@ -316,7 +316,7 @@ body {
     <div class="logo-box">GS</div>
     <div class="header-title">
       <h1>GuruSup · Dashboard Diario</h1>
-      <p>Miércoles, 1 de julio de 2026 · período: 30 jun → 1 jul · últimas 24h (hora España)</p>
+      <p>Jueves, 2 de julio de 2026 · período: 1 jul → 2 jul · últimas 24h (hora España)</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
     <button class="refresh-btn" id="refresh-btn" onclick="doRefresh()"><span id="refresh-icon">↻</span> Actualizar</button>
@@ -327,14 +327,14 @@ body {
 <div class="main">
 
   <!-- ══ EMBUDO DE CONVERSIÓN ══ -->
-  <div class="section-label">Embudo de conversión · 30 jun → 1 jul · últimas 24h</div>
+  <div class="section-label">Embudo de conversión · 1 jul → 2 jul · últimas 24h</div>
 
   <div class="funnel">
 
     <div class="f-card f-c-default">
       <div class="fc-label">Contactos creados</div>
       <div class="fc-value">25</div>
-      <div class="fc-sub">Leads · 30 jun – 1 jul</div>
+      <div class="fc-sub">Leads · 1 – 2 jul</div>
     </div>
 
     <div class="f-arrow"></div>
@@ -366,18 +366,54 @@ body {
 
 
   <!-- ══ REVISIÓN VENTAS — HORIZONTAL ══ -->
-  <div class="section-label">Leads en revisión de ventas · 30 jun – 1 jul · 25 contactos</div>
+  <!-- ══ ESTADO SQL ══ -->
+  <div class="section-label">Estado y seguimiento de las SQL · 8 SQL del período</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks">
+      <div class="rev-block" style="--rbc:var(--muted)">
+        <div class="rb-num">3</div>
+        <div class="rb-name">Nuevo / sin trabajar</div>
+        <div class="rb-desc">Aún sin primer contacto</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--amber)">
+        <div class="rb-num">2</div>
+        <div class="rb-name">Intento de contacto</div>
+        <div class="rb-desc">Llamada/email sin conectar</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--guru-400)">
+        <div class="rb-num">1</div>
+        <div class="rb-name">Usuario free</div>
+        <div class="rb-desc">Ya usa la plataforma</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--green)">
+        <div class="rb-num">1</div>
+        <div class="rb-name">Cliente</div>
+        <div class="rb-desc">Ya convertido</div>
+      </div>
+      <div class="rev-block" style="--rbc:var(--blue)">
+        <div class="rb-num">1</div>
+        <div class="rb-name">Otro estado</div>
+        <div class="rb-desc">En cualificación</div>
+      </div>
+    </div>
+    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;">
+      ℹ️ El detalle de <strong>llamadas</strong> (nº de llamadas y motivo del resultado) no está disponible: el objeto <em>Calls</em> de HubSpot no es accesible con los permisos actuales. El estado mostrado proviene del <em>lead status</em> de cada SQL (ej. "Intento de contacto" = se intentó llamar/escribir sin conectar).
+    </div>
+  </div>
+
+
+  <div class="section-label">Leads en revisión de ventas · 1 – 2 jul · 25 contactos</div>
   <div class="card" style="padding:16px 20px;">
     <div class="rev-blocks">
 
       <div class="rev-block" style="--rbc:var(--green)">
-        <div class="rb-num">6</div>
+        <div class="rb-num">3</div>
         <div class="rb-name">Ya gestionado</div>
         <div class="rb-desc">Proceso completado</div>
       </div>
 
       <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">17</div>
+        <div class="rb-num">20</div>
         <div class="rb-name">Pendiente revisión</div>
         <div class="rb-desc">Sin asignar aún</div>
       </div>
@@ -417,14 +453,14 @@ body {
 
 
   <!-- ── CANALES DE ADQUISICIÓN ── -->
-  <div class="section-label">Canales de adquisición · 25 contactos · 30 jun – 1 jul</div>
+  <div class="section-label">Canales de adquisición · 25 contactos · 1 – 2 jul</div>
   <div class="channels-grid">
-    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">9</div><div class="ch-label">Social Ads</div><div class="ch-pct">36% · 8 lead · 0 freem · 1 SQL</div></div>
+    <div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">12</div><div class="ch-label">Social Ads</div><div class="ch-pct">48% · 12 lead · 0 freem · 0 SQL</div></div>
+    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">6</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">24% · 1 lead · 3 freem · 2 SQL</div></div>
     <div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">5</div><div class="ch-label">SEM / Google Ads</div><div class="ch-pct">20% · 0 lead · 0 freem · 5 SQL</div></div>
-    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">4</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">16% · 2 lead · 1 freem · 1 SQL</div></div>
-    <div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">3</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">12% · 1 lead · 2 freem · 0 SQL</div></div>
-    <div class="ch-card" style="--chc:#22d3ee"><div class="ch-icon">💬</div><div class="ch-num">2</div><div class="ch-label">Chat web</div><div class="ch-pct">8% · 2 lead · 0 freem · 0 SQL</div></div>
-    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">🎪</div><div class="ch-num">2</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">8% · fuente: otras campañas · 1 freem · 1 SQL</div></div>
+    <div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">1</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">4% · 0 lead · 0 freem · 1 SQL</div></div>
+    <div class="ch-card" style="--chc:#ec4899"><div class="ch-icon">🎪</div><div class="ch-num">1</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">4% · fuente: otras campañas · 1 freem</div></div>
+    <div class="ch-card" style="--chc:#22d3ee"><div class="ch-icon">💬</div><div class="ch-num">0</div><div class="ch-label">Chat web</div><div class="ch-pct">0% en este período</div></div>
   </div>
 
 
@@ -433,13 +469,14 @@ body {
   <div class="card">
     <div class="card-header">
       <span class="card-title">Empresas en pipeline por etapa</span>
-      <span class="badge badge-green">34 empresas activas</span>
+      <span class="badge badge-green">35 empresas activas</span>
     </div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
     <table class="table" id="emp-table">
       <thead><tr><th>Empresa</th><th>Etapa</th></tr></thead>
       <tbody>
+        <tr><td><strong>Leganés Club de Fútbol</strong> <span class="new-tag">nuevo</span></td><td><span class="pill pill-discov">Discovery</span></td></tr>
         <tr><td><strong>Azora Real Estate</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
         <tr><td><strong>Fever</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
         <tr><td><strong>Linkia FP</strong></td><td><span class="pill pill-discov">Discovery</span></td></tr>
@@ -480,7 +517,7 @@ body {
 
     <div class="rev-blocks" style="margin-top:16px;">
       <div class="rev-block" style="--rbc:var(--guru-300)">
-        <div class="rb-num">34</div>
+        <div class="rb-num">35</div>
         <div class="rb-name">Oportunidades en pipeline</div>
         <div class="rb-desc">Pipeline de ventas (canales medidos)</div>
       </div>
@@ -490,20 +527,20 @@ body {
         <div class="rb-desc">Demos agendadas en pipeline</div>
       </div>
       <div class="rev-block" style="--rbc:var(--amber)">
-        <div class="rb-num">0</div>
+        <div class="rb-num">1</div>
         <div class="rb-name">Nuevas oportunidades</div>
-        <div class="rb-desc">En el período 30 jun – 1 jul</div>
+        <div class="rb-desc">En el período 1 – 2 jul</div>
       </div>
     </div>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;">
-      ✓ Sin nuevas oportunidades ni reuniones agendadas en este período. Pipeline activo mantenido.
+    <div class="alert alert-green" style="margin-top:14px;margin-bottom:0;">
+      ✦ 1 nueva oportunidad en el período (Leganés Club de Fútbol) · 0 reuniones agendadas.
     </div>
   </div>
 
 
   <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
-    GuruSup · Dashboard Diario generado el 1 jul 2026 hora España<br>
-    Período: 30 jun – 1 jul · últimas 24h (hora España · UTC+2)
+    GuruSup · Dashboard Diario generado el 2 jul 2026 hora España<br>
+    Período: 1 jul – 2 jul · últimas 24h (hora España · UTC+2)
   </div>
 
 </div>
