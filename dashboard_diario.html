@@ -341,11 +341,6 @@ body {
 
 <div class="main">
 
-  <div class="tab-nav">
-    <button class="tab-btn active" id="tabbtn-dashboard" onclick="switchTab('dashboard')">⭐ Adquisición y Estado de Leads</button>
-    <button class="tab-btn" id="tabbtn-emailing" onclick="switchTab('emailing')">📩 Campañas de Mailings</button>
-  </div>
-
   <div id="tab-dashboard" class="tab-content active">
 
   <!-- ══ EMBUDO DE CONVERSIÓN ══ -->
@@ -565,98 +560,6 @@ body {
   </div>
 
   </div><!-- /tab-dashboard -->
-
-  <div id="tab-emailing" class="tab-content">
-
-    <!-- ══ EMAIL DE BIENVENIDA ══ -->
-    <div class="section-label">Email de bienvenida · nuevos registros</div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Email automático de bienvenida al registrarse</span>
-        <span class="badge badge-blue">🔁 Automatizado</span>
-      </div>
-      <div class="rev-blocks">
-        <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">1.580</div><div class="rb-name">Emails enviados</div><div class="rb-desc">Total histórico</div></div>
-        <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">235</div><div class="rb-name">Contactos influidos</div><div class="rb-desc">Interacción atribuida</div></div>
-        <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">—</div><div class="rb-name">Apertura / clics</div><div class="rb-desc">Ver nota</div></div>
-      </div>
-      <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-        <span>ℹ️</span>
-        <div>Volumen del marcador «email bienvenida enviado» (1.580 histórico) · <strong>235 contactos influidos</strong> (campaña HubSpot). La <strong>tasa de apertura y clics por email</strong> no la expone la API del conector (solo el panel de email de HubSpot); si me pasas esos 2 números los añado.</div>
-      </div>
-    </div>
-
-
-    <!-- ══ SECUENCIA EBOOK INMOBILIARIA ══ -->
-    <div class="section-label">Secuencia de nurturing · Ebook Inmobiliaria</div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Secuencia de emails del ebook (sector inmobiliario)</span>
-        <span class="badge badge-green">📥 25 leads captados</span>
-      </div>
-      <div class="rev-blocks" style="margin-bottom:14px;">
-        <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">25</div><div class="rb-name">Leads captados</div><div class="rb-desc">vía formulario LinkedIn Lead Gen</div></div>
-        <div class="rev-block" style="--rbc:#a855f7"><div class="rb-num">Paid</div><div class="rb-name">Canal de origen</div><div class="rb-desc">Social Ads · LinkedIn</div></div>
-        <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">Lead</div><div class="rb-name">Etapa actual</div><div class="rb-desc">En nurturing por secuencia</div></div>
-      </div>
-      <table class="table">
-        <thead><tr><th>Email</th><th>Enviados</th><th>Apertura</th><th>Clics</th></tr></thead>
-        <tbody>
-          <tr><td><strong>1 · Autoresponder</strong> (entrega ebook)</td><td>—</td><td>—</td><td>—</td></tr>
-          <tr><td><strong>2 · Seguimiento</strong></td><td>—</td><td>—</td><td>—</td></tr>
-          <tr><td><strong>3 · Seguimiento</strong></td><td>—</td><td>—</td><td>—</td></tr>
-        </tbody>
-      </table>
-      <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-        <span>ℹ️</span>
-        <div>Campaña <strong>«Ebook Inmobiliaria - secuencias Social Paid»</strong>: <strong>25 leads captados</strong> por el formulario de <strong>LinkedIn Lead Generation Ads</strong> (Paid Social), todos en etapa <em>lead</em> y en nurturing por la secuencia. La <strong>apertura y clics por email</strong> de la secuencia no los expone la API del conector (solo el panel de HubSpot); si me los pasas los añado.</div>
-      </div>
-    </div>
-
-    <!-- ══ WEBINAR AGENTES EN VIVO ══ -->
-    <div class="section-label">Webinar · «Agentes en Vivo»</div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Campaña de email · Webinar Agentes en Vivo</span>
-        <span class="badge badge-blue">🎥 Webinar</span>
-      </div>
-      <div class="rev-blocks">
-        <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">445</div><div class="rb-name">Contactos influidos</div><div class="rb-desc">Alcance de la campaña</div></div>
-        <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">—</div><div class="rb-name">Tasa de apertura</div><div class="rb-desc">Ver nota</div></div>
-        <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">—</div><div class="rb-name">Tasa de clics</div><div class="rb-desc">Ver nota</div></div>
-        <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">—</div><div class="rb-name">Registrados</div><div class="rb-desc">Ver nota</div></div>
-      </div>
-      <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-        <span>ℹ️</span>
-        <div>Campaña de captación al webinar «Agentes en Vivo» · <strong>445 contactos influidos</strong> (la de mayor alcance). La <strong>apertura, clics y nº de registrados por email</strong> no los expone la API del conector (solo el panel de email de HubSpot); si me pasas esos números los añado.</div>
-      </div>
-    </div>
-
-    <!-- ══ ACTIVACIÓN FREEMIUM ══ -->
-    <div class="section-label">Reactivación de usuarios freemium · «Activación Freemiums»</div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Email de reactivación a freemium activos (marketing-contactables)</span>
-        <span class="badge badge-green">📧 Enviada</span>
-      </div>
-      <div class="rev-blocks">
-        <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">306</div><div class="rb-name">Emails enviados</div><div class="rb-desc">Freemium activos &lt;6 meses</div></div>
-        <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">36%</div><div class="rb-name">Tasa de apertura</div><div class="rb-desc">111 aperturas</div></div>
-        <div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">3%</div><div class="rb-name">Tasa de clics</div><div class="rb-desc">9 clics · CTA plataforma</div></div>
-        <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">8,1%</div><div class="rb-name">Clic sobre apertura</div><div class="rb-desc">CTR de los que abren</div></div>
-      </div>
-      <div class="alert alert-muted" style="margin-top:14px;align-items:flex-start;">
-        <span>🎬</span>
-        <div>Email con <strong>vídeo de 1 min</strong> animando a volver a la plataforma · CTA = acceso directo. <strong>Flujo:</strong> a los que no abren se les envía un 2º email con una <strong>guía en PDF</strong>.</div>
-      </div>
-      <div class="alert alert-green" style="margin-top:10px;align-items:flex-start;">
-        <span>💡</span>
-        <div><strong style="color:var(--guru-300);">Lectura:</strong> apertura <strong>36%</strong> (base viva) pero clic <strong>3%</strong> → el salto «vídeo → volver a la plataforma» es el cuello de botella. El 2º email (guía PDF) a los ~195 no-abridores medirá el reenganche.</div>
-      </div>
-    </div>
-
-  </div><!-- /tab-emailing -->
-
 </div>
 <script>
 (function(){
@@ -668,14 +571,6 @@ body {
   }
   var tsEl = document.getElementById('sync-ts');
   if(tsEl) tsEl.textContent = fmtNow();
-
-  window.switchTab = function(tab){
-    document.getElementById('tab-dashboard').classList.toggle('active', tab==='dashboard');
-    document.getElementById('tab-emailing').classList.toggle('active', tab==='emailing');
-    document.getElementById('tabbtn-dashboard').classList.toggle('active', tab==='dashboard');
-    document.getElementById('tabbtn-emailing').classList.toggle('active', tab==='emailing');
-    window.scrollTo(0,0);
-  };
 
   window.doRefresh = function(){
     var btn = document.getElementById('refresh-btn');
