@@ -241,19 +241,41 @@ body {
 }
 @media(max-width:600px){
   .header { padding: 0 14px; }
+  .header-inner { gap: 10px; padding: 12px 0 10px; }
+  .header-title { min-width: 0; }
+  .header-title h1 { font-size: 14px; line-height: 1.25; }
+  .header-title p  { font-size: 10px; line-height: 1.35; }
+  .logo-box { width: 34px; height: 34px; font-size: 13px; }
   .live-badge { display: none; }
-  .refresh-btn { margin-left: auto; padding: 7px 16px; font-size: 12px; }
+  .refresh-btn { margin-left: auto; padding: 7px 14px; font-size: 12px; }
+  .sync-bar { padding: 5px 14px 6px; }
   .main { padding: 18px 14px 50px; }
   /* embudo en vertical */
   .funnel { flex-direction: column; gap: 8px; }
-  .f-arrow { width: 100%; height: 22px; transform: rotate(90deg); }
+  .f-arrow { width: 100%; height: 20px; transform: rotate(90deg); }
+  .f-card { padding: 14px 16px 13px; }
   .fc-value, .fc-opp-new { font-size: 40px; }
+  .fc-opp-total { font-size: 13px; }
   /* bloques de estado / pipeline a 2 columnas */
-  .rev-block { min-width: calc(50% - 5px); }
+  .rev-block { flex: 1 1 calc(50% - 5px); min-width: calc(50% - 5px); }
+  .rb-num { font-size: 23px; }
+  /* flechas de flujo */
+  .flow-arrow { font-size: 24px; margin: 2px 0 12px; }
+  .flow-arrow small { font-size: 10px; padding: 0 8px; }
+  /* barra de prioridades y alertas legibles */
+  .alert { padding: 10px 12px; font-size: 12px; line-height: 1.5; }
+  /* búsqueda de pipeline a ancho completo */
+  #emp-search { font-size: 16px; }
   /* tablas con scroll horizontal */
   .card { padding: 16px 14px; overflow-x: auto; }
-  .table { min-width: 320px; }
-  .section-label { font-size: 10px; }
+  .card-header { flex-wrap: wrap; gap: 8px; }
+  .table { min-width: 300px; }
+  .section-label { font-size: 10px; margin-top: 26px; }
+}
+@media(max-width:380px){
+  .channels-grid { grid-template-columns: 1fr; }
+  .rev-block { flex: 1 1 100%; min-width: 100%; }
+  .fc-value, .fc-opp-new { font-size: 36px; }
 }
 
 /* ── LOGIN OVERLAY ── */
