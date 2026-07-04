@@ -330,6 +330,10 @@ def main():
         return ("@" not in n and "[duplicado]" not in n
                 and not n.rstrip().endswith("new deal") and "- new deal" not in n)
 
+    def clean_deal_name(name):
+        n = re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', name or "", flags=re.I)
+        return n.strip()
+
     mkt_deals = []
     for dl in all_deals:
         p = dl["properties"]
@@ -342,7 +346,7 @@ def main():
         label, icon, _ = classify_channel(src, d1)
         mkt_deals.append({
             "id": dl["id"],
-            "name": p.get("dealname", "—"),
+            "name": clean_deal_name(p.get("dealname", "—")) or "—",
             "stage": p.get("dealstage", ""),
             "created": (p.get("createdate") or "")[:10],
             "channel": f"{icon} {label}",
@@ -383,8 +387,8 @@ def render(d):
     for label, c in d["channels"]:
         p = pct(c["n"], d["total"]) if c["n"] > 0 else "—"
         lc_txt = " · ".join(f"{cnt} {lbl.lower()}" for lbl, cnt in sorted(c["lc"].items(), key=lambda x: -x[1]))
-        opacity = "" if c["n"] > 0 else ' style="opacity:.45"'
-        ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}"{opacity}>'
+        dim = "" if c["n"] > 0 else ";opacity:.45"
+        ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}{dim}">'
                      f'<div class="ch-icon">{c["icon"]}</div>'
                      f'<div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
@@ -394,8 +398,8 @@ def render(d):
     rev_blocks = ""
     for key, color in REV_META:
         n = d["rev_counts"].get(key, 0)
-        opacity = "" if n > 0 else ' style="opacity:.4"'
-        rev_blocks += (f'<div class="rev-block" style="--rbc:{color}"{opacity}>'
+        dim = "" if n > 0 else ";opacity:.4"
+        rev_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
                        f'<div class="rb-num">{n}</div>'
                        f'<div class="rb-name">{esc(key)}</div></div>\n')
 
@@ -403,8 +407,8 @@ def render(d):
     sql_blocks = ""
     for key, color, desc in SQL_STATE_META:
         n = d["sql_state_counts"].get(key, 0)
-        opacity = "" if n > 0 else ' style="opacity:.4"'
-        sql_blocks += (f'<div class="rev-block" style="--rbc:{color}"{opacity}>'
+        dim = "" if n > 0 else ";opacity:.4"
+        sql_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
                        f'<div class="rb-num">{n}</div>'
                        f'<div class="rb-name">{esc(key)}</div>'
                        f'<div class="rb-desc">{esc(desc)}</div></div>\n')
