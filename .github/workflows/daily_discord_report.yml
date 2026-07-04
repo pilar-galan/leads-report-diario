@@ -1,0 +1,34 @@
+name: Daily Leads Report
+
+on:
+  schedule:
+    # Genera el dashboard a las 8:30h España (06:30 UTC verano)
+    - cron: '30 6 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generar dashboard con datos reales de HubSpot
+        env:
+          HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+        run: python3 generate_dashboard.py
+
+      - name: Publicar dashboard actualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dashboard_diario.html
+          if git diff --staged --quiet; then
+            echo "Sin cambios en el dashboard"
+          else
+            git commit -m "chore: actualización diaria del dashboard (datos HubSpot)"
+            git push
+          fi
