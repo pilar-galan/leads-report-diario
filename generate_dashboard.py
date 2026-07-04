@@ -42,6 +42,18 @@ LC_LABELS = {
     "customer":               "Cliente",
 }
 
+# ── Etapa del ciclo de vida (lifecyclestage) — value -> (label, color) ──
+LC_META = [
+    ("subscriber",            "Suscriptor",      "var(--muted)"),
+    ("lead",                  "Lead",            "var(--guru-500)"),
+    ("marketingqualifiedlead","MQL",             "var(--blue)"),
+    ("salesqualifiedlead",    "SQL-Consultoría", "var(--orange)"),
+    ("1378463825",            "Freemium",        "var(--guru-400)"),
+    ("opportunity",           "Oportunidad",     "var(--green)"),
+    ("customer",              "Cliente",         "var(--green)"),
+    ("other",                 "Otra etapa",      "var(--muted)"),
+]
+
 # ── Revisión ventas (propiedad revision_ventas) — orden y color ──
 REV_META = [
     ("Ya gestionado",                   "var(--green)"),
@@ -76,7 +88,7 @@ FIXED_CHANNELS = {
 }
 
 
-# ─────────────────────── HubSpot API ───────────────────────
+# ─────────────────────────── HubSpot API ───────────────────────────
 def api_post(path, payload):
     req = urllib.request.Request(
         BASE + path,
@@ -116,7 +128,7 @@ def iso(dt):
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-# ─────────────────────── Clasificadores ───────────────────────
+# ─────────────────────────── Clasificadores ───────────────────────────
 def classify_channel(src, d1):
     """Devuelve (label, icon, color) alineado con la taxonomía de marketing."""
     d1 = d1 or ""
@@ -164,7 +176,7 @@ def pct(n, base):
     return f"{round(n/base*100)}%" if base else "—"
 
 
-# ─────────────────────── Reuniones de marketing ───────────────────────
+# ─────────────────────────── Reuniones de marketing ───────────────────────────
 def fetch_marketing_meetings(start_iso, end_iso):
     """
     Reuniones creadas en la ventana cuyo contacto asociado entró por un canal
@@ -205,6 +217,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
             if not is_marketing(src, d1):
                 continue
             company = cp.get("company") or ""
+            firstname = cp.get("firstname") or ""
             try:
                 ca = api_get(f"/crm/v4/objects/contacts/{cid}/associations/companies")
                 coids = [r["toObjectId"] for r in ca.get("results", [])]
@@ -216,7 +229,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
             except Exception:
                 pass
             label, _, _ = classify_channel(src, d1)
-            company = company.strip() or "Sin empresa"
+            company = company.strip() or firstname.strip() or "Sin empresa"
             key = f"{company.lower()}|{label}"
             if key in seen:
                 continue
@@ -225,7 +238,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
     return out
 
 
-# ─────────────────────── Main ───────────────────────
+# ─────────────────────────── Main ───────────────────────────
 def main():
     if not TOKEN:
         print("ERROR: falta HUBSPOT_TOKEN", file=sys.stderr)
@@ -302,6 +315,11 @@ def main():
         key = l["rev"] if l["rev"] else "Pendiente de revisión"
         rev_counts[key] = rev_counts.get(key, 0) + 1
 
+    # Etapa del ciclo de vida
+    lc_counts = {}
+    for l in real:
+        lc_counts[l["lc"]] = lc_counts.get(l["lc"], 0) + 1
+
     # Estado del lead (hs_lead_status)
     lead_state_counts = {}
     for l in real:
@@ -374,7 +392,7 @@ def main():
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
-        "channels": channels, "rev_counts": rev_counts,
+        "channels": channels, "rev_counts": rev_counts, "lc_counts": lc_counts,
         "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
         "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
@@ -411,6 +429,20 @@ def render(d):
         rev_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
                        f'<div class="rb-num">{n}</div>'
                        f'<div class="rb-name">{esc(key)}</div></div>\n')
+
+    # Etapa del ciclo de vida (solo etapas con contactos)
+    lc_blocks = ""
+    known = {m[0] for m in LC_META if m[0] != "other"}
+    other_n = sum(n for k, n in d["lc_counts"].items() if k and k not in known)
+    for value, label, color in LC_META:
+        n = other_n if value == "other" else d["lc_counts"].get(value, 0)
+        if n == 0:
+            continue
+        lc_blocks += (f'<div class="rev-block" style="--rbc:{color}">'
+                      f'<div class="rb-num">{n}</div>'
+                      f'<div class="rb-name">{esc(label)}</div></div>\n')
+    if not lc_blocks:
+        lc_blocks = '<div class="rb-desc" style="color:var(--muted)">Sin datos de ciclo de vida</div>'
 
     # Estado del lead
     lead_blocks = ""
@@ -457,7 +489,7 @@ def render(d):
         total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
         n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
         n_meetings=d["n_meetings"], meeting_companies=d["meeting_companies"],
-        ch_cards=ch_cards, rev_blocks=rev_blocks, lead_blocks=lead_blocks,
+        ch_cards=ch_cards, rev_blocks=rev_blocks, lc_blocks=lc_blocks, lead_blocks=lead_blocks,
         n_lead_estado=d["n_lead_estado"], call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=len(d["mkt_deals"]), nuevos_deals=d["nuevos_deals"],
         demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
@@ -688,6 +720,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
     </div>
     <div class="rev-blocks">{rev_blocks}</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px;">Por etapa del ciclo de vida</div>
+    <div class="rev-blocks">{lc_blocks}</div>
   </div>
 
   <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
