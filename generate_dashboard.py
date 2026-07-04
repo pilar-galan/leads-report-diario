@@ -53,11 +53,15 @@ REV_META = [
     ("Test",                            "var(--muted)"),
 ]
 
-# ── Estado SQL (propiedad estado_sql_consultoria) — orden y color ──
-SQL_STATE_META = [
-    ("Califica",     "var(--green)",    "Cualificado para consultoría"),
-    ("No califica",  "var(--red)",      "Descartado por ventas"),
-    ("Freemium",     "var(--guru-400)", "Deriva a producto freemium"),
+# ── Estado del lead (propiedad hs_lead_status) — value -> (label, color, desc) ──
+LEAD_STATE_META = [
+    ("UNQUALIFIED",          "Lead frío",       "var(--blue)",     "Sin cualificar aún"),
+    ("ATTEMPTED_TO_CONTACT", "Lead caliente",   "var(--amber)",    "Intento de contacto"),
+    ("OPEN",                 "En contacto",     "var(--guru-400)", "Conversación abierta"),
+    ("OPEN_DEAL",            "En negociación",  "var(--orange)",   "Oportunidad en curso"),
+    ("usuario_free",         "Prueba Gratuita", "var(--guru-300)", "Usando la plataforma"),
+    ("cliente",              "Cliente",         "var(--green)",    "Convertido a cliente"),
+    ("Mareado",              "Mareado",         "var(--muted)",    "Sin avance claro"),
 ]
 
 # ── Canales de adquisición fijos (siempre visibles aunque estén a 0) ──
@@ -248,6 +252,7 @@ def main():
     raw = fetch_all("contacts", win_filters, [
         "email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
+        "hs_lead_status",
     ])
 
     real = []
@@ -265,6 +270,7 @@ def main():
             "lc":  p.get("lifecyclestage") or "",
             "rev": p.get("revision_ventas") or "",
             "sql_state": p.get("estado_sql_consultoria") or "",
+            "lead_state": p.get("hs_lead_status") or "",
             "email": email,
             "firstname": p.get("firstname") or "",
             "company": p.get("company") or "",
@@ -295,12 +301,12 @@ def main():
         key = l["rev"] if l["rev"] else "Pendiente de revisión"
         rev_counts[key] = rev_counts.get(key, 0) + 1
 
-    # Estado SQL
-    sql_state_counts = {}
+    # Estado del lead (hs_lead_status)
+    lead_state_counts = {}
     for l in real:
-        if l["sql_state"]:
-            sql_state_counts[l["sql_state"]] = sql_state_counts.get(l["sql_state"], 0) + 1
-    n_sql_estado = sum(sql_state_counts.values())
+        if l["lead_state"]:
+            lead_state_counts[l["lead_state"]] = lead_state_counts.get(l["lead_state"], 0) + 1
+    n_lead_estado = sum(lead_state_counts.values())
 
     # Tabla de SQL para "Llamadas"
     sql_rows = []
@@ -366,7 +372,7 @@ def main():
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
         "channels": channels, "rev_counts": rev_counts,
-        "sql_state_counts": sql_state_counts, "n_sql_estado": n_sql_estado,
+        "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
         "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
         "nuevos_ids": {d["id"] for d in nuevos_deals}, "chan_dist": chan_dist,
@@ -403,15 +409,15 @@ def render(d):
                        f'<div class="rb-num">{n}</div>'
                        f'<div class="rb-name">{esc(key)}</div></div>\n')
 
-    # Estado SQL
-    sql_blocks = ""
-    for key, color, desc in SQL_STATE_META:
-        n = d["sql_state_counts"].get(key, 0)
+    # Estado del lead
+    lead_blocks = ""
+    for value, label, color, desc in LEAD_STATE_META:
+        n = d["lead_state_counts"].get(value, 0)
         dim = "" if n > 0 else ";opacity:.4"
-        sql_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
-                       f'<div class="rb-num">{n}</div>'
-                       f'<div class="rb-name">{esc(key)}</div>'
-                       f'<div class="rb-desc">{esc(desc)}</div></div>\n')
+        lead_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
+                        f'<div class="rb-num">{n}</div>'
+                        f'<div class="rb-name">{esc(label)}</div>'
+                        f'<div class="rb-desc">{esc(desc)}</div></div>\n')
 
     # Tabla llamadas
     if d["sql_rows"]:
@@ -448,8 +454,8 @@ def render(d):
         total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
         n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
         n_meetings=d["n_meetings"], meeting_companies=d["meeting_companies"],
-        ch_cards=ch_cards, rev_blocks=rev_blocks, sql_blocks=sql_blocks,
-        n_sql_estado=d["n_sql_estado"], call_rows=call_rows, deal_rows=deal_rows,
+        ch_cards=ch_cards, rev_blocks=rev_blocks, lead_blocks=lead_blocks,
+        n_lead_estado=d["n_lead_estado"], call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=len(d["mkt_deals"]), nuevos_deals=d["nuevos_deals"],
         demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
         generado=esc(d["generado"]),
@@ -681,11 +687,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="rev-blocks">{rev_blocks}</div>
   </div>
 
-  <div class="flow-arrow">↓<small>Estos SQL pasan a revisión y seguimiento de estado</small></div>
+  <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
 
-  <div class="section-label">Estado y seguimiento de las SQL · {n_sql_estado} con estado</div>
+  <div class="section-label">Estado del lead · {n_lead_estado} con estado</div>
   <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">{sql_blocks}</div>
+    <div class="rev-blocks">{lead_blocks}</div>
   </div>
 
   <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
