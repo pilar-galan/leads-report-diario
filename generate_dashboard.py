@@ -205,6 +205,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
             if not is_marketing(src, d1):
                 continue
             company = cp.get("company") or ""
+            firstname = cp.get("firstname") or ""
             try:
                 ca = api_get(f"/crm/v4/objects/contacts/{cid}/associations/companies")
                 coids = [r["toObjectId"] for r in ca.get("results", [])]
@@ -216,7 +217,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
             except Exception:
                 pass
             label, _, _ = classify_channel(src, d1)
-            company = company.strip() or "Sin empresa"
+            company = company.strip() or firstname.strip() or "Sin empresa"
             key = f"{company.lower()}|{label}"
             if key in seen:
                 continue
