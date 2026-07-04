@@ -204,7 +204,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
                 continue
             if not is_marketing(src, d1):
                 continue
-            company = cp.get("company") or cp.get("firstname") or "—"
+            company = cp.get("company") or ""
             try:
                 ca = api_get(f"/crm/v4/objects/contacts/{cid}/associations/companies")
                 coids = [r["toObjectId"] for r in ca.get("results", [])]
@@ -216,7 +216,8 @@ def fetch_marketing_meetings(start_iso, end_iso):
             except Exception:
                 pass
             label, _, _ = classify_channel(src, d1)
-            key = company.lower().strip()
+            company = company.strip() or "Sin empresa"
+            key = f"{company.lower()}|{label}"
             if key in seen:
                 continue
             seen.add(key)
@@ -320,7 +321,9 @@ def main():
     # Reuniones de marketing (auto)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
     n_meetings = len(meetings)
-    meeting_companies = " · ".join(f"<strong>{esc(m['company'])}</strong>" for m in meetings) or "—"
+    meeting_companies = " · ".join(
+        f"<strong>{esc(m['company'])}</strong> <span style=\"opacity:.7\">({esc(m['channel'])})</span>"
+        for m in meetings) or "—"
 
     # Pipeline (solo marketing)
     deal_filters = [
