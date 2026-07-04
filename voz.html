@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuruSup · Asistente de Voz IA</title>
+<style>
+:root {
+  --bg:      #0a0618;
+  --surface: #13112a;
+  --card:    #1e1b42;
+  --border:  #2e2a5a;
+  --purple:  #7c3aed;
+  --accent:  #a78bfa;
+  --green:   #10b981;
+  --red:     #ef4444;
+  --text:    #f0edff;
+  --muted:   #7b76a0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(160deg, #1a0a3d, #0a0618);
+  border-bottom: 1px solid rgba(124,58,237,.25);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; color: #fff;
+  box-shadow: 0 0 20px rgba(124,58,237,.5);
+}
+.header-text h1 { font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+.header-text p  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.status-dot {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; color: var(--muted);
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted);
+  transition: all .3s;
+}
+.dot.on  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.dot.rec { background: var(--red);   box-shadow: 0 0 8px var(--red); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── CHAT AREA ── */
+.chat-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Mensaje burbuja */
+.msg {
+  display: flex;
+  gap: 12px;
+  animation: fadeIn .25s ease;
+}
+.msg.user  { flex-direction: row-reverse; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+  align-self: flex-end;
+}
+.avatar.guru { background: linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; box-shadow:0 0 12px rgba(124,58,237,.4); }
+.avatar.user { background: var(--surface); border: 1px solid var(--border); color: var(--accent); }
+
+.bubble {
+  max-width: 72%;
+  padding: 13px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+}
+.msg.guru .bubble {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+  color: var(--text);
+}
+.msg.user .bubble {
+  background: linear-gradient(135deg,#5b21b6,#7c3aed);
+  border-bottom-right-radius: 4px;
+  color: #fff;
+}
+
+.bubble strong { color: var(--accent); }
+.msg.user .bubble strong { color: #e9d5ff; }
+
+.bubble ul { padding-left: 18px; margin-top: 6px; }
+.bubble li { margin-bottom: 4px; }
+
+/* Timestamp */
+.ts {
+  font-size: 10px; color: var(--muted);
+  align-self: flex-end; margin-bottom: 2px; flex-shrink: 0;
+}
+
+/* Typing indicator */
+.typing .bubble {
+  display: flex; gap: 5px; align-items: center;
+  padding: 14px 18px;
+}
+.typing-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  animation: bounce .9s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: .15s; }
+.typing-dot:nth-child(3) { animation-delay: .30s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(1)} 40%{transform:scale(1.4)} }
+
+/* ── BOTTOM BAR ── */
+.bottom {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 20px 24px;
+}
+.bottom-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Mic button */
+.mic-btn {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 0 28px rgba(124,58,237,.5);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.mic-btn:hover  { transform: scale(1.07); box-shadow: 0 0 36px rgba(124,58,237,.7); }
+.mic-btn.active { background: linear-gradient(135deg,#b91c1c,#ef4444); box-shadow: 0 0 36px rgba(239,68,68,.6); animation: pulse 1s infinite; }
+.mic-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.mic-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all .3s;
+}
+.mic-btn.active .mic-ring {
+  border-color: rgba(239,68,68,.4);
+  animation: ring 1.5s infinite;
+}
+@keyframes ring { 0%{inset:-8px;opacity:1} 100%{inset:-24px;opacity:0} }
+
+.mic-hint {
+  font-size: 12px; color: var(--muted); text-align: center;
+}
+.mic-hint span { color: var(--accent); font-weight: 600; }
+
+/* Text input fallback */
+.text-row {
+  display: flex; gap: 10px; width: 100%;
+}
+.text-input {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+}
+.text-input:focus { border-color: var(--purple); }
+.text-input::placeholder { color: var(--muted); }
+.send-btn {
+  background: linear-gradient(135deg,#7c3aed,#a855f7);
+  border: none; border-radius: 12px;
+  width: 44px; height: 44px;
+  color: #fff; font-size: 18px;
+  cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.send-btn:hover { transform: scale(1.05); }
+
+/* Controls row */
+.controls {
+  display: flex; gap: 10px;
+}
+.ctrl-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 11px; color: var(--muted);
+  cursor: pointer; transition: all .2s;
+}
+.ctrl-btn:hover { border-color: var(--purple); color: var(--accent); }
+
+/* Live transcript */
+.transcript {
+  font-size: 13px;
+  color: var(--accent);
+  text-align: center;
+  min-height: 20px;
+  font-style: italic;
+  transition: opacity .3s;
+}
+
+/* Welcome */
+.welcome {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+.welcome .big { font-size: 48px; margin-bottom: 12px; }
+.welcome h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.welcome p { font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 20px; }
+.suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.sug {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text-2, #c4bfe0);
+  cursor: pointer;
+  transition: all .2s;
+}
+.sug:hover { border-color: var(--purple); color: var(--accent); }
+
+/* Scrollbar */
+.chat-wrap::-webkit-scrollbar { width: 4px; }
+.chat-wrap::-webkit-scrollbar-track { background: transparent; }
+.chat-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Error banner */
+.error-banner {
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.3);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #f87171;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">GS</div>
+  <div class="header-text">
+    <h1>GuruSup · Asistente de Voz IA</h1>
+    <p>Habla o escribe · Datos CRM en tiempo real</p>
+  </div>
+  <div class="status-dot">
+    <div class="dot" id="statusDot"></div>
+    <span id="statusText">Cargando…</span>
+  </div>
+  <button onclick="promptApiKey()" title="Configurar API Key" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);border-radius:8px;padding:6px 10px;color:var(--accent);font-size:15px;cursor:pointer;margin-left:10px">🔑</button>
+</header>
+
+<div class="chat-wrap" id="chatWrap">
+  <!-- Welcome screen -->
+  <div class="welcome" id="welcome">
+    <div class="big">🎙️</div>
+    <h2>¿En qué te ayudo?</h2>
+    <p>Pulsa el micrófono y pregunta cualquier cosa sobre el pipeline, contactos, freemiums o estrategia comercial.</p>
+    <div class="suggestions">
+      <div class="sug" onclick="sendText('¿Cuántos leads nuevos tenemos esta semana?')">📊 Leads esta semana</div>
+      <div class="sug" onclick="sendText('¿Cuál es el deal más prioritario ahora mismo?')">🔥 Deal más urgente</div>
+      <div class="sug" onclick="sendText('¿Cómo está el pipeline de freemiums?')">🌱 Estado freemiums</div>
+      <div class="sug" onclick="sendText('Genera un email de seguimiento para Cooltra')">📧 Email seguimiento</div>
+      <div class="sug" onclick="sendText('¿Qué canal nos trae mejores leads?')">🎯 Mejor canal</div>
+      <div class="sug" onclick="sendText('Resume el estado comercial de la semana')">📋 Resumen semanal</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="bottom-inner">
+
+    <!-- Live transcript -->
+    <div class="transcript" id="transcript"></div>
+
+    <!-- Mic button -->
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+      <div class="mic-ring"></div>
+      🎙️
+    </button>
+    <div class="mic-hint" id="micHint">
+      <span>Pulsa para hablar</span> · o escribe abajo
+    </div>
+
+    <!-- Text input -->
+    <div class="text-row">
+      <input class="text-input" id="textInput" placeholder="Escribe tu pregunta…"
+        onkeydown="if(event.key==='Enter')sendFromInput()">
+      <button class="send-btn" onclick="sendFromInput()">↑</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="ctrl-btn" onclick="resetChat()">🗑️ Nueva conversación</button>
+      <button class="ctrl-btn" onclick="toggleTTS()">🔊 <span id="ttsLabel">Voz activada</span></button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Configuración ─────────────────────────────────────────────────────────────
+const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+
+const SYSTEM_PROMPT = `Eres el asistente de IA comercial de GuruSup, una startup española de AI agents para customer support.
+
+CONTEXTO DE NEGOCIO:
+- Competidores: Decagon, Sierra, Ada, Intercom Fin
+- ICP: startups B2C Series A-C, España/LATAM, 5k-50k tickets/mes
+- Modelo: Consultoría + Freemium que convierte a pago
+
+DATOS ACTUALES DEL CRM (HubSpot · 14 Jun 2026):
+- Base de datos: 9.120 contactos totales
+- Nuevos contactos esta semana: 97
+  · Leads: 79 (18 no cualificados, 15 open activos, 5 en contacto)
+  · Opportunities: 3
+  · Clientes nuevos: 10
+- Canales: Offline 53%, Tráfico Directo 22%, Orgánico SEO 13.5%, Paid Search 7.5%, AI Referrals 2%
+
+PIPELINE ACTIVO:
+- 89 deals abiertos · ~€53.000 en juego
+- SQL Consultoría: 3 deals activos (Flywire, eboca, ZZ Test)
+- SQL Freemium: 5 deals (Cooltra €10k, GoTrendier €2k, Rever, TeamSystem, COCUNAT)
+- Presentaciones agendadas: 13 deals · €16.400
+- Deals con fecha vencida urgentes: Waynabox €13.2k, Cooltra €10k, Redexis €5k, Plenergy €3k
+
+FREEMIUMS:
+- 41 deals en pipeline freemium · €51.625 en juego
+- 3 ganados: TBF Abogados, VDS (€5k), PropHero
+- 2 nuevos sin contactar esta semana: Planeta Huerto, Avantio
+- Tasa conversión freemium → cliente: 7.3%
+
+EMAIL Y ACTIVACIÓN:
+- Tasa apertura email: 3% (muy baja)
+- 63.5% contactos no marketable (sin permiso email)
+- 0 contactos en secuencia automática de bienvenida
+
+REVENUE:
+- Mejor mes: Marzo 2026 · €18.850
+- Tasa de cierre histórica: 4% (121 perdidos vs 5 ganados)
+- Ticket medio: €1.150
+
+CLIENTES ACTUALES:
+- 95 clientes en total
+- Canal offline genera el 100% de los cierres
+
+Responde siempre en español, de forma directa, concisa y orientada a la acción.
+Si te preguntan por datos específicos del CRM, usa los datos de contexto anteriores.
+Si te piden hacer algo (generar un email, crear una propuesta, analizar un deal), hazlo.
+Máximo 3-4 párrafos en respuestas largas. Usa listas cuando ayude a la claridad.`;
+
+// ── Estado ───────────────────────────────────────────────────────────────────
+let isRecording = false;
+let recognition  = null;
+let ttsEnabled   = true;
+let msgCount     = 0;
+let conversationHistory = [];
+
+// ── Gestión API Key ──────────────────────────────────────────────────────────
+function getApiKey() {
+  return localStorage.getItem('guru_api_key') || '';
+}
+
+function saveApiKey(key) {
+  localStorage.setItem('guru_api_key', key.trim());
+}
+
+function promptApiKey() {
+  const existing = getApiKey();
+  const key = prompt('Introduce tu Anthropic API Key (sk-ant-...):\n\nSe guardará en este dispositivo.', existing);
+  if (key && key.trim().startsWith('sk-')) {
+    saveApiKey(key.trim());
+    document.getElementById('statusDot').className = 'dot on';
+    document.getElementById('statusText').textContent = 'Listo';
+    return key.trim();
+  } else if (key !== null) {
+    showError('API Key inválida. Debe empezar por sk-ant-...');
+  }
+  return null;
+}
+
+// ── Verificar API Key al cargar ──────────────────────────────────────────────
+function checkStatus() {
+  const key = getApiKey();
+  if (key) {
+    document.getElementById('statusDot').className = 'dot on';
+    document.getElementById('statusText').textContent = 'Listo';
+  } else {
+    document.getElementById('statusText').textContent = 'Sin API key';
+    showError('⚠️ Pulsa el botón de clave 🔑 para configurar tu API key de Anthropic.');
+  }
+}
+
+// ── Mostrar mensaje en el chat ───────────────────────────────────────────────
+function addMessage(role, text) {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const wrap = document.getElementById('chatWrap');
+  const now = new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'});
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const ts = document.createElement('div');
+  ts.className = 'ts';
+  ts.textContent = now;
+
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role}`;
+  avatar.textContent = role === 'guru' ? 'GS' : '👤';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = formatText(text);
+
+  if (role === 'user') {
+    div.appendChild(ts);
+    div.appendChild(bubble);
+    div.appendChild(avatar);
+  } else {
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    div.appendChild(ts);
+  }
+
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  msgCount++;
+  return bubble;
+}
+
+function formatText(text) {
+  // Markdown básico
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    .replace(/\n\n/g, '</p><p style="margin-top:8px">')
+    .replace(/\n/g, '<br>');
+}
+
+// ── Typing indicator ─────────────────────────────────────────────────────────
+function showTyping() {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+  const wrap = document.getElementById('chatWrap');
+  const div = document.createElement('div');
+  div.className = 'msg guru typing';
+  div.id = 'typing';
+  div.innerHTML = `<div class="avatar guru">GS</div><div class="bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function hideTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+// ── Llamar a la API de Anthropic directamente ────────────────────────────────
+async function sendText(text) {
+  if (!text.trim()) return;
+
+  let apiKey = getApiKey();
+  if (!apiKey) {
+    apiKey = promptApiKey();
+    if (!apiKey) return;
+  }
+
+  addMessage('user', text);
+  showTyping();
+  document.getElementById('transcript').textContent = '';
+
+  conversationHistory.push({role: 'user', content: text});
+  // Limitar historial a 20 mensajes
+  if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+
+  try {
+    const r = await fetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    hideTyping();
+
+    if (!r.ok) {
+      const err = await r.json();
+      if (r.status === 401) {
+        localStorage.removeItem('guru_api_key');
+        document.getElementById('statusDot').className = 'dot';
+        document.getElementById('statusText').textContent = 'Sin API key';
+        showError('API Key inválida o expirada. Pulsa 🔑 para actualizarla.');
+      } else {
+        showError(`Error API: ${err.error?.message || r.status}`);
+      }
+      conversationHistory.pop();
+      return;
+    }
+
+    const d = await r.json();
+    const answer = d.content[0].text;
+    conversationHistory.push({role: 'assistant', content: answer});
+    addMessage('guru', answer);
+    if (ttsEnabled) speak(answer);
+
+  } catch(e) {
+    hideTyping();
+    conversationHistory.pop();
+    showError('Error de red. Comprueba tu conexión a internet.');
+  }
+}
+
+function sendFromInput() {
+  const input = document.getElementById('textInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  sendText(text);
+}
+
+// ── Web Speech API (reconocimiento de voz) ───────────────────────────────────
+function toggleMic() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showError('Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.');
+    return;
+  }
+  isRecording ? stopMic() : startMic();
+}
+
+function startMic() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'es-ES';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('micBtn').className = 'mic-btn active';
+    document.getElementById('micBtn').textContent = '⏹️';
+    document.getElementById('micHint').innerHTML = '<span style="color:var(--red)">Escuchando… habla ahora</span>';
+    document.getElementById('statusDot').className = 'dot rec';
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      e.results[i].isFinal ? final += t : interim += t;
+    }
+    document.getElementById('transcript').textContent = interim || final;
+    if (final) {
+      stopMic();
+      sendText(final);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    stopMic();
+    if (e.error !== 'no-speech') showError(`Error de micrófono: ${e.error}`);
+  };
+
+  recognition.onend = () => { if (isRecording) stopMic(); };
+
+  recognition.start();
+}
+
+function stopMic() {
+  isRecording = false;
+  if (recognition) recognition.stop();
+  const btn = document.getElementById('micBtn');
+  btn.className = 'mic-btn';
+  btn.textContent = '🎙️';
+  document.getElementById('micHint').innerHTML = '<span>Pulsa para hablar</span> · o escribe abajo';
+  document.getElementById('statusDot').className = 'dot on';
+}
+
+// ── Text-to-Speech (respuesta por voz) ──────────────────────────────────────
+function speak(text) {
+  if (!ttsEnabled || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  // Limpiar markdown para TTS
+  const clean = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1').replace(/^[-•] /gm, '').substring(0, 800);
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = 'es-ES';
+  utt.rate = 1.05;
+  utt.pitch = 1;
+  // Preferir voz en español si disponible
+  const voices = window.speechSynthesis.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith('es'));
+  if (esVoice) utt.voice = esVoice;
+  window.speechSynthesis.speak(utt);
+}
+
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  document.getElementById('ttsLabel').textContent = ttsEnabled ? 'Voz activada' : 'Voz desactivada';
+  if (!ttsEnabled) window.speechSynthesis?.cancel();
+}
+
+// ── Reset conversación ───────────────────────────────────────────────────────
+async function resetChat() {
+  conversationHistory = [];
+  const wrap = document.getElementById('chatWrap');
+  wrap.innerHTML = `<div class="welcome" id="welcome">
+    <div class="big">🎙️</div>
+    <h2>¿En qué te ayudo?</h2>
+    <p>Pulsa el micrófono y pregunta cualquier cosa sobre el pipeline, contactos, freemiums o estrategia comercial.</p>
+    <div class="suggestions">
+      <div class="sug" onclick="sendText('¿Cuántos leads nuevos tenemos esta semana?')">📊 Leads esta semana</div>
+      <div class="sug" onclick="sendText('¿Cuál es el deal más prioritario ahora mismo?')">🔥 Deal más urgente</div>
+      <div class="sug" onclick="sendText('¿Cómo está el pipeline de freemiums?')">🌱 Estado freemiums</div>
+      <div class="sug" onclick="sendText('Genera un email de seguimiento para Cooltra')">📧 Email seguimiento</div>
+      <div class="sug" onclick="sendText('¿Qué canal nos trae mejores leads?')">🎯 Mejor canal</div>
+      <div class="sug" onclick="sendText('Resume el estado comercial de la semana')">📋 Resumen semanal</div>
+    </div>
+  </div>`;
+}
+
+// ── Error ────────────────────────────────────────────────────────────────────
+function showError(msg) {
+  const wrap = document.getElementById('chatWrap');
+  const div = document.createElement('div');
+  div.className = 'error-banner';
+  div.textContent = msg;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+checkStatus();
+// Cargar voces TTS
+window.speechSynthesis?.getVoices();
+window.speechSynthesis?.addEventListener('voiceschanged', () => window.speechSynthesis.getVoices());
+</script>
+
+</body>
+</html>

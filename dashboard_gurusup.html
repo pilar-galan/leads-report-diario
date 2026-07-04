@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuruSup · Radar IA — Dashboard Comercial</title>
+<style>
+/* ════════════════════════════ TOKENS DE MARCA ══════════════════════════ */
+:root {
+  --guru-900: #0a0618;
+  --guru-800: #110e2a;
+  --guru-700: #1a1640;
+  --guru-600: #241f58;
+  --guru-500: #7c3aed;
+  --guru-400: #9d5ffa;
+  --guru-300: #c4a2fc;
+  --guru-200: #ede9ff;
+
+  --surface:  #161330;
+  --card:     #1e1b42;
+  --border:   #2e2a5a;
+  --border-l: rgba(124,58,237,.25);
+
+  --green:    #10b981;
+  --green-bg: rgba(16,185,129,.1);
+  --amber:    #f59e0b;
+  --amber-bg: rgba(245,158,11,.1);
+  --red:      #ef4444;
+  --red-bg:   rgba(239,68,68,.1);
+  --blue:     #3b82f6;
+  --blue-bg:  rgba(59,130,246,.1);
+
+  --text:     #f0edff;
+  --text-2:   #c4bfe0;
+  --muted:    #7b76a0;
+  --white:    #ffffff;
+
+  --radius:   18px;
+  --radius-s: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--guru-900);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════ HEADER ══════════════════════════════════ */
+.gs-header {
+  background: linear-gradient(160deg, #1a0a3d 0%, #0a0618 70%);
+  border-bottom: 1px solid var(--border-l);
+  padding: 28px 56px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.gs-logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--guru-500), #a855f7);
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: #fff;
+  letter-spacing: -1px;
+  box-shadow: 0 0 24px rgba(124,58,237,.5);
+  flex-shrink: 0;
+}
+.gs-brand { flex: 1; }
+.gs-brand h1 { font-size: 20px; font-weight: 800; letter-spacing: -.4px; }
+.gs-brand p  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.gs-badge {
+  background: rgba(124,58,237,.15);
+  border: 1px solid var(--guru-500);
+  color: var(--guru-300);
+  font-size: 11px; font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 999px;
+  letter-spacing: .3px;
+}
+.gs-date { font-size: 11px; color: var(--muted); margin-left: 8px; }
+
+/* ══════════════════════════════ FUNNEL RAIL ════════════════════════════ */
+.funnel-wrap {
+  display: flex;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+/* Sidebar rail */
+.funnel-rail {
+  width: 64px;
+  flex-shrink: 0;
+  padding: 56px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: sticky;
+  top: 101px;
+  align-self: flex-start;
+  height: calc(100vh - 101px);
+  overflow: hidden;
+}
+.rail-line {
+  width: 2px;
+  flex: 1;
+  background: linear-gradient(180deg, var(--guru-500) 0%, rgba(124,58,237,0) 100%);
+  border-radius: 999px;
+  margin-top: 8px;
+}
+
+/* Main content */
+.funnel-content { flex: 1; padding: 0 40px 0 0; }
+
+/* ══════════════════════════════ STAGE BLOCK ════════════════════════════ */
+.stage {
+  padding: 56px 0 0;
+  position: relative;
+}
+.stage-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.stage-num {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--guru-500), #a855f7);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 18px rgba(124,58,237,.4);
+  position: relative;
+  z-index: 1;
+}
+.stage-num.green  { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 0 18px rgba(16,185,129,.3); }
+.stage-num.amber  { background: linear-gradient(135deg, #d97706, #f59e0b); box-shadow: 0 0 18px rgba(245,158,11,.3); }
+.stage-num.blue   { background: linear-gradient(135deg, #1d4ed8, #3b82f6); box-shadow: 0 0 18px rgba(59,130,246,.3); }
+.stage-num.red    { background: linear-gradient(135deg, #b91c1c, #ef4444); box-shadow: 0 0 18px rgba(239,68,68,.3); }
+
+.stage-meta { flex: 1; }
+.stage-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 2.5px;
+  color: var(--guru-400); text-transform: uppercase; margin-bottom: 4px;
+}
+.stage-title {
+  font-size: 22px; font-weight: 800; letter-spacing: -.5px; color: var(--text);
+}
+.stage-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.stage-divider {
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-l) 0%, transparent 80%);
+  margin-bottom: 28px;
+}
+
+/* ══════════════════════════════ GRID UTILS ════════════════════════════ */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.g-hero { display: grid; grid-template-columns: 1fr 380px; gap: 18px; align-items: start; }
+.mt { margin-top: 18px; }
+.mt2 { margin-top: 28px; }
+
+/* ══════════════════════════════ CARDS ══════════════════════════════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(124,58,237,.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.card-top-line {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--guru-500), transparent);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.card-top-line.green  { background: linear-gradient(90deg, var(--green), transparent); }
+.card-top-line.amber  { background: linear-gradient(90deg, var(--amber), transparent); }
+.card-top-line.red    { background: linear-gradient(90deg, var(--red), transparent); }
+.card-top-line.blue   { background: linear-gradient(90deg, var(--blue), transparent); }
+
+.c-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* ══════════════════════════════ KPI CARDS ══════════════════════════════ */
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(124,58,237,.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.kpi-n {
+  font-size: 44px; font-weight: 900; letter-spacing: -3px;
+  line-height: 1; color: var(--text);
+}
+.kpi-n.accent { color: var(--guru-400); }
+.kpi-n.green  { color: var(--green); }
+.kpi-n.amber  { color: var(--amber); }
+.kpi-n.red    { color: var(--red); }
+.kpi-n.blue   { color: var(--blue); }
+.kpi-lbl { font-size: 12px; color: var(--text-2); margin-top: 6px; font-weight: 500; }
+.kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.kpi-delta {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 800; letter-spacing: .3px;
+  padding: 3px 9px; border-radius: 999px; margin-top: 10px;
+}
+.d-up   { background: var(--green-bg); color: var(--green); }
+.d-warn { background: var(--amber-bg); color: var(--amber); }
+.d-down { background: var(--red-bg);   color: var(--red); }
+.d-info { background: var(--blue-bg);  color: var(--blue); }
+
+/* ══════════════════════════════ DONUT CHART ════════════════════════════ */
+.donut-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  display: flex; align-items: center; gap: 28px;
+  position: relative; overflow: hidden;
+}
+.donut-wrap::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(124,58,237,.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.donut-svg { flex-shrink: 0; transform: rotate(-90deg); }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+.dleg-row { display: flex; align-items: center; gap: 9px; }
+.dleg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.dleg-name { font-size: 12px; color: var(--text-2); flex: 1; }
+.dleg-pct  { font-size: 13px; font-weight: 800; }
+.dleg-n    { font-size: 11px; color: var(--muted); }
+
+/* ══════════════════════════════ BAR LIST ════════════════════════════════ */
+.bar-list { display: flex; flex-direction: column; gap: 9px; }
+.bar-row  { display: flex; align-items: center; gap: 10px; }
+.bar-lbl  { font-size: 11px; color: var(--text-2); width: 150px; flex-shrink: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-lbl.w120 { width: 120px; }
+.bar-track { flex: 1; background: var(--surface); border-radius: 999px; height: 7px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 999px; }
+.bf-purple { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+.bf-blue   { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
+.bf-green  { background: linear-gradient(90deg, #059669, #10b981); }
+.bf-amber  { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.bf-red    { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+.bf-grey   { background: #334155; }
+.bar-val   { font-size: 12px; font-weight: 800; color: var(--text); width: 44px; text-align: right; flex-shrink: 0; }
+
+/* ══════════════════════════════ FUNNEL STEPS ════════════════════════════ */
+.fsteps { display: flex; flex-direction: column; gap: 7px; }
+.fstep {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface); border-radius: var(--radius-s);
+  padding: 11px 16px;
+  border-left: 3px solid var(--border);
+}
+.fstep.s-purple { border-left-color: var(--guru-500); }
+.fstep.s-green  { border-left-color: var(--green); }
+.fstep.s-amber  { border-left-color: var(--amber); }
+.fstep.s-red    { border-left-color: var(--red); }
+.fstep.s-blue   { border-left-color: var(--blue); }
+.fs-num  { font-size: 22px; font-weight: 900; min-width: 38px; color: var(--text); }
+.fs-info { flex: 1; }
+.fs-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.fs-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.fs-val  { font-size: 14px; font-weight: 800; color: var(--guru-300); }
+
+/* ══════════════════════════════ TABLE ══════════════════════════════════ */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+     color: var(--muted); padding: 0 10px 10px; text-align: left;
+     border-bottom: 1px solid var(--border); }
+td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.035); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(124,58,237,.04); }
+.tr { text-align: right; }
+.tm { font-family: 'SF Mono', monospace; letter-spacing: -.2px; }
+
+/* ══════════════════════════════ PILLS ══════════════════════════════════ */
+.pill {
+  display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: .5px;
+  padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+}
+.p-purple { background: rgba(124,58,237,.2);  color: var(--guru-300); border: 1px solid rgba(124,58,237,.3); }
+.p-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(16,185,129,.2); }
+.p-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid rgba(245,158,11,.2); }
+.p-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(239,68,68,.2); }
+.p-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(59,130,246,.2); }
+.p-grey   { background: rgba(148,163,184,.08); color: var(--muted); border: 1px solid rgba(148,163,184,.15); }
+
+/* ══════════════════════════════ INSIGHT ════════════════════════════════ */
+.insight {
+  background: rgba(124,58,237,.07);
+  border-left: 3px solid var(--guru-500);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  padding: 10px 14px;
+  margin-top: 16px;
+  font-size: 12px; color: var(--guru-300);
+  font-weight: 500; line-height: 1.5;
+}
+.insight.warn { border-left-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+.insight.danger { border-left-color: var(--red); background: var(--red-bg); color: var(--red); }
+.insight.good { border-left-color: var(--green); background: var(--green-bg); color: var(--green); }
+
+/* ══════════════════════════════ ACTION BANNER ══════════════════════════ */
+.action-banner {
+  background: linear-gradient(135deg, #1a0840, #0e1840);
+  border: 1px solid rgba(124,58,237,.4);
+  border-radius: var(--radius);
+  padding: 22px 26px;
+  display: flex; gap: 18px; align-items: flex-start;
+  position: relative; overflow: hidden;
+}
+.action-banner::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 240px; height: 100%;
+  background: radial-gradient(circle at top right, rgba(168,85,247,.12), transparent 70%);
+  pointer-events: none;
+}
+.ab-icon { font-size: 30px; flex-shrink: 0; }
+.ab-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--guru-400); text-transform: uppercase; margin-bottom: 6px; }
+.ab-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.5; margin-bottom: 10px; }
+.ab-tags  { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.ab-note  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ══════════════════════════════ ALERT BOX ══════════════════════════════ */
+.alert {
+  background: rgba(239,68,68,.06);
+  border: 1px solid rgba(239,68,68,.25);
+  border-radius: var(--radius-s);
+  padding: 14px 18px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.alert.warn { background: var(--amber-bg); border-color: rgba(245,158,11,.25); }
+
+/* ══════════════════════════════ 3-STAT ROW ═════════════════════════════ */
+.stat-row {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+}
+.stat-box {
+  background: var(--surface);
+  border-radius: var(--radius-s);
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.stat-big { font-size: 30px; font-weight: 900; letter-spacing: -1px; }
+.stat-lbl { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+/* ══════════════════════════════ TREND BARS (horiz monthly) ═════════════ */
+.trend-h { display: flex; flex-direction: column; gap: 6px; }
+.th-row  { display: flex; align-items: center; gap: 9px; }
+.th-lbl  { font-size: 10px; color: var(--muted); width: 54px; flex-shrink: 0; }
+.th-bar  { height: 6px; border-radius: 999px; min-width: 3px; }
+.th-val  { font-size: 10px; font-weight: 800; color: var(--text); margin-left: 4px; width: 24px; }
+
+/* ══════════════════════════════ EMAIL ENGAGE ═══════════════════════════ */
+.engage-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 8px;
+}
+.eng-box {
+  background: var(--surface); border-radius: var(--radius-s);
+  padding: 16px; text-align: center; border: 1px solid var(--border);
+}
+.eng-n   { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+.eng-lbl { font-size: 10px; color: var(--muted); margin-top: 4px; }
+.eng-sub { font-size: 10px; color: var(--text-2); margin-top: 4px; }
+
+/* ══════════════════════════════ RESPONSIVE ═════════════════════════════ */
+@media (max-width: 1100px) {
+  .funnel-rail  { display: none; }
+  .funnel-content { padding: 0 20px; }
+  .g2, .g3, .g4, .g-hero, .stat-row, .engage-grid { grid-template-columns: 1fr; }
+  .gs-header { padding: 20px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ HEADER ══════════════════════════════════ -->
+<header class="gs-header">
+  <div class="gs-logo">GS</div>
+  <div class="gs-brand">
+    <h1>GuruSup · Radar IA</h1>
+    <p>Dashboard Comercial · Funnel de Ciclo de Vida</p>
+  </div>
+  <span class="gs-badge">🟢 Live HubSpot</span>
+  <span class="gs-date">14 Jun 2026</span>
+</header>
+
+<!-- ══════════════════════════ RESUMEN SEMANAL ══════════════════════════ -->
+<div style="background:linear-gradient(135deg,#13103a 0%,#0e0c28 100%);border-bottom:1px solid rgba(124,58,237,.2);padding:28px 56px 32px;">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--guru-300)">⚡ Resumen semana · 14 Jun 2026</span>
+      <span style="flex:1;height:1px;background:var(--border-l)"></span>
+      <span style="font-size:12px;color:var(--muted)">97 contactos nuevos · 89 deals abiertos</span>
+    </div>
+    <!-- Funnel steps -->
+    <div style="display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px;">
+
+      <!-- 1. Contactos nuevos -->
+      <div style="flex:1;min-width:110px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);border-right:none;border-radius:14px 0 0 14px;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">97</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--guru-300);margin:6px 0 4px">Nuevos</div>
+        <div style="font-size:11px;color:var(--muted)">esta semana</div>
+      </div>
+      <div style="display:flex;align-items:center;color:rgba(124,58,237,.5);font-size:18px;padding:0 2px;background:rgba(124,58,237,.05);border-top:1px solid rgba(124,58,237,.3);border-bottom:1px solid rgba(124,58,237,.3)">▶</div>
+
+      <!-- 2. Leads -->
+      <div style="flex:1.2;min-width:130px;background:rgba(124,58,237,.09);border:1px solid rgba(124,58,237,.25);border-right:none;border-left:none;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">79</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--guru-300);margin:6px 0 4px">Leads</div>
+        <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+          <span style="font-size:10px;background:rgba(239,68,68,.15);color:#fca5a5;border-radius:4px;padding:1px 6px">18 no cualif.</span>
+          <span style="font-size:10px;background:rgba(245,158,11,.12);color:#fcd34d;border-radius:4px;padding:1px 6px">15 open</span>
+          <span style="font-size:10px;background:rgba(16,185,129,.1);color:#6ee7b7;border-radius:4px;padding:1px 6px">5 contactados</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;color:rgba(124,58,237,.5);font-size:18px;padding:0 2px;background:rgba(124,58,237,.05);border-top:1px solid rgba(124,58,237,.25);border-bottom:1px solid rgba(124,58,237,.25)">▶</div>
+
+      <!-- 3. SQL Freemium -->
+      <div style="flex:1;min-width:120px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-right:none;border-left:none;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">5</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#93c5fd;margin:6px 0 4px">SQL Freemium</div>
+        <div style="font-size:11px;color:var(--muted)">3 freemiums · sem.</div>
+        <div style="font-size:10px;color:#60a5fa;margin-top:3px">€24k en juego</div>
+      </div>
+      <div style="display:flex;align-items:center;color:rgba(59,130,246,.4);font-size:18px;padding:0 2px;background:rgba(59,130,246,.04);border-top:1px solid rgba(59,130,246,.25);border-bottom:1px solid rgba(59,130,246,.25)">▶</div>
+
+      <!-- 4. SQL Consultoría -->
+      <div style="flex:1;min-width:120px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);border-right:none;border-left:none;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">3</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#d8b4fe;margin:6px 0 4px">SQL Consultoría</div>
+        <div style="font-size:11px;color:var(--muted)">Flywire · eboca · ZZ</div>
+      </div>
+      <div style="display:flex;align-items:center;color:rgba(168,85,247,.4);font-size:18px;padding:0 2px;background:rgba(168,85,247,.04);border-top:1px solid rgba(168,85,247,.25);border-bottom:1px solid rgba(168,85,247,.25)">▶</div>
+
+      <!-- 5. Deals activos -->
+      <div style="flex:1.1;min-width:120px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-right:none;border-left:none;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">89</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fcd34d;margin:6px 0 4px">Deals abiertos</div>
+        <div style="font-size:11px;color:var(--muted)">€53.000 pipeline</div>
+        <div style="font-size:10px;color:#fbbf24;margin-top:3px">13 presentaciones</div>
+      </div>
+      <div style="display:flex;align-items:center;color:rgba(245,158,11,.4);font-size:18px;padding:0 2px;background:rgba(245,158,11,.04);border-top:1px solid rgba(245,158,11,.22);border-bottom:1px solid rgba(245,158,11,.22)">▶</div>
+
+      <!-- 6. Clientes -->
+      <div style="flex:1;min-width:110px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-right:none;border-left:none;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">10</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6ee7b7;margin:6px 0 4px">Clientes nuevos</div>
+        <div style="font-size:11px;color:var(--muted)">95 total</div>
+      </div>
+      <div style="display:flex;align-items:center;color:rgba(239,68,68,.35);font-size:18px;padding:0 2px;background:rgba(239,68,68,.03);border-top:1px solid rgba(239,68,68,.2);border-bottom:1px solid rgba(239,68,68,.2)">▶</div>
+
+      <!-- 7. Churn/Perdidos -->
+      <div style="flex:1;min-width:110px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-left:none;border-radius:0 14px 14px 0;padding:16px 14px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#ef4444;line-height:1">124</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fca5a5;margin:6px 0 4px">Perdidos</div>
+        <div style="font-size:11px;color:var(--muted)">tasa cierre 4%</div>
+      </div>
+
+    </div>
+    <!-- conversion indicators -->
+    <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--muted)">📊 Conversión leads→SQL: <strong style="color:var(--text-2)">10.1%</strong></span>
+      <span style="font-size:12px;color:var(--muted)">💰 Freemium→cliente: <strong style="color:var(--text-2)">7.3%</strong></span>
+      <span style="font-size:12px;color:var(--muted)">📧 Apertura email: <strong style="color:#fca5a5">3%</strong> · <strong style="color:#fca5a5">63.5%</strong> sin permiso</span>
+      <span style="font-size:12px;color:var(--muted)">🏆 Canal top: <strong style="color:var(--text-2)">Offline 53%</strong> · 100% cierres</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ FUNNEL WRAPPER ══════════════════════════ -->
+<div class="funnel-wrap">
+
+  <!-- Rail lateral -->
+  <div class="funnel-rail">
+    <div style="width:40px;height:40px;background:var(--card);border:1px solid var(--border-l);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px">▼</div>
+    <div class="rail-line"></div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="funnel-content">
+
+  <!-- ╔══════════════════════════════════════════════════════════════════╗
+       ║  ETAPA 1 · CONTACTOS                                           ║
+       ╚══════════════════════════════════════════════════════════════════╝ -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">1</div>
+      <div class="stage-meta">
+        <div class="stage-label">Etapa 1 · Tope del Funnel</div>
+        <div class="stage-title">Contactos — Volumen, Evolución y Origen</div>
+        <div class="stage-sub">Base de datos completa · 9.120 contactos activos</div>
+      </div>
+    </div>
+    <div class="stage-divider"></div>
+
+    <!-- Hero: KPIs + Donut fuente -->
+    <div class="g-hero">
+
+      <!-- Columna izquierda: KPIs + evolución -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- KPI row top -->
+        <div class="g3">
+          <div class="kpi-card">
+            <div class="card-top-line"></div>
+            <div class="c-label">👥 Total contactos</div>
+            <div class="kpi-n accent">9.120</div>
+            <div class="kpi-lbl">Base de datos activa</div>
+            <span class="kpi-delta d-up">↑ Creciendo</span>
+          </div>
+          <div class="kpi-card">
+            <div class="card-top-line green"></div>
+            <div class="c-label">🆕 Nuevos mayo–jun</div>
+            <div class="kpi-n green">1.257</div>
+            <div class="kpi-lbl">Contactos creados</div>
+            <span class="kpi-delta d-up">↑ Alta captación</span>
+          </div>
+          <div class="kpi-card">
+            <div class="card-top-line amber"></div>
+            <div class="c-label">📅 Pico histórico</div>
+            <div class="kpi-n amber">63</div>
+            <div class="kpi-lbl">Deals · Marzo 2026</div>
+            <span class="kpi-delta d-info">📈 Máximo</span>
+          </div>
+        </div>
+
+        <!-- Evolución mensual de deals -->
+        <div class="card">
+          <div class="card-top-line"></div>
+          <div class="c-label">📊 Evolución mensual de deals creados · Mar 2025 – Jun 2026</div>
+          <div class="trend-h">
+            <div class="th-row"><span class="th-lbl">Mar 25</span><div class="th-bar bf-purple" style="width:calc(9/63*100%)"></div><span class="th-val">9</span></div>
+            <div class="th-row"><span class="th-lbl">Abr 25</span><div class="th-bar bf-grey" style="width:calc(4/63*100%)"></div><span class="th-val">4</span></div>
+            <div class="th-row"><span class="th-lbl">May 25</span><div class="th-bar bf-grey" style="width:calc(5/63*100%)"></div><span class="th-val">5</span></div>
+            <div class="th-row"><span class="th-lbl">Jun 25</span><div class="th-bar bf-blue" style="width:calc(3/63*100%)"></div><span class="th-val">3</span></div>
+            <div class="th-row"><span class="th-lbl">Jul 25</span><div class="th-bar bf-purple" style="width:calc(12/63*100%)"></div><span class="th-val">12</span></div>
+            <div class="th-row"><span class="th-lbl">Ago 25</span><div class="th-bar bf-grey" style="width:calc(3/63*100%)"></div><span class="th-val">3</span></div>
+            <div class="th-row"><span class="th-lbl">Sep 25</span><div class="th-bar bf-purple" style="width:calc(8/63*100%)"></div><span class="th-val">8</span></div>
+            <div class="th-row"><span class="th-lbl">Oct 25</span><div class="th-bar bf-purple" style="width:calc(33/63*100%)"></div><span class="th-val">33</span></div>
+            <div class="th-row"><span class="th-lbl">Nov 25</span><div class="th-bar bf-purple" style="width:calc(11/63*100%)"></div><span class="th-val">11</span></div>
+            <div class="th-row"><span class="th-lbl">Dic 25</span><div class="th-bar bf-purple" style="width:calc(13/63*100%)"></div><span class="th-val">13</span></div>
+            <div class="th-row"><span class="th-lbl">Ene 26</span><div class="th-bar bf-purple" style="width:calc(19/63*100%)"></div><span class="th-val">19</span></div>
+            <div class="th-row"><span class="th-lbl">Feb 26</span><div class="th-bar bf-grey" style="width:calc(6/63*100%)"></div><span class="th-val">6</span></div>
+            <div class="th-row"><span class="th-lbl" style="color:var(--guru-300);font-weight:700">Mar 26 🔝</span><div class="th-bar" style="width:100%;background:linear-gradient(90deg,var(--guru-500),#a855f7);box-shadow:0 0 6px rgba(168,85,247,.5)"></div><span class="th-val" style="color:var(--guru-300)">63</span></div>
+            <div class="th-row"><span class="th-lbl">Abr 26</span><div class="th-bar bf-purple" style="width:calc(10/63*100%)"></div><span class="th-val">10</span></div>
+            <div class="th-row"><span class="th-lbl">May 26</span><div class="th-bar bf-purple" style="width:calc(17/63*100%)"></div><span class="th-val">17</span></div>
+            <div class="th-row"><span class="th-lbl" style="color:var(--amber);font-weight:700">Jun 26 ↗</span><div class="th-bar bf-amber" style="width:calc(37/63*100%)"></div><span class="th-val" style="color:var(--amber)">37</span></div>
+          </div>
+          <div class="insight">Marzo 2026 fue el pico histórico (63 deals, €18.850). Junio 2026 ya lleva 37 en 14 días — ritmo para ser el segundo mejor mes.</div>
+        </div>
+
+      </div><!-- /col izq -->
+
+      <!-- Columna derecha: Donut fuentes -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="donut-wrap">
+          <div style="position:relative;width:180px;height:180px;flex-shrink:0;">
+            <svg width="180" height="180" viewBox="0 0 180 180" class="donut-svg">
+              <!-- Offline 53% -->
+              <circle r="70" cx="90" cy="90" fill="none" stroke="#7c3aed" stroke-width="22"
+                stroke-dasharray="233.11 206.72" stroke-dashoffset="0"/>
+              <!-- Directo 22% -->
+              <circle r="70" cx="90" cy="90" fill="none" stroke="#3b82f6" stroke-width="22"
+                stroke-dasharray="96.76 343.06" stroke-dashoffset="-233.11"/>
+              <!-- Orgánico 13.5% -->
+              <circle r="70" cx="90" cy="90" fill="none" stroke="#10b981" stroke-width="22"
+                stroke-dasharray="59.38 380.45" stroke-dashoffset="-329.87"/>
+              <!-- Paid Search 7.5% -->
+              <circle r="70" cx="90" cy="90" fill="none" stroke="#f59e0b" stroke-width="22"
+                stroke-dasharray="32.99 406.84" stroke-dashoffset="-389.24"/>
+              <!-- AI Referrals 2% -->
+              <circle r="70" cx="90" cy="90" fill="none" stroke="#a855f7" stroke-width="22"
+                stroke-dasharray="8.80 431.03" stroke-dashoffset="-422.23"/>
+              <!-- Otros 2% -->
+              <circle r="70" cx="90" cy="90" fill="none" stroke="#475569" stroke-width="22"
+                stroke-dasharray="8.80 431.03" stroke-dashoffset="-431.03"/>
+            </svg>
+            <!-- Centro del donut -->
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(90deg)">
+              <div style="font-size:22px;font-weight:900;color:var(--text);letter-spacing:-1px">200</div>
+              <div style="font-size:9px;color:var(--muted);text-align:center;line-height:1.2">contactos<br>analizados</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="c-label" style="margin-bottom:6px">🎯 Fuente de origen</div>
+            <div class="dleg-row">
+              <div class="dleg-dot" style="background:#7c3aed"></div>
+              <span class="dleg-name">🤝 Offline</span>
+              <span class="dleg-pct" style="color:#a78bfa">53%</span>
+              <span class="dleg-n">106</span>
+            </div>
+            <div class="dleg-row">
+              <div class="dleg-dot" style="background:#3b82f6"></div>
+              <span class="dleg-name">🔗 Directo</span>
+              <span class="dleg-pct" style="color:#60a5fa">22%</span>
+              <span class="dleg-n">44</span>
+            </div>
+            <div class="dleg-row">
+              <div class="dleg-dot" style="background:#10b981"></div>
+              <span class="dleg-name">🔍 Orgánico</span>
+              <span class="dleg-pct" style="color:#34d399">13.5%</span>
+              <span class="dleg-n">27</span>
+            </div>
+            <div class="dleg-row">
+              <div class="dleg-dot" style="background:#f59e0b"></div>
+              <span class="dleg-name">💰 Paid Search</span>
+              <span class="dleg-pct" style="color:#fcd34d">7.5%</span>
+              <span class="dleg-n">15</span>
+            </div>
+            <div class="dleg-row">
+              <div class="dleg-dot" style="background:#a855f7"></div>
+              <span class="dleg-name">🤖 AI Referrals</span>
+              <span class="dleg-pct" style="color:#c084fc">2%</span>
+              <span class="dleg-n">4</span>
+            </div>
+            <div class="dleg-row">
+              <div class="dleg-dot" style="background:#475569"></div>
+              <span class="dleg-name">📣 Otros</span>
+              <span class="dleg-pct" style="color:var(--muted)">2%</span>
+              <span class="dleg-n">4</span>
+            </div>
+            <div class="insight" style="margin-top:10px">El canal offline domina (53%) pero tiene 0% de apertura de email. El SEO trae volumen y calidad. AI Referrals ya es canal real.</div>
+          </div>
+        </div>
+
+        <!-- Email de bienvenida -->
+        <div class="card">
+          <div class="card-top-line amber"></div>
+          <div class="c-label">📧 Email de bienvenida · Engagement jun 2026</div>
+          <div class="engage-grid">
+            <div class="eng-box">
+              <div class="eng-n" style="color:var(--amber)">3%</div>
+              <div class="eng-lbl">Han abierto</div>
+              <div class="eng-sub">6 de 200</div>
+            </div>
+            <div class="eng-box">
+              <div class="eng-n" style="color:var(--blue)">1%</div>
+              <div class="eng-lbl">Han hecho clic</div>
+              <div class="eng-sub">2 de 200</div>
+            </div>
+            <div class="eng-box">
+              <div class="eng-n" style="color:var(--red)">0</div>
+              <div class="eng-lbl">En secuencia</div>
+              <div class="eng-sub">Sin flujo activo</div>
+            </div>
+          </div>
+          <!-- Tasa por canal -->
+          <div style="margin-top:14px">
+            <div class="bar-list">
+              <div class="bar-row">
+                <span class="bar-lbl">💰 Paid Search</span>
+                <div class="bar-track"><div class="bar-fill bf-amber" style="width:20%"></div></div>
+                <span class="bar-val" style="color:var(--amber)">20%↑</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-lbl">🔗 Directo</span>
+                <div class="bar-track"><div class="bar-fill bf-blue" style="width:4.5%"></div></div>
+                <span class="bar-val">4.5%</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-lbl">🔍 Orgánico</span>
+                <div class="bar-track"><div class="bar-fill bf-green" style="width:3.7%"></div></div>
+                <span class="bar-val">3.7%</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-lbl">🤝 Offline</span>
+                <div class="bar-track"><div class="bar-fill bf-grey" style="width:0%"></div></div>
+                <span class="bar-val" style="color:var(--red)">0%</span>
+              </div>
+            </div>
+          </div>
+          <div class="alert warn mt" style="margin-top:12px">
+            <div>⚠️</div>
+            <div style="font-size:11px;color:var(--amber);line-height:1.5"><strong>63.5% de contactos no marketable</strong> — no pueden recibir emails. 0 contactos en secuencia automática. Activar flujo de bienvenida para los 73 aptos podría triplicar el engagement en 30 días.</div>
+          </div>
+        </div>
+
+      </div><!-- /col der -->
+    </div><!-- /g-hero -->
+  </div><!-- /stage 1 -->
+
+  <!-- ╔══════════════════════════════════════════════════════════════════╗
+       ║  ETAPA 2 · LEADS → SQL                                         ║
+       ╚══════════════════════════════════════════════════════════════════╝ -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num amber">2</div>
+      <div class="stage-meta">
+        <div class="stage-label">Etapa 2 · Cualificación</div>
+        <div class="stage-title">SQL — Consultoría y Freemium</div>
+        <div class="stage-sub">Leads cualificados para venta · estados activos</div>
+      </div>
+    </div>
+    <div class="stage-divider"></div>
+
+    <div class="g4">
+      <div class="kpi-card">
+        <div class="card-top-line amber"></div>
+        <div class="c-label">⚡ SQL Consultoría</div>
+        <div class="kpi-n amber">3</div>
+        <div class="kpi-lbl">Deals en etapa SQL</div>
+        <div class="kpi-sub">Flywire · eboca · ZZ Test</div>
+        <span class="kpi-delta d-warn">€750 valor</span>
+      </div>
+      <div class="kpi-card">
+        <div class="card-top-line"></div>
+        <div class="c-label">⚡ SQL Freemium</div>
+        <div class="kpi-n accent">5</div>
+        <div class="kpi-lbl">Calificados activos</div>
+        <div class="kpi-sub">Cooltra · GoTrendier · Rever…</div>
+        <span class="kpi-delta d-up">€13.250 valor</span>
+      </div>
+      <div class="kpi-card">
+        <div class="card-top-line blue"></div>
+        <div class="c-label">🎯 Ticket medio SQL</div>
+        <div class="kpi-n blue">€2.650</div>
+        <div class="kpi-lbl">Media SQL Freemium</div>
+        <span class="kpi-delta d-info">Cooltra = €10k</span>
+      </div>
+      <div class="kpi-card">
+        <div class="card-top-line green"></div>
+        <div class="c-label">% Freemium → SQL</div>
+        <div class="kpi-n green">12%</div>
+        <div class="kpi-lbl">Tasa de cualificación</div>
+        <span class="kpi-delta d-warn">↗ Mejorable</span>
+      </div>
+    </div>
+
+    <div class="g2 mt">
+
+      <!-- SQL Consultoría funnel -->
+      <div class="card">
+        <div class="card-top-line amber"></div>
+        <div class="c-label">🏢 Funnel Consultoría · 208 deals acumulados</div>
+        <div class="fsteps">
+          <div class="fstep s-purple">
+            <div class="fs-num">145</div>
+            <div class="fs-info"><div class="fs-name">Nuevo Prospecto</div><div class="fs-sub">Leads sin cualificar</div></div>
+            <div class="fs-val">€16.175</div>
+          </div>
+          <div class="fstep s-purple">
+            <div class="fs-num">35</div>
+            <div class="fs-info"><div class="fs-name">Contactado</div><div class="fs-sub">Grupo Asesban · Weekendesk · Wingo…</div></div>
+            <div class="fs-val">€8.000</div>
+          </div>
+          <div class="fstep s-amber">
+            <div class="fs-num">13</div>
+            <div class="fs-info"><div class="fs-name">Presentación Agendada</div><div class="fs-sub">Redexis · Davante · Alsea · Plenergy…</div></div>
+            <div class="fs-val">€16.400</div>
+          </div>
+          <div class="fstep s-amber">
+            <div class="fs-num">4</div>
+            <div class="fs-info"><div class="fs-name">Propuesta Enviada</div><div class="fs-sub">Scoolinary · Talent Class…</div></div>
+            <div class="fs-val">€150</div>
+          </div>
+          <div class="fstep s-blue">
+            <div class="fs-num">3</div>
+            <div class="fs-info"><div class="fs-name">SQL Consultoría ⚡</div><div class="fs-sub">Flywire · danielamieva@eboca · ZZ Test</div></div>
+            <div class="fs-val">€750</div>
+          </div>
+        </div>
+        <div class="insight warn">Propuesta Enviada (€150) casi sin valor — la etapa previa al cierre está vacía. Prioridad: mover deals de Presentación a Propuesta esta semana.</div>
+      </div>
+
+      <!-- SQL Freemium -->
+      <div class="card">
+        <div class="card-top-line"></div>
+        <div class="c-label">🌱 SQL Freemium · Top 5 calificados</div>
+        <table>
+          <thead><tr><th>Empresa</th><th>Entrada</th><th>Canal</th><th class="tr">Valor</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Cooltra</strong> <span class="pill p-purple">🔥 Top</span></td>
+              <td class="tm">Mar 26</td><td><span class="pill p-grey">Offline</span></td>
+              <td class="tr tm" style="color:var(--green)">€10.000</td>
+            </tr>
+            <tr>
+              <td><strong>GoTrendier</strong></td>
+              <td class="tm">Sep 25</td><td><span class="pill p-grey">Offline</span></td>
+              <td class="tr tm" style="color:var(--green)">€2.000</td>
+            </tr>
+            <tr>
+              <td><strong>Rever</strong></td>
+              <td class="tm">Nov 25</td><td><span class="pill p-grey">Offline</span></td>
+              <td class="tr tm" style="color:var(--green)">€750</td>
+            </tr>
+            <tr>
+              <td><strong>TeamSystem</strong></td>
+              <td class="tm">Oct 25</td><td><span class="pill p-grey">Offline</span></td>
+              <td class="tr tm" style="color:var(--green)">€250</td>
+            </tr>
+            <tr>
+              <td><strong>COCUNAT</strong></td>
+              <td class="tm">Oct 25</td><td><span class="pill p-grey">Offline</span></td>
+              <td class="tr tm" style="color:var(--green)">€250</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <div style="flex:1;background:var(--surface);border-radius:var(--radius-s);padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:900;color:var(--guru-400)">€13.250</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Valor total SQL Freemium</div>
+          </div>
+          <div style="flex:1;background:var(--surface);border-radius:var(--radius-s);padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:900;color:var(--amber)">76%</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Concentrado en Cooltra</div>
+          </div>
+        </div>
+        <div class="insight">Cooltra lleva meses en SQL sin cerrar. Es la prioridad comercial número uno esta semana — un cierre equivale a €10.000 de golpe.</div>
+      </div>
+
+    </div>
+  </div><!-- /stage 2 -->
+
+  <!-- ╔══════════════════════════════════════════════════════════════════╗
+       ║  ETAPA 3 · PIPELINE ACTIVO                                     ║
+       ╚══════════════════════════════════════════════════════════════════╝ -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num blue">3</div>
+      <div class="stage-meta">
+        <div class="stage-label">Etapa 3 · Pipeline Activo</div>
+        <div class="stage-title">Deals Abiertos — Volumen, Valor y Atribución</div>
+        <div class="stage-sub">89 deals activos · ~€53.000 en juego</div>
+      </div>
+    </div>
+    <div class="stage-divider"></div>
+
+    <div class="g4">
+      <div class="kpi-card">
+        <div class="card-top-line blue"></div>
+        <div class="c-label">🔄 Deals abiertos</div>
+        <div class="kpi-n blue">89</div>
+        <div class="kpi-lbl">Pipeline activo total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="card-top-line green"></div>
+        <div class="c-label">💶 Valor pipeline</div>
+        <div class="kpi-n green">~€53k</div>
+        <div class="kpi-lbl">Estimado en juego</div>
+      </div>
+      <div class="kpi-card">
+        <div class="card-top-line amber"></div>
+        <div class="c-label">⚠️ Fechas vencidas</div>
+        <div class="kpi-n amber">~20</div>
+        <div class="kpi-lbl">Deals sin actualizar</div>
+        <span class="kpi-delta d-down">↓ Requieren revisión</span>
+      </div>
+      <div class="kpi-card">
+        <div class="card-top-line"></div>
+        <div class="c-label">📅 Cierre jun 2026</div>
+        <div class="kpi-n accent">12+</div>
+        <div class="kpi-lbl">Con fecha este mes</div>
+      </div>
+    </div>
+
+    <div class="g2 mt">
+
+      <!-- Deals de alto valor -->
+      <div class="card">
+        <div class="card-top-line blue"></div>
+        <div class="c-label">🏆 Deals de alto valor · Canal + Cierre previsto</div>
+        <table>
+          <thead><tr><th>Empresa</th><th>Canal</th><th>Cierre</th><th class="tr">€</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Waynabox</strong> <span class="pill p-amber">⚠️ vencido</span></td><td><span class="pill p-grey">Offline</span></td><td class="tm">Jun 25</td><td class="tr tm" style="color:var(--green)">€13.200</td></tr>
+            <tr><td><strong>Cooltra</strong> <span class="pill p-amber">⚠️ vencido</span></td><td><span class="pill p-grey">Offline</span></td><td class="tm">Mar 26</td><td class="tr tm" style="color:var(--green)">€10.000</td></tr>
+            <tr><td><strong>Redexis</strong> <span class="pill p-amber">⚠️ vencido</span></td><td><span class="pill p-grey">Offline</span></td><td class="tm">May 26</td><td class="tr tm" style="color:var(--green)">€5.000</td></tr>
+            <tr><td><strong>Plenergy</strong> <span class="pill p-amber">⚠️ vencido</span></td><td><span class="pill p-grey">Offline</span></td><td class="tm">May 26</td><td class="tr tm" style="color:var(--green)">€3.000</td></tr>
+            <tr><td><strong>Davante</strong></td><td><span class="pill p-grey">Offline</span></td><td class="tm">Jun 26</td><td class="tr tm" style="color:var(--green)">€2.000</td></tr>
+            <tr><td><strong>GoTrendier</strong> <span class="pill p-amber">⚠️ vencido</span></td><td><span class="pill p-grey">Offline</span></td><td class="tm">Sep 25</td><td class="tr tm" style="color:var(--green)">€2.000</td></tr>
+            <tr><td><strong>Grupo Alsea</strong></td><td><span class="pill p-grey">Offline</span></td><td class="tm">Jun 26</td><td class="tr tm" style="color:var(--green)">€1.500</td></tr>
+            <tr><td><strong>GuruWalk</strong> <span class="pill p-amber">⚠️ vencido</span></td><td><span class="pill p-grey">Offline</span></td><td class="tm">Jul 25</td><td class="tr tm" style="color:var(--green)">€1.800</td></tr>
+          </tbody>
+        </table>
+        <div class="insight danger">Los 4 deals más grandes llevan meses con fecha vencida. Son €31.200 paralizados — esta semana hay que actualizar estado o cerrar.</div>
+      </div>
+
+      <!-- Atribución por canal -->
+      <div class="card">
+        <div class="card-top-line"></div>
+        <div class="c-label">🎯 Atribución de deals por canal</div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Pipeline Consultoría · 200 muestra</div>
+          <div class="bar-list">
+            <div class="bar-row"><span class="bar-lbl">🤝 Offline</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:70.5%"></div></div><span class="bar-val">141</span></div>
+            <div class="bar-row"><span class="bar-lbl">🔗 Directo</span><div class="bar-track"><div class="bar-fill bf-blue" style="width:11%"></div></div><span class="bar-val">22</span></div>
+            <div class="bar-row"><span class="bar-lbl">🔍 Orgánico</span><div class="bar-track"><div class="bar-fill bf-green" style="width:10.5%"></div></div><span class="bar-val">21</span></div>
+            <div class="bar-row"><span class="bar-lbl">📱 Social</span><div class="bar-track"><div class="bar-fill bf-grey" style="width:1%"></div></div><span class="bar-val">2</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:700">Pipeline Freemium · 41 deals</div>
+          <div class="bar-list">
+            <div class="bar-row"><span class="bar-lbl">🤝 Offline</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:75.6%"></div></div><span class="bar-val">31</span></div>
+            <div class="bar-row"><span class="bar-lbl">🔗 Directo</span><div class="bar-track"><div class="bar-fill bf-blue" style="width:7.3%"></div></div><span class="bar-val">3</span></div>
+            <div class="bar-row"><span class="bar-lbl">🔍 Orgánico</span><div class="bar-track"><div class="bar-fill bf-green" style="width:7.3%"></div></div><span class="bar-val">3</span></div>
+            <div class="bar-row"><span class="bar-lbl">💰 Paid Search</span><div class="bar-track"><div class="bar-fill bf-amber" style="width:2.4%"></div></div><span class="bar-val">1</span></div>
+            <div class="bar-row"><span class="bar-lbl">📱 Social</span><div class="bar-track"><div class="bar-fill bf-grey" style="width:2.4%"></div></div><span class="bar-val">1</span></div>
+          </div>
+        </div>
+        <div class="insight">El 100% de deals ganados viene del canal offline. SEO y Directo contribuyen deals pero con menor conversión. Social ya cerró su primer deal (Editorial AltamarMar).</div>
+      </div>
+
+    </div>
+  </div><!-- /stage 3 -->
+
+  <!-- ╔══════════════════════════════════════════════════════════════════╗
+       ║  ETAPA 4 · FREEMIUMS                                           ║
+       ╚══════════════════════════════════════════════════════════════════╝ -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">4</div>
+      <div class="stage-meta">
+        <div class="stage-label">Etapa 4 · Modelo Freemium</div>
+        <div class="stage-title">Freemiums — Volumen, Estado y Activación</div>
+        <div class="stage-sub">41 deals · €51.625 en juego · 3 convertidos</div>
+      </div>
+    </div>
+    <div class="stage-divider"></div>
+
+    <div class="g4">
+      <div class="kpi-card"><div class="card-top-line"></div><div class="c-label">🌱 Totales</div><div class="kpi-n accent">41</div><div class="kpi-lbl">Pipeline freemium</div><span class="kpi-delta d-up">€51.625 en juego</span></div>
+      <div class="kpi-card"><div class="card-top-line green"></div><div class="c-label">✅ Ganados</div><div class="kpi-n green">3</div><div class="kpi-lbl">TBF · VDS · PropHero</div><span class="kpi-delta d-up">€6.500 cerrados</span></div>
+      <div class="kpi-card"><div class="card-top-line amber"></div><div class="c-label">⚡ Sin contactar</div><div class="kpi-n amber">2</div><div class="kpi-lbl">Planeta Huerto · Avantio</div><span class="kpi-delta d-warn">↗ Urgente</span></div>
+      <div class="kpi-card"><div class="card-top-line red"></div><div class="c-label">❌ Perdidos</div><div class="kpi-n red">3</div><div class="kpi-lbl">Billin · Abastores · Carback</div><span class="kpi-delta d-down">€1.375 perdidos</span></div>
+    </div>
+
+    <div class="g2 mt">
+
+      <!-- Funnel de estados freemium -->
+      <div class="card">
+        <div class="card-top-line"></div>
+        <div class="c-label">📊 Estado completo del pipeline freemium</div>
+        <div class="fsteps">
+          <div class="fstep" style="border-left-color:#6366f1"><div class="fs-num">2</div><div class="fs-info"><div class="fs-name">Nuevo (sin contactar)</div><div class="fs-sub">Planeta Huerto · Avantio — recién registrados</div></div><span class="pill p-purple">Urgente</span></div>
+          <div class="fstep s-purple"><div class="fs-num">3</div><div class="fs-info"><div class="fs-name">Activado</div><div class="fs-sub">The Balance Phone · WASHROCKS · Aston Rentals</div></div><div class="fs-val">€825</div></div>
+          <div class="fstep s-purple"><div class="fs-num">1</div><div class="fs-info"><div class="fs-name">En uso activo</div><div class="fs-sub">Frekuent</div></div><div class="fs-val">€1.000</div></div>
+          <div class="fstep s-blue"><div class="fs-num">5</div><div class="fs-info"><div class="fs-name">Contactado</div><div class="fs-sub">Wild Audience · Citring · Zulubox · Bike Ocasión…</div></div><div class="fs-val">€3.000</div></div>
+          <div class="fstep s-purple"><div class="fs-num">5</div><div class="fs-info"><div class="fs-name">En proceso</div><div class="fs-sub">Ciclogreen · Envalia · Sincrolab · Reveni Legal…</div></div><div class="fs-val">€3.000</div></div>
+          <div class="fstep s-amber"><div class="fs-num">2</div><div class="fs-info"><div class="fs-name">Follow-up pendiente</div><div class="fs-sub">TenVinilo · Montesierra</div></div><div class="fs-val">€1.125</div></div>
+          <div class="fstep s-purple"><div class="fs-num">5</div><div class="fs-info"><div class="fs-name">Demo agendada</div><div class="fs-sub">ARPÍAS · OffUgo · GuruWalk · FeelTheCity · Reveni</div></div><div class="fs-val">€6.050</div></div>
+          <div class="fstep s-amber"><div class="fs-num">6</div><div class="fs-info"><div class="fs-name">Propuesta enviada 🔑</div><div class="fs-sub">Waynabox (€13.2k) · MundoMarino · Marinalia…</div></div><div class="fs-val">€15.200</div></div>
+          <div class="fstep" style="border-left-color:#8b5cf6"><div class="fs-num">1</div><div class="fs-info"><div class="fs-name">Negociación</div><div class="fs-sub">InbestMe</div></div><div class="fs-val">€300</div></div>
+          <div class="fstep s-green"><div class="fs-num">3</div><div class="fs-info"><div class="fs-name">✅ Cerrado Ganado</div><div class="fs-sub">TBF ABOGADOS · VDS · PropHero</div></div><div class="fs-val">€6.500</div></div>
+          <div class="fstep s-red"><div class="fs-num">3</div><div class="fs-info"><div class="fs-name">❌ Perdido / Churn</div><div class="fs-sub">Billin · Abastores · Carback</div></div><div class="fs-val">€1.375</div></div>
+        </div>
+        <div class="insight">Waynabox (€13.200) en propuesta lleva meses sin moverse. Es la mayor oportunidad freemium activa. Ticket medio de cierres: €2.167 — el modelo funciona cuando se trabaja.</div>
+      </div>
+
+      <!-- Evolución mensual + banner acción -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="card">
+          <div class="card-top-line"></div>
+          <div class="c-label">📈 Evolución mensual freemiums · Mar 2025 – Jun 2026</div>
+          <div class="trend-h">
+            <div class="th-row"><span class="th-lbl">Mar 25</span><div class="th-bar bf-purple" style="width:calc(4/9*100%)"></div><span class="th-val">4</span></div>
+            <div class="th-row"><span class="th-lbl">Abr 25</span><div class="th-bar bf-grey" style="width:calc(1/9*100%)"></div><span class="th-val">1</span></div>
+            <div class="th-row"><span class="th-lbl">May 25</span><div class="th-bar bf-purple" style="width:calc(2/9*100%)"></div><span class="th-val">2</span></div>
+            <div class="th-row"><span class="th-lbl">Jun 25</span><div class="th-bar bf-grey" style="width:calc(1/9*100%)"></div><span class="th-val">1</span></div>
+            <div class="th-row"><span class="th-lbl">Jul 25</span><div class="th-bar bf-purple" style="width:calc(3/9*100%)"></div><span class="th-val">3</span></div>
+            <div class="th-row"><span class="th-lbl">Ago 25</span><div class="th-bar bf-purple" style="width:calc(2/9*100%)"></div><span class="th-val">2</span></div>
+            <div class="th-row"><span class="th-lbl">Sep 25</span><div class="th-bar bf-purple" style="width:calc(3/9*100%)"></div><span class="th-val">3</span></div>
+            <div class="th-row"><span class="th-lbl">Oct 25</span><div class="th-bar bf-purple" style="width:calc(3/9*100%)"></div><span class="th-val">3</span></div>
+            <div class="th-row"><span class="th-lbl">Nov 25</span><div class="th-bar bf-grey" style="width:calc(1/9*100%)"></div><span class="th-val">1</span></div>
+            <div class="th-row"><span class="th-lbl">Ene 26</span><div class="th-bar bf-grey" style="width:calc(1/9*100%)"></div><span class="th-val">1</span></div>
+            <div class="th-row"><span class="th-lbl">Feb 26</span><div class="th-bar bf-grey" style="width:calc(1/9*100%)"></div><span class="th-val">1</span></div>
+            <div class="th-row"><span class="th-lbl" style="color:var(--guru-300);font-weight:700">Mar 26 🔝</span><div class="th-bar" style="width:100%;background:linear-gradient(90deg,var(--guru-500),#a855f7);box-shadow:0 0 6px rgba(168,85,247,.5)"></div><span class="th-val" style="color:var(--guru-300)">9</span></div>
+            <div class="th-row"><span class="th-lbl">Abr 26</span><div class="th-bar bf-purple" style="width:calc(4/9*100%)"></div><span class="th-val">4</span></div>
+            <div class="th-row"><span class="th-lbl">May 26</span><div class="th-bar bf-purple" style="width:calc(3/9*100%)"></div><span class="th-val">3</span></div>
+            <div class="th-row"><span class="th-lbl">Jun 26</span><div class="th-bar bf-amber" style="width:calc(3/9*100%)"></div><span class="th-val">3</span></div>
+          </div>
+          <div class="insight">Entrada estable de 2–4 freemiums/mes. El cuello de botella no es la captación: es la activación. Solo 3 de 41 han convertido a cliente (7.3%).</div>
+        </div>
+
+        <!-- Banner acción secuencia -->
+        <div class="action-banner">
+          <div class="ab-icon">🚀</div>
+          <div>
+            <div class="ab-label">Próxima Acción · Activación</div>
+            <div class="ab-title">Se va a preparar una <strong style="color:var(--guru-300)">propuesta de secuencia de contenido</strong> para empujar la activación del pipeline freemium — emails, casos de uso reales y valor demostrado, adaptados a cada etapa del funnel.</div>
+            <div class="ab-tags">
+              <span class="pill p-purple">📧 Secuencia de emails</span>
+              <span class="pill p-green">📖 Casos de éxito</span>
+              <span class="pill p-blue">🎯 Por etapa del funnel</span>
+              <span class="pill p-amber">⚡ 36 deals sin cerrar</span>
+            </div>
+            <div class="ab-note"><strong style="color:var(--text-2)">Targets urgentes:</strong> Planeta Huerto · Avantio (nuevos) · Waynabox (€13.2k en propuesta) · Cooltra (€10k SQL)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /stage 4 -->
+
+  <!-- ╔══════════════════════════════════════════════════════════════════╗
+       ║  ETAPA 5 · CIERRE Y REVENUE                                    ║
+       ╚══════════════════════════════════════════════════════════════════╝ -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num green">5</div>
+      <div class="stage-meta">
+        <div class="stage-label">Etapa 5 · Cierre y Revenue</div>
+        <div class="stage-title">Seguimiento de Ventas — Resultados y KPIs de Referencia</div>
+        <div class="stage-sub">Won/Lost · Revenue mensual · Ratios clave</div>
+      </div>
+    </div>
+    <div class="stage-divider"></div>
+
+    <div class="g4">
+      <div class="kpi-card"><div class="card-top-line green"></div><div class="c-label">🏆 Deals ganados</div><div class="kpi-n green">5</div><div class="kpi-lbl">Cerrados won histórico</div><span class="kpi-delta d-up">€5.750 generados</span></div>
+      <div class="kpi-card"><div class="card-top-line red"></div><div class="c-label">📉 Deals perdidos</div><div class="kpi-n red">121</div><div class="kpi-lbl">Cerrados lost histórico</div><span class="kpi-delta d-down">Tasa cierre 4%</span></div>
+      <div class="kpi-card"><div class="card-top-line amber"></div><div class="c-label">💶 Ticket medio won</div><div class="kpi-n amber">€1.150</div><div class="kpi-lbl">Media deals cerrados</div></div>
+      <div class="kpi-card"><div class="card-top-line"></div><div class="c-label">📅 Mejor mes</div><div class="kpi-n accent">€18.8k</div><div class="kpi-lbl">Marzo 2026</div><span class="kpi-delta d-up">↑ Pico histórico</span></div>
+    </div>
+
+    <div class="g2 mt">
+
+      <!-- Revenue mensual -->
+      <div class="card">
+        <div class="card-top-line green"></div>
+        <div class="c-label">📊 Revenue por mes (deals con importe registrado)</div>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-lbl w120">Mar 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(3700/18850*100%)"></div></div><span class="bar-val">€3.7k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Abr 2025</span><div class="bar-track"><div class="bar-fill bf-grey" style="width:calc(850/18850*100%)"></div></div><span class="bar-val">€850</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">May 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(2700/18850*100%)"></div></div><span class="bar-val">€2.7k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Jun 2025 🎯</span><div class="bar-track"><div class="bar-fill bf-blue" style="width:calc(13400/18850*100%)"></div></div><span class="bar-val" style="color:var(--blue)">€13.4k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Jul 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(4900/18850*100%)"></div></div><span class="bar-val">€4.9k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Ago 2025</span><div class="bar-track"><div class="bar-fill bf-grey" style="width:calc(1200/18850*100%)"></div></div><span class="bar-val">€1.2k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Sep 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(3200/18850*100%)"></div></div><span class="bar-val">€3.2k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Oct 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(1750/18850*100%)"></div></div><span class="bar-val">€1.7k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Nov 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(3750/18850*100%)"></div></div><span class="bar-val">€3.7k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Dic 2025</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(2000/18850*100%)"></div></div><span class="bar-val">€2.0k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Ene 2026</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(3125/18850*100%)"></div></div><span class="bar-val">€3.1k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Feb 2026</span><div class="bar-track"><div class="bar-fill bf-grey" style="width:calc(1125/18850*100%)"></div></div><span class="bar-val">€1.1k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120" style="color:var(--guru-300);font-weight:700">Mar 2026 🔝</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,var(--guru-500),#a855f7);box-shadow:0 0 6px rgba(168,85,247,.4)"></div></div><span class="bar-val" style="color:var(--guru-300)">€18.8k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">Abr 2026</span><div class="bar-track"><div class="bar-fill bf-amber" style="width:calc(7250/18850*100%)"></div></div><span class="bar-val" style="color:var(--amber)">€7.2k</span></div>
+          <div class="bar-row"><span class="bar-lbl w120">May 2026</span><div class="bar-track"><div class="bar-fill bf-purple" style="width:calc(3000/18850*100%)"></div></div><span class="bar-val">€3.0k</span></div>
+        </div>
+        <div class="insight">El patrón muestra picos trimestrales: Jun 25, Oct 25, Mar 26 son los meses fuertes. El ritmo sugiere un ciclo de ventas de ~90 días.</div>
+      </div>
+
+      <!-- Won/Lost + KPIs referencia -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="card">
+          <div class="card-top-line green"></div>
+          <div class="c-label">✅ Deals cerrados ganados · Detalle</div>
+          <table>
+            <thead><tr><th>Empresa</th><th>Pipeline</th><th>Canal</th><th class="tr">€</th></tr></thead>
+            <tbody>
+              <tr><td><strong>VDS</strong></td><td><span class="pill p-blue">Freemium</span></td><td>Offline</td><td class="tr tm" style="color:var(--green)">€5.000</td></tr>
+              <tr><td><strong>TBF ABOGADOS</strong></td><td><span class="pill p-blue">Freemium</span></td><td>Offline</td><td class="tr tm" style="color:var(--green)">€750</td></tr>
+              <tr><td><strong>PropHero</strong></td><td><span class="pill p-blue">Freemium</span></td><td>Offline</td><td class="tr tm" style="color:var(--green)">€750</td></tr>
+              <tr><td colspan="3" style="color:var(--muted);font-size:11px">+ 2 deals sin importe registrado</td><td class="tr" style="color:var(--muted)">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-top-line red"></div>
+          <div class="c-label">📊 Ratio comercial histórico</div>
+          <div class="bar-list" style="margin-bottom:14px">
+            <div class="bar-row"><span class="bar-lbl">✅ Won</span><div class="bar-track"><div class="bar-fill bf-green" style="width:4%"></div></div><span class="bar-val" style="color:var(--green)">4%</span></div>
+            <div class="bar-row"><span class="bar-lbl">❌ Lost</span><div class="bar-track"><div class="bar-fill bf-red" style="width:96%"></div></div><span class="bar-val" style="color:var(--red)">96%</span></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-box">
+              <div class="stat-big" style="color:var(--guru-400)">253</div>
+              <div class="stat-lbl">Deals totales histórico</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-big" style="color:var(--green)">€1.150</div>
+              <div class="stat-lbl">Ticket medio won</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-big" style="color:var(--amber)">89</div>
+              <div class="stat-lbl">Pipeline activo abierto</div>
+            </div>
+          </div>
+          <div class="insight danger">La tasa del 4% es baja pero el pipeline de €53k puede multiplicar el revenue si se activan los deals vencidos. 100% de cierres por canal offline — los digitales tienen margen enorme.</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div><!-- /stage 5 -->
+
+  </div><!-- /funnel-content -->
+</div><!-- /funnel-wrap -->
+
+<footer style="text-align:center;padding:24px;color:var(--muted);font-size:11px;border-top:1px solid var(--border-l);background:var(--guru-800);">
+  GuruSup · Radar IA — Datos en tiempo real desde HubSpot CRM · 14 Jun 2026 · Generado automáticamente
+</footer>
+
+</body>
+</html>
