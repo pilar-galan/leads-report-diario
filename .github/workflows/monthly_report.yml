@@ -1,0 +1,62 @@
+name: Monthly Leads Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: 'Inicio del período (ISO)'
+        required: true
+        default: '2026-06-01T00:00:00'
+      end:
+        description: 'Fin del período (ISO)'
+        required: true
+        default: '2026-07-01T00:00:00'
+      output:
+        description: 'Archivo de salida'
+        required: true
+        default: 'dashboard_junio_2026.html'
+      title:
+        description: 'Título del informe'
+        required: true
+        default: 'GuruSup · Informe Mensual · Junio 2026'
+      period:
+        description: 'Texto del período'
+        required: true
+        default: 'Junio 2026 · mes completo'
+      fecha:
+        description: 'Texto de cabecera'
+        required: true
+        default: 'Informe mensual'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-monthly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generar informe mensual con datos de HubSpot
+        env:
+          HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+          GEN_START:  ${{ inputs.start }}
+          GEN_END:    ${{ inputs.end }}
+          GEN_OUTPUT: ${{ inputs.output }}
+          GEN_TITLE:  ${{ inputs.title }}
+          GEN_PERIOD: ${{ inputs.period }}
+          GEN_FECHA:  ${{ inputs.fecha }}
+        run: python3 generate_dashboard.py
+
+      - name: Publicar informe mensual
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.output }}"
+          if git diff --staged --quiet; then
+            echo "Sin cambios en el informe mensual"
+          else
+            git commit -m "chore: informe mensual (${{ inputs.output }})"
+            git push
+          fi

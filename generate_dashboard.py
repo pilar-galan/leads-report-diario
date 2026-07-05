@@ -247,17 +247,33 @@ def main():
     tz_spain = timezone(timedelta(hours=2))
     es_now   = datetime.now(timezone.utc).astimezone(tz_spain)
 
-    today_830 = es_now.replace(hour=8, minute=30, second=0, microsecond=0)
-    days_back = 3 if es_now.weekday() == 0 else 1
-    start     = today_830 - timedelta(days=days_back)
-    start_iso = iso(start)
-    end_iso   = iso(es_now)
+    # Overrides opcionales por variables de entorno (informes ad-hoc, p. ej. mensual)
+    gen_start = os.environ.get("GEN_START")   # ISO, p. ej. 2026-06-01T00:00:00
+    gen_end   = os.environ.get("GEN_END")     # ISO, p. ej. 2026-07-01T00:00:00
+    out_file  = os.environ.get("GEN_OUTPUT", "dashboard_diario.html")
+    title     = os.environ.get("GEN_TITLE",  "GuruSup · Dashboard Diario")
+    period_ov = os.environ.get("GEN_PERIOD")
+    fecha_ov  = os.environ.get("GEN_FECHA")
 
-    fecha_larga = f"{DIAS[es_now.weekday()]}, {es_now.day} de {MESES[es_now.month-1]} de {es_now.year}"
-    periodo_txt = (f"{start.day} {MESES[start.month-1][:3]} {start.strftime('%H:%M')} → "
-                   f"{es_now.day} {MESES[es_now.month-1][:3]} {es_now.strftime('%H:%M')} (hora España)")
-    if es_now.weekday() == 0:
-        periodo_txt += " · incluye fin de semana"
+    if gen_start and gen_end:
+        start  = datetime.fromisoformat(gen_start).replace(tzinfo=tz_spain)
+        es_now = datetime.fromisoformat(gen_end).replace(tzinfo=tz_spain)
+        start_iso = iso(start)
+        end_iso   = iso(es_now)
+        fecha_larga = fecha_ov or "Informe mensual"
+        periodo_txt = period_ov or (f"{start.day} {MESES[start.month-1][:3]} → "
+                                    f"{es_now.day} {MESES[es_now.month-1][:3]} {es_now.year}")
+    else:
+        today_830 = es_now.replace(hour=8, minute=30, second=0, microsecond=0)
+        days_back = 3 if es_now.weekday() == 0 else 1
+        start     = today_830 - timedelta(days=days_back)
+        start_iso = iso(start)
+        end_iso   = iso(es_now)
+        fecha_larga = f"{DIAS[es_now.weekday()]}, {es_now.day} de {MESES[es_now.month-1]} de {es_now.year}"
+        periodo_txt = (f"{start.day} {MESES[start.month-1][:3]} {start.strftime('%H:%M')} → "
+                       f"{es_now.day} {MESES[es_now.month-1][:3]} {es_now.strftime('%H:%M')} (hora España)")
+        if es_now.weekday() == 0:
+            periodo_txt += " · incluye fin de semana"
 
     win_filters = [
         {"propertyName": "createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
@@ -388,6 +404,7 @@ def main():
         chan_dist[d["channel"]] = chan_dist.get(d["channel"], 0) + 1
 
     data = {
+        "title": title,
         "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
@@ -402,7 +419,7 @@ def main():
     }
 
     html = render(data)
-    with open("dashboard_diario.html", "w", encoding="utf-8") as f:
+    with open(out_file, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"OK · contactos={total} leads={n_lead} sql={n_sql} free={n_free} "
           f"reuniones={n_meetings} deals_mkt={len(mkt_deals)} imports={imports} tests={tests}")
@@ -485,6 +502,7 @@ def render(d):
                                sorted(d["chan_dist"].items(), key=lambda x: -x[1])) or "—"
 
     return TEMPLATE.format(
+        title=esc(d["title"]),
         fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
         n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
@@ -502,7 +520,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GuruSup · Dashboard Diario</title>
+<title>{title}</title>
 <style>
 :root {{
   --guru-900:#0a0618; --guru-800:#110e2a; --guru-500:#FF6B5B; --guru-400:#E55A4C; --guru-300:#FAE5DC;
@@ -658,12 +676,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="header-inner">
     <div class="logo-box">GS</div>
     <div class="header-title">
-      <h1>GuruSup · Dashboard Diario</h1>
+      <h1>{title}</h1>
       <p>{fecha_larga} · {periodo_txt}</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
   </div>
-  <div class="sync-bar">Datos de las últimas 24h · generado el {generado}</div>
+  <div class="sync-bar">Datos del período · generado el {generado}</div>
 </div>
 
 <div class="main">
