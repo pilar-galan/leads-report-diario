@@ -2,8 +2,8 @@ name: Daily Leads Report
 
 on:
   schedule:
-    # Genera el dashboard a las 8:30h España (06:30 UTC verano)
-    - cron: '30 6 * * 1-5'
+    # Genera el dashboard a las 8:00h España todos los días (06:00 UTC verano)
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
