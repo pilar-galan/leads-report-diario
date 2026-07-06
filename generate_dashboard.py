@@ -667,20 +667,21 @@ def render(d):
       <div class="fc-label">Reuniones agendadas</div>
       <div class="fc-value">{d["n_meetings"]}</div>
       <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total"><strong>{pct(d["n_meetings"], d["n_sql"])}</strong> conversión desde SQL Consultoría Demo</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-purple">
       <div class="fc-label">Oportunidades</div>
       <div class="fc-value">{d["n_opps_generated"]}</div>
       <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total">{d["opps_generated_companies"]}</div>
+      <div class="fc-opp-total"><strong>{pct(d["n_opps_generated"], d["n_meetings"])}</strong> conversión desde Reuniones agendadas</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-green">
       <div class="fc-label">Clientes</div>
       <div class="fc-value">{d["n_clients_generated"]}</div>
       <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total">{d["clients_generated_companies"]}</div>
+      <div class="fc-opp-total"><strong>{pct(d["n_clients_generated"], d["n_opps_generated"])}</strong> conversión desde Oportunidades</div>
     </div>
   </div>
 
