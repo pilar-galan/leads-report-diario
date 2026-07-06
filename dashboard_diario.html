@@ -43,6 +43,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .f-c-default { --fc:var(--guru-500); --fv:var(--text); }
 .f-c-orange { --fc:var(--orange); --fv:var(--orange); }
 .f-c-green { --fc:var(--green); --fv:var(--green); }
+.f-c-purple { --fc:#a78bfa; --fv:#a78bfa; }
 
 .channels-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
 @media(max-width:900px){ .channels-grid { grid-template-columns:repeat(3,1fr); } }
@@ -161,61 +162,68 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     <div class="logo-box">GS</div>
     <div class="header-title">
       <h1>GuruSup · Dashboard Diario</h1>
-      <p>Lunes, 6 de julio de 2026 · 3 jul 08:00 → 6 jul 09:45 (hora España) · incluye fin de semana</p>
+      <p>Lunes, 6 de julio de 2026 · 3 jul 08:00 → 6 jul 13:20 (hora España) · incluye fin de semana</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
   </div>
-  <div class="sync-bar">Datos del período · generado el 06 Jul 2026 · 09:45</div>
+  <div class="sync-bar">Datos del período · generado el 06 Jul 2026 · 13:20</div>
 </div>
 
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · 3 jul 08:00 → 6 jul 09:45 (hora España) · incluye fin de semana</div>
+  <div class="section-label">Embudo de conversión · 3 jul 08:00 → 6 jul 13:20 (hora España) · incluye fin de semana</div>
   <div class="funnel">
     <div class="f-card f-c-default">
       <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">39</div>
+      <div class="fc-value">41</div>
       <div class="fc-sub">Total del período</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-default">
       <div class="fc-label">Leads</div>
-      <div class="fc-value">15</div>
-      <div class="fc-sub">38% del total de contactos</div>
+      <div class="fc-value">16</div>
+      <div class="fc-sub">39% del total de contactos</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-orange">
       <div class="fc-label">SQL Consultoría</div>
       <div class="fc-value">17</div>
-      <div class="fc-sub">44% del total de contactos</div>
+      <div class="fc-sub">41% del total de contactos</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-default">
       <div class="fc-label">Freemium</div>
-      <div class="fc-value">8</div>
-      <div class="fc-sub">21% del total de contactos</div>
+      <div class="fc-value">10</div>
+      <div class="fc-sub">24% del total de contactos</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-green">
       <div class="fc-label">Reuniones agendadas</div>
-      <div class="fc-value">1</div>
+      <div class="fc-value">2</div>
       <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total"><strong>Daniel</strong> <span style="opacity:.7">(SEO Orgánico)</span></div>
+      <div class="fc-opp-total"><strong>Daniel</strong> <span style="opacity:.7">(SEO Orgánico)</span> · <strong>Cerdá Group</strong> <span style="opacity:.7">(Google Ads)</span></div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-purple">
+      <div class="fc-label">Oportunidades generadas</div>
+      <div class="fc-value">0</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total">—</div>
     </div>
   </div>
 
-  <div class="section-label">Canales de adquisición · 39 contactos</div>
-  <div class="channels-grid"><div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">11</div><div class="ch-label">Google Ads</div><div class="ch-pct">28% del total</div><div class="ch-sql">🎯 11 SQL</div></div>
-<div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">9</div><div class="ch-label">Social Ads</div><div class="ch-pct">23% del total</div><div class="ch-sql">🎯 1 SQL</div></div>
-<div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">8</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">21% del total</div><div class="ch-sql">🎯 4 SQL</div></div>
-<div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">8</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">21% del total</div><div class="ch-sql">🎯 1 SQL</div></div>
-<div class="ch-card" style="--chc:#64748b"><div class="ch-icon">•</div><div class="ch-num">3</div><div class="ch-label">Otros</div><div class="ch-pct">8% del total</div><div class="ch-sql">🎯 0 SQL</div></div>
+  <div class="section-label">Canales de adquisición · 41 contactos</div>
+  <div class="channels-grid"><div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">11</div><div class="ch-label">Google Ads</div><div class="ch-pct">27% del total</div><div class="ch-sql">🎯 11 SQL</div></div>
+<div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">9</div><div class="ch-label">Social Ads</div><div class="ch-pct">22% del total</div><div class="ch-sql">🎯 1 SQL</div></div>
+<div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">9</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">22% del total</div><div class="ch-sql">🎯 1 SQL</div></div>
+<div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">8</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">20% del total</div><div class="ch-sql">🎯 4 SQL</div></div>
+<div class="ch-card" style="--chc:#64748b"><div class="ch-icon">•</div><div class="ch-num">4</div><div class="ch-label">Otros</div><div class="ch-pct">10% del total</div><div class="ch-sql">🎯 0 SQL</div></div>
 <div class="ch-card" style="--chc:#22d3ee;opacity:.45"><div class="ch-icon">💬</div><div class="ch-num">0</div><div class="ch-label">Chat web</div><div class="ch-pct">— del total</div><div class="ch-sql">🎯 0 SQL</div></div>
 <div class="ch-card" style="--chc:#ec4899;opacity:.45"><div class="ch-icon">🎪</div><div class="ch-num">0</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">— del total</div><div class="ch-sql">🎯 0 SQL</div></div>
 <div class="ch-card" style="--chc:#22c55e;opacity:.45"><div class="ch-icon">🌱</div><div class="ch-num">0</div><div class="ch-label">Social orgánico</div><div class="ch-pct">— del total</div><div class="ch-sql">🎯 0 SQL</div></div>
 </div>
 
-  <div class="section-label">Leads en revisión de ventas · 39 contactos</div>
+  <div class="section-label">Leads en revisión de ventas · 41 contactos</div>
   <div class="card" style="padding:16px 20px;">
     <div class="alert alert-green" style="margin:0 0 12px;align-items:flex-start;">
       <span>🎯</span>
@@ -229,8 +237,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     <div style="font-size:12px;color:var(--text);opacity:.85;padding:2px 4px 12px;line-height:1.55;">
       ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
     </div>
-    <div class="rev-blocks"><div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">3</div><div class="rb-name">Ya gestionado</div><div class="rb-desc">2 lead · 1 SQL</div></div>
-<div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">35</div><div class="rb-name">Pendiente de revisión</div><div class="rb-desc">13 lead · 15 SQL · 7 freem</div></div>
+    <div class="rev-blocks"><div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">20</div><div class="rb-name">Ya gestionado</div><div class="rb-desc">5 lead · 15 SQL</div></div>
+<div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">20</div><div class="rb-name">Pendiente de revisión</div><div class="rb-desc">11 lead · 1 SQL · 8 freem</div></div>
 <div class="rev-block" style="--rbc:var(--blue);opacity:.4"><div class="rb-num">0</div><div class="rb-name">En revisión</div></div>
 <div class="rev-block" style="--rbc:var(--orange);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Aceptado para gestión comercial</div></div>
 <div class="rev-block" style="--rbc:var(--guru-400)"><div class="rb-num">1</div><div class="rb-name">Duplicado</div><div class="rb-desc">1 SQL</div></div>
@@ -241,6 +249,14 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 
   <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
 
+  <div class="section-label">Llamadas y previsión · seguimiento comercial</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks">
+      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">14</div><div class="rb-name">Llamadas registradas</div><div class="rb-desc">11 completadas · HubSpot Calls</div></div>
+      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">14</div><div class="rb-name">Previsión de llamadas</div><div class="rb-desc">SQL pendientes de contactar · de 17 del período</div></div>
+    </div>
+  </div>
+
   <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
   <div class="card">
     <div class="card-header">
@@ -249,7 +265,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     </div>
     <table class="table">
       <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
-      <tbody><tr><td><strong>Ander</strong></td><td>Grupo Iparbaiw S.L. · <em>Google Ads</em></td><td><span class="pill pill-demo">Freemium</span></td></tr><tr><td><strong>Alvaro</strong></td><td>Almaf creación y desarrollo sl · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ramón</strong></td><td>Todas · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Pau</strong></td><td>Especia delivery · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Sara</strong></td><td>Delaight · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Rosario Rodríguez Cañas</strong></td><td>Pensionista · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Maria Jaume</strong></td><td>DENTAL DRA JAUME SLP · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Leopoldina</strong></td><td>Personas · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Violeta</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>alae</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Isidro Fernández</strong></td><td>Ayuntamiento de Oviedo · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>suhas</strong></td><td>nuvo aeon diamonds · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Brayam</strong></td><td>1031168220 · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>José Hernández</strong></td><td>Centro Universitario Trilingüe · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Elmer</strong></td><td>personal · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Senén</strong></td><td>— · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Alok</strong></td><td>Okp · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr></tbody>
+      <tbody><tr><td><strong>Ander</strong></td><td>Grupo Iparbaiw S.L. · <em>Google Ads</em></td><td><span class="pill pill-demo">Freemium</span></td></tr><tr><td><strong>Alvaro</strong></td><td>Almaf creación y desarrollo sl · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ramón</strong></td><td>Todas · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Pau</strong></td><td>Especia delivery · <em>Google Ads</em></td><td><span class="pill pill-demo">Freemium</span></td></tr><tr><td><strong>Sara</strong></td><td>Delaight · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Rosario Rodríguez Cañas</strong></td><td>Pensionista · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Maria Jaume</strong></td><td>DENTAL DRA JAUME SLP · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Leopoldina</strong></td><td>Personas · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Violeta</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>alae</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">No califica</span></td></tr><tr><td><strong>Isidro Fernández</strong></td><td>Ayuntamiento de Oviedo · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>suhas</strong></td><td>nuvo aeon diamonds · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Brayam</strong></td><td>1031168220 · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>José Hernández</strong></td><td>Centro Universitario Trilingüe · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Elmer</strong></td><td>personal · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Senén</strong></td><td>— · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Alok</strong></td><td>Okp · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr></tbody>
     </table>
     <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
       <span>💡</span>
@@ -258,7 +274,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
       <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
       <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
       <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
-      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. El estado de llamada íntegro se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
+      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. Llamadas registradas vía HubSpot Calls (no vinculadas 1:1 a cada SQL aún).</span></div>
     </div>
   </div>
 
@@ -287,7 +303,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </div>
 
   <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 06 Jul 2026 · 09:45 (hora España)
+    GuruSup · Dashboard Diario · generado el 06 Jul 2026 · 13:20 (hora España)
   </div>
 
 </div>
