@@ -511,6 +511,7 @@ def render(d):
         group = by_stage.get(st_id, [])
         if not group:
             continue
+        group = sorted(group, key=lambda x: x["channel"])  # agrupar por canal dentro de la etapa
         deal_rows += f'<tr class="stage-divider"><td colspan="3">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
             new_tag = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
