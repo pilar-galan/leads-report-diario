@@ -65,17 +65,6 @@ REV_META = [
     ("Test",                            "var(--muted)"),
 ]
 
-# ── Estado del lead (propiedad hs_lead_status) — value -> (label, color, desc) ──
-LEAD_STATE_META = [
-    ("UNQUALIFIED",          "Lead frío",       "var(--blue)",     "Sin cualificar aún"),
-    ("ATTEMPTED_TO_CONTACT", "Lead caliente",   "var(--amber)",    "Intento de contacto"),
-    ("OPEN",                 "En contacto",     "var(--guru-400)", "Conversación abierta"),
-    ("OPEN_DEAL",            "En negociación",  "var(--orange)",   "Oportunidad en curso"),
-    ("usuario_free",         "Prueba Gratuita", "var(--guru-300)", "Usando la plataforma"),
-    ("cliente",              "Cliente",         "var(--green)",    "Convertido a cliente"),
-    ("Mareado",              "Mareado",         "var(--muted)",    "Sin avance claro"),
-]
-
 # ── Canales de adquisición fijos (siempre visibles aunque estén a 0) ──
 FIXED_CHANNELS = {
     "Social Ads":         {"n": 0, "icon": "📣", "color": "#a855f7", "lc": {}},
@@ -168,12 +157,42 @@ def is_internal(email):
     return (email or "").endswith("@gurusup.com")
 
 
+def is_valid_deal(name):
+    n = (name or "").lower()
+    return ("@" not in n and "[duplicado]" not in n
+            and not n.rstrip().endswith("new deal") and "- new deal" not in n)
+
+
+def clean_deal_name(name):
+    n = re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', name or "", flags=re.I)
+    return n.strip()
+
+
 def esc(t):
     return str(t).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def pct(n, base):
     return f"{round(n/base*100)}%" if base else "—"
+
+
+# ─────────────────────────── Llamadas ───────────────────────────
+def fetch_calls_summary(start_iso, end_iso):
+    """
+    Llamadas registradas en la ventana (objeto Calls de HubSpot).
+    Devuelve {total, completed, outbound}. Defensivo: si falla, ceros.
+    """
+    try:
+        calls = fetch_all("calls", [
+            {"propertyName": "hs_timestamp", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+        ], ["hs_call_status", "hs_call_direction"])
+    except Exception as err:
+        print(f"  calls search error: {err}")
+        return {"total": 0, "completed": 0, "outbound": 0}
+    total     = len(calls)
+    completed = sum(1 for c in calls if c["properties"].get("hs_call_status") == "COMPLETED")
+    outbound  = sum(1 for c in calls if c["properties"].get("hs_call_direction") == "OUTBOUND")
+    return {"total": total, "completed": completed, "outbound": outbound}
 
 
 # ─────────────────────────── Reuniones de marketing ───────────────────────────
@@ -235,6 +254,74 @@ def fetch_marketing_meetings(start_iso, end_iso):
                 continue
             seen.add(key)
             out.append({"company": company, "channel": label})
+    return out
+
+
+def fetch_deal_company(deal_id):
+    """Nombre de la empresa asociada a un deal (o None si no tiene)."""
+    try:
+        ca = api_get(f"/crm/v4/objects/deals/{deal_id}/associations/companies")
+        coids = [r["toObjectId"] for r in ca.get("results", [])]
+        if coids:
+            co = api_get(f"/crm/v3/objects/companies/{coids[0]}?properties=name")
+            nm = co.get("properties", {}).get("name")
+            if nm:
+                return nm.strip()
+    except Exception:
+        pass
+    return None
+
+
+def fetch_deal_contact_company(deal_id):
+    """Fallback: empresa (texto) o nombre del contacto asociado a un deal."""
+    try:
+        ca = api_get(f"/crm/v4/objects/deals/{deal_id}/associations/contacts")
+        cids = [r["toObjectId"] for r in ca.get("results", [])]
+        if cids:
+            c = api_get(f"/crm/v3/objects/contacts/{cids[0]}?properties=company,firstname")
+            cp = c.get("properties", {})
+            return (cp.get("company") or "").strip() or (cp.get("firstname") or "").strip()
+    except Exception:
+        pass
+    return None
+
+
+def fetch_generated_opportunities(start_iso, end_iso, is_valid_deal, clean_deal_name):
+    """
+    Oportunidades (deals) creadas en la ventana, de canales de marketing,
+    con independencia de si siguen abiertas. Devuelve lista de dicts
+    {company, channel} para el KPI del embudo superior.
+    """
+    out = []
+    try:
+        deals = fetch_all("deals", [
+            {"propertyName": "pipeline", "operator": "EQ", "value": "default"},
+            {"propertyName": "createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+        ], ["dealname", "hs_analytics_source", "hs_analytics_source_data_1", "createdate"])
+    except Exception as err:
+        print(f"  generated-opportunities search error: {err}")
+        return out
+
+    seen = set()
+    for dl in deals:
+        p = dl["properties"]
+        name = p.get("dealname", "")
+        if not is_valid_deal(name):
+            continue
+        src = p.get("hs_analytics_source") or ""
+        d1  = p.get("hs_analytics_source_data_1") or ""
+        if is_import(src, d1) or not is_marketing(src, d1):
+            continue
+        label, _, _ = classify_channel(src, d1)
+        company = fetch_deal_company(dl["id"])
+        if not company:
+            company = fetch_deal_contact_company(dl["id"])
+        company = (company or clean_deal_name(name) or "Sin empresa").strip() or "Sin empresa"
+        key = f"{company.lower()}|{label}|{dl['id']}"
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"company": company, "channel": label})
     return out
 
 
@@ -337,13 +424,6 @@ def main():
     for l in real:
         lc_counts[l["lc"]] = lc_counts.get(l["lc"], 0) + 1
 
-    # Estado del lead (hs_lead_status)
-    lead_state_counts = {}
-    for l in real:
-        if l["lead_state"]:
-            lead_state_counts[l["lead_state"]] = lead_state_counts.get(l["lead_state"], 0) + 1
-    n_lead_estado = sum(lead_state_counts.values())
-
     # Tabla de SQL para "Llamadas"
     sql_rows = []
     for l in real:
@@ -352,6 +432,9 @@ def main():
             name = l["firstname"] or (l["email"].split("@")[0] if l["email"] else "—")
             sql_rows.append({"name": name, "company": l["company"],
                              "channel": label, "state": l["sql_state"] or "Pendiente"})
+
+    n_sql_pendientes = sum(1 for r in sql_rows if r["state"] == "Pendiente")
+    calls_summary = fetch_calls_summary(start_iso, end_iso)
 
     # Reuniones de marketing (auto)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -368,15 +451,6 @@ def main():
     all_deals = fetch_all("deals", deal_filters,
                           ["dealname", "dealstage", "createdate",
                            "hs_analytics_source", "hs_analytics_source_data_1"])
-
-    def is_valid_deal(name):
-        n = (name or "").lower()
-        return ("@" not in n and "[duplicado]" not in n
-                and not n.rstrip().endswith("new deal") and "- new deal" not in n)
-
-    def clean_deal_name(name):
-        n = re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', name or "", flags=re.I)
-        return n.strip()
 
     mkt_deals = []
     for dl in all_deals:
@@ -404,15 +478,23 @@ def main():
     for d in mkt_deals:
         chan_dist[d["channel"]] = chan_dist.get(d["channel"], 0) + 1
 
+    # Oportunidades generadas en el período (abiertas o cerradas), solo marketing
+    generated_opps = fetch_generated_opportunities(start_iso, end_iso, is_valid_deal, clean_deal_name)
+    n_opps_generated = len(generated_opps)
+    opps_generated_companies = " · ".join(
+        f"<strong>{esc(o['company'])}</strong> <span style=\"opacity:.7\">({esc(o['channel'])})</span>"
+        for o in generated_opps) or "—"
+
     data = {
         "title": title,
         "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
+        "n_opps_generated": n_opps_generated, "opps_generated_companies": opps_generated_companies,
         "channels": channels, "rev_counts": rev_counts, "lc_counts": lc_counts,
-        "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
+        "n_sql_pendientes": n_sql_pendientes, "calls_summary": calls_summary,
         "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
         "nuevos_ids": {d["id"] for d in nuevos_deals}, "chan_dist": chan_dist,
         "imports": imports, "tests": tests, "internal": internal,
@@ -462,16 +544,6 @@ def render(d):
     if not lc_blocks:
         lc_blocks = '<div class="rb-desc" style="color:var(--muted)">Sin datos de ciclo de vida</div>'
 
-    # Estado del lead
-    lead_blocks = ""
-    for value, label, color, desc in LEAD_STATE_META:
-        n = d["lead_state_counts"].get(value, 0)
-        dim = "" if n > 0 else ";opacity:.4"
-        lead_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
-                        f'<div class="rb-num">{n}</div>'
-                        f'<div class="rb-name">{esc(label)}</div>'
-                        f'<div class="rb-desc">{esc(desc)}</div></div>\n')
-
     # Tabla llamadas
     if d["sql_rows"]:
         call_rows = ""
@@ -502,16 +574,21 @@ def render(d):
     chan_dist_txt = " · ".join(f"{n} {esc(lbl)}" for lbl, n in
                                sorted(d["chan_dist"].items(), key=lambda x: -x[1])) or "—"
 
+    cs = d["calls_summary"]
+
     return TEMPLATE.format(
         title=esc(d["title"]),
         fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
         n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
         n_meetings=d["n_meetings"], meeting_companies=d["meeting_companies"],
-        ch_cards=ch_cards, rev_blocks=rev_blocks, lc_blocks=lc_blocks, lead_blocks=lead_blocks,
-        n_lead_estado=d["n_lead_estado"], call_rows=call_rows, deal_rows=deal_rows,
+        n_opps_generated=d["n_opps_generated"], opps_generated_companies=d["opps_generated_companies"],
+        ch_cards=ch_cards, rev_blocks=rev_blocks, lc_blocks=lc_blocks,
+        call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=len(d["mkt_deals"]), nuevos_deals=d["nuevos_deals"],
         demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
+        n_calls=cs["total"], n_calls_completed=cs["completed"],
+        n_sql_pendientes=d["n_sql_pendientes"], n_sql_total=len(d["sql_rows"]),
         generado=esc(d["generado"]),
     )
 
@@ -561,6 +638,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .f-c-default {{ --fc:var(--guru-500); --fv:var(--text); }}
 .f-c-orange {{ --fc:var(--orange); --fv:var(--orange); }}
 .f-c-green {{ --fc:var(--green); --fv:var(--green); }}
+.f-c-purple {{ --fc:#a78bfa; --fv:#a78bfa; }}
 
 .channels-grid {{ display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }}
 @media(max-width:900px){{ .channels-grid {{ grid-template-columns:repeat(3,1fr); }} }}
@@ -719,6 +797,13 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="fc-sub">de canales de marketing</div>
       <div class="fc-opp-total">{meeting_companies}</div>
     </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-purple">
+      <div class="fc-label">Oportunidades generadas</div>
+      <div class="fc-value">{n_opps_generated}</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total">{opps_generated_companies}</div>
+    </div>
   </div>
 
   <div class="section-label">Canales de adquisición · {total} contactos</div>
@@ -743,14 +828,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="rev-blocks">{lc_blocks}</div>
   </div>
 
-  <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
-
-  <div class="section-label">Estado del lead · {n_lead_estado} con estado</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">{lead_blocks}</div>
-  </div>
-
   <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
+
+  <div class="section-label">Llamadas y previsión · seguimiento comercial</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks">
+      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">{n_calls}</div><div class="rb-name">Llamadas registradas</div><div class="rb-desc">{n_calls_completed} completadas · HubSpot Calls</div></div>
+      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">{n_sql_pendientes}</div><div class="rb-name">Previsión de llamadas</div><div class="rb-desc">SQL pendientes de contactar · de {n_sql_total} del período</div></div>
+    </div>
+  </div>
 
   <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
   <div class="card">
@@ -769,7 +855,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
       <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
       <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
-      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. El estado de llamada íntegro se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
+      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. Llamadas registradas vía HubSpot Calls (no vinculadas 1:1 a cada SQL aún).</span></div>
     </div>
   </div>
 
