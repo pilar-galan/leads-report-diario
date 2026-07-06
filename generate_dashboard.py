@@ -355,6 +355,7 @@ def main():
             name = l["firstname"] or (l["email"].split("@")[0] if l["email"] else "—")
             sql_rows.append({"name": name, "company": l["company"],
                              "channel": label, "state": l["sql_state"] or "Pendiente"})
+    sql_rows.sort(key=lambda r: r["channel"])
 
     # Reuniones de marketing (auto)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -744,8 +745,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
     </div>
     <div class="rev-blocks">{rev_blocks}</div>
-    <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px;">Por etapa del ciclo de vida</div>
-    <div class="rev-blocks">{lc_blocks}</div>
   </div>
 
   <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
