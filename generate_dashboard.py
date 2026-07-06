@@ -42,6 +42,18 @@ LC_LABELS = {
     "customer":               "Cliente",
 }
 
+# ── Etapa del ciclo de vida (lifecyclestage) — value -> (label, color) ──
+LC_META = [
+    ("subscriber",            "Suscriptor",      "var(--muted)"),
+    ("lead",                  "Lead",            "var(--guru-500)"),
+    ("marketingqualifiedlead","MQL",             "var(--blue)"),
+    ("salesqualifiedlead",    "SQL-Consultoría", "var(--orange)"),
+    ("1378463825",            "Freemium",        "var(--guru-400)"),
+    ("opportunity",           "Oportunidad",     "var(--green)"),
+    ("customer",              "Cliente",         "var(--green)"),
+    ("other",                 "Otra etapa",      "var(--muted)"),
+]
+
 # ── Revisión ventas (propiedad revision_ventas) — orden y color ──
 REV_META = [
     ("Ya gestionado",                   "var(--green)"),
@@ -76,7 +88,7 @@ FIXED_CHANNELS = {
 }
 
 
-# ───────────────────────── HubSpot API ────────────────────────
+# ────────────────────────── HubSpot API ──────────────────────────
 def api_post(path, payload):
     req = urllib.request.Request(
         BASE + path,
@@ -116,7 +128,7 @@ def iso(dt):
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-# ───────────────────────── Clasificadores ────────────────────────
+# ────────────────────────── Clasificadores ──────────────────────────
 def classify_channel(src, d1):
     """Devuelve (label, icon, color) alineado con la taxonomía de marketing."""
     d1 = d1 or ""
@@ -165,7 +177,7 @@ def pct(n, base):
     return f"{round(n/base*100)}%" if base else "—"
 
 
-# ───────────────────────── Reuniones de marketing ────────────────────────
+# ────────────────────────── Reuniones de marketing ──────────────────────────
 def fetch_marketing_meetings(start_iso, end_iso):
     """
     Reuniones creadas en la ventana cuyo contacto asociado entró por un canal
@@ -227,7 +239,7 @@ def fetch_marketing_meetings(start_iso, end_iso):
     return out
 
 
-# ───────────────────────── Main ────────────────────────
+# ────────────────────────── Main ──────────────────────────
 def main():
     if not TOKEN:
         print("ERROR: falta HUBSPOT_TOKEN", file=sys.stderr)
@@ -317,11 +329,24 @@ def main():
             chan[fc_label] = dict(fc_data)
     channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
-    # Revisión ventas
+    # Revisión ventas (con desglose por etapa: lead / SQL / freemium)
     rev_counts = {}
+    rev_lc = {}
     for l in real:
         key = l["rev"] if l["rev"] else "Pendiente de revisión"
         rev_counts[key] = rev_counts.get(key, 0) + 1
+        b = rev_lc.setdefault(key, {"lead": 0, "sql": 0, "free": 0})
+        if l["lc"] == "salesqualifiedlead":
+            b["sql"] += 1
+        elif l["lc"] == "1378463825" or l["sql_state"] == "Freemium":
+            b["free"] += 1
+        else:
+            b["lead"] += 1
+
+    # Etapa del ciclo de vida
+    lc_counts = {}
+    for l in real:
+        lc_counts[l["lc"]] = lc_counts.get(l["lc"], 0) + 1
 
     # Estado del lead (hs_lead_status)
     lead_state_counts = {}
@@ -397,7 +422,7 @@ def main():
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
-        "channels": channels, "rev_counts": rev_counts,
+        "channels": channels, "rev_counts": rev_counts, "rev_lc": rev_lc, "lc_counts": lc_counts,
         "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
         "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
@@ -432,9 +457,29 @@ def render(d):
     for key, color in REV_META:
         n = d["rev_counts"].get(key, 0)
         dim = "" if n > 0 else ";opacity:.4"
+        bd = d.get("rev_lc", {}).get(key, {})
+        parts = []
+        if bd.get("lead"): parts.append(f'{bd["lead"]} lead')
+        if bd.get("sql"):  parts.append(f'{bd["sql"]} SQL')
+        if bd.get("free"): parts.append(f'{bd["free"]} freem')
+        desc = f'<div class="rb-desc">{" · ".join(parts)}</div>' if (n > 0 and parts) else ''
         rev_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
                        f'<div class="rb-num">{n}</div>'
-                       f'<div class="rb-name">{esc(key)}</div></div>\n')
+                       f'<div class="rb-name">{esc(key)}</div>{desc}</div>\n')
+
+    # Etapa del ciclo de vida (solo etapas con contactos)
+    lc_blocks = ""
+    known = {m[0] for m in LC_META if m[0] != "other"}
+    other_n = sum(n for k, n in d["lc_counts"].items() if k and k not in known)
+    for value, label, color in LC_META:
+        n = other_n if value == "other" else d["lc_counts"].get(value, 0)
+        if n == 0:
+            continue
+        lc_blocks += (f'<div class="rev-block" style="--rbc:{color}">'
+                      f'<div class="rb-num">{n}</div>'
+                      f'<div class="rb-name">{esc(label)}</div></div>\n')
+    if not lc_blocks:
+        lc_blocks = '<div class="rb-desc" style="color:var(--muted)">Sin datos de ciclo de vida</div>'
 
     # Estado del lead
     lead_blocks = ""
@@ -466,6 +511,7 @@ def render(d):
         group = by_stage.get(st_id, [])
         if not group:
             continue
+        group = sorted(group, key=lambda x: x["channel"])  # agrupar por canal dentro de la etapa
         deal_rows += f'<tr class="stage-divider"><td colspan="3">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
             new_tag = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
@@ -482,7 +528,7 @@ def render(d):
         total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
         n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
         n_meetings=d["n_meetings"], meeting_companies=d["meeting_companies"],
-        ch_cards=ch_cards, rev_blocks=rev_blocks, lead_blocks=lead_blocks,
+        ch_cards=ch_cards, rev_blocks=rev_blocks, lc_blocks=lc_blocks, lead_blocks=lead_blocks,
         n_lead_estado=d["n_lead_estado"], call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=len(d["mkt_deals"]), nuevos_deals=d["nuevos_deals"],
         demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
