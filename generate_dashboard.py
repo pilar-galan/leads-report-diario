@@ -437,6 +437,7 @@ def main():
     n_lead = sum(1 for l in real if l["lc"] == "lead")
     n_sql  = sum(1 for l in real if l["lc"] == "salesqualifiedlead")
     n_free = sum(1 for l in real if l["lc"] == "1378463825" or l["sql_state"] == "Freemium")
+    n_free_advanced = sum(1 for l in real if l["sql_state"] == "Freemium" and l["lc"] in ("opportunity", "customer"))
 
     # Canales
     chan = {}
@@ -544,7 +545,7 @@ def main():
     data = {
         "title": title, "is_monthly": is_monthly,
         "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
-        "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
+        "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free, "n_free_advanced": n_free_advanced,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
         "n_opps_generated": n_opps_generated, "opps_generated_companies": opps_generated_companies,
@@ -784,6 +785,37 @@ def render(d):
     </div>
   </div>"""
 
+    rev_intro = f"""  <div class="section-label">Leads en revisión de ventas · {d["total"]} contactos</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="alert alert-green" style="margin:0 0 12px;align-items:flex-start;">
+      <span>🎯</span>
+      <div>
+        <strong style="color:var(--guru-300);">La prioridad de revisión son los SQL Consultoría</strong> —contactos que han <strong>pedido una demo</strong>. Orden de prioridad de ventas:
+        <br>• <strong style="color:var(--text-2);">Máxima prioridad: SQL de Paid</strong> — pagamos por ellos y traen intención, pero el coste es alto, así que hay que <strong>sacar conclusiones para optimizar las campañas</strong>.
+        <br>• <strong style="color:var(--text-2);">Siguiente prioridad: SQL del resto de canales</strong> (siempre que sean SQL).
+        <br>• Cuando haya <strong>teléfono de contacto, se les llama en los primeros 15 minutos</strong>.
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text);opacity:.85;padding:2px 4px 12px;line-height:1.55;">
+      ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
+    </div>"""
+
+    if d["is_monthly"]:
+        if d["n_free_advanced"] > 0:
+            free_note = (f'🧪 De los <strong>{d["n_free"]} freemium</strong> del período, '
+                         f'<strong>{d["n_free_advanced"]} ha{"n" if d["n_free_advanced"] != 1 else ""} pasado a Oportunidad o Cliente</strong>.')
+        else:
+            free_note = f'🧪 De los <strong>{d["n_free"]} freemium</strong> del período, <strong>ninguno ha pasado a Oportunidad o Cliente</strong> todavía.'
+        rev_section = rev_intro + f"""
+    <div style="font-size:12px;color:var(--text);opacity:.85;padding:2px 4px 0;line-height:1.55;">
+      {free_note}
+    </div>
+  </div>"""
+    else:
+        rev_section = rev_intro + f"""
+    <div class="rev-blocks">{rev_blocks}</div>
+  </div>"""
+
     return TEMPLATE.format(
         title=esc(d["title"]),
         fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
@@ -797,7 +829,7 @@ def render(d):
         demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
         n_calls=cs["total"], n_calls_completed=cs["completed"],
         n_sql_pendientes=d["n_sql_pendientes"], n_sql_total=len(d["sql_rows"]),
-        funnel_section=funnel_section, calls_section=calls_section,
+        funnel_section=funnel_section, calls_section=calls_section, rev_section=rev_section,
         generado=esc(d["generado"]),
     )
 
@@ -983,22 +1015,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Canales de adquisición · {total} contactos</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="section-label">Leads en revisión de ventas · {total} contactos</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="alert alert-green" style="margin:0 0 12px;align-items:flex-start;">
-      <span>🎯</span>
-      <div>
-        <strong style="color:var(--guru-300);">La prioridad de revisión son los SQL Consultoría</strong> —contactos que han <strong>pedido una demo</strong>. Orden de prioridad de ventas:
-        <br>• <strong style="color:var(--text-2);">Máxima prioridad: SQL de Paid</strong> — pagamos por ellos y traen intención, pero el coste es alto, así que hay que <strong>sacar conclusiones para optimizar las campañas</strong>.
-        <br>• <strong style="color:var(--text-2);">Siguiente prioridad: SQL del resto de canales</strong> (siempre que sean SQL).
-        <br>• Cuando haya <strong>teléfono de contacto, se les llama en los primeros 15 minutos</strong>.
-      </div>
-    </div>
-    <div style="font-size:12px;color:var(--text);opacity:.85;padding:2px 4px 12px;line-height:1.55;">
-      ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
-    </div>
-    <div class="rev-blocks">{rev_blocks}</div>
-  </div>
+{rev_section}
 
 {calls_section}
 
