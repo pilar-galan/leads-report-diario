@@ -570,14 +570,20 @@ def render(d):
     ch_cards = ""
     for label, c in d["channels"]:
         p = pct(c["n"], d["total"]) if c["n"] > 0 else "—"
-        sql = c.get("sql", 0)
+        lc = c.get("lc", {})
+        breakdown = " · ".join(part for part in [
+            f'{lc.get("Lead", 0)} leads' if lc.get("Lead") else "",
+            f'{lc.get("SQL-Consultoría", 0)} SQL' if lc.get("SQL-Consultoría") else "",
+            f'{lc.get("Freemium", 0)} freemium' if lc.get("Freemium") else "",
+            f'{lc.get("Oportunidad", 0)} oport.' if lc.get("Oportunidad") else "",
+        ] if part) or "—"
         dim = "" if c["n"] > 0 else ";opacity:.45"
         ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}{dim}">'
                      f'<div class="ch-icon">{c["icon"]}</div>'
                      f'<div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
                      f'<div class="ch-pct">{p} del total</div>'
-                     f'<div class="ch-sql">🎯 {sql} SQL</div></div>\n')
+                     f'<div class="ch-breakdown">{esc(breakdown)}</div></div>\n')
 
     # Revisión ventas
     rev_blocks = ""
@@ -641,7 +647,33 @@ def render(d):
 
     cs = d["calls_summary"]
 
-    # Embudo(s): informe mensual separa comercial y producto/freemium; el diario mantiene el embudo único.
+    # Embudo de producto · Freemium: directo desde contactos creados (no pasa por Leads,
+    # que es una etapa mixta de consultoría). Compartido entre informe diario y mensual.
+    freemium_funnel = f"""  <div class="section-label" style="margin-top:20px;">
+    <span class="funnel-row-label" style="text-transform:none;letter-spacing:normal;font-size:12px;">
+      Embudo de producto · Freemium
+    </span>
+  </div>
+  <div class="funnel funnel-row">
+    <div class="f-card f-c-default">
+      <div class="fc-label">Contactos creados</div>
+      <div class="fc-value">{d["total"]}</div>
+      <div class="fc-sub">Total del período</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Freemium</div>
+      <div class="fc-value">{d["n_free"]}</div>
+      <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
+    </div>
+  </div>
+  <div class="alert alert-muted" style="margin-top:10px;margin-bottom:0;">
+    <span>⚙️</span>
+    <div>Estos contactos freemium se están tratando con acciones de automatizaciones; vamos a ver cómo se reactivan las cuentas.</div>
+  </div>"""
+
+    # Embudo(s): comercial (consultoría, vía SQL) y producto/freemium van siempre separados,
+    # tanto en el informe diario como en el mensual.
     if d["is_monthly"]:
         funnel_section = f"""  <div class="section-label">Embudo comercial · {esc(d["periodo_txt"])}</div>
   <div class="funnel funnel-row">
@@ -685,38 +717,10 @@ def render(d):
     </div>
   </div>
 
-  <div class="section-label" style="margin-top:20px;">
-    <span class="funnel-row-label" style="text-transform:none;letter-spacing:normal;font-size:12px;">
-      Embudo de producto · Freemium
-      <span class="badge badge-amber">🧪 En definición</span>
-    </span>
-  </div>
-  <div class="funnel funnel-row">
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">{d["total"]}</div>
-      <div class="fc-sub">Total del período</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">{d["n_lead"]}</div>
-      <div class="fc-sub">{d["pct_lead"]} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">{d["n_free"]}</div>
-      <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
-    </div>
-  </div>
-  <div class="alert alert-muted" style="margin-top:10px;margin-bottom:0;">
-    <span>ℹ️</span>
-    <div>El proceso de producto/freemium está en definición: en cuanto haya oportunidades, reuniones o clientes que vengan del uso freemium, se añadirán como pasos adicionales de este embudo.</div>
-  </div>"""
+{freemium_funnel}"""
     else:
-        funnel_section = f"""  <div class="section-label">Embudo de conversión · {esc(d["periodo_txt"])}</div>
-  <div class="funnel">
+        funnel_section = f"""  <div class="section-label">Embudo comercial · {esc(d["periodo_txt"])}</div>
+  <div class="funnel funnel-row">
     <div class="f-card f-c-default">
       <div class="fc-label">Contactos creados</div>
       <div class="fc-value">{d["total"]}</div>
@@ -735,12 +739,6 @@ def render(d):
       <div class="fc-sub">{d["pct_sql"]} del total de contactos</div>
     </div>
     <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">{d["n_free"]}</div>
-      <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
     <div class="f-card f-c-green">
       <div class="fc-label">Reuniones agendadas</div>
       <div class="fc-value">{d["n_meetings"]}</div>
@@ -754,7 +752,9 @@ def render(d):
       <div class="fc-sub">de canales de marketing</div>
       <div class="fc-opp-total">{d["opps_generated_companies"]}</div>
     </div>
-  </div>"""
+  </div>
+
+{freemium_funnel}"""
 
     if d["is_monthly"]:
         calls_section = ""
@@ -864,7 +864,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .ch-num {{ font-size:30px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }}
 .ch-label {{ font-size:11px; font-weight:600; color:var(--text-2); margin-top:4px; }}
 .ch-pct {{ font-size:11px; color:var(--muted); margin-top:2px; }}
-.ch-sql {{ font-size:12px; font-weight:800; color:var(--orange); margin-top:5px; }}
+.ch-breakdown {{ font-size:10.5px; color:var(--muted); margin-top:5px; line-height:1.4; }}
 
 .rev-blocks {{ display:flex; gap:10px; flex-wrap:wrap; }}
 .rev-block {{ flex:1; min-width:130px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; }}
