@@ -699,12 +699,6 @@ def render(d):
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">{d["n_lead"]}</div>
-      <div class="fc-sub">{d["pct_lead"]} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
       <div class="fc-label">Freemium</div>
       <div class="fc-value">{d["n_free"]}</div>
       <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
