@@ -329,11 +329,19 @@ def main():
             chan[fc_label] = dict(fc_data)
     channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
-    # Revisión ventas
+    # Revisión ventas (con desglose por etapa: lead / SQL / freemium)
     rev_counts = {}
+    rev_lc = {}
     for l in real:
         key = l["rev"] if l["rev"] else "Pendiente de revisión"
         rev_counts[key] = rev_counts.get(key, 0) + 1
+        b = rev_lc.setdefault(key, {"lead": 0, "sql": 0, "free": 0})
+        if l["lc"] == "salesqualifiedlead":
+            b["sql"] += 1
+        elif l["lc"] == "1378463825" or l["sql_state"] == "Freemium":
+            b["free"] += 1
+        else:
+            b["lead"] += 1
 
     # Etapa del ciclo de vida
     lc_counts = {}
@@ -414,7 +422,7 @@ def main():
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
-        "channels": channels, "rev_counts": rev_counts, "lc_counts": lc_counts,
+        "channels": channels, "rev_counts": rev_counts, "rev_lc": rev_lc, "lc_counts": lc_counts,
         "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
         "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
@@ -449,9 +457,15 @@ def render(d):
     for key, color in REV_META:
         n = d["rev_counts"].get(key, 0)
         dim = "" if n > 0 else ";opacity:.4"
+        bd = d.get("rev_lc", {}).get(key, {})
+        parts = []
+        if bd.get("lead"): parts.append(f'{bd["lead"]} lead')
+        if bd.get("sql"):  parts.append(f'{bd["sql"]} SQL')
+        if bd.get("free"): parts.append(f'{bd["free"]} freem')
+        desc = f'<div class="rb-desc">{" · ".join(parts)}</div>' if (n > 0 and parts) else ''
         rev_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
                        f'<div class="rb-num">{n}</div>'
-                       f'<div class="rb-name">{esc(key)}</div></div>\n')
+                       f'<div class="rb-name">{esc(key)}</div>{desc}</div>\n')
 
     # Etapa del ciclo de vida (solo etapas con contactos)
     lc_blocks = ""
