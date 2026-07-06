@@ -67,6 +67,25 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .card-title { font-size:14px; font-weight:700; color:var(--text); }
 .badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.04em; }
 .badge-green { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
+.badge-amber { background:rgba(245,158,11,.15); color:var(--amber); border:1px solid rgba(245,158,11,.3); }
+.funnel-row { margin-bottom:10px; }
+.funnel-row-label { font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.cmp-wrap { display:flex; flex-direction:column; gap:10px; }
+.cmp-row { display:grid; grid-template-columns:120px 1fr 46px; align-items:center; gap:10px; }
+.cmp-label { font-size:12px; font-weight:600; color:var(--text-2); }
+.cmp-bars { display:flex; flex-direction:column; gap:4px; }
+.cmp-bar-track { background:rgba(255,255,255,.04); border-radius:5px; height:16px; position:relative; overflow:hidden; }
+.cmp-bar-fill { height:100%; border-radius:5px; display:flex; align-items:center; }
+.cmp-bar-fill.may { background:var(--muted); }
+.cmp-bar-fill.jun { background:var(--guru-500); }
+.cmp-bar-val { font-size:10px; font-weight:700; color:#fff; padding-left:6px; white-space:nowrap; }
+.cmp-delta { font-size:12px; font-weight:700; text-align:right; }
+.cmp-delta.up { color:var(--green); }
+.cmp-delta.down { color:var(--red); }
+.cmp-legend { display:flex; gap:16px; font-size:11px; color:var(--muted); margin-bottom:12px; }
+.cmp-legend span { display:flex; align-items:center; gap:5px; }
+.cmp-dot { width:9px; height:9px; border-radius:2px; display:inline-block; }
+.cmp-stats { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
 .table { width:100%; border-collapse:collapse; }
 .table th { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 12px 10px 0; text-align:left; border-bottom:1px solid var(--border); }
 .table td { font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); vertical-align:middle; }
@@ -170,8 +189,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · Junio 2026 · mes completo</div>
-  <div class="funnel">
+  <div class="section-label">Embudo comercial · Junio 2026 · mes completo</div>
+  <div class="funnel funnel-row">
     <div class="f-card f-c-default">
       <div class="fc-label">Contactos creados</div>
       <div class="fc-value">535</div>
@@ -185,9 +204,49 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-orange">
-      <div class="fc-label">SQL Consultoría</div>
+      <div class="fc-label">SQL Consultoría Demo</div>
       <div class="fc-value">75</div>
       <div class="fc-sub">14% del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Reuniones agendadas</div>
+      <div class="fc-value">32</div>
+      <div class="fc-sub">de canales de marketing</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-purple">
+      <div class="fc-label">Oportunidades</div>
+      <div class="fc-value">11</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total"><strong>Brava Nails</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>COS Global Services</strong> <span style="opacity:.7">(App / Freemium)</span> · <strong>Centro Médico Lámar</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>DVD Dental Solution</strong> <span style="opacity:.7">(Eventos / Campañas)</span> · <strong>Estiro</strong> <span style="opacity:.7">(SEO Orgánico)</span> · <strong>Factorydea</strong> <span style="opacity:.7">(SEO Orgánico) · cerrada perdida</span> · <strong>Moon Tenerife</strong> <span style="opacity:.7">(Tráfico directo) · cerrada perdida</span> · <strong>Netberry</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>Sector Vending</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>Weekendesk</strong> <span style="opacity:.7">(Eventos / Campañas)</span> · <strong>Grupo Asesban</strong> <span style="opacity:.7">(Tráfico directo)</span></div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Clientes</div>
+      <div class="fc-value">9</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total"><strong>Altamar</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Altamar</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Altamar</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Edelvives</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Flywire</strong> <span style="opacity:.7">(Chat web)</span> · <strong>Flywire</strong> <span style="opacity:.7">(Chat web)</span> · <strong>Bike Ocasión</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Gotrendier</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Ciclogreen</strong> <span style="opacity:.7">(Chat web)</span></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:20px;">
+    <span class="funnel-row-label" style="text-transform:none;letter-spacing:normal;font-size:12px;">
+      Embudo de producto · Freemium
+      <span class="badge badge-amber">🧪 En definición</span>
+    </span>
+  </div>
+  <div class="funnel funnel-row">
+    <div class="f-card f-c-default">
+      <div class="fc-label">Contactos creados</div>
+      <div class="fc-value">535</div>
+      <div class="fc-sub">Total del período</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Leads</div>
+      <div class="fc-value">330</div>
+      <div class="fc-sub">62% del total de contactos</div>
     </div>
     <div class="f-arrow"></div>
     <div class="f-card f-c-default">
@@ -195,20 +254,10 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
       <div class="fc-value">110</div>
       <div class="fc-sub">21% del total de contactos</div>
     </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-green">
-      <div class="fc-label">Reuniones agendadas</div>
-      <div class="fc-value">32</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total"><strong>69cd288edb417de44becec5a</strong> <span style="opacity:.7">(SEO Orgánico)</span> · <strong>69a9ca3f2a300d5294c5eeff</strong> <span style="opacity:.7">(Chat web)</span> · <strong>67b38c12cef06db5e6086aec</strong> <span style="opacity:.7">(Chat web)</span> · <strong>69f864de52eda4257cf5d40e</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Álvaro</strong> <span style="opacity:.7">(Chat web)</span> · <strong>697cdb55a13cc461febdba94</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Wild Audience</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Fan</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Grupo asesban</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>6811eade21ee7e172849f071</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>69b1879dd523c0562cca259b</strong> <span style="opacity:.7">(Chat web)</span> · <strong>67e28337d7ef6e6fe3293d19</strong> <span style="opacity:.7">(Chat web)</span> · <strong>Adeslas</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>69f89f6c2a18ef8e9faa19bd</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>debora</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Dencanto Community</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>69f9ae9d94b4f1cbb6dd6888</strong> <span style="opacity:.7">(App / Freemium)</span> · <strong>Marina</strong> <span style="opacity:.7">(Chat web)</span> · <strong>Saleem</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Jose Luis</strong> <span style="opacity:.7">(Eventos / Campañas)</span> · <strong>69ef332c2bb7ce809a879531</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>Factorydea</strong> <span style="opacity:.7">(SEO Orgánico)</span> · <strong>distribucionmayorista.online</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>69df5542070db8320442fb57</strong> <span style="opacity:.7">(SEO Orgánico)</span> · <strong>Netberry</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>REMAX</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>CENTRO MEDICO LAMAR SL</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>Laura</strong> <span style="opacity:.7">(Chat web)</span> · <strong>Daniel</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>Zynap</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>697b87f424879a46395c4a7d</strong> <span style="opacity:.7">(Chat web)</span> · <strong>68d2a8d9aaa3ca95f7aa9e6e</strong> <span style="opacity:.7">(Tráfico directo)</span></div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-purple">
-      <div class="fc-label">Oportunidades generadas</div>
-      <div class="fc-value">11</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total"><strong>Brava Nails</strong> <span style="opacity:.7">(Tráfico directo)</span> · <strong>COS Global Services</strong> <span style="opacity:.7">(App / Freemium)</span> · <strong>Centro Médico Lámar</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>DVD Dental Solution</strong> <span style="opacity:.7">(Eventos / Campañas)</span> · <strong>Estiro</strong> <span style="opacity:.7">(SEO Orgánico)</span> · <strong>Factorydea</strong> <span style="opacity:.7">(SEO Orgánico) · cerrada perdida</span> · <strong>Moon Tenerife</strong> <span style="opacity:.7">(Tráfico directo) · cerrada perdida</span> · <strong>Netberry</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>Sector Vending</strong> <span style="opacity:.7">(Google Ads)</span> · <strong>Weekendesk</strong> <span style="opacity:.7">(Eventos / Campañas)</span> · <strong>Grupo Asesban</strong> <span style="opacity:.7">(Tráfico directo)</span></div>
-    </div>
+  </div>
+  <div class="alert alert-muted" style="margin-top:10px;margin-bottom:0;">
+    <span>ℹ️</span>
+    <div>El proceso de producto/freemium está en definición: en cuanto haya oportunidades, reuniones o clientes que vengan del uso freemium, se añadirán como pasos adicionales de este embudo.</div>
   </div>
 
   <div class="section-label">Canales de adquisición · 535 contactos</div>
@@ -222,6 +271,94 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 <div class="ch-card" style="--chc:#a78bfa"><div class="ch-icon">🤝</div><div class="ch-num">3</div><div class="ch-label">Referido</div><div class="ch-pct">1% · 2 sql-consultoría · 1 freemium</div></div>
 <div class="ch-card" style="--chc:#22c55e"><div class="ch-icon">🌱</div><div class="ch-num">2</div><div class="ch-label">Social orgánico</div><div class="ch-pct">0% · 2 lead</div></div>
 </div>
+
+  <div class="section-label">Comparativa de canales · Mayo → Junio 2026</div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Adquisición por canal y su evolución a SQL y oportunidades</span>
+      <span class="badge badge-green">Junio vs Mayo</span>
+    </div>
+    <div class="cmp-legend">
+      <span><span class="cmp-dot" style="background:var(--muted)"></span>Mayo 2026</span>
+      <span><span class="cmp-dot" style="background:var(--guru-500)"></span>Junio 2026</span>
+    </div>
+    <div class="cmp-wrap">
+      <div class="cmp-row">
+        <div class="cmp-label">🔗 Tráfico directo</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:100%"><span class="cmp-bar-val">Mayo 620</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:52%"><span class="cmp-bar-val">Junio 321</span></div></div>
+        </div>
+        <div class="cmp-delta down">-48%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">🌿 SEO Orgánico</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:100%"><span class="cmp-bar-val">Mayo 109</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:72%"><span class="cmp-bar-val">Junio 78</span></div></div>
+        </div>
+        <div class="cmp-delta down">-28%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">🔍 Google Ads</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:23%"><span class="cmp-bar-val">Mayo 15</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:100%"><span class="cmp-bar-val">Junio 65</span></div></div>
+        </div>
+        <div class="cmp-delta up">+333%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">📣 Social Ads</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:19%"><span class="cmp-bar-val">Mayo 9</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:100%"><span class="cmp-bar-val">Junio 47</span></div></div>
+        </div>
+        <div class="cmp-delta up">+422%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">💬 Chat web</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:100%"><span class="cmp-bar-val">Mayo 30</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:47%"><span class="cmp-bar-val">Junio 14</span></div></div>
+        </div>
+        <div class="cmp-delta down">-53%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">🎪 Eventos / Camp.</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:60%"><span class="cmp-bar-val">Mayo 3</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:100%"><span class="cmp-bar-val">Junio 5</span></div></div>
+        </div>
+        <div class="cmp-delta up">+67%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">🤝 Referido</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:67%"><span class="cmp-bar-val">Mayo 2</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:100%"><span class="cmp-bar-val">Junio 3</span></div></div>
+        </div>
+        <div class="cmp-delta up">+50%</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-label">🌱 Social orgánico</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-track"><div class="cmp-bar-fill may" style="width:100%"><span class="cmp-bar-val">Mayo 3</span></div></div>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill jun" style="width:67%"><span class="cmp-bar-val">Junio 2</span></div></div>
+        </div>
+        <div class="cmp-delta down">-33%</div>
+      </div>
+    </div>
+    <div class="cmp-stats">
+      <div class="rev-block" style="--rbc:var(--guru-500)"><div class="rb-num">800 → 535</div><div class="rb-name">Contactos totales</div><div class="rb-desc">-33% (mayo tuvo más volumen de tráfico directo/SEO sin cualificar)</div></div>
+      <div class="rev-block" style="--rbc:var(--orange)"><div class="rb-num">3 → 75</div><div class="rb-name">SQL alcanzados</div><div class="rb-desc">Fuerte mejora en cualificación en junio</div></div>
+      <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">7 → 11</div><div class="rb-name">Oportunidades de marketing</div><div class="rb-desc">+57% vs mayo</div></div>
+    </div>
+    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
+      <span>ℹ️</span>
+      <div><strong style="color:var(--guru-300);">Lectura:</strong> en junio se apostó fuerte por <strong>paid (Google Ads +333%, Social Ads +422%)</strong> mientras bajó el volumen de tráfico directo, SEO y chat web (leads menos cualificados de forma orgánica). El resultado: muchos menos contactos totales pero muchos más SQL y oportunidades — la calidad de la adquisición mejoró notablemente.
+      <br><span style="color:var(--muted);font-size:11px;">Contactos y SQL de mayo recalculados a fecha de hoy con la misma metodología (SQL = alcanzó alguna vez la etapa SQL); los de junio corresponden al snapshot mensual generado el 1 de julio. Puede haber pequeño desfase por sincronizaciones retroactivas de HubSpot.</span></div>
+    </div>
+  </div>
 
   <div class="section-label">Leads en revisión de ventas · 535 contactos</div>
   <div class="card" style="padding:16px 20px;">
@@ -256,37 +393,6 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 </div>
   </div>
 
-  <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
-
-  <div class="section-label">Llamadas y previsión · seguimiento comercial</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">
-      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">46</div><div class="rb-name">Llamadas registradas</div><div class="rb-desc">46 completadas · HubSpot Calls</div></div>
-      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">73</div><div class="rb-name">Previsión de llamadas</div><div class="rb-desc">SQL pendientes de contactar · de 75 del período</div></div>
-    </div>
-  </div>
-
-  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">SQL Consultoría del período · empresa, canal y estado</span>
-      <span class="badge badge-green">📞 Seguimiento comercial</span>
-    </div>
-    <table class="table">
-      <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
-      <tbody><tr><td><strong>Bruno</strong></td><td>Garsa · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Jesús</strong></td><td>REMAX · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ángel</strong></td><td>distribucionmayorista.online · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Daria Kowalska</strong></td><td>e · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Sandra</strong></td><td>Pick &amp; Stone · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Juan</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Eusebio</strong></td><td>M&amp;M SOLUCIONES, S. L. · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Fernando</strong></td><td>Byte Factory · <em>Google Ads</em></td><td><span class="pill pill-demo">Freemium</span></td></tr><tr><td><strong>paola sanchez</strong></td><td>Einer Villarreal · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Adrián</strong></td><td>Factorydea · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Víctor Mollá</strong></td><td>— · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Fran</strong></td><td>RK Inmuebles Valencianos · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Marina</strong></td><td>Incapto · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Marina</strong></td><td>Marina · <em>Referido</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>LAURA</strong></td><td>call center · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Idk</strong></td><td>VTSBS · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Oriol Agusti Blanch</strong></td><td>Zynap · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>José A. Reina</strong></td><td>ATECSAL · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Camilo</strong></td><td>— · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Bea</strong></td><td>SpainU · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Hamid</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Tamara</strong></td><td>iProperty · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Maria</strong></td><td>Sompopo · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>DJALMA</strong></td><td>CONNECT TELECOM LTDA · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Juan</strong></td><td>Avantis · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Caterina aina</strong></td><td>Clinica font · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Pilar</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ads Concierge | Social Ads Manager</strong></td><td>Compremarket / The Social Audience · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>XAVIER</strong></td><td>ARNIOL SL · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Manuel</strong></td><td>Eucalypro Group · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>asd</strong></td><td>asd · <em>App / Freemium</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Bernardo Jaime</strong></td><td>Gotrendier · <em>Eventos / Campañas</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Alejandro Gómez de la Almena</strong></td><td>Rocklab · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Paco Sanmartín</strong></td><td>PS Inmobiliaria · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>administracion</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>yaswanth s</strong></td><td>— · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>hadish.bekuretsion</strong></td><td>— · <em>App / Freemium</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>6</strong></td><td>— · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>ARM</strong></td><td>testemar · <em>App / Freemium</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Edgar</strong></td><td>Remax Arena · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Pedro</strong></td><td>Consorcio Mediterraneo Comercio Internacional S.L · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>CARLOS</strong></td><td>GRUPO IPARBAIW S.L · <em>Google Ads</em></td><td><span class="pill pill-demo">Freemium</span></td></tr><tr><td><strong>Tvmb</strong></td><td>RGS · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Luis José</strong></td><td>Brial · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Zohaib Hassan</strong></td><td>Asoftware · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Vitaly</strong></td><td>Liderstars S.L · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Sami SEBAI</strong></td><td>AIR LIQUIDE MEXICO · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Silvia</strong></td><td>Carzon · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Bala</strong></td><td>Nephostack · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Rohit</strong></td><td>Iam going to the open a grocery stor for online · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>DEISY MARTINEZ</strong></td><td>CASA DIRECT SL · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Alfa caceres inmobiliaria</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>CRISTINA</strong></td><td>Esteve Pharmaceuticals · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>JONATHAN</strong></td><td>kosac consultores sl · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>nmorenocampos12.nmc</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ana</strong></td><td>El cerezal · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>NACHO</strong></td><td>Mono walgreens s.l. · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Sondomendo</strong></td><td>sondomendo@gmail.com · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Manuel</strong></td><td>TuServicioLegal legaltech sl · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ezra Jipron</strong></td><td>Jamana stationery · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Jose Joaquín</strong></td><td>De Rojas abogados · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>01703914014</strong></td><td>Condy boy · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Luis</strong></td><td>ia4ever · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Tomas</strong></td><td>Urmachome · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>limra</strong></td><td>Limra doğal taş · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Ingenieria y desarrollo energetico Solar</strong></td><td>INGENIERIA Y DESARROLLO ENERGETICO SOLAR S.L · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Tomas</strong></td><td>Debod Properties · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Rishikesh</strong></td><td>jbmpl · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Elena Pajuelo Vazquez</strong></td><td>Elena Pajuelo Matrona · <em>Tráfico directo</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Martín</strong></td><td>Sephora · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Juan Carlos</strong></td><td>www.rasolenia.com · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Nancy Tenenuela</strong></td><td>Templo Consulting Inmobiliaria SL · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Marcia</strong></td><td>Marcia · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>nelson</strong></td><td>nelo · <em>Referido</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Luis</strong></td><td>Creditoportucoche · <em>Social Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr></tbody>
-    </table>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>💡</span>
-      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
-      <br>• <strong>Brand = intención alta</strong>: los SQL de campaña de marca avanzan rápido a oportunidad/demo.
-      <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
-      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
-      <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
-      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. Llamadas registradas vía HubSpot Calls (no vinculadas 1:1 a cada SQL aún).</span></div>
-    </div>
-  </div>
-
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
     <div class="card-header">
@@ -297,7 +403,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
     <table class="table" id="emp-table">
       <thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
-      <tbody><tr class="stage-divider"><td colspan="3">Discovery · 2 deals</td></tr><tr data-name="greyfinch"><td><strong>Greyfinch</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong> <span class="new-tag">NUEVO</span></td><td>🔗 Tráfico directo</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr class="stage-divider"><td colspan="3">Demo / Reunión · 14 deals</td></tr><tr data-name="mizubath"><td><strong>Mizubath</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="xtrim"><td><strong>Xtrim</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dencanto community"><td><strong>Dencanto Community</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="plenergy"><td><strong>Plenergy</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="meit"><td><strong>Meit</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="som mobilitat"><td><strong>Som Mobilitat</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="cos global services"><td><strong>COS Global Services</strong> <span class="new-tag">NUEVO</span></td><td>⚡ App / Freemium</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong> <span class="new-tag">NUEVO</span></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="brava nails"><td><strong>Brava Nails</strong> <span class="new-tag">NUEVO</span></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dvd dental solution"><td><strong>DVD DENTAL SOLUTION</strong> <span class="new-tag">NUEVO</span></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="estiro"><td><strong>Estiro</strong> <span class="new-tag">NUEVO</span></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="netberry"><td><strong>Netberry</strong> <span class="new-tag">NUEVO</span></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="sector vending"><td><strong>Sector Vending</strong> <span class="new-tag">NUEVO</span></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="centro médico lámar"><td><strong>Centro Médico Lámar</strong> <span class="new-tag">NUEVO</span></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr></tbody>
+      <tbody><tr class="stage-divider"><td colspan="3">Discovery · 2 deals</td></tr><tr data-name="greyfinch"><td><strong>Greyfinch</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong> <span class="new-tag">NUEVO</span></td><td>🔗 Tráfico directo</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr class="stage-divider"><td colspan="3">Demo / Reunión · 14 deals</td></tr><tr data-name="cos global services"><td><strong>COS Global Services</strong> <span class="new-tag">NUEVO</span></td><td>⚡ App / Freemium</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong> <span class="new-tag">NUEVO</span></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dvd dental solution"><td><strong>DVD DENTAL SOLUTION</strong> <span class="new-tag">NUEVO</span></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="netberry"><td><strong>Netberry</strong> <span class="new-tag">NUEVO</span></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="sector vending"><td><strong>Sector Vending</strong> <span class="new-tag">NUEVO</span></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="centro médico lámar"><td><strong>Centro Médico Lámar</strong> <span class="new-tag">NUEVO</span></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="mizubath"><td><strong>Mizubath</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="xtrim"><td><strong>Xtrim</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="plenergy"><td><strong>Plenergy</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="meit"><td><strong>Meit</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="estiro"><td><strong>Estiro</strong> <span class="new-tag">NUEVO</span></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dencanto community"><td><strong>Dencanto Community</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="som mobilitat"><td><strong>Som Mobilitat</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="brava nails"><td><strong>Brava Nails</strong> <span class="new-tag">NUEVO</span></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr></tbody>
     </table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
     <div class="rev-blocks" style="margin-top:16px;">

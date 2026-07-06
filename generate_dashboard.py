@@ -326,6 +326,42 @@ def fetch_generated_opportunities(start_iso, end_iso, is_valid_deal, clean_deal_
     return out
 
 
+def fetch_generated_clients(start_iso, end_iso):
+    """
+    Contactos que pasaron a Cliente en la ventana y entraron por un canal
+    de marketing. Devuelve lista de dicts {company, channel}.
+    """
+    out = []
+    try:
+        contacts = fetch_all("contacts", [
+            {"propertyName": "createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+            {"propertyName": "lifecyclestage", "operator": "EQ", "value": "customer"},
+        ], ["email", "firstname", "company", "hs_analytics_source", "hs_analytics_source_data_1"])
+    except Exception as err:
+        print(f"  generated-clients search error: {err}")
+        return out
+
+    seen = set()
+    for c in contacts:
+        p = c["properties"]
+        src = p.get("hs_analytics_source") or ""
+        d1  = p.get("hs_analytics_source_data_1") or ""
+        if not is_marketing(src, d1):
+            continue
+        label, _, _ = classify_channel(src, d1)
+        company = (p.get("company") or "").strip()
+        if not company:
+            email = p.get("email") or ""
+            company = (email.split("@")[-1].split(".")[0].capitalize() if "@" in email
+                       else p.get("firstname") or "Sin empresa")
+        key = f"{company.lower()}|{label}|{c['id']}"
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"company": company, "channel": label})
+    return out
+
+
 # ────────────────────────── Main ──────────────────────────
 def main():
     if not TOKEN:
@@ -342,6 +378,8 @@ def main():
     title     = os.environ.get("GEN_TITLE",  "GuruSup · Dashboard Diario")
     period_ov = os.environ.get("GEN_PERIOD")
     fecha_ov  = os.environ.get("GEN_FECHA")
+
+    is_monthly = bool(gen_start and gen_end)
 
     if gen_start and gen_end:
         start  = datetime.fromisoformat(gen_start).replace(tzinfo=tz_spain)
@@ -446,7 +484,7 @@ def main():
     sql_rows.sort(key=lambda r: r["channel"])
 
     n_sql_pendientes = sum(1 for r in sql_rows if r["state"] == "Pendiente")
-    calls_summary = fetch_calls_summary(start_iso, end_iso)
+    calls_summary = {"total": 0, "completed": 0, "outbound": 0} if is_monthly else fetch_calls_summary(start_iso, end_iso)
 
     # Reuniones de marketing (auto)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -490,20 +528,27 @@ def main():
     for d in mkt_deals:
         chan_dist[d["channel"]] = chan_dist.get(d["channel"], 0) + 1
 
-    # Oportunidades generadas en el período (abiertas o cerradas), solo marketing
+    # Oportunidades y clientes generados en el período, solo marketing (embudo comercial)
     generated_opps = fetch_generated_opportunities(start_iso, end_iso, is_valid_deal, clean_deal_name)
     n_opps_generated = len(generated_opps)
     opps_generated_companies = " · ".join(
         f"<strong>{esc(o['company'])}</strong> <span style=\"opacity:.7\">({esc(o['channel'])})</span>"
         for o in generated_opps) or "—"
 
+    generated_clients = fetch_generated_clients(start_iso, end_iso) if is_monthly else []
+    n_clients_generated = len(generated_clients)
+    clients_generated_companies = " · ".join(
+        f"<strong>{esc(o['company'])}</strong> <span style=\"opacity:.7\">({esc(o['channel'])})</span>"
+        for o in generated_clients) or "—"
+
     data = {
-        "title": title,
+        "title": title, "is_monthly": is_monthly,
         "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
         "n_opps_generated": n_opps_generated, "opps_generated_companies": opps_generated_companies,
+        "n_clients_generated": n_clients_generated, "clients_generated_companies": clients_generated_companies,
         "channels": channels, "rev_counts": rev_counts, "rev_lc": rev_lc, "lc_counts": lc_counts,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
         "n_sql_pendientes": n_sql_pendientes, "calls_summary": calls_summary,
@@ -596,6 +641,154 @@ def render(d):
 
     cs = d["calls_summary"]
 
+    # Embudo(s): informe mensual separa comercial y producto/freemium; el diario mantiene el embudo único.
+    if d["is_monthly"]:
+        funnel_section = f"""  <div class="section-label">Embudo comercial · {esc(d["periodo_txt"])}</div>
+  <div class="funnel funnel-row">
+    <div class="f-card f-c-default">
+      <div class="fc-label">Contactos creados</div>
+      <div class="fc-value">{d["total"]}</div>
+      <div class="fc-sub">Total del período</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Leads</div>
+      <div class="fc-value">{d["n_lead"]}</div>
+      <div class="fc-sub">{d["pct_lead"]} del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-orange">
+      <div class="fc-label">SQL Consultoría Demo</div>
+      <div class="fc-value">{d["n_sql"]}</div>
+      <div class="fc-sub">{d["pct_sql"]} del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Reuniones agendadas</div>
+      <div class="fc-value">{d["n_meetings"]}</div>
+      <div class="fc-sub">de canales de marketing</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-purple">
+      <div class="fc-label">Oportunidades</div>
+      <div class="fc-value">{d["n_opps_generated"]}</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total">{d["opps_generated_companies"]}</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Clientes</div>
+      <div class="fc-value">{d["n_clients_generated"]}</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total">{d["clients_generated_companies"]}</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:20px;">
+    <span class="funnel-row-label" style="text-transform:none;letter-spacing:normal;font-size:12px;">
+      Embudo de producto · Freemium
+      <span class="badge badge-amber">🧪 En definición</span>
+    </span>
+  </div>
+  <div class="funnel funnel-row">
+    <div class="f-card f-c-default">
+      <div class="fc-label">Contactos creados</div>
+      <div class="fc-value">{d["total"]}</div>
+      <div class="fc-sub">Total del período</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Leads</div>
+      <div class="fc-value">{d["n_lead"]}</div>
+      <div class="fc-sub">{d["pct_lead"]} del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Freemium</div>
+      <div class="fc-value">{d["n_free"]}</div>
+      <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
+    </div>
+  </div>
+  <div class="alert alert-muted" style="margin-top:10px;margin-bottom:0;">
+    <span>ℹ️</span>
+    <div>El proceso de producto/freemium está en definición: en cuanto haya oportunidades, reuniones o clientes que vengan del uso freemium, se añadirán como pasos adicionales de este embudo.</div>
+  </div>"""
+    else:
+        funnel_section = f"""  <div class="section-label">Embudo de conversión · {esc(d["periodo_txt"])}</div>
+  <div class="funnel">
+    <div class="f-card f-c-default">
+      <div class="fc-label">Contactos creados</div>
+      <div class="fc-value">{d["total"]}</div>
+      <div class="fc-sub">Total del período</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Leads</div>
+      <div class="fc-value">{d["n_lead"]}</div>
+      <div class="fc-sub">{d["pct_lead"]} del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-orange">
+      <div class="fc-label">SQL Consultoría</div>
+      <div class="fc-value">{d["n_sql"]}</div>
+      <div class="fc-sub">{d["pct_sql"]} del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-default">
+      <div class="fc-label">Freemium</div>
+      <div class="fc-value">{d["n_free"]}</div>
+      <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Reuniones agendadas</div>
+      <div class="fc-value">{d["n_meetings"]}</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total">{d["meeting_companies"]}</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-purple">
+      <div class="fc-label">Oportunidades generadas</div>
+      <div class="fc-value">{d["n_opps_generated"]}</div>
+      <div class="fc-sub">de canales de marketing</div>
+      <div class="fc-opp-total">{d["opps_generated_companies"]}</div>
+    </div>
+  </div>"""
+
+    if d["is_monthly"]:
+        calls_section = ""
+    else:
+        calls_section = f"""  <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
+
+  <div class="section-label">Llamadas y previsión · seguimiento comercial</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks">
+      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">{cs["total"]}</div><div class="rb-name">Llamadas registradas</div><div class="rb-desc">{cs["completed"]} completadas · HubSpot Calls</div></div>
+      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">{d["n_sql_pendientes"]}</div><div class="rb-name">Previsión de llamadas</div><div class="rb-desc">SQL pendientes de contactar · de {len(d["sql_rows"])} del período</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">SQL Consultoría del período · empresa, canal y estado</span>
+      <span class="badge badge-green">📞 Seguimiento comercial</span>
+    </div>
+    <table class="table">
+      <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
+      <tbody>{call_rows}</tbody>
+    </table>
+    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
+      <span>💡</span>
+      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
+      <br>• <strong>Brand = intención alta</strong>: los SQL de campaña de marca avanzan rápido a oportunidad/demo.
+      <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
+      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
+      <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
+      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. Llamadas registradas vía HubSpot Calls (no vinculadas 1:1 a cada SQL aún).</span></div>
+    </div>
+  </div>"""
+
     return TEMPLATE.format(
         title=esc(d["title"]),
         fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
@@ -609,6 +802,7 @@ def render(d):
         demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
         n_calls=cs["total"], n_calls_completed=cs["completed"],
         n_sql_pendientes=d["n_sql_pendientes"], n_sql_total=len(d["sql_rows"]),
+        funnel_section=funnel_section, calls_section=calls_section,
         generado=esc(d["generado"]),
     )
 
@@ -683,6 +877,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .card-title {{ font-size:14px; font-weight:700; color:var(--text); }}
 .badge {{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.04em; }}
 .badge-green {{ background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }}
+.badge-amber {{ background:rgba(245,158,11,.15); color:var(--amber); border:1px solid rgba(245,158,11,.3); }}
+.funnel-row {{ margin-bottom:10px; }}
+.funnel-row-label {{ font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:10px; display:flex; align-items:center; gap:8px; }}
 .table {{ width:100%; border-collapse:collapse; }}
 .table th {{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 12px 10px 0; text-align:left; border-bottom:1px solid var(--border); }}
 .table td {{ font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); vertical-align:middle; }}
@@ -786,46 +983,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · {periodo_txt}</div>
-  <div class="funnel">
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">{total}</div>
-      <div class="fc-sub">Total del período</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">{n_lead}</div>
-      <div class="fc-sub">{pct_lead} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-orange">
-      <div class="fc-label">SQL Consultoría</div>
-      <div class="fc-value">{n_sql}</div>
-      <div class="fc-sub">{pct_sql} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">{n_free}</div>
-      <div class="fc-sub">{pct_free} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-green">
-      <div class="fc-label">Reuniones agendadas</div>
-      <div class="fc-value">{n_meetings}</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total">{meeting_companies}</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-purple">
-      <div class="fc-label">Oportunidades generadas</div>
-      <div class="fc-value">{n_opps_generated}</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total">{opps_generated_companies}</div>
-    </div>
-  </div>
+{funnel_section}
 
   <div class="section-label">Canales de adquisición · {total} contactos</div>
   <div class="channels-grid">{ch_cards}</div>
@@ -847,36 +1005,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="rev-blocks">{rev_blocks}</div>
   </div>
 
-  <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
-
-  <div class="section-label">Llamadas y previsión · seguimiento comercial</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">
-      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">{n_calls}</div><div class="rb-name">Llamadas registradas</div><div class="rb-desc">{n_calls_completed} completadas · HubSpot Calls</div></div>
-      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">{n_sql_pendientes}</div><div class="rb-name">Previsión de llamadas</div><div class="rb-desc">SQL pendientes de contactar · de {n_sql_total} del período</div></div>
-    </div>
-  </div>
-
-  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">SQL Consultoría del período · empresa, canal y estado</span>
-      <span class="badge badge-green">📞 Seguimiento comercial</span>
-    </div>
-    <table class="table">
-      <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
-      <tbody>{call_rows}</tbody>
-    </table>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>💡</span>
-      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
-      <br>• <strong>Brand = intención alta</strong>: los SQL de campaña de marca avanzan rápido a oportunidad/demo.
-      <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
-      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
-      <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
-      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. Llamadas registradas vía HubSpot Calls (no vinculadas 1:1 a cada SQL aún).</span></div>
-    </div>
-  </div>
+{calls_section}
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
