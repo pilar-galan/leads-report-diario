@@ -78,13 +78,13 @@ LEAD_STATE_META = [
 
 # ── Canales de adquisición fijos (siempre visibles aunque estén a 0) ──
 FIXED_CHANNELS = {
-    "Social Ads":         {"n": 0, "icon": "📣", "color": "#a855f7", "lc": {}},
-    "Google Ads":         {"n": 0, "icon": "🔍", "color": "#4285F4", "lc": {}},
-    "Tráfico directo":    {"n": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
-    "SEO Orgánico":       {"n": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
-    "Social orgánico":    {"n": 0, "icon": "🌱", "color": "#22c55e", "lc": {}},
-    "Eventos / Campañas": {"n": 0, "icon": "🎪", "color": "#ec4899", "lc": {}},
-    "Chat web":           {"n": 0, "icon": "💬", "color": "#22d3ee", "lc": {}},
+    "Social Ads":         {"n": 0, "sql": 0, "icon": "📣", "color": "#a855f7", "lc": {}},
+    "Google Ads":         {"n": 0, "sql": 0, "icon": "🔍", "color": "#4285F4", "lc": {}},
+    "Tráfico directo":    {"n": 0, "sql": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
+    "SEO Orgánico":       {"n": 0, "sql": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
+    "Social orgánico":    {"n": 0, "sql": 0, "icon": "🌱", "color": "#22c55e", "lc": {}},
+    "Eventos / Campañas": {"n": 0, "sql": 0, "icon": "🎪", "color": "#ec4899", "lc": {}},
+    "Chat web":           {"n": 0, "sql": 0, "icon": "💬", "color": "#22d3ee", "lc": {}},
 }
 
 
@@ -138,12 +138,13 @@ def classify_channel(src, d1):
     if src == "SOCIAL_MEDIA":    return ("Social orgánico",    "🌱", "#22c55e")
     if src == "REFERRALS":       return ("Referido",           "🤝", "#a78bfa")
     if src == "OTHER_CAMPAIGNS": return ("Eventos / Campañas", "🎪", "#ec4899")
+    if src == "EMAIL_MARKETING": return ("Email", "✉️", "#f97316")
     if src == "OFFLINE" and d1 == "CONVERSATIONS":
         return ("Chat web", "💬", "#22d3ee")
     if src == "DIRECT_TRAFFIC":
-        if "e3875d32" in d1: return ("App / Freemium", "⚡", "#f59e0b")
+        # Incluye las altas por la app (freemium); se cuentan por su origen: tráfico directo
         return ("Tráfico directo", "🔗", "#94a3b8")
-    return ("App / Freemium", "⚡", "#f59e0b")
+    return ("Otros", "•", "#64748b")
 
 
 def is_marketing(src, d1):
@@ -317,8 +318,10 @@ def main():
     for l in real:
         label, icon, color = classify_channel(l["src"], l["d1"])
         if label not in chan:
-            chan[label] = {"n": 0, "icon": icon, "color": color, "lc": {}}
+            chan[label] = {"n": 0, "sql": 0, "icon": icon, "color": color, "lc": {}}
         chan[label]["n"] += 1
+        if l["lc"] == "salesqualifiedlead":
+            chan[label]["sql"] += 1
         lc_lbl = LC_LABELS.get(l["lc"], l["lc"] or "—")
         chan[label]["lc"][lc_lbl] = chan[label]["lc"].get(lc_lbl, 0) + 1
     for fc_label, fc_data in FIXED_CHANNELS.items():
@@ -431,13 +434,14 @@ def render(d):
     ch_cards = ""
     for label, c in d["channels"]:
         p = pct(c["n"], d["total"]) if c["n"] > 0 else "—"
-        lc_txt = " · ".join(f"{cnt} {lbl.lower()}" for lbl, cnt in sorted(c["lc"].items(), key=lambda x: -x[1]))
+        sql = c.get("sql", 0)
         dim = "" if c["n"] > 0 else ";opacity:.45"
         ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}{dim}">'
                      f'<div class="ch-icon">{c["icon"]}</div>'
                      f'<div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
-                     f'<div class="ch-pct">{p} · {esc(lc_txt) or "—"}</div></div>\n')
+                     f'<div class="ch-pct">{p} del total</div>'
+                     f'<div class="ch-sql">🎯 {sql} SQL</div></div>\n')
 
     # Revisión ventas
     rev_blocks = ""
@@ -571,6 +575,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .ch-num {{ font-size:30px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }}
 .ch-label {{ font-size:11px; font-weight:600; color:var(--text-2); margin-top:4px; }}
 .ch-pct {{ font-size:11px; color:var(--muted); margin-top:2px; }}
+.ch-sql {{ font-size:12px; font-weight:800; color:var(--orange); margin-top:5px; }}
 
 .rev-blocks {{ display:flex; gap:10px; flex-wrap:wrap; }}
 .rev-block {{ flex:1; min-width:130px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; }}
