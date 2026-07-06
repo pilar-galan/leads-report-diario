@@ -67,17 +67,17 @@ REV_META = [
 
 # ── Canales de adquisición fijos (siempre visibles aunque estén a 0) ──
 FIXED_CHANNELS = {
-    "Social Ads":         {"n": 0, "icon": "📣", "color": "#a855f7", "lc": {}},
-    "Google Ads":         {"n": 0, "icon": "🔍", "color": "#4285F4", "lc": {}},
-    "Tráfico directo":    {"n": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
-    "SEO Orgánico":       {"n": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
-    "Social orgánico":    {"n": 0, "icon": "🌱", "color": "#22c55e", "lc": {}},
-    "Eventos / Campañas": {"n": 0, "icon": "🎪", "color": "#ec4899", "lc": {}},
-    "Chat web":           {"n": 0, "icon": "💬", "color": "#22d3ee", "lc": {}},
+    "Social Ads":         {"n": 0, "sql": 0, "icon": "📣", "color": "#a855f7", "lc": {}},
+    "Google Ads":         {"n": 0, "sql": 0, "icon": "🔍", "color": "#4285F4", "lc": {}},
+    "Tráfico directo":    {"n": 0, "sql": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
+    "SEO Orgánico":       {"n": 0, "sql": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
+    "Social orgánico":    {"n": 0, "sql": 0, "icon": "🌱", "color": "#22c55e", "lc": {}},
+    "Eventos / Campañas": {"n": 0, "sql": 0, "icon": "🎪", "color": "#ec4899", "lc": {}},
+    "Chat web":           {"n": 0, "sql": 0, "icon": "💬", "color": "#22d3ee", "lc": {}},
 }
 
 
-# ─────────────────────────── HubSpot API ───────────────────────────
+# ────────────────────────── HubSpot API ──────────────────────────
 def api_post(path, payload):
     req = urllib.request.Request(
         BASE + path,
@@ -117,7 +117,7 @@ def iso(dt):
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-# ─────────────────────────── Clasificadores ───────────────────────────
+# ────────────────────────── Clasificadores ──────────────────────────
 def classify_channel(src, d1):
     """Devuelve (label, icon, color) alineado con la taxonomía de marketing."""
     d1 = d1 or ""
@@ -127,12 +127,13 @@ def classify_channel(src, d1):
     if src == "SOCIAL_MEDIA":    return ("Social orgánico",    "🌱", "#22c55e")
     if src == "REFERRALS":       return ("Referido",           "🤝", "#a78bfa")
     if src == "OTHER_CAMPAIGNS": return ("Eventos / Campañas", "🎪", "#ec4899")
+    if src == "EMAIL_MARKETING": return ("Email", "✉️", "#f97316")
     if src == "OFFLINE" and d1 == "CONVERSATIONS":
         return ("Chat web", "💬", "#22d3ee")
     if src == "DIRECT_TRAFFIC":
-        if "e3875d32" in d1: return ("App / Freemium", "⚡", "#f59e0b")
+        # Incluye las altas por la app (freemium); se cuentan por su origen: tráfico directo
         return ("Tráfico directo", "🔗", "#94a3b8")
-    return ("App / Freemium", "⚡", "#f59e0b")
+    return ("Otros", "•", "#64748b")
 
 
 def is_marketing(src, d1):
@@ -176,7 +177,7 @@ def pct(n, base):
     return f"{round(n/base*100)}%" if base else "—"
 
 
-# ─────────────────────────── Llamadas ───────────────────────────
+# ────────────────────────── Llamadas ──────────────────────────
 def fetch_calls_summary(start_iso, end_iso):
     """
     Llamadas registradas en la ventana (objeto Calls de HubSpot).
@@ -195,7 +196,7 @@ def fetch_calls_summary(start_iso, end_iso):
     return {"total": total, "completed": completed, "outbound": outbound}
 
 
-# ─────────────────────────── Reuniones de marketing ───────────────────────────
+# ────────────────────────── Reuniones de marketing ──────────────────────────
 def fetch_marketing_meetings(start_iso, end_iso):
     """
     Reuniones creadas en la ventana cuyo contacto asociado entró por un canal
@@ -325,7 +326,7 @@ def fetch_generated_opportunities(start_iso, end_iso, is_valid_deal, clean_deal_
     return out
 
 
-# ─────────────────────────── Main ───────────────────────────
+# ────────────────────────── Main ──────────────────────────
 def main():
     if not TOKEN:
         print("ERROR: falta HUBSPOT_TOKEN", file=sys.stderr)
@@ -404,8 +405,10 @@ def main():
     for l in real:
         label, icon, color = classify_channel(l["src"], l["d1"])
         if label not in chan:
-            chan[label] = {"n": 0, "icon": icon, "color": color, "lc": {}}
+            chan[label] = {"n": 0, "sql": 0, "icon": icon, "color": color, "lc": {}}
         chan[label]["n"] += 1
+        if l["lc"] == "salesqualifiedlead":
+            chan[label]["sql"] += 1
         lc_lbl = LC_LABELS.get(l["lc"], l["lc"] or "—")
         chan[label]["lc"][lc_lbl] = chan[label]["lc"].get(lc_lbl, 0) + 1
     for fc_label, fc_data in FIXED_CHANNELS.items():
@@ -413,11 +416,19 @@ def main():
             chan[fc_label] = dict(fc_data)
     channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
-    # Revisión ventas
+    # Revisión ventas (con desglose por etapa: lead / SQL / freemium)
     rev_counts = {}
+    rev_lc = {}
     for l in real:
         key = l["rev"] if l["rev"] else "Pendiente de revisión"
         rev_counts[key] = rev_counts.get(key, 0) + 1
+        b = rev_lc.setdefault(key, {"lead": 0, "sql": 0, "free": 0})
+        if l["lc"] == "salesqualifiedlead":
+            b["sql"] += 1
+        elif l["lc"] == "1378463825" or l["sql_state"] == "Freemium":
+            b["free"] += 1
+        else:
+            b["lead"] += 1
 
     # Etapa del ciclo de vida
     lc_counts = {}
@@ -432,6 +443,7 @@ def main():
             name = l["firstname"] or (l["email"].split("@")[0] if l["email"] else "—")
             sql_rows.append({"name": name, "company": l["company"],
                              "channel": label, "state": l["sql_state"] or "Pendiente"})
+    sql_rows.sort(key=lambda r: r["channel"])
 
     n_sql_pendientes = sum(1 for r in sql_rows if r["state"] == "Pendiente")
     calls_summary = fetch_calls_summary(start_iso, end_iso)
@@ -492,7 +504,7 @@ def main():
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
         "n_opps_generated": n_opps_generated, "opps_generated_companies": opps_generated_companies,
-        "channels": channels, "rev_counts": rev_counts, "lc_counts": lc_counts,
+        "channels": channels, "rev_counts": rev_counts, "rev_lc": rev_lc, "lc_counts": lc_counts,
         "sql_rows": sql_rows, "mkt_deals": mkt_deals,
         "n_sql_pendientes": n_sql_pendientes, "calls_summary": calls_summary,
         "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
@@ -513,22 +525,29 @@ def render(d):
     ch_cards = ""
     for label, c in d["channels"]:
         p = pct(c["n"], d["total"]) if c["n"] > 0 else "—"
-        lc_txt = " · ".join(f"{cnt} {lbl.lower()}" for lbl, cnt in sorted(c["lc"].items(), key=lambda x: -x[1]))
+        sql = c.get("sql", 0)
         dim = "" if c["n"] > 0 else ";opacity:.45"
         ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}{dim}">'
                      f'<div class="ch-icon">{c["icon"]}</div>'
                      f'<div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
-                     f'<div class="ch-pct">{p} · {esc(lc_txt) or "—"}</div></div>\n')
+                     f'<div class="ch-pct">{p} del total</div>'
+                     f'<div class="ch-sql">🎯 {sql} SQL</div></div>\n')
 
     # Revisión ventas
     rev_blocks = ""
     for key, color in REV_META:
         n = d["rev_counts"].get(key, 0)
         dim = "" if n > 0 else ";opacity:.4"
+        bd = d.get("rev_lc", {}).get(key, {})
+        parts = []
+        if bd.get("lead"): parts.append(f'{bd["lead"]} lead')
+        if bd.get("sql"):  parts.append(f'{bd["sql"]} SQL')
+        if bd.get("free"): parts.append(f'{bd["free"]} freem')
+        desc = f'<div class="rb-desc">{" · ".join(parts)}</div>' if (n > 0 and parts) else ''
         rev_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
                        f'<div class="rb-num">{n}</div>'
-                       f'<div class="rb-name">{esc(key)}</div></div>\n')
+                       f'<div class="rb-name">{esc(key)}</div>{desc}</div>\n')
 
     # Etapa del ciclo de vida (solo etapas con contactos)
     lc_blocks = ""
@@ -564,6 +583,7 @@ def render(d):
         group = by_stage.get(st_id, [])
         if not group:
             continue
+        group = sorted(group, key=lambda x: x["channel"])  # agrupar por canal dentro de la etapa
         deal_rows += f'<tr class="stage-divider"><td colspan="3">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
             new_tag = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
@@ -649,6 +669,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .ch-num {{ font-size:30px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }}
 .ch-label {{ font-size:11px; font-weight:600; color:var(--text-2); margin-top:4px; }}
 .ch-pct {{ font-size:11px; color:var(--muted); margin-top:2px; }}
+.ch-sql {{ font-size:12px; font-weight:800; color:var(--orange); margin-top:5px; }}
 
 .rev-blocks {{ display:flex; gap:10px; flex-wrap:wrap; }}
 .rev-block {{ flex:1; min-width:130px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; }}
@@ -824,8 +845,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
     </div>
     <div class="rev-blocks">{rev_blocks}</div>
-    <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px;">Por etapa del ciclo de vida</div>
-    <div class="rev-blocks">{lc_blocks}</div>
   </div>
 
   <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
