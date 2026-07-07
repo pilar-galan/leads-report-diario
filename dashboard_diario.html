@@ -6,125 +6,107 @@
 <title>GuruSup · Dashboard Diario</title>
 <style>
 :root {
-  --guru-900:#0a0618; --guru-800:#110e2a; --guru-500:#FF6B5B; --guru-400:#E55A4C; --guru-300:#FAE5DC;
+  --guru-900:#0a0618; --guru-500:#FF6B5B; --guru-400:#E55A4C; --guru-300:#FAE5DC;
   --surface:#161330; --card:#1e1b42; --border:#2e2a5a;
   --green:#10b981; --amber:#f59e0b; --red:#ef4444; --blue:#3b82f6; --orange:#f97316;
-  --text:#f0edff; --text-2:#c4bfe0; --muted:#7b76a0;
+  --teal:#22d3ee; --text:#f0edff; --text-2:#c4bfe0; --muted:#7b76a0;
 }
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { scroll-behavior:smooth; font-size:15px; }
+html { font-size:15px; }
 body { background:var(--guru-900); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif; line-height:1.5; min-height:100vh; }
-
 .header { position:sticky; top:0; z-index:100; background:rgba(17,14,42,.96); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 24px; }
 .header-inner { display:flex; align-items:center; gap:16px; padding:14px 0 12px; flex-wrap:wrap; }
 .logo-box { width:40px; height:40px; background:linear-gradient(135deg,var(--guru-500),var(--guru-400)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0; box-shadow:0 0 16px rgba(255,107,91,.4); }
 .header-title { flex:1; min-width:180px; }
-.header-title h1 { font-size:16px; font-weight:700; color:var(--text); }
+.header-title h1 { font-size:16px; font-weight:700; }
 .header-title p { font-size:12px; color:var(--muted); }
 .live-badge { background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3); color:var(--green); font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; white-space:nowrap; }
 .live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 .sync-bar { font-size:11px; color:var(--muted); padding:5px 24px 6px; border-top:1px solid rgba(46,42,90,.6); background:rgba(17,14,42,.7); }
-
 .main { max-width:1160px; margin:0 auto; padding:24px 20px 60px; }
 .section-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:32px 0 14px; }
 .section-label:first-child { margin-top:0; }
 
+/* Dos embudos */
+.funnels-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media(max-width:760px){ .funnels-2 { grid-template-columns:1fr; } }
+.fn-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 18px 20px; }
+.fn-title { font-size:13px; font-weight:800; margin-bottom:4px; }
+.fn-note { font-size:11px; color:var(--muted); margin-bottom:14px; }
+.pyramid { display:flex; flex-direction:column; align-items:center; }
+.pyr-row { width:100%; display:flex; justify-content:center; }
+.pyr-bar { border-radius:8px; padding:11px 12px; text-align:center; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 2px 8px rgba(0,0,0,.25); }
+.pyr-val { font-size:19px; font-weight:800; }
+.pyr-lbl { font-size:12px; font-weight:600; opacity:.95; }
+.pyr-conv { font-size:11px; font-weight:700; color:var(--muted); margin:5px 0; }
+.fn-highlight { margin-top:14px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.25); color:#a5f3fc; border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.5; }
+
+/* Gráficos */
+.charts-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+@media(max-width:820px){ .charts-3 { grid-template-columns:1fr; } }
+.chart-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 14px 8px; }
+.chart-card h3 { font-size:12px; font-weight:700; margin-bottom:2px; }
+.chart-card .sub { font-size:10px; color:var(--muted); margin-bottom:8px; }
+
+/* Funnel horizontal 24h */
 .funnel { display:flex; align-items:stretch; gap:0; }
-.f-arrow { display:flex; align-items:center; justify-content:center; width:34px; flex-shrink:0; font-size:30px; opacity:.8; }
-.f-arrow::after { content:'›'; color:var(--guru-400); font-weight:700; }
-.f-card { flex:1; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; min-width:0; display:flex; flex-direction:column; gap:4px; }
-.f-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--fc,var(--guru-500)); border-radius:10px 10px 0 0; }
-.fc-label { font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.07em; }
-.fc-value { font-size:48px; font-weight:800; line-height:1; color:var(--fv,var(--text)); margin-top:4px; }
-.fc-sub { font-size:13px; color:var(--text-2); font-weight:600; margin-top:6px; }
-.fc-opp-total { font-size:12px; color:var(--muted); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
-.fc-opp-total strong { color:var(--text-2); }
+.f-arrow { display:flex; align-items:center; justify-content:center; width:30px; flex-shrink:0; }
+.f-arrow::after { content:'›'; color:var(--guru-400); font-weight:700; font-size:28px; }
+.f-card { flex:1; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 14px 12px; position:relative; overflow:hidden; min-width:0; }
+.f-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--fc,var(--guru-500)); }
+.fc-label { font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+.fc-value { font-size:38px; font-weight:800; line-height:1; margin-top:4px; color:var(--fv,var(--text)); }
+.fc-sub { font-size:11px; color:var(--text-2); font-weight:600; margin-top:6px; }
 .f-c-default { --fc:var(--guru-500); --fv:var(--text); }
 .f-c-orange { --fc:var(--orange); --fv:var(--orange); }
 .f-c-green { --fc:var(--green); --fv:var(--green); }
+.free-kpi { margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }
+.free-kpi .fk-num { font-size:32px; font-weight:800; color:var(--teal); }
+.free-kpi .fk-txt { font-size:12px; color:var(--text-2); }
 
 .channels-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
 @media(max-width:900px){ .channels-grid { grid-template-columns:repeat(3,1fr); } }
 @media(max-width:550px){ .channels-grid { grid-template-columns:repeat(2,1fr); } }
-.ch-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 14px 12px; position:relative; overflow:hidden; }
-.ch-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--chc,var(--guru-500)); border-radius:10px 10px 0 0; }
-.ch-icon { font-size:18px; margin-bottom:6px; }
-.ch-num { font-size:30px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }
+.ch-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 12px; position:relative; overflow:hidden; }
+.ch-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--chc,var(--guru-500)); }
+.ch-icon { font-size:17px; margin-bottom:5px; }
+.ch-num { font-size:28px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }
 .ch-label { font-size:11px; font-weight:600; color:var(--text-2); margin-top:4px; }
-.ch-pct { font-size:11px; color:var(--muted); margin-top:2px; }
-.ch-sql { font-size:12px; font-weight:800; color:var(--orange); margin-top:5px; }
-
-.rev-blocks { display:flex; gap:10px; flex-wrap:wrap; }
-.rev-block { flex:1; min-width:130px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; }
-.rev-block::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--rbc,var(--border)); border-radius:10px 10px 0 0; }
-.rb-num { font-size:26px; font-weight:800; line-height:1; color:var(--rbc,var(--muted)); margin-bottom:6px; }
-.rb-name { font-size:12px; font-weight:600; color:var(--rbc,var(--muted)); }
-.rb-desc { font-size:11px; color:var(--muted); margin-top:3px; }
+.ch-pct { font-size:10px; color:var(--muted); margin-top:2px; }
+.ch-sql { font-size:11px; font-weight:700; color:var(--text-2); margin-top:5px; }
 
 .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:12px; }
 .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.card-title { font-size:14px; font-weight:700; color:var(--text); }
-.badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.04em; }
+.card-title { font-size:14px; font-weight:700; }
+.badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
 .badge-green { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
 .table { width:100%; border-collapse:collapse; }
 .table th { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 12px 10px 0; text-align:left; border-bottom:1px solid var(--border); }
-.table td { font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); vertical-align:middle; }
-.table tr:last-child td { border-bottom:none; }
+.table td { font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); }
 .table td strong { color:var(--text); font-weight:600; }
-.table tr.stage-divider td { background:rgba(255,255,255,.03); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:6px 0; border-bottom:1px solid var(--border); }
+.table tr.stage-divider td { background:rgba(255,255,255,.03); font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); padding:6px 0; }
 .pill { display:inline-block; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; }
 .pill-demo { background:rgba(16,185,129,.15); color:var(--green); }
 .pill-discov { background:rgba(255,107,91,.15); color:#F5D5C8; }
 .pill-best { background:rgba(245,158,11,.15); color:var(--amber); }
-.new-tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; background:rgba(16,185,129,.2); color:var(--green); letter-spacing:.04em; text-transform:uppercase; }
-
-.alert { border-radius:8px; padding:10px 14px; font-size:12px; margin-bottom:14px; display:flex; align-items:flex-start; gap:8px; }
-.alert-green { background:rgba(16,185,129,.06); border:1px solid rgba(16,185,129,.2); color:#6ee7b7; }
+.new-tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; background:rgba(16,185,129,.2); color:var(--green); text-transform:uppercase; }
+.alert { border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }
 .alert-muted { background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }
-
-.flow-arrow { text-align:center; margin:2px 0 14px; color:var(--guru-400); font-size:26px; line-height:1; }
-.flow-arrow small { display:block; font-size:11px; color:var(--muted); font-weight:600; margin-top:3px; }
+.caption { font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }
 
 @media(max-width:600px){
-  .header { padding:0 14px; }
-  .header-inner { gap:10px; padding:12px 0 10px; }
-  .header-title { min-width:0; }
-  .header-title h1 { font-size:14px; line-height:1.25; }
-  .header-title p { font-size:10px; line-height:1.35; }
-  .logo-box { width:34px; height:34px; font-size:13px; }
-  .live-badge { display:none; }
-  .sync-bar { padding:5px 14px 6px; }
-  .main { padding:18px 14px 50px; }
-  .funnel { flex-direction:column; gap:8px; }
-  .f-arrow { width:100%; height:20px; transform:rotate(90deg); }
-  .f-card { padding:14px 16px 13px; }
-  .fc-value { font-size:40px; }
-  .fc-opp-total { font-size:13px; }
-  .rev-block { flex:1 1 calc(50% - 5px); min-width:calc(50% - 5px); }
-  .rb-num { font-size:23px; }
-  .flow-arrow { font-size:24px; margin:2px 0 12px; }
-  .flow-arrow small { font-size:10px; padding:0 8px; }
-  .alert { padding:10px 12px; font-size:12px; line-height:1.5; }
-  #emp-search { font-size:16px; }
-  .card { padding:16px 14px; overflow-x:auto; }
-  .card-header { flex-wrap:wrap; gap:8px; }
-  .table { min-width:300px; }
+  .header { padding:0 14px; } .header-title h1 { font-size:14px; } .header-title p { font-size:10px; }
+  .live-badge { display:none; } .main { padding:18px 14px 50px; }
+  .funnel { flex-direction:column; gap:8px; } .f-arrow { width:100%; height:20px; transform:rotate(90deg); }
+  .fc-value { font-size:32px; } .card { padding:16px 14px; overflow-x:auto; } .table { min-width:300px; }
   .section-label { font-size:10px; margin-top:26px; }
 }
-@media(max-width:380px){
-  .channels-grid { grid-template-columns:1fr; }
-  .rev-block { flex:1 1 100%; min-width:100%; }
-  .fc-value { font-size:36px; }
-}
-
 #gs-gate { position:fixed; inset:0; z-index:9999; background:#0a0618; display:flex; align-items:center; justify-content:center; }
 #gs-gate .box { background:#1e1b42; border:1px solid #2e2a5a; border-radius:16px; padding:40px 36px; width:340px; text-align:center; }
-#gs-gate .logo { width:48px; height:48px; border-radius:12px; margin:0 auto 20px; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:17px; color:#fff; }
-#gs-gate h2 { font-size:18px; font-weight:700; color:#f0edff; margin-bottom:4px; }
-#gs-gate p { font-size:13px; color:#7b76a0; margin-bottom:24px; }
+#gs-gate .logo { width:48px; height:48px; border-radius:12px; margin:0 auto 20px; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; }
+#gs-gate h2 { font-size:18px; font-weight:700; margin-bottom:4px; } #gs-gate p { font-size:13px; color:#7b76a0; margin-bottom:24px; }
 #gs-gate input { width:100%; padding:11px 14px; border-radius:8px; border:1px solid #2e2a5a; background:#161330; color:#f0edff; font-size:15px; margin-bottom:12px; outline:none; letter-spacing:.08em; }
-#gs-gate input:focus { border-color:#ff6b5b; }
 #gs-gate button { width:100%; padding:11px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; font-size:15px; font-weight:700; }
 #gs-gate .err { color:#ef4444; font-size:12px; margin-top:8px; display:none; }
 </style>
@@ -132,175 +114,104 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 (function(){
   if(sessionStorage.getItem('gs_ok')==='1') return;
   document.addEventListener('DOMContentLoaded', function(){
-    var gate=document.getElementById('gs-gate'), inp=document.getElementById('gs-pwd'),
-        err=document.getElementById('gs-err'), btn=document.getElementById('gs-btn');
-    gate.style.display='flex';
-    function check(){ if(inp.value==='radar2026'){ sessionStorage.setItem('gs_ok','1'); gate.style.display='none'; }
-      else { err.style.display='block'; inp.value=''; inp.focus(); } }
-    btn.addEventListener('click', check);
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') check(); });
+    var g=document.getElementById('gs-gate'), i=document.getElementById('gs-pwd'),
+        e=document.getElementById('gs-err'), b=document.getElementById('gs-btn');
+    g.style.display='flex';
+    function ck(){ if(i.value==='radar2026'){ sessionStorage.setItem('gs_ok','1'); g.style.display='none'; }
+      else { e.style.display='block'; i.value=''; i.focus(); } }
+    b.addEventListener('click', ck); i.addEventListener('keydown', function(ev){ if(ev.key==='Enter') ck(); });
   });
 })();
 </script>
 </head>
 <body>
+<div id="gs-gate" style="display:none"><div class="box"><div class="logo">GS</div>
+  <h2>GuruSup · Dashboard Diario</h2><p>Acceso restringido</p>
+  <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus><button id="gs-btn">Entrar</button>
+  <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
-<div id="gs-gate" style="display:none">
-  <div class="box">
-    <div class="logo">GS</div>
-    <h2>GuruSup · Dashboard Diario</h2>
-    <p>Acceso restringido</p>
-    <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus>
-    <button id="gs-btn">Entrar</button>
-    <div id="gs-err" class="err">Contraseña incorrecta</div>
-  </div>
-</div>
-
-<div class="header">
-  <div class="header-inner">
-    <div class="logo-box">GS</div>
-    <div class="header-title">
-      <h1>GuruSup · Dashboard Diario</h1>
-      <p>Martes, 7 de julio de 2026 · 6 jul 08:00 → 7 jul 11:53 (hora España)</p>
-    </div>
-    <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
-  </div>
-  <div class="sync-bar">Datos del período · generado el 07 Jul 2026 · 11:53</div>
-</div>
+<div class="header"><div class="header-inner"><div class="logo-box">GS</div>
+  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Martes, 7 de julio de 2026 · 6 jul 08:00 → 7 jul 15:14 (hora España)</p></div>
+  <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span></div>
+  <div class="sync-bar">Generado el 07 Jul 2026 · 15:14 · embudos y gráficos acumulados 1 jun 2026 → hoy</div></div>
 
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · Consultoría · 6 jul 08:00 → 7 jul 11:53 (hora España)</div>
-  <div class="funnel"><div class="f-card f-c-default"><div class="fc-label">Contactos creados</div><div class="fc-value">18</div><div class="fc-sub">Total del período</div></div><div class="f-arrow"></div><div class="f-card f-c-default"><div class="fc-label">Leads</div><div class="fc-value">9</div><div class="fc-sub">50% del total</div></div><div class="f-arrow"></div><div class="f-card f-c-orange"><div class="fc-label">SQL Consultoría</div><div class="fc-value">3</div><div class="fc-sub">17% del total</div></div><div class="f-arrow"></div><div class="f-card f-c-green"><div class="fc-label">Reuniones agendadas</div><div class="fc-value">2</div><div class="fc-sub">de canales de marketing</div><div class="fc-opp-total"><strong>Rubén Guillot Escandell</strong> <span style="opacity:.7">· Google Ads</span><br><strong>demo</strong> <span style="opacity:.7">· Tráfico directo</span></div></div><div class="f-arrow"></div><div class="f-card f-c-default"><div class="fc-label">Oportunidad</div><div class="fc-value">0</div><div class="fc-sub">0% del total</div></div></div>
-
-  <div class="section-label">Embudo Freemium · 6 jul 08:00 → 7 jul 11:53 (hora España)</div>
-  <div class="funnel"><div class="f-card f-c-default"><div class="fc-label">Nuevos contactos</div><div class="fc-value">18</div><div class="fc-sub">Total del período</div></div><div class="f-arrow"></div><div class="f-card f-c-orange"><div class="fc-label">Freemium</div><div class="fc-value">5</div><div class="fc-sub">28% del total</div></div></div>
-
-  <div class="section-label">Canales de adquisición · 18 contactos</div>
-  <div class="channels-grid"><div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">5</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">28% del total</div><div class="ch-sql">🎯 0 SQL</div></div>
-<div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">4</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">22% del total</div><div class="ch-sql">🎯 2 SQL</div></div>
-<div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">4</div><div class="ch-label">Social Ads</div><div class="ch-pct">22% del total</div><div class="ch-sql">🎯 0 SQL</div></div>
-<div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">3</div><div class="ch-label">Google Ads</div><div class="ch-pct">17% del total</div><div class="ch-sql">🎯 1 SQL</div></div>
-<div class="ch-card" style="--chc:#64748b"><div class="ch-icon">•</div><div class="ch-num">2</div><div class="ch-label">Otros</div><div class="ch-pct">11% del total</div><div class="ch-sql">🎯 0 SQL</div></div>
-<div class="ch-card" style="--chc:#22d3ee;opacity:.45"><div class="ch-icon">💬</div><div class="ch-num">0</div><div class="ch-label">Chat web</div><div class="ch-pct">— del total</div><div class="ch-sql">🎯 0 SQL</div></div>
-<div class="ch-card" style="--chc:#ec4899;opacity:.45"><div class="ch-icon">🎪</div><div class="ch-num">0</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">— del total</div><div class="ch-sql">🎯 0 SQL</div></div>
-<div class="ch-card" style="--chc:#22c55e;opacity:.45"><div class="ch-icon">🌱</div><div class="ch-num">0</div><div class="ch-label">Social orgánico</div><div class="ch-pct">— del total</div><div class="ch-sql">🎯 0 SQL</div></div>
-</div>
-
-  <div class="section-label">Leads en revisión de ventas · 18 contactos</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="alert alert-green" style="margin:0 0 12px;align-items:flex-start;">
-      <span>🎯</span>
-      <div>
-        <strong style="color:var(--guru-300);">La prioridad de revisión son los SQL Consultoría</strong> —contactos que han <strong>pedido una demo</strong>. Orden de prioridad de ventas:
-        <br>• <strong style="color:var(--text-2);">Máxima prioridad: SQL de Paid</strong> — pagamos por ellos y traen intención, pero el coste es alto, así que hay que <strong>sacar conclusiones para optimizar las campañas</strong>.
-        <br>• <strong style="color:var(--text-2);">Siguiente prioridad: SQL del resto de canales</strong> (siempre que sean SQL).
-        <br>• Cuando haya <strong>teléfono de contacto, se les llama en los primeros 15 minutos</strong>.
-      </div>
+  <div class="section-label">Embudos de conversión · acumulado 1 jun 2026 → hoy</div>
+  <div class="funnels-2">
+    <div class="fn-box">
+      <div class="fn-title">🛠️ Proceso comercial (ventas)</div>
+      <div class="fn-note">De contacto a cliente · tasas de conversión entre etapas</div>
+      <div class="pyramid"><div class="pyr-row"><div class="pyr-bar" style="width:100%;background:#FF6B5B"><span class="pyr-val">636</span> <span class="pyr-lbl">Contactos</span></div></div><div class="pyr-conv">▼ 68%</div><div class="pyr-row"><div class="pyr-bar" style="width:68%;background:#E55A4C"><span class="pyr-val">434</span> <span class="pyr-lbl">Leads</span></div></div><div class="pyr-conv">▼ 13%</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#f97316"><span class="pyr-val">56</span> <span class="pyr-lbl">SQL Consultoría</span></div></div><div class="pyr-conv">▼ 57%</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#f59e0b"><span class="pyr-val">32</span> <span class="pyr-lbl">Reunión agendada</span></div></div><div class="pyr-conv">▼ 50%</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#10b981"><span class="pyr-val">16</span> <span class="pyr-lbl">Oportunidad</span></div></div><div class="pyr-conv">▼ 56%</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#0ea5a3"><span class="pyr-val">9</span> <span class="pyr-lbl">Cliente</span></div></div></div>
     </div>
-    <div style="font-size:12px;color:var(--text);opacity:.85;padding:2px 4px 12px;line-height:1.55;">
-      ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
+    <div class="fn-box">
+      <div class="fn-title" style="color:var(--teal)">⚡ Activación Freemium</div>
+      <div class="fn-note">Activación de contactos existentes y nuevos usuarios freemium</div>
+      <div class="pyramid"><div class="pyr-row"><div class="pyr-bar" style="width:100%;background:#22d3ee"><span class="pyr-val">636</span> <span class="pyr-lbl">Contactos</span></div></div><div class="pyr-conv">▼ 20%</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#06b6d4"><span class="pyr-val">125</span> <span class="pyr-lbl">Freemium</span></div></div><div class="pyr-conv">▼ 0%</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#0891b2"><span class="pyr-val">0</span> <span class="pyr-lbl">Agenda con ventas</span></div></div><div class="pyr-conv">▼ —</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#0e7490"><span class="pyr-val">0</span> <span class="pyr-lbl">Oportunidad</span></div></div><div class="pyr-conv">▼ —</div><div class="pyr-row"><div class="pyr-bar" style="width:34%;background:#155e75"><span class="pyr-val">0</span> <span class="pyr-lbl">Cliente</span></div></div></div>
+      <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
     </div>
-    <div class="rev-blocks"><div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">4</div><div class="rb-name">Ya gestionado</div><div class="rb-desc">1 lead · 2 SQL · 1 freem</div></div>
-<div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">12</div><div class="rb-name">Pendiente de revisión</div><div class="rb-desc">8 lead · 4 freem</div></div>
-<div class="rev-block" style="--rbc:var(--blue);opacity:.4"><div class="rb-num">0</div><div class="rb-name">En revisión</div></div>
-<div class="rev-block" style="--rbc:var(--orange);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Aceptado para gestión comercial</div></div>
-<div class="rev-block" style="--rbc:var(--guru-400);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Duplicado</div></div>
-<div class="rev-block" style="--rbc:var(--red)"><div class="rb-num">2</div><div class="rb-name">No aplica / Descartado</div><div class="rb-desc">1 lead · 1 SQL</div></div>
-<div class="rev-block" style="--rbc:var(--muted);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Test</div></div>
-</div>
   </div>
 
-  <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
-
-  <div class="section-label">Estado del lead · 5 con estado</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks"><div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">1</div><div class="rb-name">Lead frío</div><div class="rb-desc">Sin cualificar aún</div></div>
-<div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">2</div><div class="rb-name">Lead caliente</div><div class="rb-desc">Intento de contacto</div></div>
-<div class="rev-block" style="--rbc:var(--guru-400);opacity:.4"><div class="rb-num">0</div><div class="rb-name">En contacto</div><div class="rb-desc">Conversación abierta</div></div>
-<div class="rev-block" style="--rbc:var(--orange);opacity:.4"><div class="rb-num">0</div><div class="rb-name">En negociación</div><div class="rb-desc">Oportunidad en curso</div></div>
-<div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">1</div><div class="rb-name">Prueba Gratuita</div><div class="rb-desc">Usando la plataforma</div></div>
-<div class="rev-block" style="--rbc:var(--green);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Cliente</div><div class="rb-desc">Convertido a cliente</div></div>
-<div class="rev-block" style="--rbc:var(--muted)"><div class="rb-num">1</div><div class="rb-name">Mareado</div><div class="rb-desc">Sin avance claro</div></div>
-</div>
+  <div class="section-label">Evolución acumulada 1 jun 2026 → hoy</div>
+  <div class="charts-3">
+    <div class="chart-card"><h3>Nuevos contactos / leads</h3><div class="sub">acumulado diario</div><svg viewBox="0 0 720 200" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block"><defs><linearGradient id="gFF6B5B" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6B5B" stop-opacity=".30"/><stop offset="1" stop-color="#FF6B5B" stop-opacity="0"/></linearGradient></defs><text x="38" y="174" text-anchor="end" fill="#7b76a0" font-size="10">0</text><line x1="44" y1="170" x2="706" y2="170" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><text x="38" y="97" text-anchor="end" fill="#7b76a0" font-size="10">318</text><line x1="44" y1="93" x2="706" y2="93" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><text x="38" y="20" text-anchor="end" fill="#7b76a0" font-size="10">636</text><line x1="44" y1="16" x2="706" y2="16" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><polygon points="44,170 44.0,168.1 62.4,165.2 80.8,162.7 99.2,160.6 117.6,159.3 135.9,158.6 154.3,157.4 172.7,155.7 191.1,149.9 209.5,145.3 227.9,141.4 246.3,139.0 264.7,137.8 283.1,137.3 301.4,133.7 319.8,130.5 338.2,128.6 356.6,124.7 375.0,122.3 393.4,120.6 411.8,118.7 430.2,112.9 448.6,85.3 466.9,67.6 485.3,62.2 503.7,59.1 522.1,57.2 540.5,54.3 558.9,46.8 577.3,40.5 595.7,35.1 614.1,29.3 632.4,25.9 650.8,23.5 669.2,20.8 687.6,18.2 706.0,16.0 706.0,170" fill="url(#gFF6B5B)"/><polyline points="44.0,168.1 62.4,165.2 80.8,162.7 99.2,160.6 117.6,159.3 135.9,158.6 154.3,157.4 172.7,155.7 191.1,149.9 209.5,145.3 227.9,141.4 246.3,139.0 264.7,137.8 283.1,137.3 301.4,133.7 319.8,130.5 338.2,128.6 356.6,124.7 375.0,122.3 393.4,120.6 411.8,118.7 430.2,112.9 448.6,85.3 466.9,67.6 485.3,62.2 503.7,59.1 522.1,57.2 540.5,54.3 558.9,46.8 577.3,40.5 595.7,35.1 614.1,29.3 632.4,25.9 650.8,23.5 669.2,20.8 687.6,18.2 706.0,16.0" fill="none" stroke="#FF6B5B" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="448.6" cy="85.3" r="4" fill="#FF6B5B"/><text x="449" y="77" text-anchor="middle" fill="#FF6B5B" font-size="10" font-weight="700">pico +114</text><text x="44" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">1 jun</text><text x="449" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">23 jun</text><text x="706" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">7 jul</text></svg></div>
+    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario</div><svg viewBox="0 0 720 200" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block"><defs><linearGradient id="gf59e0b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity=".30"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></linearGradient></defs><text x="38" y="174" text-anchor="end" fill="#7b76a0" font-size="10">0</text><line x1="44" y1="170" x2="706" y2="170" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><text x="38" y="97" text-anchor="end" fill="#7b76a0" font-size="10">28</text><line x1="44" y1="93" x2="706" y2="93" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><text x="38" y="20" text-anchor="end" fill="#7b76a0" font-size="10">56</text><line x1="44" y1="16" x2="706" y2="16" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><polygon points="44,170 44.0,170.0 62.4,170.0 80.8,170.0 99.2,170.0 117.6,164.5 135.9,164.5 154.3,161.8 172.7,156.2 191.1,153.5 209.5,148.0 227.9,137.0 246.3,134.2 264.7,131.5 283.1,131.5 301.4,131.5 319.8,126.0 338.2,126.0 356.6,120.5 375.0,115.0 393.4,109.5 411.8,106.8 430.2,95.7 448.6,84.8 466.9,82.0 485.3,79.2 503.7,76.5 522.1,73.8 540.5,68.2 558.9,62.8 577.3,60.0 595.7,54.5 614.1,40.8 632.4,35.2 650.8,29.8 669.2,24.3 687.6,16.0 706.0,16.0 706.0,170" fill="url(#gf59e0b)"/><polyline points="44.0,170.0 62.4,170.0 80.8,170.0 99.2,170.0 117.6,164.5 135.9,164.5 154.3,161.8 172.7,156.2 191.1,153.5 209.5,148.0 227.9,137.0 246.3,134.2 264.7,131.5 283.1,131.5 301.4,131.5 319.8,126.0 338.2,126.0 356.6,120.5 375.0,115.0 393.4,109.5 411.8,106.8 430.2,95.7 448.6,84.8 466.9,82.0 485.3,79.2 503.7,76.5 522.1,73.8 540.5,68.2 558.9,62.8 577.3,60.0 595.7,54.5 614.1,40.8 632.4,35.2 650.8,29.8 669.2,24.3 687.6,16.0 706.0,16.0" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="614.1" cy="40.8" r="4" fill="#f59e0b"/><text x="614" y="33" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">pico +5</text><text x="44" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">1 jun</text><text x="614" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">2 jul</text><text x="706" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">7 jul</text></svg></div>
+    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario</div><svg viewBox="0 0 720 200" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block"><defs><linearGradient id="g10b981" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b981" stop-opacity=".30"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></linearGradient></defs><text x="38" y="174" text-anchor="end" fill="#7b76a0" font-size="10">0</text><line x1="44" y1="170" x2="706" y2="170" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><text x="38" y="97" text-anchor="end" fill="#7b76a0" font-size="10">8</text><line x1="44" y1="93" x2="706" y2="93" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><text x="38" y="20" text-anchor="end" fill="#7b76a0" font-size="10">16</text><line x1="44" y1="16" x2="706" y2="16" stroke="#2e2a5a" stroke-width="1" opacity=".5"/><polygon points="44,170 44.0,170.0 62.4,170.0 80.8,170.0 99.2,170.0 117.6,150.8 135.9,150.8 154.3,141.1 172.7,121.9 191.1,112.2 209.5,93.0 227.9,54.5 246.3,54.5 264.7,54.5 283.1,54.5 301.4,54.5 319.8,44.9 338.2,44.9 356.6,44.9 375.0,44.9 393.4,35.2 411.8,35.2 430.2,16.0 448.6,16.0 466.9,16.0 485.3,16.0 503.7,16.0 522.1,16.0 540.5,16.0 558.9,16.0 577.3,16.0 595.7,16.0 614.1,16.0 632.4,16.0 650.8,16.0 669.2,16.0 687.6,16.0 706.0,16.0 706.0,170" fill="url(#g10b981)"/><polyline points="44.0,170.0 62.4,170.0 80.8,170.0 99.2,170.0 117.6,150.8 135.9,150.8 154.3,141.1 172.7,121.9 191.1,112.2 209.5,93.0 227.9,54.5 246.3,54.5 264.7,54.5 283.1,54.5 301.4,54.5 319.8,44.9 338.2,44.9 356.6,44.9 375.0,44.9 393.4,35.2 411.8,35.2 430.2,16.0 448.6,16.0 466.9,16.0 485.3,16.0 503.7,16.0 522.1,16.0 540.5,16.0 558.9,16.0 577.3,16.0 595.7,16.0 614.1,16.0 632.4,16.0 650.8,16.0 669.2,16.0 687.6,16.0 706.0,16.0" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="227.9" cy="54.5" r="4" fill="#10b981"/><text x="228" y="46" text-anchor="middle" fill="#10b981" font-size="10" font-weight="700">pico +4</text><text x="44" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">1 jun</text><text x="228" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">11 jun</text><text x="706" y="192" text-anchor="middle" fill="#7b76a0" font-size="10">7 jul</text></svg></div>
   </div>
 
-  <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
+  <div class="section-label">Contactos generados · últimas 24h</div>
+  <div class="funnel"><div class="f-card f-c-default"><div class="fc-label">Contactos</div><div class="fc-value">20</div><div class="fc-sub">últimas 24h</div></div><div class="f-arrow"></div><div class="f-card f-c-default"><div class="fc-label">Leads</div><div class="fc-value">14</div><div class="fc-sub">▼ 70% desde anterior</div></div><div class="f-arrow"></div><div class="f-card f-c-orange"><div class="fc-label">SQL Consultoría</div><div class="fc-value">3</div><div class="fc-sub">▼ 21% desde anterior</div></div><div class="f-arrow"></div><div class="f-card f-c-green"><div class="fc-label">Agenda reunión</div><div class="fc-value">0</div><div class="fc-sub">▼ 0% desde anterior</div></div><div class="f-arrow"></div><div class="f-card f-c-default"><div class="fc-label">Oportunidad</div><div class="fc-value">0</div><div class="fc-sub">▼ 0% desde anterior</div></div></div>
+  <div class="free-kpi"><div class="fk-num">5</div><div class="fk-txt"><strong>Freemium</strong> en 24h · <strong>25%</strong> del total de contactos (20)</div></div>
+  <div class="caption">Reuniones agendadas hoy: —</div>
 
-  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
+  <div class="section-label">Canales de adquisición · últimas 24h</div>
+  <div class="channels-grid"><div class="ch-card" style="--chc:#94a3b8"><div class="ch-icon">🔗</div><div class="ch-num">5</div><div class="ch-label">Tráfico directo</div><div class="ch-pct">25% del total</div><div class="ch-sql">1 lead · 4 freem</div></div>
+<div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">4</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">20% del total</div><div class="ch-sql">2 lead · 2 SQL</div></div>
+<div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">4</div><div class="ch-label">Social Ads</div><div class="ch-pct">20% del total</div><div class="ch-sql">4 lead</div></div>
+<div class="ch-card" style="--chc:#4285F4"><div class="ch-icon">🔍</div><div class="ch-num">3</div><div class="ch-label">Google Ads</div><div class="ch-pct">15% del total</div><div class="ch-sql">1 lead · 1 SQL · 1 freem</div></div>
+<div class="ch-card" style="--chc:#64748b"><div class="ch-icon">•</div><div class="ch-num">3</div><div class="ch-label">Otros</div><div class="ch-pct">15% del total</div><div class="ch-sql">3 lead</div></div>
+<div class="ch-card" style="--chc:#22d3ee"><div class="ch-icon">💬</div><div class="ch-num">1</div><div class="ch-label">Chat web</div><div class="ch-pct">5% del total</div><div class="ch-sql">1 lead</div></div>
+<div class="ch-card" style="--chc:#ec4899;opacity:.45"><div class="ch-icon">🎪</div><div class="ch-num">0</div><div class="ch-label">Eventos / Campañas</div><div class="ch-pct">— del total</div><div class="ch-sql">—</div></div>
+<div class="ch-card" style="--chc:#22c55e;opacity:.45"><div class="ch-icon">🌱</div><div class="ch-num">0</div><div class="ch-label">Social orgánico</div><div class="ch-pct">— del total</div><div class="ch-sql">—</div></div>
+</div>
+
+  <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">SQL Consultoría del período · empresa, canal y estado</span>
-      <span class="badge badge-green">📞 Seguimiento comercial</span>
-    </div>
-    <table class="table">
-      <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
-      <tbody><tr><td><strong>Abdalah</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Valéria</strong></td><td>Equipe Multiprofissional - CEMCA · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Aditya Rath</strong></td><td>Braj Raj Perfumes · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr></tbody>
-    </table>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>💡</span>
-      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
-      <br>• <strong>Brand = intención alta</strong>: los SQL de campaña de marca avanzan rápido a oportunidad/demo.
-      <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
-      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
-      <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
-      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. El estado de llamada íntegro se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
-    </div>
+    <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
+      <span class="badge badge-green">📞 Seguimiento comercial</span></div>
+    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
+    <tbody><tr><td><strong>Abdalah</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Valéria</strong></td><td>Equipe Multiprofissional - CEMCA · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span> · <span style="color:var(--red)">descartado</span></td></tr><tr><td><strong>Aditya Rath</strong></td><td>Braj Raj Perfumes · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr></tbody></table>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas». La <strong>razón de descarte/descualificación</strong> se mostrará aquí en cuanto esté creada la propiedad correspondiente en HubSpot.</div></div>
   </div>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Empresas en pipeline · por canal de marketing y etapa</span>
-      <span class="badge badge-green">17 oportunidades de marketing</span>
-    </div>
+    <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
+      <span class="badge badge-green">17 oportunidades de marketing</span></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
-    <table class="table" id="emp-table">
-      <thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
-      <tbody><tr class="stage-divider"><td colspan="3">Discovery · 2 deals</td></tr><tr data-name="greyfinch"><td><strong>Greyfinch</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr class="stage-divider"><td colspan="3">Demo / Reunión · 14 deals</td></tr><tr data-name="mizubath"><td><strong>Mizubath</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="xtrim"><td><strong>Xtrim</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="plenergy"><td><strong>Plenergy</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="meit"><td><strong>Meit</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="estiro"><td><strong>Estiro</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dvd dental solution"><td><strong>DVD DENTAL SOLUTION</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="netberry"><td><strong>Netberry</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="sector vending"><td><strong>Sector Vending</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="centro médico lámar"><td><strong>Centro Médico Lámar</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dencanto community"><td><strong>Dencanto Community</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="som mobilitat"><td><strong>Som Mobilitat</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="cos global services"><td><strong>COS Global Services</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="brava nails"><td><strong>Brava Nails</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr></tbody>
-    </table>
+    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
+    <tbody><tr class="stage-divider"><td colspan="3">Discovery · 2 deals</td></tr><tr data-name="greyfinch"><td><strong>Greyfinch</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-discov">Discovery</span></td></tr><tr class="stage-divider"><td colspan="3">Demo / Reunión · 14 deals</td></tr><tr data-name="mizubath"><td><strong>Mizubath</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="xtrim"><td><strong>Xtrim</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="plenergy"><td><strong>Plenergy</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="meit"><td><strong>Meit</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="estiro"><td><strong>Estiro</strong></td><td>🌿 SEO Orgánico</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dvd dental solution"><td><strong>DVD DENTAL SOLUTION</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="netberry"><td><strong>Netberry</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="sector vending"><td><strong>Sector Vending</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="centro médico lámar"><td><strong>Centro Médico Lámar</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="dencanto community"><td><strong>Dencanto Community</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="som mobilitat"><td><strong>Som Mobilitat</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="cos global services"><td><strong>COS Global Services</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr><tr data-name="brava nails"><td><strong>Brava Nails</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td></tr></tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-    <div class="rev-blocks" style="margin-top:16px;">
-      <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">17</div><div class="rb-name">Oportunidades en pipeline</div><div class="rb-desc">Solo canales de marketing</div></div>
-      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">14</div><div class="rb-name">En demo / reunión</div><div class="rb-desc">Etapa presentación</div></div>
-      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">0</div><div class="rb-name">Nuevas oportunidades</div><div class="rb-desc">Creadas en el período</div></div>
-    </div>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>ℹ️</span>
-      <div>Solo oportunidades cuyo contacto entró por un <strong>canal de marketing</strong> (Paid Search/Social, SEO, directo, social orgánico, referencias, chat web o eventos). Se excluyen deals de extensión de Sales, integraciones, alta manual e importación. Reparto por canal: 6 🌿 SEO Orgánico · 5 🔗 Tráfico directo · 3 🎪 Eventos / Campañas · 3 🔍 Google Ads.</div>
-    </div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Reparto por canal: 6 🌿 SEO Orgánico · 5 🔗 Tráfico directo · 3 🎪 Eventos / Campañas · 3 🔍 Google Ads.</div></div>
   </div>
 
-  <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 07 Jul 2026 · 11:53 (hora España)
+  <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
+    GuruSup · Dashboard Diario · generado el 07 Jul 2026 · 15:14 (hora España)
   </div>
-
 </div>
 <script>
-(function(){
-  window.filtrarEmpresas=function(){
-    var q=document.getElementById('emp-search').value.toLowerCase().trim();
-    var rows=document.querySelectorAll('#emp-table tbody tr:not(.stage-divider)');
-    var visibles=0;
-    rows.forEach(function(r){
-      var name=r.querySelector('td strong');
-      var match=name && name.textContent.toLowerCase().indexOf(q)!==-1;
-      r.style.display=(!q||match)?'':'none';
-      if(!q||match) visibles++;
-    });
-    document.querySelectorAll('#emp-table tbody tr.stage-divider').forEach(function(div){
-      var next=div.nextElementSibling, has=false;
-      while(next && !next.classList.contains('stage-divider')){
-        if(next.style.display!=='none') has=true;
-        next=next.nextElementSibling;
-      }
-      div.style.display=(has||!q)?'':'none';
-    });
-    var empty=document.getElementById('emp-empty');
-    if(empty) empty.style.display=visibles===0?'block':'none';
-  };
-})();
+window.filtrarEmpresas=function(){
+  var q=document.getElementById('emp-search').value.toLowerCase().trim();
+  var rows=document.querySelectorAll('#emp-table tbody tr:not(.stage-divider)'), vis=0;
+  rows.forEach(function(r){ var n=r.querySelector('td strong'); var m=n&&n.textContent.toLowerCase().indexOf(q)!==-1;
+    r.style.display=(!q||m)?'':'none'; if(!q||m) vis++; });
+  document.querySelectorAll('#emp-table tbody tr.stage-divider').forEach(function(dv){
+    var nx=dv.nextElementSibling, has=false;
+    while(nx&&!nx.classList.contains('stage-divider')){ if(nx.style.display!=='none') has=true; nx=nx.nextElementSibling; }
+    dv.style.display=(has||!q)?'':'none'; });
+  var em=document.getElementById('emp-empty'); if(em) em.style.display=vis===0?'block':'none';
+};
 </script>
 </body>
 </html>
