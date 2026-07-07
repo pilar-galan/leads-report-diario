@@ -27,7 +27,7 @@ MESES = ["enero","febrero","marzo","abril","mayo","junio","julio",
 MESES3 = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
 DIAS  = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
 
-FUNNEL_START_DEFAULT = "2026-06-01T00:00:00"   # embudos acumulados desde 1 jun
+FUNNEL_START_DEFAULT = "2026-01-01T00:00:00"   # embudos acumulados desde 1 ene (anual)
 CHART_START_DEFAULT  = "2026-01-01T00:00:00"   # gráficos evolutivos anuales desde 1 ene
 
 MARKETING_SOURCES = {
@@ -361,6 +361,34 @@ def main():
     ch_opp   = series(lambda c: rank(c["lc"]) >= 4)
     ch_cli   = series(lambda c: rank(c["lc"]) >= 5)
 
+    def peak_insight(pred):
+        """Día con mayor incremento + canal/campaña de origen dominante."""
+        from collections import Counter
+        inc = [0]*len(days)
+        chc = [Counter() for _ in days]
+        cmp = [Counter() for _ in days]
+        for c in hist:
+            if c["created"] in idx and pred(c):
+                i = idx[c["created"]]; inc[i] += 1
+                chc[i][classify_channel(c["src"], c["d1"])[0]] += 1
+                if c["d1"]:
+                    cmp[i][c["d1"]] += 1
+        if not any(inc):
+            return "Sin datos suficientes."
+        pi = max(range(len(days)), key=lambda i: inc[i])
+        if inc[pi] == 0:
+            return "Sin picos relevantes."
+        day = days[pi]; delta = inc[pi]
+        top_ch = chc[pi].most_common(1)
+        txt = f"Pico {day.day} {MESES3[day.month-1]} (+{delta})"
+        if top_ch:
+            lbl, cn = top_ch[0]
+            txt += f" · origen {round(cn/delta*100)}% <strong>{esc(lbl)}</strong>"
+        top_cmp = cmp[pi].most_common(1)
+        if top_cmp and top_cmp[0][1] >= 2:
+            txt += f" · «{esc(top_cmp[0][0][:38])}»"
+        return txt
+
     # ── Canales (diario) con desglose lead/SQL/freemium ──
     chan = {}
     for c in daily:
@@ -423,6 +451,10 @@ def main():
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
         "svg_opp": svg_cumulative(*ch_opp, labels, "#10b981"),
         "svg_cli": svg_cumulative(*ch_cli, labels, "#22d3ee"),
+        "peak_leads": peak_insight(lambda c: rank(c["lc"]) >= 1),
+        "peak_sql": peak_insight(lambda c: rank(c["lc"]) >= 3),
+        "peak_opp": peak_insight(lambda c: rank(c["lc"]) >= 4),
+        "peak_cli": peak_insight(lambda c: rank(c["lc"]) >= 5),
         "channels": channels, "sql_rows": sql_rows,
         "mkt_deals": mkt_deals, "mkt_total": len(mkt_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
@@ -543,6 +575,7 @@ def render(d):
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
         sales_pyr=sales_pyr, free_pyr=free_pyr,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
+        peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
         meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
@@ -617,6 +650,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 @media(max-width:720px){{ .charts-2 {{ grid-template-columns:1fr; }} }}
 .chart-card {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 16px 10px; }}
 .chart-card h3 {{ font-size:13px; font-weight:700; margin-bottom:2px; }}
+.peak-note {{ font-size:11px; color:var(--text-2); margin-top:6px; padding-top:8px; border-top:1px solid var(--border); line-height:1.5; }}
+.peak-note strong {{ color:var(--guru-300); }}
 .chart-card .sub {{ font-size:10px; color:var(--muted); margin-bottom:8px; }}
 
 /* Funnel horizontal 24h */
@@ -731,10 +766,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
   <div class="charts-2">
-    <div class="chart-card"><h3>Leads generados</h3><div class="sub">acumulado diario · anual</div>{svg_leads}</div>
-    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario · anual</div>{svg_sql}</div>
-    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario · anual</div>{svg_opp}</div>
-    <div class="chart-card"><h3>Clientes</h3><div class="sub">acumulado diario · anual</div>{svg_cli}</div>
+    <div class="chart-card"><h3>Leads generados</h3><div class="sub">acumulado diario · anual</div>{svg_leads}<div class="peak-note">📌 {peak_leads}</div></div>
+    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario · anual</div>{svg_sql}<div class="peak-note">📌 {peak_sql}</div></div>
+    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario · anual</div>{svg_opp}<div class="peak-note">📌 {peak_opp}</div></div>
+    <div class="chart-card"><h3>Clientes</h3><div class="sub">acumulado diario · anual</div>{svg_cli}<div class="peak-note">📌 {peak_cli}</div></div>
   </div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
