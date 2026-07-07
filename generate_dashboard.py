@@ -16,7 +16,7 @@ Ventanas: los embudos y gráficos se calculan desde HIST_START (1 jun) hasta aho
 El resumen 24h, canales y estados usan la ventana diaria.
 Overrides por env: GEN_START/GEN_END/GEN_OUTPUT/GEN_TITLE/GEN_PERIOD/GEN_FECHA/GEN_HIST_START.
 """
-import os, sys, json, urllib.request, urllib.error, re
+import os, sys, json, time, urllib.request, urllib.error, re
 from datetime import datetime, timedelta, timezone, date
 
 TOKEN = os.environ.get("HUBSPOT_TOKEN", "")
@@ -73,19 +73,34 @@ FIXED_CHANNELS = {
 }
 
 
-# ─────────────── HubSpot API ───────────────
+# ─────────────── HubSpot API (con reintentos ante 429) ───────────────
+def _open(req, tries=6):
+    for a in range(tries):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and a < tries - 1:
+                ra = e.headers.get("Retry-After")
+                time.sleep(float(ra) if ra else min(2 ** a, 10))
+                continue
+            raise
+        except urllib.error.URLError:
+            if a < tries - 1:
+                time.sleep(min(2 ** a, 10)); continue
+            raise
+
+
 def api_post(path, payload):
     req = urllib.request.Request(BASE + path, data=json.dumps(payload).encode(),
         headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode())
+    return _open(req)
 
 
 def api_get(path):
     req = urllib.request.Request(BASE + path,
         headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}, method="GET")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode())
+    return _open(req)
 
 
 def fetch_all(obj_type, filters, properties):
@@ -99,6 +114,7 @@ def fetch_all(obj_type, filters, properties):
         after = data.get("paging", {}).get("next", {}).get("after")
         if not after:
             break
+        time.sleep(0.25)  # evita ráfagas que disparan el rate limit
     return results
 
 
