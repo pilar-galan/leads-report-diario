@@ -360,20 +360,16 @@ def main():
 
     fstart, dstart = funnel_iso[:10], start_iso[:10]
 
-    # ── Oportunidades y Clientes = EMPRESAS por ciclo de vida (1 por compañía) ──
-    comp_raw = fetch_all("companies", [
-        {"propertyName": "lifecyclestage", "operator": "IN", "values": ["opportunity", "customer"]},
-        {"propertyName": "createdate", "operator": "GTE", "value": chart_iso},
-    ], ["name", "lifecyclestage", "createdate"])
-    companies = []
-    for co in comp_raw:
-        p = co["properties"]
-        companies.append({"lc": p.get("lifecyclestage") or "", "created": (p.get("createdate") or "")[:10],
-                          "src": "", "d1": ""})
-    opp_cum = sum(1 for c in companies if c["lc"] == "opportunity" and c["created"] >= fstart)
-    cli_cum = sum(1 for c in companies if c["lc"] == "customer" and c["created"] >= fstart)
-    opp_day = sum(1 for c in companies if c["lc"] == "opportunity" and c["created"] >= dstart)
-    cli_day = sum(1 for c in companies if c["lc"] == "customer" and c["created"] >= dstart)
+    # ── Oportunidades y Clientes = contactos en opportunity/customer, DEDUPLICADOS por empresa ──
+    # (el token no tiene permiso de lectura del objeto companies → usamos contactos únicos por compañía)
+    def compkey(c):
+        return c["company"].strip().lower() or c["email"].strip().lower() or id(c)
+    def uniq_companies(lc_value, since):
+        return len({compkey(c) for c in hist if c["lc"] == lc_value and c["created"] >= since})
+    opp_cum = uniq_companies("opportunity", fstart)
+    cli_cum = uniq_companies("customer", fstart)
+    opp_day = uniq_companies("opportunity", dstart)
+    cli_day = uniq_companies("customer", dstart)
 
     # ── Deals · reunión agendada (demo+) y tabla de pipeline (abiertos) ──
     DEMO_PLUS = {"presentationscheduled", "1033589123", "1119432966"}  # needs-validation, best case, close won
@@ -426,10 +422,16 @@ def main():
         days.append(dcur)
         dcur += timedelta(days=1)
     idx = {d.isoformat(): i for i, d in enumerate(days)}
-    def series(items, pred):
+    def series(items, pred, keyf=None):
         daily_inc = [0]*len(days)
-        for it in items:
+        seen = set()
+        for it in sorted(items, key=lambda x: x["created"]) if keyf else items:
             if it["created"] in idx and pred(it):
+                if keyf:
+                    k = keyf(it)
+                    if k in seen:
+                        continue
+                    seen.add(k)
                 daily_inc[idx[it["created"]]] += 1
         cumv, run = [], 0
         for v in daily_inc:
@@ -438,8 +440,8 @@ def main():
     labels = [f"{d.day} {MESES3[d.month-1]}" for d in days]
     ch_leads = series(hist, lambda c: rank(c["lc"]) >= 1)
     ch_sql   = series(hist, lambda c: rank(c["lc"]) >= 3)
-    ch_opp   = series(companies, lambda c: c["lc"] == "opportunity")  # empresas oportunidad
-    ch_cli   = series(companies, lambda c: c["lc"] == "customer")     # empresas cliente
+    ch_opp   = series(hist, lambda c: c["lc"] == "opportunity", compkey)  # empresas oportunidad
+    ch_cli   = series(hist, lambda c: c["lc"] == "customer", compkey)     # empresas cliente
 
     def peak_insight(items, pred, topn=2, origin=True):
         """Top-N días con mayor incremento + (opcional) canal/campaña de origen."""
@@ -514,8 +516,8 @@ def main():
         "svg_cli": svg_cumulative(*ch_cli, labels, "#22d3ee"),
         "peak_leads": peak_insight(hist, lambda c: rank(c["lc"]) >= 1),
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
-        "peak_opp": peak_insight(companies, lambda c: c["lc"] == "opportunity", origin=False),
-        "peak_cli": peak_insight(companies, lambda c: c["lc"] == "customer", origin=False),
+        "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
+        "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
         "channels": channels, "sql_rows": sql_rows,
         "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
