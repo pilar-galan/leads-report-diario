@@ -27,7 +27,8 @@ MESES = ["enero","febrero","marzo","abril","mayo","junio","julio",
 MESES3 = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
 DIAS  = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
 
-HIST_START_DEFAULT = "2026-06-01T00:00:00"
+FUNNEL_START_DEFAULT = "2026-06-01T00:00:00"   # embudos acumulados desde 1 jun
+CHART_START_DEFAULT  = "2026-01-01T00:00:00"   # gráficos evolutivos anuales desde 1 ene
 
 MARKETING_SOURCES = {
     "PAID_SEARCH", "PAID_SOCIAL", "ORGANIC_SEARCH", "SOCIAL_MEDIA",
@@ -269,7 +270,8 @@ def main():
     title     = os.environ.get("GEN_TITLE",  "GuruSup · Dashboard Diario")
     period_ov = os.environ.get("GEN_PERIOD")
     fecha_ov  = os.environ.get("GEN_FECHA")
-    hist_start_s = os.environ.get("GEN_HIST_START", HIST_START_DEFAULT)
+    funnel_start_s = os.environ.get("GEN_HIST_START", FUNNEL_START_DEFAULT)
+    chart_start_s  = os.environ.get("GEN_CHART_START", CHART_START_DEFAULT)
 
     if gen_start and gen_end:
         start  = datetime.fromisoformat(gen_start).replace(tzinfo=tz)
@@ -289,12 +291,14 @@ def main():
 
     start_iso = iso(start)
     end_iso   = iso(es_now)
-    hist_start = datetime.fromisoformat(hist_start_s).replace(tzinfo=tz)
-    hist_iso   = iso(hist_start)
+    funnel_start = datetime.fromisoformat(funnel_start_s).replace(tzinfo=tz)
+    funnel_iso   = iso(funnel_start)
+    chart_start  = datetime.fromisoformat(chart_start_s).replace(tzinfo=tz)
+    chart_iso    = iso(chart_start)
 
-    # Histórico desde 1 jun (incluye la ventana diaria como subconjunto)
+    # Histórico desde 1 ene (gráficos anuales; embudos y diario son subconjuntos)
     hraw = fetch_all("contacts", [
-        {"propertyName": "createdate", "operator": "BETWEEN", "value": hist_iso, "highValue": end_iso},
+        {"propertyName": "createdate", "operator": "BETWEEN", "value": chart_iso, "highValue": end_iso},
         {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
     ], ["email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
@@ -321,19 +325,20 @@ def main():
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
+    hist_fun = [c for c in hist if c["created_full"] >= funnel_iso]   # embudos: desde 1 jun
 
-    # Reuniones de marketing (histórico) -> agenda acumulada y diaria
-    meetings = fetch_marketing_meetings(hist_iso, end_iso)
+    # Reuniones de marketing (desde 1 jun, para el embudo) -> agenda acumulada y diaria
+    meetings = fetch_marketing_meetings(funnel_iso, end_iso)
     agenda_cum = len({m["cid"] for m in meetings})
     daily_meets = [m for m in meetings if m["created"] >= start_iso[:10]]
     agenda_day = len({m["cid"] for m in daily_meets})
     meet_names = " · ".join(f"<strong>{esc(m['name'])}</strong> ({esc(m['channel'])})" for m in daily_meets) or "—"
 
-    cum = funnel_counts(hist)
+    cum = funnel_counts(hist_fun)
     dd  = funnel_counts(daily)
 
-    # ── Gráficos acumulados por día ──
-    d0 = hist_start.date()
+    # ── Gráficos acumulados por día (anual, desde 1 ene) ──
+    d0 = chart_start.date()
     dN = es_now.date()
     days = []
     dcur = d0
@@ -351,9 +356,10 @@ def main():
             run += v; cumv.append(run)
         return cumv, daily_inc
     labels = [f"{d.day} {MESES3[d.month-1]}" for d in days]
-    ch_contacts = series(lambda c: True)
-    ch_sql      = series(lambda c: rank(c["lc"]) >= 3)
-    ch_opp      = series(lambda c: rank(c["lc"]) >= 4)
+    ch_leads = series(lambda c: rank(c["lc"]) >= 1)
+    ch_sql   = series(lambda c: rank(c["lc"]) >= 3)
+    ch_opp   = series(lambda c: rank(c["lc"]) >= 4)
+    ch_cli   = series(lambda c: rank(c["lc"]) >= 5)
 
     # ── Canales (diario) con desglose lead/SQL/freemium ──
     chan = {}
@@ -409,12 +415,14 @@ def main():
 
     data = {
         "title": title, "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
-        "hist_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
+        "fun_label": f"{funnel_start.day} {MESES3[funnel_start.month-1]} {funnel_start.year} → hoy",
+        "chart_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
         "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day,
         "meet_names": meet_names,
-        "svg_contacts": svg_cumulative(*ch_contacts, labels, "#FF6B5B"),
+        "svg_leads": svg_cumulative(*ch_leads, labels, "#FF6B5B"),
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
         "svg_opp": svg_cumulative(*ch_opp, labels, "#10b981"),
+        "svg_cli": svg_cumulative(*ch_cli, labels, "#22d3ee"),
         "channels": channels, "sql_rows": sql_rows,
         "mkt_deals": mkt_deals, "mkt_total": len(mkt_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
@@ -544,9 +552,9 @@ def render(d):
 
     return TEMPLATE.format(
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
-        hist_label=esc(d["hist_label"]),
+        fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
         dist_band=dist_band, sales_pyr=sales_pyr, free_pyr=free_pyr,
-        svg_contacts=d["svg_contacts"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"],
+        svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
         meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
@@ -617,10 +625,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fn-highlight {{ margin-top:14px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.25); color:#a5f3fc; border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.5; }}
 
 /* Gráficos */
-.charts-3 {{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }}
-@media(max-width:820px){{ .charts-3 {{ grid-template-columns:1fr; }} }}
-.chart-card {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 14px 8px; }}
-.chart-card h3 {{ font-size:12px; font-weight:700; margin-bottom:2px; }}
+.charts-2 {{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }}
+@media(max-width:720px){{ .charts-2 {{ grid-template-columns:1fr; }} }}
+.chart-card {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 16px 10px; }}
+.chart-card h3 {{ font-size:13px; font-weight:700; margin-bottom:2px; }}
 .chart-card .sub {{ font-size:10px; color:var(--muted); margin-bottom:8px; }}
 
 /* Funnel horizontal 24h */
@@ -707,11 +715,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
   <div class="header-title"><h1>{title}</h1><p>{fecha_larga} · {periodo_txt}</p></div>
   <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span></div>
-  <div class="sync-bar">Generado el {generado} · embudos y gráficos acumulados {hist_label}</div></div>
+  <div class="sync-bar">Generado el {generado} · embudos acumulados {fun_label} · gráficos anuales {chart_label}</div></div>
 
 <div class="main">
 
-  <div class="section-label">Etapas de ciclo de vida · acumulado {hist_label}</div>
+  <div class="section-label">Etapas de ciclo de vida · acumulado {fun_label}</div>
   <div class="lc-band">{dist_band}</div>
 
   <div class="flow-sep"><span>▽ De SQL y Freemium en adelante · evolución del proceso comercial y de activación</span></div>
@@ -730,11 +738,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     </div>
   </div>
 
-  <div class="section-label">Evolución acumulada {hist_label}</div>
-  <div class="charts-3">
-    <div class="chart-card"><h3>Nuevos contactos / leads</h3><div class="sub">acumulado diario</div>{svg_contacts}</div>
-    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario</div>{svg_sql}</div>
-    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario</div>{svg_opp}</div>
+  <div class="section-label">Evolución anual acumulada · {chart_label}</div>
+  <div class="charts-2">
+    <div class="chart-card"><h3>Leads generados</h3><div class="sub">acumulado diario · anual</div>{svg_leads}</div>
+    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario · anual</div>{svg_sql}</div>
+    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario · anual</div>{svg_opp}</div>
+    <div class="chart-card"><h3>Clientes</h3><div class="sub">acumulado diario · anual</div>{svg_cli}</div>
   </div>
 
   <div class="section-label">Contactos generados · últimas 24h</div>
