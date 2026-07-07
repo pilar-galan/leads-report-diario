@@ -160,6 +160,7 @@ def funnel_counts(lst):
     return {
         "total": len(lst),
         "lead": sum(1 for c in lst if rank(c["lc"]) >= 1),
+        "lead_pure": sum(1 for c in lst if rank(c["lc"]) in (1, 2)),  # lead/MQL, aún no SQL
         "sql":  sum(1 for c in lst if rank(c["lc"]) >= 3),
         "opp":  sum(1 for c in lst if rank(c["lc"]) >= 4),
         "cli":  sum(1 for c in lst if rank(c["lc"]) >= 5),
@@ -432,12 +433,28 @@ def main():
 def render(d):
     cum, dd = d["cum"], d["dd"]
 
-    # Pirámide (embudo invertido). steps: [(label, value, conv_txt)]
+    # ── Banda de etapas de ciclo de vida (distribución, sin conversión) ──
+    def stage_chip(label, val, sub, color):
+        return (f'<div class="lc-stage" style="--sc:{color}">'
+                f'<div class="lc-n">{val}</div><div class="lc-l">{esc(label)}</div>'
+                f'<div class="lc-s">{sub}</div></div>')
+    pct_sql_total  = pct(cum["sql"], cum["total"])
+    pct_free_total = pct(cum["free"], cum["total"])
+    dist_band = (
+        '<div class="lc-total"><div class="n">' + str(cum["total"]) + '</div>'
+        '<div class="t">Contactos creados<br><span>acumulado</span></div></div>'
+        '<div class="lc-stages">'
+        + stage_chip("Leads", cum["lead_pure"], "en ciclo de vida", "#FF6B5B")
+        + stage_chip("SQL Consultoría", cum["sql"], pct_sql_total + " del total", "#f59e0b")
+        + stage_chip("Freemium", cum["free"], pct_free_total + " del total", "#22d3ee")
+        + '</div>')
+
+    # ── Pirámides evolutivas (embudo invertido desde SQL / Freemium) ──
     def pyramid(steps, palette):
         top = steps[0][1] or 1
         rows = ""
         for i, (label, val, conv) in enumerate(steps):
-            w = max(34, round(val / top * 100)) if top else 34
+            w = max(38, round(val / top * 100)) if top else 38
             color = palette[min(i, len(palette)-1)]
             conv_html = f'<div class="pyr-conv">▼ {conv}</div>' if conv else ""
             rows += (f'{conv_html}<div class="pyr-row"><div class="pyr-bar" '
@@ -446,20 +463,18 @@ def render(d):
                      f'</div></div>')
         return rows
 
-    sales_pal = ["#FF6B5B", "#E55A4C", "#f97316", "#f59e0b", "#10b981", "#0ea5a3"]
-    free_pal  = ["#22d3ee", "#06b6d4", "#0891b2", "#0e7490", "#155e75"]
+    # Salmón GuruSup, de intenso a más claro
+    sales_pal = ["#D9432F", "#FF6B5B", "#FF8C7E", "#FBB0A6"]
+    free_pal  = ["#0891b2", "#22d3ee", "#67e8f9", "#a5f3fc"]
 
     sales_steps = [
-        ("Contactos", cum["total"], ""),
-        ("Leads", cum["lead"], pct(cum["lead"], cum["total"])),
-        ("SQL Consultoría", cum["sql"], pct(cum["sql"], cum["lead"])),
+        ("SQL Consultoría", cum["sql"], ""),
         ("Reunión agendada", d["agenda_cum"], pct(d["agenda_cum"], cum["sql"])),
-        ("Oportunidad", cum["opp"], pct(cum["opp"], d["agenda_cum"])),
+        ("Oportunidad", cum["opp"], pct(cum["opp"], d["agenda_cum"] or cum["sql"])),
         ("Cliente", cum["cli"], pct(cum["cli"], cum["opp"])),
     ]
     free_steps = [
-        ("Contactos", cum["total"], ""),
-        ("Freemium", cum["free"], pct(cum["free"], cum["total"])),
+        ("Freemium", cum["free"], ""),
         ("Agenda con ventas", 0, pct(0, cum["free"])),
         ("Oportunidad", 0, "—"),
         ("Cliente", 0, "—"),
@@ -530,7 +545,7 @@ def render(d):
     return TEMPLATE.format(
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         hist_label=esc(d["hist_label"]),
-        sales_pyr=sales_pyr, free_pyr=free_pyr,
+        dist_band=dist_band, sales_pyr=sales_pyr, free_pyr=free_pyr,
         svg_contacts=d["svg_contacts"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
         meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
@@ -569,6 +584,24 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .section-label {{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:32px 0 14px; }}
 .section-label:first-child {{ margin-top:0; }}
 
+/* Banda etapas de ciclo de vida */
+.lc-band {{ display:flex; flex-wrap:wrap; align-items:center; gap:20px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 22px; }}
+.lc-total {{ display:flex; align-items:center; gap:14px; padding-right:20px; border-right:1px solid var(--border); }}
+.lc-total .n {{ font-size:46px; font-weight:800; line-height:1; color:var(--guru-300); }}
+.lc-total .t {{ font-size:12px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.06em; line-height:1.3; }}
+.lc-total .t span {{ font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; }}
+.lc-stages {{ display:flex; gap:12px; flex-wrap:wrap; flex:1; }}
+.lc-stage {{ flex:1; min-width:120px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; position:relative; overflow:hidden; }}
+.lc-stage::before {{ content:''; position:absolute; top:0; left:0; bottom:0; width:3px; background:var(--sc,var(--guru-500)); }}
+.lc-stage .lc-n {{ font-size:26px; font-weight:800; line-height:1; color:var(--sc,var(--text)); }}
+.lc-stage .lc-l {{ font-size:12px; font-weight:600; color:var(--text-2); margin-top:4px; }}
+.lc-stage .lc-s {{ font-size:11px; color:var(--muted); margin-top:2px; }}
+/* Separador de flujo */
+.flow-sep {{ display:flex; align-items:center; gap:14px; margin:22px 2px 20px; }}
+.flow-sep::before, .flow-sep::after {{ content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),var(--border),transparent); }}
+.flow-sep span {{ font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }}
+@media(max-width:600px){{ .flow-sep span {{ white-space:normal; text-align:center; }} }}
+
 /* Dos embudos */
 .funnels-2 {{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }}
 @media(max-width:760px){{ .funnels-2 {{ grid-template-columns:1fr; }} }}
@@ -577,7 +610,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fn-note {{ font-size:11px; color:var(--muted); margin-bottom:14px; }}
 .pyramid {{ display:flex; flex-direction:column; align-items:center; }}
 .pyr-row {{ width:100%; display:flex; justify-content:center; }}
-.pyr-bar {{ border-radius:8px; padding:11px 12px; text-align:center; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 2px 8px rgba(0,0,0,.25); }}
+.pyr-bar {{ border-radius:8px; padding:11px 12px; text-align:center; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 2px 8px rgba(0,0,0,.25); text-shadow:0 1px 2px rgba(0,0,0,.4); }}
 .pyr-val {{ font-size:19px; font-weight:800; }}
 .pyr-lbl {{ font-size:12px; font-weight:600; opacity:.95; }}
 .pyr-conv {{ font-size:11px; font-weight:700; color:var(--muted); margin:5px 0; }}
@@ -678,16 +711,20 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
 <div class="main">
 
-  <div class="section-label">Embudos de conversión · acumulado {hist_label}</div>
+  <div class="section-label">Etapas de ciclo de vida · acumulado {hist_label}</div>
+  <div class="lc-band">{dist_band}</div>
+
+  <div class="flow-sep"><span>▽ De SQL y Freemium en adelante · evolución del proceso comercial y de activación</span></div>
+
   <div class="funnels-2">
     <div class="fn-box">
       <div class="fn-title">🛠️ Proceso comercial (ventas)</div>
-      <div class="fn-note">De contacto a cliente · tasas de conversión entre etapas</div>
+      <div class="fn-note">De SQL a cliente · tasas de conversión entre etapas</div>
       <div class="pyramid">{sales_pyr}</div>
     </div>
     <div class="fn-box">
       <div class="fn-title" style="color:var(--teal)">⚡ Activación Freemium</div>
-      <div class="fn-note">Activación de contactos existentes y nuevos usuarios freemium</div>
+      <div class="fn-note">De freemium a cliente · activación de cuentas</div>
       <div class="pyramid">{free_pyr}</div>
       <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
     </div>
