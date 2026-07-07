@@ -47,6 +47,9 @@ STAGE_LABELS = [
     ("1033589123",           "Best Case",      "pill-best"),
 ]
 
+# Rango de etapas de deal (para el embudo por empresas)
+DEAL_RANK = {"1107496610": 1, "presentationscheduled": 2, "1033589123": 3, "closedwon": 4}
+
 LC_LABELS = {
     "lead": "Lead", "salesqualifiedlead": "SQL-Consultoría", "1378463825": "Freemium",
     "marketingqualifiedlead": "MQL", "opportunity": "Oportunidad", "customer": "Cliente",
@@ -244,31 +247,43 @@ def svg_cumulative(cum, daily, labels, color):
     def Y(v): return pt + ph * (1 - v / maxv)
     line = " ".join(f"{X(i):.1f},{Y(v):.1f}" for i, v in enumerate(cum))
     area = f"{pl},{pt+ph} " + line + f" {X(n-1):.1f},{pt+ph}"
-    # pico = mayor incremento diario
-    peak_i = max(range(n), key=lambda i: daily[i]) if daily else 0
     # ticks de eje Y (0, medio, max)
     yt = "".join(
         f'<text x="{pl-6}" y="{Y(maxv*f)+4:.0f}" text-anchor="end" fill="#7b76a0" font-size="10">{round(maxv*f)}</text>'
         f'<line x1="{pl}" y1="{Y(maxv*f):.0f}" x2="{W-pr}" y2="{Y(maxv*f):.0f}" stroke="#2e2a5a" stroke-width="1" opacity=".5"/>'
         for f in (0, .5, 1))
-    # ticks de eje X (primero, pico, último)
-    xi = sorted(set([0, peak_i, n-1]))
+    # líneas y etiquetas de mes (cambio de mes en labels 'D mmm')
+    months = ""
+    prev_m = None
+    for i, lb in enumerate(labels):
+        m = lb.split()[-1]
+        if m != prev_m:
+            months += (f'<line x1="{X(i):.0f}" y1="{pt}" x2="{X(i):.0f}" y2="{pt+ph}" stroke="#2e2a5a" stroke-width="1" opacity=".55"/>'
+                       f'<text x="{X(i)+3:.0f}" y="{pt+11}" fill="#9a95c0" font-size="10" font-weight="700">{m}</text>')
+            prev_m = m
+    # top-2 saltos (mayores incrementos diarios) = fechas destacadas
+    dots = ""
+    if daily:
+        top = sorted(range(n), key=lambda i: daily[i], reverse=True)
+        top = [i for i in top if daily[i] > 0][:2]
+        for i in top:
+            dots += (f'<circle cx="{X(i):.1f}" cy="{Y(cum[i]):.1f}" r="4" fill="{color}"/>'
+                     f'<text x="{X(i):.0f}" y="{Y(cum[i])-8:.0f}" text-anchor="middle" fill="{color}" '
+                     f'font-size="10" font-weight="700">{labels[i].split()[0]} +{daily[i]}</text>')
+    # etiquetas de eje X (primero y último)
     xt = "".join(
-        f'<text x="{X(i):.0f}" y="{H-8}" text-anchor="middle" fill="#7b76a0" font-size="10">{labels[i]}</text>'
-        for i in xi)
-    peak_dot = (f'<circle cx="{X(peak_i):.1f}" cy="{Y(cum[peak_i]):.1f}" r="4" fill="{color}"/>'
-                f'<text x="{X(peak_i):.0f}" y="{Y(cum[peak_i])-8:.0f}" text-anchor="middle" fill="{color}" '
-                f'font-size="10" font-weight="700">pico +{daily[peak_i]}</text>') if daily and daily[peak_i] > 0 else ""
+        f'<text x="{X(i):.0f}" y="{H-8}" text-anchor="{a}" fill="#7b76a0" font-size="10">{labels[i]}</text>'
+        for i, a in ((0, "start"), (n-1, "end")))
     return (f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" '
             f'style="display:block">'
             f'<defs><linearGradient id="g{color[1:]}" x1="0" y1="0" x2="0" y2="1">'
             f'<stop offset="0" stop-color="{color}" stop-opacity=".30"/>'
             f'<stop offset="1" stop-color="{color}" stop-opacity="0"/></linearGradient></defs>'
-            f'{yt}'
+            f'{yt}{months}'
             f'<polygon points="{area}" fill="url(#g{color[1:]})"/>'
             f'<polyline points="{line}" fill="none" stroke="{color}" stroke-width="2.5" '
             f'stroke-linejoin="round" stroke-linecap="round"/>'
-            f'{peak_dot}{xt}</svg>')
+            f'{dots}{xt}</svg>')
 
 
 # ─────────────── Main ───────────────
@@ -343,15 +358,57 @@ def main():
     daily = [c for c in hist if c["created_full"] >= start_iso]
     hist_fun = [c for c in hist if c["created_full"] >= funnel_iso]   # embudos: desde 1 jun
 
-    # Reuniones de marketing (desde 1 jun, para el embudo) -> agenda acumulada y diaria
-    meetings = fetch_marketing_meetings(funnel_iso, end_iso)
-    agenda_cum = len({m["cid"] for m in meetings})
-    daily_meets = [m for m in meetings if m["created"] >= start_iso[:10]]
-    agenda_day = len({m["cid"] for m in daily_meets})
+    # ── Deals (empresas) · marketing · reuniones/oportunidades/clientes ──
+    all_deals = fetch_all("deals", [
+        {"propertyName": "pipeline", "operator": "EQ", "value": "default"},
+    ], ["dealname", "dealstage", "createdate", "closedate", "hs_is_closed", "hs_is_closed_won",
+        "hs_analytics_source", "hs_analytics_source_data_1"])
+
+    def valid_deal(n):
+        n = (n or "").lower()
+        return "@" not in n and "[duplicado]" not in n and not n.rstrip().endswith("new deal") and "- new deal" not in n
+    def clean_deal(n):
+        return re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', n or "", flags=re.I).strip()
+
+    mkt_deals = []
+    for dl in all_deals:
+        p = dl["properties"]
+        if not valid_deal(p.get("dealname", "")):
+            continue
+        src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
+        if not is_marketing(src, d1):
+            continue
+        stage = p.get("dealstage", "")
+        icon = classify_channel(src, d1)[1]; label = classify_channel(src, d1)[0]
+        mkt_deals.append({
+            "id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
+            "stage": stage, "drank": DEAL_RANK.get(stage, 0),
+            "won": p.get("hs_is_closed_won") == "true" or stage == "closedwon",
+            "closed": p.get("hs_is_closed") == "true",
+            "created": (p.get("createdate") or "")[:10],
+            "channel": f"{icon} {label}", "chlabel": label, "src": src, "d1": d1,
+        })
+
+    fstart, dstart = funnel_iso[:10], start_iso[:10]
+    fdeals = [d for d in mkt_deals if d["created"] >= fstart]
+    reunion_cum = sum(1 for d in fdeals if d["drank"] >= 2)   # llegaron a demo/reunión
+    opp_cum     = sum(1 for d in fdeals if d["drank"] >= 3)   # best case+
+    cli_cum     = sum(1 for d in fdeals if d["won"])          # cerrados ganados
+    reunion_day = sum(1 for d in mkt_deals if d["created"] >= dstart and d["drank"] >= 2)
+    opp_day     = sum(1 for d in mkt_deals if d["created"] >= dstart and d["drank"] >= 3)
+
+    open_deals = [d for d in mkt_deals if not d["closed"]]
+
+    # Reuniones (calendario) del día -> nombres (ventana diaria, ligero)
+    meetings = fetch_marketing_meetings(start_iso, end_iso)
+    daily_meets = [m for m in meetings if m["created"] >= dstart]
     meet_names = " · ".join(f"<strong>{esc(m['name'])}</strong> ({esc(m['channel'])})" for m in daily_meets) or "—"
 
     cum = funnel_counts(hist_fun)
     dd  = funnel_counts(daily)
+    # Oportunidades y clientes = deals (empresas); reunión = deals en demo+
+    agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
+    agenda_day, dd["opp"], dd["cli"] = reunion_day, opp_day, sum(1 for d in mkt_deals if d["created"] >= dstart and d["won"])
 
     # ── Gráficos acumulados por día (anual, desde 1 ene) ──
     d0 = chart_start.date()
@@ -362,48 +419,49 @@ def main():
         days.append(dcur)
         dcur += timedelta(days=1)
     idx = {d.isoformat(): i for i, d in enumerate(days)}
-    def series(pred):
+    def series(items, pred):
         daily_inc = [0]*len(days)
-        for c in hist:
-            if c["created"] in idx and pred(c):
-                daily_inc[idx[c["created"]]] += 1
+        for it in items:
+            if it["created"] in idx and pred(it):
+                daily_inc[idx[it["created"]]] += 1
         cumv, run = [], 0
         for v in daily_inc:
             run += v; cumv.append(run)
         return cumv, daily_inc
     labels = [f"{d.day} {MESES3[d.month-1]}" for d in days]
-    ch_leads = series(lambda c: rank(c["lc"]) >= 1)
-    ch_sql   = series(lambda c: rank(c["lc"]) >= 3)
-    ch_opp   = series(lambda c: rank(c["lc"]) >= 4)
-    ch_cli   = series(lambda c: rank(c["lc"]) >= 5)
+    ch_leads = series(hist, lambda c: rank(c["lc"]) >= 1)
+    ch_sql   = series(hist, lambda c: rank(c["lc"]) >= 3)
+    ch_opp   = series(mkt_deals, lambda d: d["drank"] >= 3)   # oportunidades = deals best case+
+    ch_cli   = series(mkt_deals, lambda d: d["won"])          # clientes = deals ganados
 
-    def peak_insight(pred):
-        """Día con mayor incremento + canal/campaña de origen dominante."""
+    def peak_insight(items, pred, topn=2):
+        """Top-N días con mayor incremento + canal/campaña de origen dominante."""
         from collections import Counter
         inc = [0]*len(days)
         chc = [Counter() for _ in days]
         cmp = [Counter() for _ in days]
-        for c in hist:
-            if c["created"] in idx and pred(c):
-                i = idx[c["created"]]; inc[i] += 1
-                chc[i][classify_channel(c["src"], c["d1"])[0]] += 1
-                if c["d1"]:
-                    cmp[i][c["d1"]] += 1
-        if not any(inc):
-            return "Sin datos suficientes."
-        pi = max(range(len(days)), key=lambda i: inc[i])
-        if inc[pi] == 0:
-            return "Sin picos relevantes."
-        day = days[pi]; delta = inc[pi]
-        top_ch = chc[pi].most_common(1)
-        txt = f"Pico {day.day} {MESES3[day.month-1]} (+{delta})"
-        if top_ch:
-            lbl, cn = top_ch[0]
-            txt += f" · origen {round(cn/delta*100)}% <strong>{esc(lbl)}</strong>"
-        top_cmp = cmp[pi].most_common(1)
-        if top_cmp and top_cmp[0][1] >= 2:
-            txt += f" · «{esc(top_cmp[0][0][:38])}»"
-        return txt
+        for it in items:
+            if it["created"] in idx and pred(it):
+                i = idx[it["created"]]; inc[i] += 1
+                chc[i][classify_channel(it["src"], it["d1"])[0]] += 1
+                if it["d1"]:
+                    cmp[i][it["d1"]] += 1
+        order = sorted(range(len(days)), key=lambda i: inc[i], reverse=True)
+        peaks = [i for i in order if inc[i] > 0][:topn]
+        if not peaks:
+            return "Sin picos relevantes en el período."
+        parts = []
+        for i in peaks:
+            day = days[i]; delta = inc[i]
+            s = f'<strong>{day.day} {MESES3[day.month-1]}</strong> (+{delta})'
+            tc = chc[i].most_common(1)
+            if tc:
+                s += f' · {round(tc[0][1]/delta*100)}% {esc(tc[0][0])}'
+            tcmp = cmp[i].most_common(1)
+            if tcmp and tcmp[0][1] >= 2:
+                s += f' · «{esc(tcmp[0][0][:30])}»'
+            parts.append(s)
+        return "📌 Picos: " + " · ".join(parts)
 
     # ── Canales (diario) con desglose lead/SQL/freemium ──
     chan = {}
@@ -429,32 +487,11 @@ def main():
                              "state": c["sql_state"] or "Pendiente", "rev": c["rev"] or "Pendiente de revisión"})
     sql_rows.sort(key=lambda r: r["channel"])
 
-    # ── Pipeline (periodo, solo marketing) ──
-    all_deals = fetch_all("deals", [
-        {"propertyName": "pipeline", "operator": "EQ", "value": "default"},
-        {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
-    ], ["dealname", "dealstage", "createdate", "hs_analytics_source", "hs_analytics_source_data_1"])
-    def valid_deal(n):
-        n = (n or "").lower()
-        return "@" not in n and "[duplicado]" not in n and not n.rstrip().endswith("new deal") and "- new deal" not in n
-    def clean_deal(n):
-        return re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', n or "", flags=re.I).strip()
-    mkt_deals = []
-    for dl in all_deals:
-        p = dl["properties"]
-        if not valid_deal(p.get("dealname", "")):
-            continue
-        src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
-        if not is_marketing(src, d1):
-            continue
-        label, icon, _ = classify_channel(src, d1)
-        mkt_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
-                          "stage": p.get("dealstage", ""), "created": (p.get("createdate") or "")[:10],
-                          "channel": f"{icon} {label}"})
-    nuevos_ids = {d["id"] for d in mkt_deals if d["created"] and d["created"] >= start_iso[:10]}
-    demos_pipeline = sum(1 for d in mkt_deals if d["stage"] == "presentationscheduled")
+    # ── Pipeline (deals abiertos, solo marketing) ──
+    nuevos_ids = {d["id"] for d in open_deals if d["created"] >= dstart}
+    demos_pipeline = sum(1 for d in open_deals if d["stage"] == "presentationscheduled")
     chan_dist = {}
-    for d in mkt_deals:
+    for d in open_deals:
         chan_dist[d["channel"]] = chan_dist.get(d["channel"], 0) + 1
 
     data = {
@@ -467,12 +504,12 @@ def main():
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
         "svg_opp": svg_cumulative(*ch_opp, labels, "#10b981"),
         "svg_cli": svg_cumulative(*ch_cli, labels, "#22d3ee"),
-        "peak_leads": peak_insight(lambda c: rank(c["lc"]) >= 1),
-        "peak_sql": peak_insight(lambda c: rank(c["lc"]) >= 3),
-        "peak_opp": peak_insight(lambda c: rank(c["lc"]) >= 4),
-        "peak_cli": peak_insight(lambda c: rank(c["lc"]) >= 5),
+        "peak_leads": peak_insight(hist, lambda c: rank(c["lc"]) >= 1),
+        "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
+        "peak_opp": peak_insight(mkt_deals, lambda d: d["drank"] >= 3),
+        "peak_cli": peak_insight(mkt_deals, lambda d: d["won"]),
         "channels": channels, "sql_rows": sql_rows,
-        "mkt_deals": mkt_deals, "mkt_total": len(mkt_deals),
+        "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
@@ -526,21 +563,19 @@ def render(d):
     sales_pyr = pyramid(sales_steps, sales_pal)
     free_pyr = pyramid(free_steps, free_pal)
 
-    # Resumen 24h (funnel horizontal con flechas + %)
-    def dcard(label, val, conv, cls="f-c-default"):
-        sub = f'<div class="fc-sub">▼ {conv} desde anterior</div>' if conv else '<div class="fc-sub">últimas 24h</div>'
-        return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div>{sub}</div>'
-    arrow = '<div class="f-arrow"></div>'
-    day_cards = [
-        dcard("Contactos", dd["total"], ""),
-        dcard("Leads", dd["lead"], pct(dd["lead"], dd["total"])),
-        dcard("SQL Consultoría", dd["sql"], pct(dd["sql"], dd["lead"]), "f-c-orange"),
-        dcard("Agenda reunión", d["agenda_day"], pct(d["agenda_day"], dd["sql"]), "f-c-green"),
-        dcard("Oportunidad", dd["opp"], pct(dd["opp"], d["agenda_day"] or dd["sql"])),
-    ]
-    if dd["cli"] > 0:
-        day_cards.append(dcard("Cliente", dd["cli"], pct(dd["cli"], dd["opp"]), "f-c-green"))
-    day_funnel = arrow.join(day_cards)
+    # Resumen 24h · KPIs (% sobre el total de contactos, NO es un embudo)
+    dtot = dd["total"]
+    def dcard(label, val, sub, cls="f-c-default"):
+        return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div><div class="fc-sub">{sub}</div></div>'
+    day_cards = "".join([
+        dcard("Contactos", dtot, "últimas 24h"),
+        dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total'),
+        dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-teal"),
+        dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-orange"),
+        dcard("Agenda reunión", d["agenda_day"], f'{pct(d["agenda_day"], dtot)} del total', "f-c-green"),
+        dcard("Oportunidad", dd["opp"], f'{pct(dd["opp"], dtot)} del total'),
+    ])
+    day_funnel = day_cards
 
     # Canales
     ch_cards = ""
@@ -682,6 +717,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .f-c-default {{ --fc:var(--guru-500); --fv:var(--text); }}
 .f-c-orange {{ --fc:var(--orange); --fv:var(--orange); }}
 .f-c-green {{ --fc:var(--green); --fv:var(--green); }}
+.f-c-teal {{ --fc:var(--teal); --fv:var(--teal); }}
+.day-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }}
+@media(max-width:900px){{ .day-kpis {{ grid-template-columns:repeat(3,1fr); }} }}
+@media(max-width:520px){{ .day-kpis {{ grid-template-columns:repeat(2,1fr); }} }}
 .free-kpi {{ margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }}
 .free-kpi .fk-num {{ font-size:32px; font-weight:800; color:var(--teal); }}
 .free-kpi .fk-txt {{ font-size:12px; color:var(--text-2); }}
@@ -759,9 +798,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 <div class="main">
 
   <div class="section-label">Contactos generados · últimas 24h</div>
-  <div class="funnel">{day_funnel}</div>
-  <div class="free-kpi"><div class="fk-num">{d_free}</div><div class="fk-txt"><strong>Freemium</strong> en 24h · <strong>{d_free_pct}</strong> del total de contactos ({d_total})</div></div>
-  <div class="caption">Reuniones agendadas hoy: {meet_names}</div>
+  <div class="day-kpis">{day_funnel}</div>
+  <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · Reuniones agendadas hoy: {meet_names}</div>
+
+  <div class="section-label">Canales de adquisición · últimas 24h</div>
+  <div class="channels-grid">{ch_cards}</div>
 
   <div class="flow-sep"><span>📈 Evolutivo · {chart_label}</span></div>
 
@@ -782,14 +823,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
   <div class="charts-2">
-    <div class="chart-card"><h3>Leads generados</h3><div class="sub">acumulado diario · anual</div>{svg_leads}<div class="peak-note">📌 {peak_leads}</div></div>
-    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario · anual</div>{svg_sql}<div class="peak-note">📌 {peak_sql}</div></div>
-    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario · anual</div>{svg_opp}<div class="peak-note">📌 {peak_opp}</div></div>
-    <div class="chart-card"><h3>Clientes</h3><div class="sub">acumulado diario · anual</div>{svg_cli}<div class="peak-note">📌 {peak_cli}</div></div>
+    <div class="chart-card"><h3>Leads generados</h3><div class="sub">acumulado diario · anual</div>{svg_leads}<div class="peak-note">{peak_leads}</div></div>
+    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario · anual</div>{svg_sql}<div class="peak-note">{peak_sql}</div></div>
+    <div class="chart-card"><h3>Oportunidades <span style="font-weight:400;color:var(--muted)">· deals</span></h3><div class="sub">acumulado diario · anual</div>{svg_opp}<div class="peak-note">{peak_opp}</div></div>
+    <div class="chart-card"><h3>Clientes <span style="font-weight:400;color:var(--muted)">· deals</span></h3><div class="sub">acumulado diario · anual</div>{svg_cli}<div class="peak-note">{peak_cli}</div></div>
   </div>
-
-  <div class="section-label">Canales de adquisición · últimas 24h</div>
-  <div class="channels-grid">{ch_cards}</div>
 
   <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
