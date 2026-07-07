@@ -230,12 +230,12 @@ def fetch_marketing_meetings(start_iso, end_iso):
             except Exception:
                 pass
             label, _, _ = classify_channel(src, d1)
-            company = company.strip() or firstname.strip() or "Sin empresa"
-            key = f"{company.lower()}|{label}"
+            name = firstname.strip() or company.strip() or "Sin nombre"
+            key = f"{name.lower()}|{label}"
             if key in seen:
                 continue
             seen.add(key)
-            out.append({"company": company, "channel": label})
+            out.append({"name": name, "channel": label})
     return out
 
 
@@ -312,6 +312,8 @@ def main():
     n_lead = sum(1 for l in real if l["lc"] == "lead")
     n_sql  = sum(1 for l in real if l["lc"] == "salesqualifiedlead")
     n_free = sum(1 for l in real if l["lc"] == "1378463825" or l["sql_state"] == "Freemium")
+    n_opp  = sum(1 for l in real if l["lc"] == "opportunity")
+    n_cli  = sum(1 for l in real if l["lc"] == "customer")
 
     # Canales
     chan = {}
@@ -368,8 +370,8 @@ def main():
     # Reuniones de marketing (auto)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
     n_meetings = len(meetings)
-    meeting_companies = " · ".join(
-        f"<strong>{esc(m['company'])}</strong> <span style=\"opacity:.7\">({esc(m['channel'])})</span>"
+    meeting_companies = "<br>".join(
+        f"<strong>{esc(m['name'])}</strong> <span style=\"opacity:.7\">· {esc(m['channel'])}</span>"
         for m in meetings) or "—"
 
     # Pipeline (solo marketing)
@@ -420,7 +422,9 @@ def main():
         "title": title,
         "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
+        "n_opp": n_opp, "n_cli": n_cli,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
+        "pct_opp": pct(n_opp, total), "pct_cli": pct(n_cli, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
         "channels": channels, "rev_counts": rev_counts, "rev_lc": rev_lc, "lc_counts": lc_counts,
         "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
@@ -439,6 +443,34 @@ def main():
 
 
 def render(d):
+    arrow = '<div class="f-arrow"></div>'
+
+    def fcard(label, value, sub, cls="f-c-default", extra=""):
+        return (f'<div class="f-card {cls}">'
+                f'<div class="fc-label">{label}</div>'
+                f'<div class="fc-value">{value}</div>'
+                f'<div class="fc-sub">{sub}</div>{extra}</div>')
+
+    # ── Embudo 1 · Consultoría (ventas) ──
+    meet_extra = f'<div class="fc-opp-total">{d["meeting_companies"]}</div>'
+    f1 = [
+        fcard("Contactos creados", d["total"], "Total del período"),
+        fcard("Leads", d["n_lead"], f'{d["pct_lead"]} del total'),
+        fcard("SQL Consultoría", d["n_sql"], f'{d["pct_sql"]} del total', "f-c-orange"),
+        fcard("Reuniones agendadas", d["n_meetings"], "de canales de marketing", "f-c-green", meet_extra),
+        fcard("Oportunidad", d["n_opp"], f'{d["pct_opp"]} del total'),
+    ]
+    if d["n_cli"] > 0:  # Cliente solo si hay alguno
+        f1.append(fcard("Cliente", d["n_cli"], f'{d["pct_cli"]} del total', "f-c-green"))
+    funnel1_html = arrow.join(f1)
+
+    # ── Embudo 2 · Freemium ──
+    f2 = [
+        fcard("Nuevos contactos", d["total"], "Total del período"),
+        fcard("Freemium", d["n_free"], f'{d["pct_free"]} del total', "f-c-orange"),
+    ]
+    funnel2_html = arrow.join(f2)
+
     # Canales
     ch_cards = ""
     for label, c in d["channels"]:
@@ -528,6 +560,7 @@ def render(d):
         total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
         n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
         n_meetings=d["n_meetings"], meeting_companies=d["meeting_companies"],
+        funnel1_html=funnel1_html, funnel2_html=funnel2_html,
         ch_cards=ch_cards, rev_blocks=rev_blocks, lc_blocks=lc_blocks, lead_blocks=lead_blocks,
         n_lead_estado=d["n_lead_estado"], call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=len(d["mkt_deals"]), nuevos_deals=d["nuevos_deals"],
@@ -708,39 +741,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · {periodo_txt}</div>
-  <div class="funnel">
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">{total}</div>
-      <div class="fc-sub">Total del período</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">{n_lead}</div>
-      <div class="fc-sub">{pct_lead} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-orange">
-      <div class="fc-label">SQL Consultoría</div>
-      <div class="fc-value">{n_sql}</div>
-      <div class="fc-sub">{pct_sql} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">{n_free}</div>
-      <div class="fc-sub">{pct_free} del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-green">
-      <div class="fc-label">Reuniones agendadas</div>
-      <div class="fc-value">{n_meetings}</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total">{meeting_companies}</div>
-    </div>
-  </div>
+  <div class="section-label">Embudo de conversión · Consultoría · {periodo_txt}</div>
+  <div class="funnel">{funnel1_html}</div>
+
+  <div class="section-label">Embudo Freemium · {periodo_txt}</div>
+  <div class="funnel">{funnel2_html}</div>
 
   <div class="section-label">Canales de adquisición · {total} contactos</div>
   <div class="channels-grid">{ch_cards}</div>
