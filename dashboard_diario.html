@@ -43,7 +43,6 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .f-c-default { --fc:var(--guru-500); --fv:var(--text); }
 .f-c-orange { --fc:var(--orange); --fv:var(--orange); }
 .f-c-green { --fc:var(--green); --fv:var(--green); }
-.f-c-purple { --fc:#a78bfa; --fv:#a78bfa; }
 
 .channels-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
 @media(max-width:900px){ .channels-grid { grid-template-columns:repeat(3,1fr); } }
@@ -68,9 +67,6 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .card-title { font-size:14px; font-weight:700; color:var(--text); }
 .badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.04em; }
 .badge-green { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
-.badge-amber { background:rgba(245,158,11,.15); color:var(--amber); border:1px solid rgba(245,158,11,.3); }
-.funnel-row { margin-bottom:10px; }
-.funnel-row-label { font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
 .table { width:100%; border-collapse:collapse; }
 .table th { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 12px 10px 0; text-align:left; border-bottom:1px solid var(--border); }
 .table td { font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); vertical-align:middle; }
@@ -165,86 +161,20 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     <div class="logo-box">GS</div>
     <div class="header-title">
       <h1>GuruSup · Dashboard Diario</h1>
-      <p>Martes, 7 de julio de 2026 · 6 jul 08:00 → 7 jul 09:19 (hora España)</p>
+      <p>Martes, 7 de julio de 2026 · 6 jul 08:00 → 7 jul 09:32 (hora España)</p>
     </div>
     <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
   </div>
-  <div class="sync-bar">Datos del período · generado el 07 Jul 2026 · 09:19</div>
+  <div class="sync-bar">Datos del período · generado el 07 Jul 2026 · 09:32</div>
 </div>
 
 <div class="main">
 
-  <div class="section-label">Embudo comercial · 6 jul 08:00 → 7 jul 09:19 (hora España)</div>
-  <div class="funnel funnel-row">
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">14</div>
-      <div class="fc-sub">Total del período</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">7</div>
-      <div class="fc-sub">50% del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-orange">
-      <div class="fc-label">SQL Consultoría Demo</div>
-      <div class="fc-value">3</div>
-      <div class="fc-sub">21% del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-green">
-      <div class="fc-label">Reuniones agendadas</div>
-      <div class="fc-value">2</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total"><strong>67%</strong> conversión desde SQL Consultoría Demo</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-purple">
-      <div class="fc-label">Oportunidades</div>
-      <div class="fc-value">0</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total"><strong>0%</strong> conversión desde Reuniones agendadas</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-green">
-      <div class="fc-label">Clientes</div>
-      <div class="fc-value">0</div>
-      <div class="fc-sub">de canales de marketing</div>
-      <div class="fc-opp-total"><strong>—</strong> conversión desde Oportunidades</div>
-    </div>
-  </div>
+  <div class="section-label">Embudo de conversión · Consultoría · 6 jul 08:00 → 7 jul 09:32 (hora España)</div>
+  <div class="funnel"><div class="f-card f-c-default"><div class="fc-label">Contactos creados</div><div class="fc-value">14</div><div class="fc-sub">Total del período</div></div><div class="f-arrow"></div><div class="f-card f-c-default"><div class="fc-label">Leads</div><div class="fc-value">7</div><div class="fc-sub">50% del total</div></div><div class="f-arrow"></div><div class="f-card f-c-orange"><div class="fc-label">SQL Consultoría</div><div class="fc-value">3</div><div class="fc-sub">21% del total</div></div><div class="f-arrow"></div><div class="f-card f-c-green"><div class="fc-label">Reuniones agendadas</div><div class="fc-value">2</div><div class="fc-sub">de canales de marketing</div><div class="fc-opp-total"><strong>Rubén Guillot Escandell</strong> <span style="opacity:.7">· Google Ads</span><br><strong>demo</strong> <span style="opacity:.7">· Tráfico directo</span></div></div><div class="f-arrow"></div><div class="f-card f-c-default"><div class="fc-label">Oportunidad</div><div class="fc-value">0</div><div class="fc-sub">0% del total</div></div></div>
 
-  <div class="section-label" style="margin-top:20px;">
-    <span class="funnel-row-label" style="text-transform:none;letter-spacing:normal;font-size:12px;">
-      Embudo de producto · Freemium
-      <span class="badge badge-amber">🧪 En definición</span>
-    </span>
-  </div>
-  <div class="funnel funnel-row">
-    <div class="f-card f-c-default">
-      <div class="fc-label">Contactos creados</div>
-      <div class="fc-value">14</div>
-      <div class="fc-sub">Total del período</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Leads</div>
-      <div class="fc-value">7</div>
-      <div class="fc-sub">50% del total de contactos</div>
-    </div>
-    <div class="f-arrow"></div>
-    <div class="f-card f-c-default">
-      <div class="fc-label">Freemium</div>
-      <div class="fc-value">4</div>
-      <div class="fc-sub">29% del total de contactos</div>
-    </div>
-  </div>
-  <div class="alert alert-muted" style="margin-top:10px;margin-bottom:0;">
-    <span>ℹ️</span>
-    <div>El proceso de producto/freemium está en definición: en cuanto haya oportunidades, reuniones o clientes que vengan del uso freemium, se añadirán como pasos adicionales de este embudo.</div>
-  </div>
+  <div class="section-label">Embudo Freemium · 6 jul 08:00 → 7 jul 09:32 (hora España)</div>
+  <div class="funnel"><div class="f-card f-c-default"><div class="fc-label">Nuevos contactos</div><div class="fc-value">14</div><div class="fc-sub">Total del período</div></div><div class="f-arrow"></div><div class="f-card f-c-orange"><div class="fc-label">Freemium</div><div class="fc-value">4</div><div class="fc-sub">29% del total</div></div></div>
 
   <div class="section-label">Canales de adquisición · 14 contactos</div>
   <div class="channels-grid"><div class="ch-card" style="--chc:#10b981"><div class="ch-icon">🌿</div><div class="ch-num">4</div><div class="ch-label">SEO Orgánico</div><div class="ch-pct">29% del total</div><div class="ch-sql">🎯 2 SQL</div></div>
@@ -281,7 +211,42 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 </div>
   </div>
 
+  <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
 
+  <div class="section-label">Estado del lead · 2 con estado</div>
+  <div class="card" style="padding:16px 20px;">
+    <div class="rev-blocks"><div class="rev-block" style="--rbc:var(--blue)"><div class="rb-num">1</div><div class="rb-name">Lead frío</div><div class="rb-desc">Sin cualificar aún</div></div>
+<div class="rev-block" style="--rbc:var(--amber);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Lead caliente</div><div class="rb-desc">Intento de contacto</div></div>
+<div class="rev-block" style="--rbc:var(--guru-400);opacity:.4"><div class="rb-num">0</div><div class="rb-name">En contacto</div><div class="rb-desc">Conversación abierta</div></div>
+<div class="rev-block" style="--rbc:var(--orange);opacity:.4"><div class="rb-num">0</div><div class="rb-name">En negociación</div><div class="rb-desc">Oportunidad en curso</div></div>
+<div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">1</div><div class="rb-name">Prueba Gratuita</div><div class="rb-desc">Usando la plataforma</div></div>
+<div class="rev-block" style="--rbc:var(--green);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Cliente</div><div class="rb-desc">Convertido a cliente</div></div>
+<div class="rev-block" style="--rbc:var(--muted);opacity:.4"><div class="rb-num">0</div><div class="rb-name">Mareado</div><div class="rb-desc">Sin avance claro</div></div>
+</div>
+  </div>
+
+  <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
+
+  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">SQL Consultoría del período · empresa, canal y estado</span>
+      <span class="badge badge-green">📞 Seguimiento comercial</span>
+    </div>
+    <table class="table">
+      <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
+      <tbody><tr><td><strong>Abdalah</strong></td><td>— · <em>Google Ads</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Valéria</strong></td><td>Equipe Multiprofissional - CEMCA · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr><tr><td><strong>Aditya Rath</strong></td><td>Braj Raj Perfumes · <em>SEO Orgánico</em></td><td><span class="pill pill-demo">Pendiente</span></td></tr></tbody>
+    </table>
+    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
+      <span>💡</span>
+      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
+      <br>• <strong>Brand = intención alta</strong>: los SQL de campaña de marca avanzan rápido a oportunidad/demo.
+      <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
+      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
+      <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
+      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. El estado de llamada íntegro se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
+    </div>
+  </div>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
@@ -308,7 +273,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </div>
 
   <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 07 Jul 2026 · 09:19 (hora España)
+    GuruSup · Dashboard Diario · generado el 07 Jul 2026 · 09:32 (hora España)
   </div>
 
 </div>
