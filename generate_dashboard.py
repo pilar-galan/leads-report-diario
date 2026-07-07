@@ -74,6 +74,7 @@ FIXED_CHANNELS = {
     "Social orgánico":    {"n": 0, "sql": 0, "icon": "🌱", "color": "#22c55e", "lc": {}},
     "Eventos / Campañas": {"n": 0, "sql": 0, "icon": "🎪", "color": "#ec4899", "lc": {}},
     "Chat web":           {"n": 0, "sql": 0, "icon": "💬", "color": "#22d3ee", "lc": {}},
+    "App / Producto":     {"n": 0, "sql": 0, "icon": "⚡", "color": "#f59e0b", "lc": {}},
 }
 
 
@@ -130,6 +131,10 @@ def classify_channel(src, d1):
     if src == "EMAIL_MARKETING": return ("Email", "✉️", "#f97316")
     if src == "OFFLINE" and d1 == "CONVERSATIONS":
         return ("Chat web", "💬", "#22d3ee")
+    if src == "OFFLINE" and d1 in ("INTEGRATION", "IMPORT"):
+        # Altas reales creadas vía API por la propia app/producto (freemium, etc.),
+        # no son leads de marketing ni basura de importación.
+        return ("App / Producto", "⚡", "#f59e0b")
     if src == "DIRECT_TRAFFIC":
         # Incluye las altas por la app (freemium); se cuentan por su origen: tráfico directo
         return ("Tráfico directo", "🔗", "#94a3b8")
@@ -145,7 +150,9 @@ def is_marketing(src, d1):
 
 
 def is_import(src, d1):
-    return src == "OFFLINE" and (d1 or "") in ("INTEGRATION", "CRM_UI", "IMPORT")
+    # Solo alta manual en el CRM (sin atribución de canal real); INTEGRATION/IMPORT
+    # son altas reales del producto (freemium/app) y se cuentan como canal "App / Producto".
+    return src == "OFFLINE" and (d1 or "") == "CRM_UI"
 
 
 def is_test(rev, email):
@@ -156,6 +163,15 @@ def is_test(rev, email):
 
 def is_internal(email):
     return (email or "").endswith("@gurusup.com")
+
+
+def is_freemium(lc, free_entered, sql_state):
+    """
+    Un contacto es de origen freemium si su etapa actual es Freemium, o si
+    alguna vez entró en esa etapa (aunque luego haya avanzado a Oportunidad/
+    Cliente), usando la fecha histórica de entrada en la etapa de HubSpot.
+    """
+    return lc == "1378463825" or bool(free_entered) or sql_state == "Freemium"
 
 
 def is_valid_deal(name):
@@ -362,6 +378,54 @@ def fetch_generated_clients(start_iso, end_iso):
     return out
 
 
+def fetch_freemium_meetings(start_iso, end_iso):
+    """
+    Reuniones creadas en la ventana cuyo contacto asociado es de origen
+    freemium/producto (etapa actual Freemium, o entró en esa etapa en algún
+    momento aunque luego haya avanzado). Devuelve lista de dicts {company}.
+    """
+    out = []
+    try:
+        data = api_post("/crm/v3/objects/meetings/search", {
+            "filterGroups": [{"filters": [
+                {"propertyName": "hs_createdate", "operator": "BETWEEN",
+                 "value": start_iso, "highValue": end_iso},
+            ]}],
+            "properties": ["hs_meeting_title"],
+            "limit": 100,
+        })
+    except Exception as err:
+        print(f"  freemium meetings search error: {err}")
+        return out
+
+    seen = set()
+    for m in data.get("results", []):
+        mid = m["id"]
+        try:
+            assoc = api_get(f"/crm/v4/objects/meetings/{mid}/associations/contacts")
+            cids = [r["toObjectId"] for r in assoc.get("results", [])]
+        except Exception:
+            cids = []
+        for cid in cids[:1]:
+            try:
+                c = api_get(f"/crm/v3/objects/contacts/{cid}"
+                            "?properties=lifecyclestage,estado_sql_consultoria,"
+                            "hs_v2_date_entered_1378463825,company,firstname")
+                cp = c.get("properties", {})
+            except Exception:
+                continue
+            if not is_freemium(cp.get("lifecyclestage"), cp.get("hs_v2_date_entered_1378463825"),
+                                cp.get("estado_sql_consultoria")):
+                continue
+            company = (cp.get("company") or cp.get("firstname") or "Sin empresa").strip() or "Sin empresa"
+            key = f"{company.lower()}|{cid}"
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({"company": company})
+    return out
+
+
 # ────────────────────────── Main ──────────────────────────
 def main():
     if not TOKEN:
@@ -409,7 +473,7 @@ def main():
     raw = fetch_all("contacts", win_filters, [
         "email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
-        "hs_lead_status",
+        "hs_lead_status", "hs_v2_date_entered_1378463825",
     ])
 
     real = []
@@ -427,6 +491,7 @@ def main():
             "lc":  p.get("lifecyclestage") or "",
             "rev": p.get("revision_ventas") or "",
             "sql_state": p.get("estado_sql_consultoria") or "",
+            "free_entered": p.get("hs_v2_date_entered_1378463825") or "",
             "lead_state": p.get("hs_lead_status") or "",
             "email": email,
             "firstname": p.get("firstname") or "",
@@ -436,8 +501,10 @@ def main():
     total  = len(real)
     n_lead = sum(1 for l in real if l["lc"] == "lead")
     n_sql  = sum(1 for l in real if l["lc"] == "salesqualifiedlead")
-    n_free = sum(1 for l in real if l["lc"] == "1378463825" or l["sql_state"] == "Freemium")
-    n_free_advanced = sum(1 for l in real if l["sql_state"] == "Freemium" and l["lc"] in ("opportunity", "customer"))
+    n_free = sum(1 for l in real if is_freemium(l["lc"], l["free_entered"], l["sql_state"]))
+    n_free_opps = sum(1 for l in real if is_freemium(l["lc"], l["free_entered"], l["sql_state"]) and l["lc"] == "opportunity")
+    n_free_clients = sum(1 for l in real if is_freemium(l["lc"], l["free_entered"], l["sql_state"]) and l["lc"] == "customer")
+    n_free_advanced = n_free_opps + n_free_clients
 
     # Canales
     chan = {}
@@ -494,6 +561,9 @@ def main():
         f"<strong>{esc(m['company'])}</strong> <span style=\"opacity:.7\">({esc(m['channel'])})</span>"
         for m in meetings) or "—"
 
+    # Reuniones de contactos freemium/producto (embudo de producto), solo en el mensual
+    n_free_meetings = len(fetch_freemium_meetings(start_iso, end_iso)) if is_monthly else 0
+
     # Pipeline (solo marketing)
     deal_filters = [
         {"propertyName": "pipeline",     "operator": "EQ", "value": "default"},
@@ -546,6 +616,7 @@ def main():
         "title": title, "is_monthly": is_monthly,
         "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free, "n_free_advanced": n_free_advanced,
+        "n_free_meetings": n_free_meetings, "n_free_opps": n_free_opps, "n_free_clients": n_free_clients,
         "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
         "n_meetings": n_meetings, "meeting_companies": meeting_companies,
         "n_opps_generated": n_opps_generated, "opps_generated_companies": opps_generated_companies,
@@ -689,7 +760,6 @@ def render(d):
   <div class="section-label" style="margin-top:20px;">
     <span class="funnel-row-label" style="text-transform:none;letter-spacing:normal;font-size:12px;">
       Embudo de producto · Freemium
-      <span class="badge badge-amber">🧪 En definición</span>
     </span>
   </div>
   <div class="funnel funnel-row">
@@ -704,10 +774,28 @@ def render(d):
       <div class="fc-value">{d["n_free"]}</div>
       <div class="fc-sub">{d["pct_free"]} del total de contactos</div>
     </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Reuniones agendadas</div>
+      <div class="fc-value">{d["n_free_meetings"]}</div>
+      <div class="fc-sub">{pct(d["n_free_meetings"], d["n_free"])} de los freemium</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-purple">
+      <div class="fc-label">Oportunidades</div>
+      <div class="fc-value">{d["n_free_opps"]}</div>
+      <div class="fc-sub">{pct(d["n_free_opps"], d["n_free"])} de los freemium</div>
+    </div>
+    <div class="f-arrow"></div>
+    <div class="f-card f-c-green">
+      <div class="fc-label">Clientes</div>
+      <div class="fc-value">{d["n_free_clients"]}</div>
+      <div class="fc-sub">{pct(d["n_free_clients"], d["n_free"])} de los freemium</div>
+    </div>
   </div>
   <div class="alert alert-muted" style="margin-top:10px;margin-bottom:0;">
     <span>ℹ️</span>
-    <div>El proceso de producto/freemium está en definición: en cuanto haya oportunidades, reuniones o clientes que vengan del uso freemium, se añadirán como pasos adicionales de este embudo.</div>
+    <div>Reuniones, oportunidades y clientes de freemium se cuentan por contacto asociado (etapa actual Freemium o que entró en Freemium en algún momento), no forman un embudo estrictamente secuencial: parte de las oportunidades de producto se generan sin pasar por una reunión agendada.</div>
   </div>"""
     else:
         funnel_section = f"""  <div class="section-label">Embudo de conversión · {esc(d["periodo_txt"])}</div>
