@@ -1,32 +1,45 @@
 #!/usr/bin/env python3
 """
 Genera dashboard_diario.html con datos reales de HubSpot.
-Ventana: 8:30h dia anterior -> 8:30h hoy (hora Espana).
-Lunes cubre fin de semana: viernes 8:30 -> lunes 8:30.
 
-Reparto hibrido (acordado con marketing):
-  - Embudo, canales, revision_ventas, estado_sql_consultoria, pipeline,
-    reuniones agendadas de marketing -> AUTOMATICO desde HubSpot.
-  - Barra de prioridades, flechas de flujo, aprendizajes de llamadas,
-    paleta y diseno -> FIJO en este script.
+Estructura:
+  1. Dos embudos (pirámide invertida) ACUMULADOS desde 1 jun:
+     - Comercial: Contactos -> Leads -> SQL -> Reunión -> Oportunidad -> Cliente
+     - Freemium:  Contactos -> Freemium -> Agenda -> Oportunidad -> Cliente
+  2. Tres gráficos evolutivos acumulados desde 1 jun (contactos, SQL, oportunidades).
+  3. Contactos generados últimas 24h (funnel con flechas y % de conversión) + freemium.
+  4. Canales de adquisición (24h) con desglose lead/SQL/freemium.
+  5. Seguimiento de ventas · estado de los SQL (24h).
+  6. Pipeline de ventas (periodo).
+
+Ventanas: los embudos y gráficos se calculan desde HIST_START (1 jun) hasta ahora.
+El resumen 24h, canales y estados usan la ventana diaria.
+Overrides por env: GEN_START/GEN_END/GEN_OUTPUT/GEN_TITLE/GEN_PERIOD/GEN_FECHA/GEN_HIST_START.
 """
 import os, sys, json, urllib.request, urllib.error, re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 
 TOKEN = os.environ.get("HUBSPOT_TOKEN", "")
 BASE  = "https://api.hubapi.com"
 
 MESES = ["enero","febrero","marzo","abril","mayo","junio","julio",
          "agosto","septiembre","octubre","noviembre","diciembre"]
+MESES3 = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
 DIAS  = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
 
-# ── Fuentes que consideramos MARKETING (adquisición inbound) ──
+HIST_START_DEFAULT = "2026-06-01T00:00:00"
+
 MARKETING_SOURCES = {
     "PAID_SEARCH", "PAID_SOCIAL", "ORGANIC_SEARCH", "SOCIAL_MEDIA",
     "DIRECT_TRAFFIC", "REFERRALS", "OTHER_CAMPAIGNS",
 }
 
-# ── Etapas del pipeline (deal stages) ──
+# Rango del ciclo de vida (para contar "alcanzó etapa X")
+LC_RANK = {
+    "subscriber": 0, "lead": 1, "marketingqualifiedlead": 2,
+    "salesqualifiedlead": 3, "opportunity": 4, "customer": 5,
+}
+
 STAGE_LABELS = [
     ("1107496610",           "Discovery",      "pill-discov"),
     ("presentationscheduled","Demo / Reunión",  "pill-demo"),
@@ -34,27 +47,10 @@ STAGE_LABELS = [
 ]
 
 LC_LABELS = {
-    "lead":                   "Lead",
-    "salesqualifiedlead":     "SQL-Consultoría",
-    "1378463825":             "Freemium",
-    "marketingqualifiedlead": "MQL",
-    "opportunity":            "Oportunidad",
-    "customer":               "Cliente",
+    "lead": "Lead", "salesqualifiedlead": "SQL-Consultoría", "1378463825": "Freemium",
+    "marketingqualifiedlead": "MQL", "opportunity": "Oportunidad", "customer": "Cliente",
 }
 
-# ── Etapa del ciclo de vida (lifecyclestage) — value -> (label, color) ──
-LC_META = [
-    ("subscriber",            "Suscriptor",      "var(--muted)"),
-    ("lead",                  "Lead",            "var(--guru-500)"),
-    ("marketingqualifiedlead","MQL",             "var(--blue)"),
-    ("salesqualifiedlead",    "SQL-Consultoría", "var(--orange)"),
-    ("1378463825",            "Freemium",        "var(--guru-400)"),
-    ("opportunity",           "Oportunidad",     "var(--green)"),
-    ("customer",              "Cliente",         "var(--green)"),
-    ("other",                 "Otra etapa",      "var(--muted)"),
-]
-
-# ── Revisión ventas (propiedad revision_ventas) — orden y color ──
 REV_META = [
     ("Ya gestionado",                   "var(--green)"),
     ("Pendiente de revisión",           "var(--amber)"),
@@ -65,49 +61,30 @@ REV_META = [
     ("Test",                            "var(--muted)"),
 ]
 
-# ── Estado del lead (propiedad hs_lead_status) — value -> (label, color, desc) ──
-LEAD_STATE_META = [
-    ("UNQUALIFIED",          "Lead frío",       "var(--blue)",     "Sin cualificar aún"),
-    ("ATTEMPTED_TO_CONTACT", "Lead caliente",   "var(--amber)",    "Intento de contacto"),
-    ("OPEN",                 "En contacto",     "var(--guru-400)", "Conversación abierta"),
-    ("OPEN_DEAL",            "En negociación",  "var(--orange)",   "Oportunidad en curso"),
-    ("usuario_free",         "Prueba Gratuita", "var(--guru-300)", "Usando la plataforma"),
-    ("cliente",              "Cliente",         "var(--green)",    "Convertido a cliente"),
-    ("Mareado",              "Mareado",         "var(--muted)",    "Sin avance claro"),
-]
-
-# ── Canales de adquisición fijos (siempre visibles aunque estén a 0) ──
 FIXED_CHANNELS = {
-    "Social Ads":         {"n": 0, "sql": 0, "icon": "📣", "color": "#a855f7", "lc": {}},
-    "Google Ads":         {"n": 0, "sql": 0, "icon": "🔍", "color": "#4285F4", "lc": {}},
-    "Tráfico directo":    {"n": 0, "sql": 0, "icon": "🔗", "color": "#94a3b8", "lc": {}},
-    "SEO Orgánico":       {"n": 0, "sql": 0, "icon": "🌿", "color": "#10b981", "lc": {}},
-    "Social orgánico":    {"n": 0, "sql": 0, "icon": "🌱", "color": "#22c55e", "lc": {}},
-    "Eventos / Campañas": {"n": 0, "sql": 0, "icon": "🎪", "color": "#ec4899", "lc": {}},
-    "Chat web":           {"n": 0, "sql": 0, "icon": "💬", "color": "#22d3ee", "lc": {}},
+    "Social Ads":         {"icon": "📣", "color": "#a855f7"},
+    "Google Ads":         {"icon": "🔍", "color": "#4285F4"},
+    "Tráfico directo":    {"icon": "🔗", "color": "#94a3b8"},
+    "SEO Orgánico":       {"icon": "🌿", "color": "#10b981"},
+    "Social orgánico":    {"icon": "🌱", "color": "#22c55e"},
+    "Eventos / Campañas": {"icon": "🎪", "color": "#ec4899"},
+    "Chat web":           {"icon": "💬", "color": "#22d3ee"},
 }
 
 
-# ─────────────────────────── HubSpot API ───────────────────────────
+# ─────────────── HubSpot API ───────────────
 def api_post(path, payload):
-    req = urllib.request.Request(
-        BASE + path,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"},
-        method="POST",
-    )
+    req = urllib.request.Request(BASE + path, data=json.dumps(payload).encode(),
+        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}, method="POST")
     with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode("utf-8"))
+        return json.loads(r.read().decode())
 
 
 def api_get(path):
-    req = urllib.request.Request(
-        BASE + path,
-        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"},
-        method="GET",
-    )
+    req = urllib.request.Request(BASE + path,
+        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}, method="GET")
     with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode("utf-8"))
+        return json.loads(r.read().decode())
 
 
 def fetch_all(obj_type, filters, properties):
@@ -128,31 +105,25 @@ def iso(dt):
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-# ─────────────────────────── Clasificadores ───────────────────────────
+# ─────────────── Clasificadores ───────────────
 def classify_channel(src, d1):
-    """Devuelve (label, icon, color) alineado con la taxonomía de marketing."""
     d1 = d1 or ""
-    if src == "PAID_SEARCH":     return ("Google Ads",         "🔍", "#4285F4")
-    if src == "PAID_SOCIAL":     return ("Social Ads",         "📣", "#a855f7")
-    if src == "ORGANIC_SEARCH":  return ("SEO Orgánico",       "🌿", "#10b981")
-    if src == "SOCIAL_MEDIA":    return ("Social orgánico",    "🌱", "#22c55e")
-    if src == "REFERRALS":       return ("Referido",           "🤝", "#a78bfa")
+    if src == "PAID_SEARCH":     return ("Google Ads", "🔍", "#4285F4")
+    if src == "PAID_SOCIAL":     return ("Social Ads", "📣", "#a855f7")
+    if src == "ORGANIC_SEARCH":  return ("SEO Orgánico", "🌿", "#10b981")
+    if src == "SOCIAL_MEDIA":    return ("Social orgánico", "🌱", "#22c55e")
+    if src == "REFERRALS":       return ("Referido", "🤝", "#a78bfa")
     if src == "OTHER_CAMPAIGNS": return ("Eventos / Campañas", "🎪", "#ec4899")
     if src == "EMAIL_MARKETING": return ("Email", "✉️", "#f97316")
     if src == "OFFLINE" and d1 == "CONVERSATIONS":
         return ("Chat web", "💬", "#22d3ee")
     if src == "DIRECT_TRAFFIC":
-        # Incluye las altas por la app (freemium); se cuentan por su origen: tráfico directo
         return ("Tráfico directo", "🔗", "#94a3b8")
     return ("Otros", "•", "#64748b")
 
 
 def is_marketing(src, d1):
-    if src in MARKETING_SOURCES:
-        return True
-    if src == "OFFLINE" and (d1 or "") == "CONVERSATIONS":
-        return True
-    return False
+    return src in MARKETING_SOURCES or (src == "OFFLINE" and (d1 or "") == "CONVERSATIONS")
 
 
 def is_import(src, d1):
@@ -177,362 +148,368 @@ def pct(n, base):
     return f"{round(n/base*100)}%" if base else "—"
 
 
-# ─────────────────────────── Reuniones de marketing ───────────────────────────
+def rank(lc):
+    return LC_RANK.get(lc, 0)
+
+
+def is_free(c):
+    return c["lc"] == "1378463825" or c["sql_state"] == "Freemium"
+
+
+def funnel_counts(lst):
+    return {
+        "total": len(lst),
+        "lead": sum(1 for c in lst if rank(c["lc"]) >= 1),
+        "sql":  sum(1 for c in lst if rank(c["lc"]) >= 3),
+        "opp":  sum(1 for c in lst if rank(c["lc"]) >= 4),
+        "cli":  sum(1 for c in lst if rank(c["lc"]) >= 5),
+        "free": sum(1 for c in lst if is_free(c)),
+    }
+
+
+# ─────────────── Reuniones de marketing ───────────────
 def fetch_marketing_meetings(start_iso, end_iso):
-    """
-    Reuniones creadas en la ventana cuyo contacto asociado entró por un canal
-    de marketing. Devuelve lista de dicts {company, channel}.
-    Defensivo: si algo falla, devuelve lo recolectado.
-    """
+    """Devuelve [{cid, name, channel, created}] de reuniones creadas en el rango
+    cuyo contacto asociado entró por marketing. Defensivo."""
     out = []
     try:
         data = api_post("/crm/v3/objects/meetings/search", {
             "filterGroups": [{"filters": [
-                {"propertyName": "hs_createdate", "operator": "BETWEEN",
-                 "value": start_iso, "highValue": end_iso},
+                {"propertyName": "hs_createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
             ]}],
-            "properties": ["hs_meeting_title"],
+            "properties": ["hs_meeting_title", "hs_createdate"],
             "limit": 100,
         })
     except Exception as err:
         print(f"  meetings search error: {err}")
         return out
-
     seen = set()
     for m in data.get("results", []):
         mid = m["id"]
+        created = (m.get("properties", {}).get("hs_createdate") or "")[:10]
         try:
             assoc = api_get(f"/crm/v4/objects/meetings/{mid}/associations/contacts")
             cids = [r["toObjectId"] for r in assoc.get("results", [])]
         except Exception:
             cids = []
         for cid in cids[:1]:
+            if cid in seen:
+                continue
             try:
                 c = api_get(f"/crm/v3/objects/contacts/{cid}"
                             "?properties=hs_analytics_source,hs_analytics_source_data_1,company,firstname")
-                cp  = c.get("properties", {})
+                cp = c.get("properties", {})
                 src = cp.get("hs_analytics_source") or ""
-                d1  = cp.get("hs_analytics_source_data_1") or ""
+                d1 = cp.get("hs_analytics_source_data_1") or ""
             except Exception:
                 continue
             if not is_marketing(src, d1):
                 continue
-            company = cp.get("company") or ""
-            firstname = cp.get("firstname") or ""
-            try:
-                ca = api_get(f"/crm/v4/objects/contacts/{cid}/associations/companies")
-                coids = [r["toObjectId"] for r in ca.get("results", [])]
-                if coids:
-                    co = api_get(f"/crm/v3/objects/companies/{coids[0]}?properties=name")
-                    nm = co.get("properties", {}).get("name")
-                    if nm:
-                        company = nm
-            except Exception:
-                pass
+            seen.add(cid)
             label, _, _ = classify_channel(src, d1)
-            name = firstname.strip() or company.strip() or "Sin nombre"
-            key = f"{name.lower()}|{label}"
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append({"name": name, "channel": label})
+            name = (cp.get("firstname") or cp.get("company") or "Sin nombre").strip()
+            out.append({"cid": cid, "name": name, "channel": label, "created": created})
     return out
 
 
-# ─────────────────────────── Main ───────────────────────────
+# ─────────────── SVG chart ───────────────
+def svg_cumulative(cum, daily, labels, color):
+    """cum: lista acumulada; daily: incremento diario; labels: 'DD mmm' por día."""
+    if not cum:
+        return '<div style="color:var(--muted);font-size:12px;padding:20px 0">Sin datos</div>'
+    W, H = 720, 200
+    pl, pr, pt, pb = 44, 14, 16, 30
+    n = len(cum)
+    maxv = max(cum) or 1
+    pw, ph = W - pl - pr, H - pt - pb
+    def X(i): return pl + (pw * i / (n - 1 if n > 1 else 1))
+    def Y(v): return pt + ph * (1 - v / maxv)
+    line = " ".join(f"{X(i):.1f},{Y(v):.1f}" for i, v in enumerate(cum))
+    area = f"{pl},{pt+ph} " + line + f" {X(n-1):.1f},{pt+ph}"
+    # pico = mayor incremento diario
+    peak_i = max(range(n), key=lambda i: daily[i]) if daily else 0
+    # ticks de eje Y (0, medio, max)
+    yt = "".join(
+        f'<text x="{pl-6}" y="{Y(maxv*f)+4:.0f}" text-anchor="end" fill="#7b76a0" font-size="10">{round(maxv*f)}</text>'
+        f'<line x1="{pl}" y1="{Y(maxv*f):.0f}" x2="{W-pr}" y2="{Y(maxv*f):.0f}" stroke="#2e2a5a" stroke-width="1" opacity=".5"/>'
+        for f in (0, .5, 1))
+    # ticks de eje X (primero, pico, último)
+    xi = sorted(set([0, peak_i, n-1]))
+    xt = "".join(
+        f'<text x="{X(i):.0f}" y="{H-8}" text-anchor="middle" fill="#7b76a0" font-size="10">{labels[i]}</text>'
+        for i in xi)
+    peak_dot = (f'<circle cx="{X(peak_i):.1f}" cy="{Y(cum[peak_i]):.1f}" r="4" fill="{color}"/>'
+                f'<text x="{X(peak_i):.0f}" y="{Y(cum[peak_i])-8:.0f}" text-anchor="middle" fill="{color}" '
+                f'font-size="10" font-weight="700">pico +{daily[peak_i]}</text>') if daily and daily[peak_i] > 0 else ""
+    return (f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" '
+            f'style="display:block">'
+            f'<defs><linearGradient id="g{color[1:]}" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="{color}" stop-opacity=".30"/>'
+            f'<stop offset="1" stop-color="{color}" stop-opacity="0"/></linearGradient></defs>'
+            f'{yt}'
+            f'<polygon points="{area}" fill="url(#g{color[1:]})"/>'
+            f'<polyline points="{line}" fill="none" stroke="{color}" stroke-width="2.5" '
+            f'stroke-linejoin="round" stroke-linecap="round"/>'
+            f'{peak_dot}{xt}</svg>')
+
+
+# ─────────────── Main ───────────────
 def main():
     if not TOKEN:
         print("ERROR: falta HUBSPOT_TOKEN", file=sys.stderr)
         sys.exit(1)
 
-    tz_spain = timezone(timedelta(hours=2))
-    es_now   = datetime.now(timezone.utc).astimezone(tz_spain)
+    tz = timezone(timedelta(hours=2))
+    es_now = datetime.now(timezone.utc).astimezone(tz)
 
-    # Overrides opcionales por variables de entorno (informes ad-hoc, p. ej. mensual)
-    gen_start = os.environ.get("GEN_START")   # ISO, p. ej. 2026-06-01T00:00:00
-    gen_end   = os.environ.get("GEN_END")     # ISO, p. ej. 2026-07-01T00:00:00
+    gen_start = os.environ.get("GEN_START")
+    gen_end   = os.environ.get("GEN_END")
     out_file  = os.environ.get("GEN_OUTPUT", "dashboard_diario.html")
     title     = os.environ.get("GEN_TITLE",  "GuruSup · Dashboard Diario")
     period_ov = os.environ.get("GEN_PERIOD")
     fecha_ov  = os.environ.get("GEN_FECHA")
+    hist_start_s = os.environ.get("GEN_HIST_START", HIST_START_DEFAULT)
 
     if gen_start and gen_end:
-        start  = datetime.fromisoformat(gen_start).replace(tzinfo=tz_spain)
-        es_now = datetime.fromisoformat(gen_end).replace(tzinfo=tz_spain)
-        start_iso = iso(start)
-        end_iso   = iso(es_now)
-        fecha_larga = fecha_ov or "Informe mensual"
-        periodo_txt = period_ov or (f"{start.day} {MESES[start.month-1][:3]} → "
-                                    f"{es_now.day} {MESES[es_now.month-1][:3]} {es_now.year}")
+        start  = datetime.fromisoformat(gen_start).replace(tzinfo=tz)
+        es_now = datetime.fromisoformat(gen_end).replace(tzinfo=tz)
+        fecha_larga = fecha_ov or "Informe"
+        periodo_txt = period_ov or (f"{start.day} {MESES3[start.month-1]} → "
+                                    f"{es_now.day} {MESES3[es_now.month-1]} {es_now.year}")
     else:
-        # Ancla a las 8:00. Lunes cubre el fin de semana (viernes 8:00 → lunes ~9:00).
         today_8   = es_now.replace(hour=8, minute=0, second=0, microsecond=0)
         days_back = 3 if es_now.weekday() == 0 else 1
         start     = today_8 - timedelta(days=days_back)
-        start_iso = iso(start)
-        end_iso   = iso(es_now)
         fecha_larga = f"{DIAS[es_now.weekday()]}, {es_now.day} de {MESES[es_now.month-1]} de {es_now.year}"
-        periodo_txt = (f"{start.day} {MESES[start.month-1][:3]} {start.strftime('%H:%M')} → "
-                       f"{es_now.day} {MESES[es_now.month-1][:3]} {es_now.strftime('%H:%M')} (hora España)")
+        periodo_txt = (f"{start.day} {MESES3[start.month-1]} {start.strftime('%H:%M')} → "
+                       f"{es_now.day} {MESES3[es_now.month-1]} {es_now.strftime('%H:%M')} (hora España)")
         if es_now.weekday() == 0:
             periodo_txt += " · incluye fin de semana"
 
-    win_filters = [
-        {"propertyName": "createdate", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
-        {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
-    ]
-    raw = fetch_all("contacts", win_filters, [
-        "email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
-        "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
-        "hs_lead_status",
-    ])
+    start_iso = iso(start)
+    end_iso   = iso(es_now)
+    hist_start = datetime.fromisoformat(hist_start_s).replace(tzinfo=tz)
+    hist_iso   = iso(hist_start)
 
-    real = []
+    # Histórico desde 1 jun (incluye la ventana diaria como subconjunto)
+    hraw = fetch_all("contacts", [
+        {"propertyName": "createdate", "operator": "BETWEEN", "value": hist_iso, "highValue": end_iso},
+        {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
+    ], ["email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
+        "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
+        "hs_lead_status", "createdate"])
+
+    hist = []
     imports = tests = internal = 0
-    for c in raw:
-        p     = c["properties"]
+    for c in hraw:
+        p = c["properties"]
         email = p.get("email") or ""
-        src   = p.get("hs_analytics_source") or ""
-        d1    = p.get("hs_analytics_source_data_1") or ""
+        src = p.get("hs_analytics_source") or ""
+        d1 = p.get("hs_analytics_source_data_1") or ""
         if is_internal(email): internal += 1; continue
         if is_test(p.get("revision_ventas"), email): tests += 1; continue
         if is_import(src, d1): imports += 1; continue
-        real.append({
-            "src": src, "d1": d1,
-            "lc":  p.get("lifecyclestage") or "",
+        hist.append({
+            "src": src, "d1": d1, "lc": p.get("lifecyclestage") or "",
             "rev": p.get("revision_ventas") or "",
             "sql_state": p.get("estado_sql_consultoria") or "",
             "lead_state": p.get("hs_lead_status") or "",
-            "email": email,
-            "firstname": p.get("firstname") or "",
-            "company": p.get("company") or "",
+            "email": email, "firstname": p.get("firstname") or "", "company": p.get("company") or "",
+            "created": (p.get("createdate") or "")[:10],
+            "created_full": p.get("createdate") or "",
         })
 
-    total  = len(real)
-    n_lead = sum(1 for l in real if l["lc"] == "lead")
-    n_sql  = sum(1 for l in real if l["lc"] == "salesqualifiedlead")
-    n_free = sum(1 for l in real if l["lc"] == "1378463825" or l["sql_state"] == "Freemium")
-    n_opp  = sum(1 for l in real if l["lc"] == "opportunity")
-    n_cli  = sum(1 for l in real if l["lc"] == "customer")
+    daily = [c for c in hist if c["created_full"] >= start_iso]
 
-    # Canales
+    # Reuniones de marketing (histórico) -> agenda acumulada y diaria
+    meetings = fetch_marketing_meetings(hist_iso, end_iso)
+    agenda_cum = len({m["cid"] for m in meetings})
+    daily_meets = [m for m in meetings if m["created"] >= start_iso[:10]]
+    agenda_day = len({m["cid"] for m in daily_meets})
+    meet_names = " · ".join(f"<strong>{esc(m['name'])}</strong> ({esc(m['channel'])})" for m in daily_meets) or "—"
+
+    cum = funnel_counts(hist)
+    dd  = funnel_counts(daily)
+
+    # ── Gráficos acumulados por día ──
+    d0 = hist_start.date()
+    dN = es_now.date()
+    days = []
+    dcur = d0
+    while dcur <= dN:
+        days.append(dcur)
+        dcur += timedelta(days=1)
+    idx = {d.isoformat(): i for i, d in enumerate(days)}
+    def series(pred):
+        daily_inc = [0]*len(days)
+        for c in hist:
+            if c["created"] in idx and pred(c):
+                daily_inc[idx[c["created"]]] += 1
+        cumv, run = [], 0
+        for v in daily_inc:
+            run += v; cumv.append(run)
+        return cumv, daily_inc
+    labels = [f"{d.day} {MESES3[d.month-1]}" for d in days]
+    ch_contacts = series(lambda c: True)
+    ch_sql      = series(lambda c: rank(c["lc"]) >= 3)
+    ch_opp      = series(lambda c: rank(c["lc"]) >= 4)
+
+    # ── Canales (diario) con desglose lead/SQL/freemium ──
     chan = {}
-    for l in real:
-        label, icon, color = classify_channel(l["src"], l["d1"])
-        if label not in chan:
-            chan[label] = {"n": 0, "sql": 0, "icon": icon, "color": color, "lc": {}}
-        chan[label]["n"] += 1
-        if l["lc"] == "salesqualifiedlead":
-            chan[label]["sql"] += 1
-        lc_lbl = LC_LABELS.get(l["lc"], l["lc"] or "—")
-        chan[label]["lc"][lc_lbl] = chan[label]["lc"].get(lc_lbl, 0) + 1
-    for fc_label, fc_data in FIXED_CHANNELS.items():
-        if fc_label not in chan:
-            chan[fc_label] = dict(fc_data)
+    for c in daily:
+        label, icon, color = classify_channel(c["src"], c["d1"])
+        e = chan.setdefault(label, {"n": 0, "lead": 0, "sql": 0, "free": 0, "icon": icon, "color": color})
+        e["n"] += 1
+        if c["lc"] == "salesqualifiedlead": e["sql"] += 1
+        elif is_free(c): e["free"] += 1
+        else: e["lead"] += 1
+    for lbl, fd in FIXED_CHANNELS.items():
+        if lbl not in chan:
+            chan[lbl] = {"n": 0, "lead": 0, "sql": 0, "free": 0, "icon": fd["icon"], "color": fd["color"]}
     channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
-    # Revisión ventas (con desglose por etapa: lead / SQL / freemium)
-    rev_counts = {}
-    rev_lc = {}
-    for l in real:
-        key = l["rev"] if l["rev"] else "Pendiente de revisión"
-        rev_counts[key] = rev_counts.get(key, 0) + 1
-        b = rev_lc.setdefault(key, {"lead": 0, "sql": 0, "free": 0})
-        if l["lc"] == "salesqualifiedlead":
-            b["sql"] += 1
-        elif l["lc"] == "1378463825" or l["sql_state"] == "Freemium":
-            b["free"] += 1
-        else:
-            b["lead"] += 1
-
-    # Etapa del ciclo de vida
-    lc_counts = {}
-    for l in real:
-        lc_counts[l["lc"]] = lc_counts.get(l["lc"], 0) + 1
-
-    # Estado del lead (hs_lead_status)
-    lead_state_counts = {}
-    for l in real:
-        if l["lead_state"]:
-            lead_state_counts[l["lead_state"]] = lead_state_counts.get(l["lead_state"], 0) + 1
-    n_lead_estado = sum(lead_state_counts.values())
-
-    # Tabla de SQL para "Llamadas"
+    # ── SQL del día (seguimiento de ventas) ──
     sql_rows = []
-    for l in real:
-        if l["lc"] == "salesqualifiedlead":
-            label, _, _ = classify_channel(l["src"], l["d1"])
-            name = l["firstname"] or (l["email"].split("@")[0] if l["email"] else "—")
-            sql_rows.append({"name": name, "company": l["company"],
-                             "channel": label, "state": l["sql_state"] or "Pendiente"})
+    for c in daily:
+        if c["lc"] == "salesqualifiedlead":
+            label, _, _ = classify_channel(c["src"], c["d1"])
+            name = c["firstname"] or (c["email"].split("@")[0] if c["email"] else "—")
+            sql_rows.append({"name": name, "company": c["company"], "channel": label,
+                             "state": c["sql_state"] or "Pendiente", "rev": c["rev"] or "Pendiente de revisión"})
     sql_rows.sort(key=lambda r: r["channel"])
 
-    # Reuniones de marketing (auto)
-    meetings = fetch_marketing_meetings(start_iso, end_iso)
-    n_meetings = len(meetings)
-    meeting_companies = "<br>".join(
-        f"<strong>{esc(m['name'])}</strong> <span style=\"opacity:.7\">· {esc(m['channel'])}</span>"
-        for m in meetings) or "—"
-
-    # Pipeline (solo marketing)
-    deal_filters = [
-        {"propertyName": "pipeline",     "operator": "EQ", "value": "default"},
+    # ── Pipeline (periodo, solo marketing) ──
+    all_deals = fetch_all("deals", [
+        {"propertyName": "pipeline", "operator": "EQ", "value": "default"},
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
-    ]
-    all_deals = fetch_all("deals", deal_filters,
-                          ["dealname", "dealstage", "createdate",
-                           "hs_analytics_source", "hs_analytics_source_data_1"])
-
-    def is_valid_deal(name):
-        n = (name or "").lower()
-        return ("@" not in n and "[duplicado]" not in n
-                and not n.rstrip().endswith("new deal") and "- new deal" not in n)
-
-    def clean_deal_name(name):
-        n = re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', name or "", flags=re.I)
-        return n.strip()
-
+    ], ["dealname", "dealstage", "createdate", "hs_analytics_source", "hs_analytics_source_data_1"])
+    def valid_deal(n):
+        n = (n or "").lower()
+        return "@" not in n and "[duplicado]" not in n and not n.rstrip().endswith("new deal") and "- new deal" not in n
+    def clean_deal(n):
+        return re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', n or "", flags=re.I).strip()
     mkt_deals = []
     for dl in all_deals:
         p = dl["properties"]
-        if not is_valid_deal(p.get("dealname", "")):
+        if not valid_deal(p.get("dealname", "")):
             continue
-        src = p.get("hs_analytics_source") or ""
-        d1  = p.get("hs_analytics_source_data_1") or ""
+        src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         if not is_marketing(src, d1):
             continue
         label, icon, _ = classify_channel(src, d1)
-        mkt_deals.append({
-            "id": dl["id"],
-            "name": clean_deal_name(p.get("dealname", "—")) or "—",
-            "stage": p.get("dealstage", ""),
-            "created": (p.get("createdate") or "")[:10],
-            "channel": f"{icon} {label}",
-        })
-
-    start_day      = start_iso[:10]
-    nuevos_deals   = [d for d in mkt_deals if d["created"] and d["created"] >= start_day]
-    demos_pipeline = [d for d in mkt_deals if d["stage"] == "presentationscheduled"]
-
+        mkt_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
+                          "stage": p.get("dealstage", ""), "created": (p.get("createdate") or "")[:10],
+                          "channel": f"{icon} {label}"})
+    nuevos_ids = {d["id"] for d in mkt_deals if d["created"] and d["created"] >= start_iso[:10]}
+    demos_pipeline = sum(1 for d in mkt_deals if d["stage"] == "presentationscheduled")
     chan_dist = {}
     for d in mkt_deals:
         chan_dist[d["channel"]] = chan_dist.get(d["channel"], 0) + 1
 
     data = {
-        "title": title,
-        "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
-        "total": total, "n_lead": n_lead, "n_sql": n_sql, "n_free": n_free,
-        "n_opp": n_opp, "n_cli": n_cli,
-        "pct_lead": pct(n_lead, total), "pct_sql": pct(n_sql, total), "pct_free": pct(n_free, total),
-        "pct_opp": pct(n_opp, total), "pct_cli": pct(n_cli, total),
-        "n_meetings": n_meetings, "meeting_companies": meeting_companies,
-        "channels": channels, "rev_counts": rev_counts, "rev_lc": rev_lc, "lc_counts": lc_counts,
-        "lead_state_counts": lead_state_counts, "n_lead_estado": n_lead_estado,
-        "sql_rows": sql_rows, "mkt_deals": mkt_deals,
-        "nuevos_deals": len(nuevos_deals), "demos_pipeline": len(demos_pipeline),
-        "nuevos_ids": {d["id"] for d in nuevos_deals}, "chan_dist": chan_dist,
-        "imports": imports, "tests": tests, "internal": internal,
+        "title": title, "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
+        "hist_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
+        "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day,
+        "meet_names": meet_names,
+        "svg_contacts": svg_cumulative(*ch_contacts, labels, "#FF6B5B"),
+        "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
+        "svg_opp": svg_cumulative(*ch_opp, labels, "#10b981"),
+        "channels": channels, "sql_rows": sql_rows,
+        "mkt_deals": mkt_deals, "mkt_total": len(mkt_deals),
+        "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
+        "demos_pipeline": demos_pipeline, "chan_dist": chan_dist,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
     }
-
     html = render(data)
     with open(out_file, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"OK · contactos={total} leads={n_lead} sql={n_sql} free={n_free} "
-          f"reuniones={n_meetings} deals_mkt={len(mkt_deals)} imports={imports} tests={tests}")
+    print(f"OK · hist_contactos={cum['total']} sql={cum['sql']} opp={cum['opp']} cli={cum['cli']} "
+          f"| dia_contactos={dd['total']} lead={dd['lead']} sql={dd['sql']} free={dd['free']} "
+          f"agenda_dia={agenda_day} deals={len(mkt_deals)}")
 
 
+# ─────────────── Render ───────────────
 def render(d):
+    cum, dd = d["cum"], d["dd"]
+
+    # Pirámide (embudo invertido). steps: [(label, value, conv_txt)]
+    def pyramid(steps, palette):
+        top = steps[0][1] or 1
+        rows = ""
+        for i, (label, val, conv) in enumerate(steps):
+            w = max(34, round(val / top * 100)) if top else 34
+            color = palette[min(i, len(palette)-1)]
+            conv_html = f'<div class="pyr-conv">▼ {conv}</div>' if conv else ""
+            rows += (f'{conv_html}<div class="pyr-row"><div class="pyr-bar" '
+                     f'style="width:{w}%;background:{color}">'
+                     f'<span class="pyr-val">{val}</span> <span class="pyr-lbl">{esc(label)}</span>'
+                     f'</div></div>')
+        return rows
+
+    sales_pal = ["#FF6B5B", "#E55A4C", "#f97316", "#f59e0b", "#10b981", "#0ea5a3"]
+    free_pal  = ["#22d3ee", "#06b6d4", "#0891b2", "#0e7490", "#155e75"]
+
+    sales_steps = [
+        ("Contactos", cum["total"], ""),
+        ("Leads", cum["lead"], pct(cum["lead"], cum["total"])),
+        ("SQL Consultoría", cum["sql"], pct(cum["sql"], cum["lead"])),
+        ("Reunión agendada", d["agenda_cum"], pct(d["agenda_cum"], cum["sql"])),
+        ("Oportunidad", cum["opp"], pct(cum["opp"], d["agenda_cum"])),
+        ("Cliente", cum["cli"], pct(cum["cli"], cum["opp"])),
+    ]
+    free_steps = [
+        ("Contactos", cum["total"], ""),
+        ("Freemium", cum["free"], pct(cum["free"], cum["total"])),
+        ("Agenda con ventas", 0, pct(0, cum["free"])),
+        ("Oportunidad", 0, "—"),
+        ("Cliente", 0, "—"),
+    ]
+    sales_pyr = pyramid(sales_steps, sales_pal)
+    free_pyr = pyramid(free_steps, free_pal)
+
+    # Resumen 24h (funnel horizontal con flechas + %)
+    def dcard(label, val, conv, cls="f-c-default"):
+        sub = f'<div class="fc-sub">▼ {conv} desde anterior</div>' if conv else '<div class="fc-sub">últimas 24h</div>'
+        return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div>{sub}</div>'
     arrow = '<div class="f-arrow"></div>'
-
-    def fcard(label, value, sub, cls="f-c-default", extra=""):
-        return (f'<div class="f-card {cls}">'
-                f'<div class="fc-label">{label}</div>'
-                f'<div class="fc-value">{value}</div>'
-                f'<div class="fc-sub">{sub}</div>{extra}</div>')
-
-    # ── Embudo 1 · Consultoría (ventas) ──
-    meet_extra = f'<div class="fc-opp-total">{d["meeting_companies"]}</div>'
-    f1 = [
-        fcard("Contactos creados", d["total"], "Total del período"),
-        fcard("Leads", d["n_lead"], f'{d["pct_lead"]} del total'),
-        fcard("SQL Consultoría", d["n_sql"], f'{d["pct_sql"]} del total', "f-c-orange"),
-        fcard("Reuniones agendadas", d["n_meetings"], "de canales de marketing", "f-c-green", meet_extra),
-        fcard("Oportunidad", d["n_opp"], f'{d["pct_opp"]} del total'),
+    day_cards = [
+        dcard("Contactos", dd["total"], ""),
+        dcard("Leads", dd["lead"], pct(dd["lead"], dd["total"])),
+        dcard("SQL Consultoría", dd["sql"], pct(dd["sql"], dd["lead"]), "f-c-orange"),
+        dcard("Agenda reunión", d["agenda_day"], pct(d["agenda_day"], dd["sql"]), "f-c-green"),
+        dcard("Oportunidad", dd["opp"], pct(dd["opp"], d["agenda_day"] or dd["sql"])),
     ]
-    if d["n_cli"] > 0:  # Cliente solo si hay alguno
-        f1.append(fcard("Cliente", d["n_cli"], f'{d["pct_cli"]} del total', "f-c-green"))
-    funnel1_html = arrow.join(f1)
-
-    # ── Embudo 2 · Freemium ──
-    f2 = [
-        fcard("Nuevos contactos", d["total"], "Total del período"),
-        fcard("Freemium", d["n_free"], f'{d["pct_free"]} del total', "f-c-orange"),
-    ]
-    funnel2_html = arrow.join(f2)
+    if dd["cli"] > 0:
+        day_cards.append(dcard("Cliente", dd["cli"], pct(dd["cli"], dd["opp"]), "f-c-green"))
+    day_funnel = arrow.join(day_cards)
 
     # Canales
     ch_cards = ""
     for label, c in d["channels"]:
-        p = pct(c["n"], d["total"]) if c["n"] > 0 else "—"
-        sql = c.get("sql", 0)
+        p = pct(c["n"], dd["total"]) if c["n"] > 0 else "—"
         dim = "" if c["n"] > 0 else ";opacity:.45"
+        parts = []
+        if c["lead"]: parts.append(f'{c["lead"]} lead')
+        if c["sql"]:  parts.append(f'{c["sql"]} SQL')
+        if c["free"]: parts.append(f'{c["free"]} freem')
+        br = " · ".join(parts) or "—"
         ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}{dim}">'
-                     f'<div class="ch-icon">{c["icon"]}</div>'
-                     f'<div class="ch-num">{c["n"]}</div>'
+                     f'<div class="ch-icon">{c["icon"]}</div><div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
                      f'<div class="ch-pct">{p} del total</div>'
-                     f'<div class="ch-sql">🎯 {sql} SQL</div></div>\n')
+                     f'<div class="ch-sql">{br}</div></div>\n')
 
-    # Revisión ventas
-    rev_blocks = ""
-    for key, color in REV_META:
-        n = d["rev_counts"].get(key, 0)
-        dim = "" if n > 0 else ";opacity:.4"
-        bd = d.get("rev_lc", {}).get(key, {})
-        parts = []
-        if bd.get("lead"): parts.append(f'{bd["lead"]} lead')
-        if bd.get("sql"):  parts.append(f'{bd["sql"]} SQL')
-        if bd.get("free"): parts.append(f'{bd["free"]} freem')
-        desc = f'<div class="rb-desc">{" · ".join(parts)}</div>' if (n > 0 and parts) else ''
-        rev_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
-                       f'<div class="rb-num">{n}</div>'
-                       f'<div class="rb-name">{esc(key)}</div>{desc}</div>\n')
-
-    # Etapa del ciclo de vida (solo etapas con contactos)
-    lc_blocks = ""
-    known = {m[0] for m in LC_META if m[0] != "other"}
-    other_n = sum(n for k, n in d["lc_counts"].items() if k and k not in known)
-    for value, label, color in LC_META:
-        n = other_n if value == "other" else d["lc_counts"].get(value, 0)
-        if n == 0:
-            continue
-        lc_blocks += (f'<div class="rev-block" style="--rbc:{color}">'
-                      f'<div class="rb-num">{n}</div>'
-                      f'<div class="rb-name">{esc(label)}</div></div>\n')
-    if not lc_blocks:
-        lc_blocks = '<div class="rb-desc" style="color:var(--muted)">Sin datos de ciclo de vida</div>'
-
-    # Estado del lead
-    lead_blocks = ""
-    for value, label, color, desc in LEAD_STATE_META:
-        n = d["lead_state_counts"].get(value, 0)
-        dim = "" if n > 0 else ";opacity:.4"
-        lead_blocks += (f'<div class="rev-block" style="--rbc:{color}{dim}">'
-                        f'<div class="rb-num">{n}</div>'
-                        f'<div class="rb-name">{esc(label)}</div>'
-                        f'<div class="rb-desc">{esc(desc)}</div></div>\n')
-
-    # Tabla llamadas
+    # Estado SQL (tabla)
     if d["sql_rows"]:
         call_rows = ""
         for r in d["sql_rows"]:
             emp = esc(r["company"]) if r["company"] else "—"
+            desc = "" if r["rev"] != "No aplica / Descartado" else ' · <span style="color:var(--red)">descartado</span>'
             call_rows += (f'<tr><td><strong>{esc(r["name"])}</strong></td>'
                           f'<td>{emp} · <em>{esc(r["channel"])}</em></td>'
-                          f'<td><span class="pill pill-demo">{esc(r["state"])}</span></td></tr>')
+                          f'<td><span class="pill pill-demo">{esc(r["state"])}</span>{desc}</td></tr>')
     else:
-        call_rows = '<tr><td colspan="3" style="color:var(--muted)">Sin SQL-Consultoría en el período</td></tr>'
+        call_rows = '<tr><td colspan="3" style="color:var(--muted)">Sin SQL en el período</td></tr>'
 
     # Pipeline
     by_stage = {}
@@ -540,32 +517,25 @@ def render(d):
         by_stage.setdefault(deal["stage"], []).append(deal)
     deal_rows = ""
     for st_id, label, pill in STAGE_LABELS:
-        group = by_stage.get(st_id, [])
+        group = sorted(by_stage.get(st_id, []), key=lambda x: x["channel"])
         if not group:
             continue
-        group = sorted(group, key=lambda x: x["channel"])  # agrupar por canal dentro de la etapa
         deal_rows += f'<tr class="stage-divider"><td colspan="3">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
-            new_tag = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
-            deal_rows += (f'<tr data-name="{esc(deal["name"].lower())}">'
-                          f'<td><strong>{esc(deal["name"])}</strong>{new_tag}</td>'
-                          f'<td>{esc(deal["channel"])}</td>'
-                          f'<td><span class="pill {pill}">{esc(label)}</span></td></tr>')
-    chan_dist_txt = " · ".join(f"{n} {esc(lbl)}" for lbl, n in
-                               sorted(d["chan_dist"].items(), key=lambda x: -x[1])) or "—"
+            nt = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
+            deal_rows += (f'<tr data-name="{esc(deal["name"].lower())}"><td><strong>{esc(deal["name"])}</strong>{nt}</td>'
+                          f'<td>{esc(deal["channel"])}</td><td><span class="pill {pill}">{esc(label)}</span></td></tr>')
+    chan_dist_txt = " · ".join(f"{n} {esc(lbl)}" for lbl, n in sorted(d["chan_dist"].items(), key=lambda x: -x[1])) or "—"
 
     return TEMPLATE.format(
-        title=esc(d["title"]),
-        fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
-        total=d["total"], n_lead=d["n_lead"], pct_lead=d["pct_lead"],
-        n_sql=d["n_sql"], pct_sql=d["pct_sql"], n_free=d["n_free"], pct_free=d["pct_free"],
-        n_meetings=d["n_meetings"], meeting_companies=d["meeting_companies"],
-        funnel1_html=funnel1_html, funnel2_html=funnel2_html,
-        ch_cards=ch_cards, rev_blocks=rev_blocks, lc_blocks=lc_blocks, lead_blocks=lead_blocks,
-        n_lead_estado=d["n_lead_estado"], call_rows=call_rows, deal_rows=deal_rows,
-        mkt_total=len(d["mkt_deals"]), nuevos_deals=d["nuevos_deals"],
-        demos_pipeline=d["demos_pipeline"], chan_dist_txt=chan_dist_txt,
-        generado=esc(d["generado"]),
+        title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
+        hist_label=esc(d["hist_label"]),
+        sales_pyr=sales_pyr, free_pyr=free_pyr,
+        svg_contacts=d["svg_contacts"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"],
+        day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
+        meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
+        mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
+        chan_dist_txt=chan_dist_txt, generado=esc(d["generado"]),
     )
 
 
@@ -577,125 +547,107 @@ TEMPLATE = r"""<!DOCTYPE html>
 <title>{title}</title>
 <style>
 :root {{
-  --guru-900:#0a0618; --guru-800:#110e2a; --guru-500:#FF6B5B; --guru-400:#E55A4C; --guru-300:#FAE5DC;
+  --guru-900:#0a0618; --guru-500:#FF6B5B; --guru-400:#E55A4C; --guru-300:#FAE5DC;
   --surface:#161330; --card:#1e1b42; --border:#2e2a5a;
   --green:#10b981; --amber:#f59e0b; --red:#ef4444; --blue:#3b82f6; --orange:#f97316;
-  --text:#f0edff; --text-2:#c4bfe0; --muted:#7b76a0;
+  --teal:#22d3ee; --text:#f0edff; --text-2:#c4bfe0; --muted:#7b76a0;
 }}
 *,*::before,*::after {{ box-sizing:border-box; margin:0; padding:0; }}
-html {{ scroll-behavior:smooth; font-size:15px; }}
+html {{ font-size:15px; }}
 body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif; line-height:1.5; min-height:100vh; }}
-
 .header {{ position:sticky; top:0; z-index:100; background:rgba(17,14,42,.96); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 24px; }}
 .header-inner {{ display:flex; align-items:center; gap:16px; padding:14px 0 12px; flex-wrap:wrap; }}
 .logo-box {{ width:40px; height:40px; background:linear-gradient(135deg,var(--guru-500),var(--guru-400)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0; box-shadow:0 0 16px rgba(255,107,91,.4); }}
 .header-title {{ flex:1; min-width:180px; }}
-.header-title h1 {{ font-size:16px; font-weight:700; color:var(--text); }}
+.header-title h1 {{ font-size:16px; font-weight:700; }}
 .header-title p {{ font-size:12px; color:var(--muted); }}
 .live-badge {{ background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3); color:var(--green); font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; white-space:nowrap; }}
 .live-dot {{ width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }}
 @keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:.3}} }}
 .sync-bar {{ font-size:11px; color:var(--muted); padding:5px 24px 6px; border-top:1px solid rgba(46,42,90,.6); background:rgba(17,14,42,.7); }}
-
 .main {{ max-width:1160px; margin:0 auto; padding:24px 20px 60px; }}
 .section-label {{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:32px 0 14px; }}
 .section-label:first-child {{ margin-top:0; }}
 
+/* Dos embudos */
+.funnels-2 {{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }}
+@media(max-width:760px){{ .funnels-2 {{ grid-template-columns:1fr; }} }}
+.fn-box {{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 18px 20px; }}
+.fn-title {{ font-size:13px; font-weight:800; margin-bottom:4px; }}
+.fn-note {{ font-size:11px; color:var(--muted); margin-bottom:14px; }}
+.pyramid {{ display:flex; flex-direction:column; align-items:center; }}
+.pyr-row {{ width:100%; display:flex; justify-content:center; }}
+.pyr-bar {{ border-radius:8px; padding:11px 12px; text-align:center; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 2px 8px rgba(0,0,0,.25); }}
+.pyr-val {{ font-size:19px; font-weight:800; }}
+.pyr-lbl {{ font-size:12px; font-weight:600; opacity:.95; }}
+.pyr-conv {{ font-size:11px; font-weight:700; color:var(--muted); margin:5px 0; }}
+.fn-highlight {{ margin-top:14px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.25); color:#a5f3fc; border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.5; }}
+
+/* Gráficos */
+.charts-3 {{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }}
+@media(max-width:820px){{ .charts-3 {{ grid-template-columns:1fr; }} }}
+.chart-card {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 14px 8px; }}
+.chart-card h3 {{ font-size:12px; font-weight:700; margin-bottom:2px; }}
+.chart-card .sub {{ font-size:10px; color:var(--muted); margin-bottom:8px; }}
+
+/* Funnel horizontal 24h */
 .funnel {{ display:flex; align-items:stretch; gap:0; }}
-.f-arrow {{ display:flex; align-items:center; justify-content:center; width:34px; flex-shrink:0; font-size:30px; opacity:.8; }}
-.f-arrow::after {{ content:'›'; color:var(--guru-400); font-weight:700; }}
-.f-card {{ flex:1; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; min-width:0; display:flex; flex-direction:column; gap:4px; }}
-.f-card::before {{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--fc,var(--guru-500)); border-radius:10px 10px 0 0; }}
-.fc-label {{ font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.07em; }}
-.fc-value {{ font-size:48px; font-weight:800; line-height:1; color:var(--fv,var(--text)); margin-top:4px; }}
-.fc-sub {{ font-size:13px; color:var(--text-2); font-weight:600; margin-top:6px; }}
-.fc-opp-total {{ font-size:12px; color:var(--muted); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }}
-.fc-opp-total strong {{ color:var(--text-2); }}
+.f-arrow {{ display:flex; align-items:center; justify-content:center; width:30px; flex-shrink:0; }}
+.f-arrow::after {{ content:'›'; color:var(--guru-400); font-weight:700; font-size:28px; }}
+.f-card {{ flex:1; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 14px 12px; position:relative; overflow:hidden; min-width:0; }}
+.f-card::before {{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--fc,var(--guru-500)); }}
+.fc-label {{ font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em; }}
+.fc-value {{ font-size:38px; font-weight:800; line-height:1; margin-top:4px; color:var(--fv,var(--text)); }}
+.fc-sub {{ font-size:11px; color:var(--text-2); font-weight:600; margin-top:6px; }}
 .f-c-default {{ --fc:var(--guru-500); --fv:var(--text); }}
 .f-c-orange {{ --fc:var(--orange); --fv:var(--orange); }}
 .f-c-green {{ --fc:var(--green); --fv:var(--green); }}
+.free-kpi {{ margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }}
+.free-kpi .fk-num {{ font-size:32px; font-weight:800; color:var(--teal); }}
+.free-kpi .fk-txt {{ font-size:12px; color:var(--text-2); }}
 
 .channels-grid {{ display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }}
 @media(max-width:900px){{ .channels-grid {{ grid-template-columns:repeat(3,1fr); }} }}
 @media(max-width:550px){{ .channels-grid {{ grid-template-columns:repeat(2,1fr); }} }}
-.ch-card {{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 14px 12px; position:relative; overflow:hidden; }}
-.ch-card::before {{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--chc,var(--guru-500)); border-radius:10px 10px 0 0; }}
-.ch-icon {{ font-size:18px; margin-bottom:6px; }}
-.ch-num {{ font-size:30px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }}
+.ch-card {{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 12px; position:relative; overflow:hidden; }}
+.ch-card::before {{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--chc,var(--guru-500)); }}
+.ch-icon {{ font-size:17px; margin-bottom:5px; }}
+.ch-num {{ font-size:28px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }}
 .ch-label {{ font-size:11px; font-weight:600; color:var(--text-2); margin-top:4px; }}
-.ch-pct {{ font-size:11px; color:var(--muted); margin-top:2px; }}
-.ch-sql {{ font-size:12px; font-weight:800; color:var(--orange); margin-top:5px; }}
-
-.rev-blocks {{ display:flex; gap:10px; flex-wrap:wrap; }}
-.rev-block {{ flex:1; min-width:130px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:16px 16px 14px; position:relative; overflow:hidden; }}
-.rev-block::before {{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--rbc,var(--border)); border-radius:10px 10px 0 0; }}
-.rb-num {{ font-size:26px; font-weight:800; line-height:1; color:var(--rbc,var(--muted)); margin-bottom:6px; }}
-.rb-name {{ font-size:12px; font-weight:600; color:var(--rbc,var(--muted)); }}
-.rb-desc {{ font-size:11px; color:var(--muted); margin-top:3px; }}
+.ch-pct {{ font-size:10px; color:var(--muted); margin-top:2px; }}
+.ch-sql {{ font-size:11px; font-weight:700; color:var(--text-2); margin-top:5px; }}
 
 .card {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:12px; }}
 .card-header {{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }}
-.card-title {{ font-size:14px; font-weight:700; color:var(--text); }}
-.badge {{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.04em; }}
+.card-title {{ font-size:14px; font-weight:700; }}
+.badge {{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }}
 .badge-green {{ background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }}
 .table {{ width:100%; border-collapse:collapse; }}
 .table th {{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 12px 10px 0; text-align:left; border-bottom:1px solid var(--border); }}
-.table td {{ font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); vertical-align:middle; }}
-.table tr:last-child td {{ border-bottom:none; }}
+.table td {{ font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); }}
 .table td strong {{ color:var(--text); font-weight:600; }}
-.table tr.stage-divider td {{ background:rgba(255,255,255,.03); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:6px 0; border-bottom:1px solid var(--border); }}
+.table tr.stage-divider td {{ background:rgba(255,255,255,.03); font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); padding:6px 0; }}
 .pill {{ display:inline-block; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; }}
 .pill-demo {{ background:rgba(16,185,129,.15); color:var(--green); }}
 .pill-discov {{ background:rgba(255,107,91,.15); color:#F5D5C8; }}
 .pill-best {{ background:rgba(245,158,11,.15); color:var(--amber); }}
-.new-tag {{ font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; background:rgba(16,185,129,.2); color:var(--green); letter-spacing:.04em; text-transform:uppercase; }}
-
-.alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-bottom:14px; display:flex; align-items:flex-start; gap:8px; }}
-.alert-green {{ background:rgba(16,185,129,.06); border:1px solid rgba(16,185,129,.2); color:#6ee7b7; }}
+.new-tag {{ font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; background:rgba(16,185,129,.2); color:var(--green); text-transform:uppercase; }}
+.alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }}
 .alert-muted {{ background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }}
-
-.flow-arrow {{ text-align:center; margin:2px 0 14px; color:var(--guru-400); font-size:26px; line-height:1; }}
-.flow-arrow small {{ display:block; font-size:11px; color:var(--muted); font-weight:600; margin-top:3px; }}
+.caption {{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }}
 
 @media(max-width:600px){{
-  .header {{ padding:0 14px; }}
-  .header-inner {{ gap:10px; padding:12px 0 10px; }}
-  .header-title {{ min-width:0; }}
-  .header-title h1 {{ font-size:14px; line-height:1.25; }}
-  .header-title p {{ font-size:10px; line-height:1.35; }}
-  .logo-box {{ width:34px; height:34px; font-size:13px; }}
-  .live-badge {{ display:none; }}
-  .sync-bar {{ padding:5px 14px 6px; }}
-  .main {{ padding:18px 14px 50px; }}
-  .funnel {{ flex-direction:column; gap:8px; }}
-  .f-arrow {{ width:100%; height:20px; transform:rotate(90deg); }}
-  .f-card {{ padding:14px 16px 13px; }}
-  .fc-value {{ font-size:40px; }}
-  .fc-opp-total {{ font-size:13px; }}
-  .rev-block {{ flex:1 1 calc(50% - 5px); min-width:calc(50% - 5px); }}
-  .rb-num {{ font-size:23px; }}
-  .flow-arrow {{ font-size:24px; margin:2px 0 12px; }}
-  .flow-arrow small {{ font-size:10px; padding:0 8px; }}
-  .alert {{ padding:10px 12px; font-size:12px; line-height:1.5; }}
-  #emp-search {{ font-size:16px; }}
-  .card {{ padding:16px 14px; overflow-x:auto; }}
-  .card-header {{ flex-wrap:wrap; gap:8px; }}
-  .table {{ min-width:300px; }}
+  .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
+  .live-badge {{ display:none; }} .main {{ padding:18px 14px 50px; }}
+  .funnel {{ flex-direction:column; gap:8px; }} .f-arrow {{ width:100%; height:20px; transform:rotate(90deg); }}
+  .fc-value {{ font-size:32px; }} .card {{ padding:16px 14px; overflow-x:auto; }} .table {{ min-width:300px; }}
   .section-label {{ font-size:10px; margin-top:26px; }}
 }}
-@media(max-width:380px){{
-  .channels-grid {{ grid-template-columns:1fr; }}
-  .rev-block {{ flex:1 1 100%; min-width:100%; }}
-  .fc-value {{ font-size:36px; }}
-}}
-
 #gs-gate {{ position:fixed; inset:0; z-index:9999; background:#0a0618; display:flex; align-items:center; justify-content:center; }}
 #gs-gate .box {{ background:#1e1b42; border:1px solid #2e2a5a; border-radius:16px; padding:40px 36px; width:340px; text-align:center; }}
-#gs-gate .logo {{ width:48px; height:48px; border-radius:12px; margin:0 auto 20px; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:17px; color:#fff; }}
-#gs-gate h2 {{ font-size:18px; font-weight:700; color:#f0edff; margin-bottom:4px; }}
-#gs-gate p {{ font-size:13px; color:#7b76a0; margin-bottom:24px; }}
+#gs-gate .logo {{ width:48px; height:48px; border-radius:12px; margin:0 auto 20px; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; }}
+#gs-gate h2 {{ font-size:18px; font-weight:700; margin-bottom:4px; }} #gs-gate p {{ font-size:13px; color:#7b76a0; margin-bottom:24px; }}
 #gs-gate input {{ width:100%; padding:11px 14px; border-radius:8px; border:1px solid #2e2a5a; background:#161330; color:#f0edff; font-size:15px; margin-bottom:12px; outline:none; letter-spacing:.08em; }}
-#gs-gate input:focus {{ border-color:#ff6b5b; }}
 #gs-gate button {{ width:100%; padding:11px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; font-size:15px; font-weight:700; }}
 #gs-gate .err {{ color:#ef4444; font-size:12px; margin-top:8px; display:none; }}
 </style>
@@ -703,153 +655,96 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 (function(){{
   if(sessionStorage.getItem('gs_ok')==='1') return;
   document.addEventListener('DOMContentLoaded', function(){{
-    var gate=document.getElementById('gs-gate'), inp=document.getElementById('gs-pwd'),
-        err=document.getElementById('gs-err'), btn=document.getElementById('gs-btn');
-    gate.style.display='flex';
-    function check(){{ if(inp.value==='radar2026'){{ sessionStorage.setItem('gs_ok','1'); gate.style.display='none'; }}
-      else {{ err.style.display='block'; inp.value=''; inp.focus(); }} }}
-    btn.addEventListener('click', check);
-    inp.addEventListener('keydown', function(e){{ if(e.key==='Enter') check(); }});
+    var g=document.getElementById('gs-gate'), i=document.getElementById('gs-pwd'),
+        e=document.getElementById('gs-err'), b=document.getElementById('gs-btn');
+    g.style.display='flex';
+    function ck(){{ if(i.value==='radar2026'){{ sessionStorage.setItem('gs_ok','1'); g.style.display='none'; }}
+      else {{ e.style.display='block'; i.value=''; i.focus(); }} }}
+    b.addEventListener('click', ck); i.addEventListener('keydown', function(ev){{ if(ev.key==='Enter') ck(); }});
   }});
 }})();
 </script>
 </head>
 <body>
+<div id="gs-gate" style="display:none"><div class="box"><div class="logo">GS</div>
+  <h2>GuruSup · Dashboard Diario</h2><p>Acceso restringido</p>
+  <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus><button id="gs-btn">Entrar</button>
+  <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
-<div id="gs-gate" style="display:none">
-  <div class="box">
-    <div class="logo">GS</div>
-    <h2>GuruSup · Dashboard Diario</h2>
-    <p>Acceso restringido</p>
-    <input id="gs-pwd" type="password" placeholder="Contraseña" autofocus>
-    <button id="gs-btn">Entrar</button>
-    <div id="gs-err" class="err">Contraseña incorrecta</div>
-  </div>
-</div>
-
-<div class="header">
-  <div class="header-inner">
-    <div class="logo-box">GS</div>
-    <div class="header-title">
-      <h1>{title}</h1>
-      <p>{fecha_larga} · {periodo_txt}</p>
-    </div>
-    <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span>
-  </div>
-  <div class="sync-bar">Datos del período · generado el {generado}</div>
-</div>
+<div class="header"><div class="header-inner"><div class="logo-box">GS</div>
+  <div class="header-title"><h1>{title}</h1><p>{fecha_larga} · {periodo_txt}</p></div>
+  <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span></div>
+  <div class="sync-bar">Generado el {generado} · embudos y gráficos acumulados {hist_label}</div></div>
 
 <div class="main">
 
-  <div class="section-label">Embudo de conversión · Consultoría · {periodo_txt}</div>
-  <div class="funnel">{funnel1_html}</div>
+  <div class="section-label">Embudos de conversión · acumulado {hist_label}</div>
+  <div class="funnels-2">
+    <div class="fn-box">
+      <div class="fn-title">🛠️ Proceso comercial (ventas)</div>
+      <div class="fn-note">De contacto a cliente · tasas de conversión entre etapas</div>
+      <div class="pyramid">{sales_pyr}</div>
+    </div>
+    <div class="fn-box">
+      <div class="fn-title" style="color:var(--teal)">⚡ Activación Freemium</div>
+      <div class="fn-note">Activación de contactos existentes y nuevos usuarios freemium</div>
+      <div class="pyramid">{free_pyr}</div>
+      <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
+    </div>
+  </div>
 
-  <div class="section-label">Embudo Freemium · {periodo_txt}</div>
-  <div class="funnel">{funnel2_html}</div>
+  <div class="section-label">Evolución acumulada {hist_label}</div>
+  <div class="charts-3">
+    <div class="chart-card"><h3>Nuevos contactos / leads</h3><div class="sub">acumulado diario</div>{svg_contacts}</div>
+    <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario</div>{svg_sql}</div>
+    <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario</div>{svg_opp}</div>
+  </div>
 
-  <div class="section-label">Canales de adquisición · {total} contactos</div>
+  <div class="section-label">Contactos generados · últimas 24h</div>
+  <div class="funnel">{day_funnel}</div>
+  <div class="free-kpi"><div class="fk-num">{d_free}</div><div class="fk-txt"><strong>Freemium</strong> en 24h · <strong>{d_free_pct}</strong> del total de contactos ({d_total})</div></div>
+  <div class="caption">Reuniones agendadas hoy: {meet_names}</div>
+
+  <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="section-label">Leads en revisión de ventas · {total} contactos</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="alert alert-green" style="margin:0 0 12px;align-items:flex-start;">
-      <span>🎯</span>
-      <div>
-        <strong style="color:var(--guru-300);">La prioridad de revisión son los SQL Consultoría</strong> —contactos que han <strong>pedido una demo</strong>. Orden de prioridad de ventas:
-        <br>• <strong style="color:var(--text-2);">Máxima prioridad: SQL de Paid</strong> — pagamos por ellos y traen intención, pero el coste es alto, así que hay que <strong>sacar conclusiones para optimizar las campañas</strong>.
-        <br>• <strong style="color:var(--text-2);">Siguiente prioridad: SQL del resto de canales</strong> (siempre que sean SQL).
-        <br>• Cuando haya <strong>teléfono de contacto, se les llama en los primeros 15 minutos</strong>.
-      </div>
-    </div>
-    <div style="font-size:12px;color:var(--text);opacity:.85;padding:2px 4px 12px;line-height:1.55;">
-      ℹ️ Los <strong>freemium y leads</strong> no se tratan de forma directa: se gestionan por <strong>automatizaciones</strong> y tienen menor prioridad para ventas.
-    </div>
-    <div class="rev-blocks">{rev_blocks}</div>
-  </div>
-
-  <div class="flow-arrow">↓<small>Los leads pasan a revisión y seguimiento de estado</small></div>
-
-  <div class="section-label">Estado del lead · {n_lead_estado} con estado</div>
-  <div class="card" style="padding:16px 20px;">
-    <div class="rev-blocks">{lead_blocks}</div>
-  </div>
-
-  <div class="flow-arrow">↓<small>A cada SQL se le llama por teléfono → estado de las llamadas</small></div>
-
-  <div class="section-label">Llamadas y seguimiento comercial · aprendizajes para marketing</div>
+  <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">SQL Consultoría del período · empresa, canal y estado</span>
-      <span class="badge badge-green">📞 Seguimiento comercial</span>
-    </div>
-    <table class="table">
-      <thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado SQL</th></tr></thead>
-      <tbody>{call_rows}</tbody>
-    </table>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>💡</span>
-      <div><strong style="color:var(--guru-300);">Aprendizajes para marketing:</strong>
-      <br>• <strong>Brand = intención alta</strong>: los SQL de campaña de marca avanzan rápido a oportunidad/demo.
-      <br>• <strong>PMAX / genérico = menor calidad</strong>: más volumen pero peor cualificación → revisar segmentación y creatividades.
-      <br>• <strong>Campañas por industria/agentes</strong>: traen volumen de SQL; medir su conversión a demo.
-      <br>• <strong>SLA de ventas</strong>: llamada en los primeros 15 min cuando hay teléfono.
-      <br><span style="color:var(--muted);font-size:11px;">Estado tomado de la propiedad «Estado SQL Consultoría» de HubSpot. El estado de llamada íntegro se añadirá cuando el conector tenga permiso de lectura de llamadas.</span></div>
-    </div>
+    <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
+      <span class="badge badge-green">📞 Seguimiento comercial</span></div>
+    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
+    <tbody>{call_rows}</tbody></table>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas». La <strong>razón de descarte/descualificación</strong> se mostrará aquí en cuanto esté creada la propiedad correspondiente en HubSpot.</div></div>
   </div>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
-    <div class="card-header">
-      <span class="card-title">Empresas en pipeline · por canal de marketing y etapa</span>
-      <span class="badge badge-green">{mkt_total} oportunidades de marketing</span>
-    </div>
+    <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
+      <span class="badge badge-green">{mkt_total} oportunidades de marketing</span></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
-    <table class="table" id="emp-table">
-      <thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
-      <tbody>{deal_rows}</tbody>
-    </table>
+    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
+    <tbody>{deal_rows}</tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-    <div class="rev-blocks" style="margin-top:16px;">
-      <div class="rev-block" style="--rbc:var(--guru-300)"><div class="rb-num">{mkt_total}</div><div class="rb-name">Oportunidades en pipeline</div><div class="rb-desc">Solo canales de marketing</div></div>
-      <div class="rev-block" style="--rbc:var(--green)"><div class="rb-num">{demos_pipeline}</div><div class="rb-name">En demo / reunión</div><div class="rb-desc">Etapa presentación</div></div>
-      <div class="rev-block" style="--rbc:var(--amber)"><div class="rb-num">{nuevos_deals}</div><div class="rb-name">Nuevas oportunidades</div><div class="rb-desc">Creadas en el período</div></div>
-    </div>
-    <div class="alert alert-muted" style="margin-top:14px;margin-bottom:0;align-items:flex-start;">
-      <span>ℹ️</span>
-      <div>Solo oportunidades cuyo contacto entró por un <strong>canal de marketing</strong> (Paid Search/Social, SEO, directo, social orgánico, referencias, chat web o eventos). Se excluyen deals de extensión de Sales, integraciones, alta manual e importación. Reparto por canal: {chan_dist_txt}.</div>
-    </div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Reparto por canal: {chan_dist_txt}.</div></div>
   </div>
 
-  <div style="margin-top:40px; text-align:center; font-size:12px; color:var(--muted);">
+  <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
     GuruSup · Dashboard Diario · generado el {generado} (hora España)
   </div>
-
 </div>
 <script>
-(function(){{
-  window.filtrarEmpresas=function(){{
-    var q=document.getElementById('emp-search').value.toLowerCase().trim();
-    var rows=document.querySelectorAll('#emp-table tbody tr:not(.stage-divider)');
-    var visibles=0;
-    rows.forEach(function(r){{
-      var name=r.querySelector('td strong');
-      var match=name && name.textContent.toLowerCase().indexOf(q)!==-1;
-      r.style.display=(!q||match)?'':'none';
-      if(!q||match) visibles++;
-    }});
-    document.querySelectorAll('#emp-table tbody tr.stage-divider').forEach(function(div){{
-      var next=div.nextElementSibling, has=false;
-      while(next && !next.classList.contains('stage-divider')){{
-        if(next.style.display!=='none') has=true;
-        next=next.nextElementSibling;
-      }}
-      div.style.display=(has||!q)?'':'none';
-    }});
-    var empty=document.getElementById('emp-empty');
-    if(empty) empty.style.display=visibles===0?'block':'none';
-  }};
-}})();
+window.filtrarEmpresas=function(){{
+  var q=document.getElementById('emp-search').value.toLowerCase().trim();
+  var rows=document.querySelectorAll('#emp-table tbody tr:not(.stage-divider)'), vis=0;
+  rows.forEach(function(r){{ var n=r.querySelector('td strong'); var m=n&&n.textContent.toLowerCase().indexOf(q)!==-1;
+    r.style.display=(!q||m)?'':'none'; if(!q||m) vis++; }});
+  document.querySelectorAll('#emp-table tbody tr.stage-divider').forEach(function(dv){{
+    var nx=dv.nextElementSibling, has=false;
+    while(nx&&!nx.classList.contains('stage-divider')){{ if(nx.style.display!=='none') has=true; nx=nx.nextElementSibling; }}
+    dv.style.display=(has||!q)?'':'none'; }});
+  var em=document.getElementById('emp-empty'); if(em) em.style.display=vis===0?'block':'none';
+}};
 </script>
 </body>
 </html>"""
