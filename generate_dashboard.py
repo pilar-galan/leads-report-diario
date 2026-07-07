@@ -441,49 +441,37 @@ def main():
 def render(d):
     cum, dd = d["cum"], d["dd"]
 
-    # ── Banda de etapas de ciclo de vida (distribución, sin conversión) ──
-    def stage_chip(label, val, sub, color):
-        return (f'<div class="lc-stage" style="--sc:{color}">'
-                f'<div class="lc-n">{val}</div><div class="lc-l">{esc(label)}</div>'
-                f'<div class="lc-s">{sub}</div></div>')
-    pct_sql_total  = pct(cum["sql"], cum["total"])
-    pct_free_total = pct(cum["free"], cum["total"])
-    dist_band = (
-        '<div class="lc-total"><div class="n">' + str(cum["total"]) + '</div>'
-        '<div class="t">Contactos creados<br><span>acumulado</span></div></div>'
-        '<div class="lc-stages">'
-        + stage_chip("Leads", cum["lead_pure"], "en ciclo de vida", "#FF6B5B")
-        + stage_chip("SQL Consultoría", cum["sql"], pct_sql_total + " del total", "#f59e0b")
-        + stage_chip("Freemium", cum["free"], pct_free_total + " del total", "#22d3ee")
-        + '</div>')
-
-    # ── Pirámides evolutivas (embudo invertido desde SQL / Freemium) ──
+    # ── Pirámides (embudo completo desde Contactos) ──
     def pyramid(steps, palette):
         top = steps[0][1] or 1
         rows = ""
-        for i, (label, val, conv) in enumerate(steps):
-            w = max(38, round(val / top * 100)) if top else 38
+        for i, (label, val, note) in enumerate(steps):
+            w = max(40, round(val / top * 100)) if top else 40
             color = palette[min(i, len(palette)-1)]
-            conv_html = f'<div class="pyr-conv">▼ {conv}</div>' if conv else ""
-            rows += (f'{conv_html}<div class="pyr-row"><div class="pyr-bar" '
+            note_html = f'<div class="pyr-conv">{note}</div>' if note else ""
+            rows += (f'{note_html}<div class="pyr-row"><div class="pyr-bar" '
                      f'style="width:{w}%;background:{color}">'
                      f'<span class="pyr-val">{val}</span> <span class="pyr-lbl">{esc(label)}</span>'
                      f'</div></div>')
         return rows
 
-    # Salmón GuruSup, de intenso a más claro
-    sales_pal = ["#D9432F", "#FF6B5B", "#FF8C7E", "#FBB0A6"]
-    free_pal  = ["#0891b2", "#22d3ee", "#67e8f9", "#a5f3fc"]
+    # Salmón GuruSup (intenso → claro) para ventas; teal para freemium
+    sales_pal = ["#C43D2E", "#E5432F", "#FF6B5B", "#FF8C7E", "#FBB0A6", "#F6C9C2"]
+    free_pal  = ["#0e7490", "#0891b2", "#22d3ee", "#67e8f9", "#a5f3fc"]
 
+    t = cum["total"]
     sales_steps = [
-        ("SQL Consultoría", cum["sql"], ""),
-        ("Reunión agendada", d["agenda_cum"], pct(d["agenda_cum"], cum["sql"])),
-        ("Oportunidad", cum["opp"], pct(cum["opp"], d["agenda_cum"] or cum["sql"])),
-        ("Cliente", cum["cli"], pct(cum["cli"], cum["opp"])),
+        ("Contactos", t, ""),
+        ("Leads", cum["lead"], f'{pct(cum["lead"], t)} del total'),
+        ("SQL Consultoría", cum["sql"], f'{pct(cum["sql"], t)} del total'),
+        ("Reunión agendada", d["agenda_cum"], f'▼ {pct(d["agenda_cum"], cum["sql"])} de SQL'),
+        ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], d["agenda_cum"] or cum["sql"])} de reunión'),
+        ("Cliente", cum["cli"], f'▼ {pct(cum["cli"], cum["opp"])} de oport.'),
     ]
     free_steps = [
-        ("Freemium", cum["free"], ""),
-        ("Agenda con ventas", 0, pct(0, cum["free"])),
+        ("Contactos", t, ""),
+        ("Freemium", cum["free"], f'{pct(cum["free"], t)} del total'),
+        ("Reunión agendada", 0, "▼ pendiente de definir"),
         ("Oportunidad", 0, "—"),
         ("Cliente", 0, "—"),
     ]
@@ -553,7 +541,7 @@ def render(d):
     return TEMPLATE.format(
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
-        dist_band=dist_band, sales_pyr=sales_pyr, free_pyr=free_pyr,
+        sales_pyr=sales_pyr, free_pyr=free_pyr,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
         meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
@@ -719,20 +707,23 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
 <div class="main">
 
-  <div class="section-label">Etapas de ciclo de vida · acumulado {fun_label}</div>
-  <div class="lc-band">{dist_band}</div>
+  <div class="section-label">Contactos generados · últimas 24h</div>
+  <div class="funnel">{day_funnel}</div>
+  <div class="free-kpi"><div class="fk-num">{d_free}</div><div class="fk-txt"><strong>Freemium</strong> en 24h · <strong>{d_free_pct}</strong> del total de contactos ({d_total})</div></div>
+  <div class="caption">Reuniones agendadas hoy: {meet_names}</div>
 
-  <div class="flow-sep"><span>▽ De SQL y Freemium en adelante · evolución del proceso comercial y de activación</span></div>
+  <div class="flow-sep"><span>📈 Evolutivo · {chart_label}</span></div>
 
+  <div class="section-label">Embudos de conversión · acumulado {fun_label}</div>
   <div class="funnels-2">
     <div class="fn-box">
       <div class="fn-title">🛠️ Proceso comercial (ventas)</div>
-      <div class="fn-note">De SQL a cliente · tasas de conversión entre etapas</div>
+      <div class="fn-note">De contacto a cliente · leads, SQL y conversiones</div>
       <div class="pyramid">{sales_pyr}</div>
     </div>
     <div class="fn-box">
       <div class="fn-title" style="color:var(--teal)">⚡ Activación Freemium</div>
-      <div class="fn-note">De freemium a cliente · activación de cuentas</div>
+      <div class="fn-note">De contacto a freemium y su activación comercial</div>
       <div class="pyramid">{free_pyr}</div>
       <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
     </div>
@@ -745,11 +736,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="chart-card"><h3>Oportunidades</h3><div class="sub">acumulado diario · anual</div>{svg_opp}</div>
     <div class="chart-card"><h3>Clientes</h3><div class="sub">acumulado diario · anual</div>{svg_cli}</div>
   </div>
-
-  <div class="section-label">Contactos generados · últimas 24h</div>
-  <div class="funnel">{day_funnel}</div>
-  <div class="free-kpi"><div class="fk-num">{d_free}</div><div class="fk-txt"><strong>Freemium</strong> en 24h · <strong>{d_free_pct}</strong> del total de contactos ({d_total})</div></div>
-  <div class="caption">Reuniones agendadas hoy: {meet_names}</div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
