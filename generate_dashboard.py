@@ -557,22 +557,32 @@ def render(d):
     cum, dd = d["cum"], d["dd"]
 
     # ── Pirámides (embudo completo desde Contactos) ──
-    def pyramid(steps, palette):
+    def txt_color(hexc):
+        h = hexc.lstrip("#"); r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return "#3a0f08" if (0.299*r + 0.587*g + 0.114*b) > 165 else "#fff"
+    def pyramid(steps, palette, split):
         top = steps[0][1] or 1
         rows = ""
         for i, (label, val, note) in enumerate(steps):
             w = max(40, round(val / top * 100)) if top else 40
             color = palette[min(i, len(palette)-1)]
             note_html = f'<div class="pyr-conv">{note}</div>' if note else ""
+            # marca de separación entre grupo acumulativo y evolutivo
+            if i == split:
+                note_html = '<div class="pyr-split">↓ empiezan a convertir (evolutivo)</div>' + note_html
             rows += (f'{note_html}<div class="pyr-row"><div class="pyr-bar" '
-                     f'style="width:{w}%;background:{color}">'
+                     f'style="width:{w}%;background:{color};color:{txt_color(color)}">'
                      f'<span class="pyr-val">{val}</span> <span class="pyr-lbl">{esc(label)}</span>'
                      f'</div></div>')
         return rows
 
-    # Salmón GuruSup (intenso → claro) para ventas; teal para freemium
-    sales_pal = ["#C43D2E", "#E5432F", "#FF6B5B", "#FF8C7E", "#FBB0A6", "#F6C9C2"]
-    free_pal  = ["#0e7490", "#0891b2", "#22d3ee", "#67e8f9", "#a5f3fc"]
+    # Acumulativos (casi directos) en tono CLARO · evolutivos (convierten) en tono FUERTE oscuro→claro
+    # Ventas: Contactos/Leads/MQL (claro) | SQL/Oportunidad/Cliente (fuerte)
+    sales_pal = ["#FBD5CE", "#F7C0B7", "#F3ABA0",   # acumulativos (salmón claro)
+                 "#B23320", "#E8543F", "#FF8B7D"]   # evolutivos (salmón fuerte oscuro→claro)
+    # Freemium: Contactos/Freemium (claro) | Oportunidad/Cliente (fuerte)
+    free_pal  = ["#BFEAF4", "#8FDDEE",                                 # acumulativos (teal claro)
+                 "#0E7490", "#22D3EE"]                                 # evolutivos (teal oscuro→claro)
 
     t = cum["total"]
     sales_steps = [
@@ -589,8 +599,8 @@ def render(d):
         ("Oportunidad", 0, "—"),
         ("Cliente", 0, "—"),
     ]
-    sales_pyr = pyramid(sales_steps, sales_pal)
-    free_pyr = pyramid(free_steps, free_pal)
+    sales_pyr = pyramid(sales_steps, sales_pal, split=3)   # SQL en adelante = evolutivo
+    free_pyr = pyramid(free_steps, free_pal, split=2)       # Oportunidad en adelante = evolutivo
 
     # Resumen 24h · KPIs (% sobre el total de contactos, NO es un embudo)
     dtot = dd["total"]
@@ -735,6 +745,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pyr-val {{ font-size:19px; font-weight:800; }}
 .pyr-lbl {{ font-size:12px; font-weight:600; opacity:.95; }}
 .pyr-conv {{ font-size:11px; font-weight:700; color:var(--muted); margin:5px 0; }}
+.pyr-split {{ font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--guru-300); margin:10px 0 6px; padding-top:8px; border-top:1px dashed var(--border); }}
 .fn-highlight {{ margin-top:14px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.25); color:#a5f3fc; border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.5; }}
 
 /* Gráficos */
