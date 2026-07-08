@@ -354,11 +354,14 @@ def main():
         email = p.get("email") or ""
         src = p.get("hs_analytics_source") or ""
         d1 = p.get("hs_analytics_source_data_1") or ""
+        lc = p.get("lifecyclestage") or ""
         if is_internal(email): internal += 1; continue
         if is_test(p.get("revision_ventas"), email): tests += 1; continue
-        if is_import(src, d1): imports += 1; continue
+        # Las importaciones se excluyen SALVO que sean freemium (los queremos todos)
+        if is_import(src, d1) and lc != "1378463825":
+            imports += 1; continue
         hist.append({
-            "src": src, "d1": d1, "lc": p.get("lifecyclestage") or "",
+            "src": src, "d1": d1, "lc": lc,
             "rev": p.get("revision_ventas") or "",
             "sql_state": p.get("estado_sql_consultoria") or "",
             "lead_state": p.get("hs_lead_status") or "",
@@ -413,8 +416,6 @@ def main():
 
     reunion_cum = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= fstart)
     reunion_day = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= dstart)
-    # Reuniones REALIZADAS (celebradas) en el período del embudo
-    reunion_real = count_meetings_held(funnel_iso, end_iso)
 
     # Reuniones (calendario) del día -> nombres (ventana diaria, ligero)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -525,7 +526,7 @@ def main():
         "title": title, "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "fun_label": f"{funnel_start.day} {MESES3[funnel_start.month-1]} {funnel_start.year} → hoy",
         "chart_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
-        "cum": cum, "agenda_cum": agenda_cum, "reunion_real": reunion_real, "dd": dd, "agenda_day": agenda_day,
+        "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day,
         "meet_names": meet_names,
         "svg_leads": svg_cumulative(*ch_leads, labels, "#FF6B5B"),
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
@@ -576,14 +577,12 @@ def render(d):
         ("Contactos", t, ""),
         ("Leads", cum["lead"], f'{pct(cum["lead"], t)} del total'),
         ("SQL Consultoría", cum["sql"], f'{pct(cum["sql"], t)} del total'),
-        ("Reuniones realizadas", d["reunion_real"], f'▼ {pct(d["reunion_real"], cum["sql"])} de SQL · celebradas'),
-        ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], d["reunion_real"] or cum["sql"])} de reunión'),
+        ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], cum["sql"])} de SQL'),
         ("Cliente", cum["cli"], f'▼ {pct(cum["cli"], cum["opp"])} de oport.'),
     ]
     free_steps = [
         ("Contactos", t, ""),
         ("Freemium", cum["free"], f'{pct(cum["free"], t)} del total'),
-        ("Reunión agendada", 0, "▼ pendiente de definir"),
         ("Oportunidad", 0, "—"),
         ("Cliente", 0, "—"),
     ]
@@ -841,6 +840,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
+  <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
+      <span class="badge badge-green">📞 Seguimiento comercial</span></div>
+    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
+    <tbody>{call_rows}</tbody></table>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas». La <strong>razón de descarte/descualificación</strong> se mostrará aquí en cuanto esté creada la propiedad correspondiente en HubSpot.</div></div>
+  </div>
+
   <div class="evo-banner">
     <div class="evo-l"><span class="evo-ico">📈</span><div><div class="evo-t">Evolutivo anual · datos acumulados</div><div class="evo-s">Todo lo que sigue suma el histórico desde el 1 de enero de 2026</div></div></div>
     <span class="evo-badge">ACUMULADO · {chart_label}</span>
@@ -867,15 +875,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="chart-card"><h3>SQL Consultoría</h3><div class="sub">acumulado diario · anual</div>{svg_sql}<div class="peak-note">{peak_sql}</div></div>
     <div class="chart-card"><h3>Oportunidades <span style="font-weight:400;color:var(--muted)">· empresas</span></h3><div class="sub">acumulado diario · anual</div>{svg_opp}<div class="peak-note">{peak_opp}</div></div>
     <div class="chart-card"><h3>Clientes <span style="font-weight:400;color:var(--muted)">· empresas</span></h3><div class="sub">acumulado diario · anual</div>{svg_cli}<div class="peak-note">{peak_cli}</div></div>
-  </div>
-
-  <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
-  <div class="card">
-    <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
-      <span class="badge badge-green">📞 Seguimiento comercial</span></div>
-    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
-    <tbody>{call_rows}</tbody></table>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas». La <strong>razón de descarte/descualificación</strong> se mostrará aquí en cuanto esté creada la propiedad correspondiente en HubSpot.</div></div>
   </div>
 
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
