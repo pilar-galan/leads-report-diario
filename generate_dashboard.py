@@ -50,6 +50,27 @@ STAGE_LABELS = [
 # Rango de etapas de deal (para el embudo por empresas)
 DEAL_RANK = {"1107496610": 1, "presentationscheduled": 2, "1033589123": 3, "closedwon": 4}
 
+# Unificación de razones de descarte/descalificación (contacto razon_descarte_sql + deal motivo_de_descalificacion)
+UNIFY_DESCARTE = {
+    # razon_descarte_sql (contactos)
+    "Lead accidental (no recuerda registrarse, clic por error, curiosidad, broma": "Lead accidental / no recuerda",
+    "Volumen <500 → Freemium": "Volumen insuficiente",
+    "Timing — \"ahora no es prioridad\"": "Timing / no es prioridad",
+    "Caso de uso equivocado (esperan mensajería masiva)": "Caso de uso / no target",
+    "Competidor con integración vertical nativa": "Competidor",
+    "Intención no cualificada / sin autoridad": "Sin autoridad / no cualificado",
+    "Build vs buy (\"lo hacemos nosotros\")": "Build vs buy",
+    "Precio": "Precio / presupuesto",
+    # motivo_de_descalificacion (deals)
+    "No interés": "Timing / no es prioridad",
+    "No target": "Caso de uso / no target",
+    "No hay presu": "Precio / presupuesto",
+    "No hay volumen": "Volumen insuficiente",
+    "Contato incorrecto": "Sin autoridad / no cualificado",
+    "Test": "Test",
+    "Otros": "Otros",
+}
+
 LC_LABELS = {
     "lead": "Lead", "salesqualifiedlead": "SQL-Consultoría", "1378463825": "Freemium",
     "marketingqualifiedlead": "MQL", "opportunity": "Oportunidad", "customer": "Cliente",
@@ -533,18 +554,25 @@ def main():
                              "state": c["sql_state"] or "Pendiente", "rev": c["rev"] or "Pendiente de revisión"})
     sql_rows.sort(key=lambda r: r["channel"])
 
-    # ── Razón de descarte SQL (propiedad razon_descarte_sql) ──
-    try:
-        drz_raw = fetch_all("contacts", [
-            {"propertyName": "razon_descarte_sql", "operator": "HAS_PROPERTY"},
-        ], ["razon_descarte_sql"])
-    except Exception as e:
-        print(f"  razon_descarte error: {e}"); drz_raw = []
+    # ── Razón de descarte/descalificación UNIFICADA (contacto razon_descarte_sql + deal motivo_de_descalificacion) ──
     drz = {}
-    for c in drz_raw:
-        v = c["properties"].get("razon_descarte_sql")
-        if v:
-            drz[v] = drz.get(v, 0) + 1
+    def add_reason(raw):
+        if not raw:
+            return
+        label = UNIFY_DESCARTE.get(raw, raw)
+        drz[label] = drz.get(label, 0) + 1
+    try:
+        for c in fetch_all("contacts", [{"propertyName": "razon_descarte_sql", "operator": "HAS_PROPERTY"}],
+                           ["razon_descarte_sql"]):
+            add_reason(c["properties"].get("razon_descarte_sql"))
+    except Exception as e:
+        print(f"  razon_descarte_sql error: {e}")
+    try:
+        for dl in fetch_all("deals", [{"propertyName": "motivo_de_descalificacion", "operator": "HAS_PROPERTY"}],
+                            ["motivo_de_descalificacion"]):
+            add_reason(dl["properties"].get("motivo_de_descalificacion"))
+    except Exception as e:
+        print(f"  motivo_de_descalificacion error: {e}")
     descarte = sorted(drz.items(), key=lambda x: -x[1])
 
     # ── Pipeline (deals abiertos, solo marketing) ──
@@ -684,8 +712,9 @@ def render(d):
             descarte_html += (f'<div class="drz-row"><div class="drz-l">{esc(reason)}</div>'
                               f'<div class="drz-barwrap"><div class="drz-bar" style="width:{w}%"></div></div>'
                               f'<div class="drz-n">{n}</div></div>')
-        descarte_note = (f'<strong>{tot}</strong> SQL descartados con razón registrada, de mayor a menor volumen. '
-                         'Razones identificadas por ventas (Agustín/Juanma) en las llamadas.')
+        descarte_note = (f'<strong>{tot}</strong> descartes con razón registrada, de mayor a menor volumen. '
+                         'Unifica «Razón descarte SQL» (contacto) y «Motivo de descalificación» (deal); '
+                         'identificadas por ventas (Agustín/Juanma) en las llamadas.')
     else:
         descarte_html = ('<div style="color:var(--muted);font-size:13px;padding:6px 0">Aún no hay descartes '
                          'registrados en la propiedad «Razón descarte SQL». Se irá poblando según ventas la registre tras las llamadas.</div>')
