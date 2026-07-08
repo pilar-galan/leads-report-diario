@@ -533,6 +533,20 @@ def main():
                              "state": c["sql_state"] or "Pendiente", "rev": c["rev"] or "Pendiente de revisión"})
     sql_rows.sort(key=lambda r: r["channel"])
 
+    # ── Razón de descarte SQL (propiedad razon_descarte_sql) ──
+    try:
+        drz_raw = fetch_all("contacts", [
+            {"propertyName": "razon_descarte_sql", "operator": "HAS_PROPERTY"},
+        ], ["razon_descarte_sql"])
+    except Exception as e:
+        print(f"  razon_descarte error: {e}"); drz_raw = []
+    drz = {}
+    for c in drz_raw:
+        v = c["properties"].get("razon_descarte_sql")
+        if v:
+            drz[v] = drz.get(v, 0) + 1
+    descarte = sorted(drz.items(), key=lambda x: -x[1])
+
     # ── Pipeline (deals abiertos, solo marketing) ──
     nuevos_ids = {d["id"] for d in open_deals if d["created"] >= dstart}
     demos_pipeline = sum(1 for d in open_deals if d["stage"] == "presentationscheduled")
@@ -557,7 +571,7 @@ def main():
         "channels": channels, "sql_rows": sql_rows,
         "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
-        "demos_pipeline": demos_pipeline, "chan_dist": chan_dist,
+        "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
         "excl_tests": tests, "excl_internal": internal, "excl_imports": imports,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
     }
@@ -661,6 +675,24 @@ def render(d):
     else:
         call_rows = '<tr><td colspan="3" style="color:var(--muted)">Sin SQL en el período</td></tr>'
 
+    # Razones de descarte SQL (ordenadas por volumen)
+    if d["descarte"]:
+        mx = d["descarte"][0][1]; tot = sum(n for _, n in d["descarte"])
+        descarte_html = ""
+        for reason, n in d["descarte"]:
+            w = max(6, round(n / mx * 100))
+            descarte_html += (f'<div class="drz-row"><div class="drz-l">{esc(reason)}</div>'
+                              f'<div class="drz-barwrap"><div class="drz-bar" style="width:{w}%"></div></div>'
+                              f'<div class="drz-n">{n}</div></div>')
+        descarte_note = (f'<strong>{tot}</strong> SQL descartados con razón registrada, de mayor a menor volumen. '
+                         'Razones identificadas por ventas (Agustín/Juanma) en las llamadas.')
+    else:
+        descarte_html = ('<div style="color:var(--muted);font-size:13px;padding:6px 0">Aún no hay descartes '
+                         'registrados en la propiedad «Razón descarte SQL». Se irá poblando según ventas la registre tras las llamadas.</div>')
+        descarte_note = ('Catálogo de razones definidas: lead accidental · volumen &lt;500 (→ freemium) · timing '
+                         '(«ahora no es prioridad») · caso de uso equivocado · competidor con integración nativa · '
+                         'intención no cualificada / sin autoridad · build vs buy · precio.')
+
     # Pipeline
     by_stage = {}
     for deal in d["mkt_deals"]:
@@ -684,7 +716,8 @@ def render(d):
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
-        meet_names=d["meet_names"], calls_day=d["calls_day"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
+        meet_names=d["meet_names"], calls_day=d["calls_day"], ch_cards=ch_cards, call_rows=call_rows,
+        descarte_html=descarte_html, descarte_note=descarte_note, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
         chan_dist_txt=chan_dist_txt,
         excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
@@ -823,6 +856,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }}
 .alert-muted {{ background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }}
 .caption {{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }}
+.drz-row {{ display:flex; align-items:center; gap:12px; margin-bottom:9px; }}
+.drz-l {{ flex:0 0 42%; font-size:12px; color:var(--text-2); line-height:1.35; }}
+.drz-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:12px; overflow:hidden; }}
+.drz-bar {{ height:12px; border-radius:5px; background:linear-gradient(90deg,var(--guru-500),var(--guru-400)); }}
+.drz-n {{ flex:0 0 32px; text-align:right; font-size:14px; font-weight:800; color:var(--guru-300); }}
+@media(max-width:600px){{ .drz-l {{ flex-basis:52%; font-size:11px; }} }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -879,7 +918,13 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <span class="badge badge-green">📞 Seguimiento comercial</span></div>
     <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
     <tbody>{call_rows}</tbody></table>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas». La <strong>razón de descarte/descualificación</strong> se mostrará aquí en cuanto esté creada la propiedad correspondiente en HubSpot.</div></div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas».</div></div>
+  </div>
+
+  <div class="section-label">Razones de descarte / descualificación de SQL</div>
+  <div class="card">
+    <div class="drz">{descarte_html}</div>
+    <div class="alert alert-muted"><span>💬</span><div>{descarte_note}</div></div>
   </div>
 
   <div class="evo-banner">
