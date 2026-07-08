@@ -234,6 +234,21 @@ def fetch_marketing_meetings(start_iso, end_iso):
     return out
 
 
+SDR_OWNERS = ["92703778", "92703779"]  # Agustín Di Nardo · Juan Manuel (Juanma) Jura
+
+def count_sdr_calls(start_iso, end_iso):
+    """Nº de llamadas de los SDR (Agustín/Juanma) en el rango (por hs_timestamp)."""
+    try:
+        res = fetch_all("calls", [
+            {"propertyName": "hubspot_owner_id", "operator": "IN", "values": SDR_OWNERS},
+            {"propertyName": "hs_timestamp", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+        ], ["hs_timestamp"])
+        return len(res)
+    except Exception as e:
+        print(f"  sdr calls error: {e}")
+        return 0
+
+
 def count_meetings_held(start_iso, end_iso):
     """Nº de reuniones REALIZADAS (celebradas) en el rango (start_time ya pasado)."""
     try:
@@ -417,6 +432,7 @@ def main():
 
     reunion_cum = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= fstart)
     reunion_day = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= dstart)
+    calls_day = count_sdr_calls(start_iso, end_iso)   # llamadas de Agustín/Juanma en 24h
 
     # Reuniones (calendario) del día -> nombres (ventana diaria, ligero)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -427,7 +443,8 @@ def main():
     dd  = funnel_counts(daily)
     # Oportunidades y clientes = EMPRESAS (ciclo de vida); reunión = deals en demo+
     agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
-    agenda_day, dd["opp"], dd["cli"] = reunion_day, opp_day, cli_day
+    # Reuniones agendadas (24h) = demos agendadas + llamadas de los SDR (Agustín/Juanma)
+    agenda_day, dd["opp"], dd["cli"] = reunion_day + calls_day, opp_day, cli_day
 
     # ── Gráficos acumulados por día (anual, desde 1 ene) ──
     d0 = chart_start.date()
@@ -527,7 +544,7 @@ def main():
         "title": title, "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "fun_label": f"{funnel_start.day} {MESES3[funnel_start.month-1]} {funnel_start.year} → hoy",
         "chart_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
-        "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day,
+        "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day, "calls_day": calls_day,
         "meet_names": meet_names,
         "svg_leads": svg_cumulative(*ch_leads, labels, "#FF6B5B"),
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
@@ -611,7 +628,7 @@ def render(d):
         dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total'),
         dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-orange"),
         dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-teal"),
-        dcard("Reuniones agendadas", d["agenda_day"], f'{pct(d["agenda_day"], dtot)} del total', "f-c-green"),
+        dcard("Reuniones y llamadas", d["agenda_day"], f'{max(d["agenda_day"]-d["calls_day"],0)} agendadas · {d["calls_day"]} llamadas', "f-c-green"),
         dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total'),
     ])
     day_funnel = day_cards
@@ -667,7 +684,7 @@ def render(d):
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
-        meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
+        meet_names=d["meet_names"], calls_day=d["calls_day"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
         chan_dist_txt=chan_dist_txt,
         excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
@@ -851,7 +868,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
   <div class="section-label">Contactos generados · últimas 24h</div>
   <div class="day-kpis">{day_funnel}</div>
-  <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · Reuniones agendadas hoy: {meet_names}</div>
+  <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · <strong>Reuniones y llamadas</strong> = reuniones agendadas (demos) + llamadas de los SDR (Agustín/Juanma): <strong>{calls_day}</strong> llamadas hoy · Reuniones hoy: {meet_names}</div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
