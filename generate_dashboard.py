@@ -541,6 +541,7 @@ def main():
         "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist,
+        "excl_tests": tests, "excl_internal": internal, "excl_imports": imports,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
     }
     html = render(data)
@@ -658,7 +659,9 @@ def render(d):
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
         meet_names=d["meet_names"], ch_cards=ch_cards, call_rows=call_rows, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
-        chan_dist_txt=chan_dist_txt, generado=esc(d["generado"]),
+        chan_dist_txt=chan_dist_txt,
+        excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
+        generado=esc(d["generado"]),
     )
 
 
@@ -870,7 +873,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
     </div>
   </div>
-  <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads.</div>
+  <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads.
+    <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
+    <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>{excl_tests}</strong> test/prueba · <strong>{excl_internal}</strong> internos @gurusup (empleados) · <strong>{excl_imports}</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
+    <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
   <div class="charts-2">
