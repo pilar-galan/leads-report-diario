@@ -181,6 +181,7 @@ def funnel_counts(lst):
         "total": len(lst),
         "lead": sum(1 for c in lst if rank(c["lc"]) >= 1),
         "lead_pure": sum(1 for c in lst if rank(c["lc"]) in (1, 2)),  # lead/MQL, aún no SQL
+        "mql": sum(1 for c in lst if rank(c["lc"]) >= 2),  # alcanzaron MQL (acumulativo)
         "sql":  sum(1 for c in lst if rank(c["lc"]) >= 3),
         "opp":  sum(1 for c in lst if rank(c["lc"]) >= 4),
         "cli":  sum(1 for c in lst if rank(c["lc"]) >= 5),
@@ -576,6 +577,7 @@ def render(d):
     sales_steps = [
         ("Contactos", t, ""),
         ("Leads", cum["lead"], f'{pct(cum["lead"], t)} del total'),
+        ("MQL", cum["mql"], f'{pct(cum["mql"], t)} del total'),
         ("SQL Consultoría", cum["sql"], f'{pct(cum["sql"], t)} del total'),
         ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], cum["sql"])} de SQL'),
         ("Cliente", cum["cli"], f'▼ {pct(cum["cli"], cum["opp"])} de oport.'),
@@ -868,6 +870,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
     </div>
   </div>
+  <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads.</div>
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
   <div class="charts-2">
