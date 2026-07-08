@@ -233,6 +233,18 @@ def fetch_marketing_meetings(start_iso, end_iso):
     return out
 
 
+def count_meetings_held(start_iso, end_iso):
+    """Nº de reuniones REALIZADAS (celebradas) en el rango (start_time ya pasado)."""
+    try:
+        res = fetch_all("meetings", [
+            {"propertyName": "hs_meeting_start_time", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+        ], ["hs_meeting_start_time"])
+        return len(res)
+    except Exception as e:
+        print(f"  meetings held error: {e}")
+        return 0
+
+
 # ─────────────── SVG chart ───────────────
 def svg_cumulative(cum, daily, labels, color):
     """cum: lista acumulada; daily: incremento diario; labels: 'DD mmm' por día."""
@@ -401,6 +413,8 @@ def main():
 
     reunion_cum = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= fstart)
     reunion_day = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= dstart)
+    # Reuniones REALIZADAS (celebradas) en el período del embudo
+    reunion_real = count_meetings_held(funnel_iso, end_iso)
 
     # Reuniones (calendario) del día -> nombres (ventana diaria, ligero)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -443,8 +457,8 @@ def main():
     ch_opp   = series(hist, lambda c: c["lc"] == "opportunity", compkey)  # empresas oportunidad
     ch_cli   = series(hist, lambda c: c["lc"] == "customer", compkey)     # empresas cliente
 
-    def peak_insight(items, pred, topn=2, origin=True):
-        """Top-N días con mayor incremento + (opcional) canal/campaña de origen."""
+    def peak_insight(items, pred, origin=True):
+        """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
         from collections import Counter
         inc = [0]*len(days)
         chc = [Counter() for _ in days]
@@ -456,22 +470,25 @@ def main():
                     chc[i][classify_channel(it["src"], it["d1"])[0]] += 1
                     if it["d1"]:
                         cmp[i][it["d1"]] += 1
-        order = sorted(range(len(days)), key=lambda i: inc[i], reverse=True)
-        peaks = [i for i in order if inc[i] > 0][:topn]
-        if not peaks:
+        # mejor día por mes
+        best = {}  # month -> index
+        for i, day in enumerate(days):
+            if inc[i] <= 0:
+                continue
+            m = day.month
+            if m not in best or inc[i] > inc[best[m]]:
+                best[m] = i
+        if not best:
             return "Sin picos relevantes en el período."
         parts = []
-        for i in peaks:
-            day = days[i]; delta = inc[i]
-            s = f'<strong>{day.day} {MESES3[day.month-1]}</strong> (+{delta})'
+        for m in sorted(best):
+            i = best[m]; day = days[i]; delta = inc[i]
+            s = f'<strong>{MESES3[day.month-1]} {day.day}</strong> +{delta}'
             tc = chc[i].most_common(1)
             if tc:
                 s += f' · {round(tc[0][1]/delta*100)}% {esc(tc[0][0])}'
-            tcmp = cmp[i].most_common(1)
-            if tcmp and tcmp[0][1] >= 2:
-                s += f' · «{esc(tcmp[0][0][:30])}»'
             parts.append(s)
-        return "📌 Picos: " + " · ".join(parts)
+        return "📌 Mejor pico por mes: " + " · ".join(parts)
 
     # ── Canales (diario) con desglose lead/SQL/freemium ──
     chan = {}
@@ -508,7 +525,7 @@ def main():
         "title": title, "fecha_larga": fecha_larga, "periodo_txt": periodo_txt,
         "fun_label": f"{funnel_start.day} {MESES3[funnel_start.month-1]} {funnel_start.year} → hoy",
         "chart_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
-        "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day,
+        "cum": cum, "agenda_cum": agenda_cum, "reunion_real": reunion_real, "dd": dd, "agenda_day": agenda_day,
         "meet_names": meet_names,
         "svg_leads": svg_cumulative(*ch_leads, labels, "#FF6B5B"),
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
@@ -559,8 +576,8 @@ def render(d):
         ("Contactos", t, ""),
         ("Leads", cum["lead"], f'{pct(cum["lead"], t)} del total'),
         ("SQL Consultoría", cum["sql"], f'{pct(cum["sql"], t)} del total'),
-        ("Reunión agendada", d["agenda_cum"], f'▼ {pct(d["agenda_cum"], cum["sql"])} de SQL'),
-        ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], d["agenda_cum"] or cum["sql"])} de reunión'),
+        ("Reuniones realizadas", d["reunion_real"], f'▼ {pct(d["reunion_real"], cum["sql"])} de SQL · celebradas'),
+        ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], d["reunion_real"] or cum["sql"])} de reunión'),
         ("Cliente", cum["cli"], f'▼ {pct(cum["cli"], cum["opp"])} de oport.'),
     ]
     free_steps = [
@@ -580,10 +597,10 @@ def render(d):
     day_cards = "".join([
         dcard("Contactos", dtot, "últimas 24h"),
         dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total'),
-        dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-teal"),
         dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-orange"),
-        dcard("Agenda reunión", d["agenda_day"], f'{pct(d["agenda_day"], dtot)} del total', "f-c-green"),
-        dcard("Oportunidad", dd["opp"], f'{pct(dd["opp"], dtot)} del total'),
+        dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-teal"),
+        dcard("Reuniones agendadas", d["agenda_day"], f'{pct(d["agenda_day"], dtot)} del total', "f-c-green"),
+        dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total'),
     ])
     day_funnel = day_cards
 
@@ -690,6 +707,16 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .flow-sep {{ display:flex; align-items:center; gap:14px; margin:22px 2px 20px; }}
 .flow-sep::before, .flow-sep::after {{ content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),var(--border),transparent); }}
 .flow-sep span {{ font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }}
+.evo-banner {{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  margin:38px 0 18px; padding:16px 20px; border-radius:14px;
+  background:linear-gradient(100deg, rgba(255,107,91,.16), rgba(34,211,238,.12));
+  border:1px solid rgba(255,107,91,.35); box-shadow:0 0 24px rgba(255,107,91,.10); }}
+.evo-l {{ display:flex; align-items:center; gap:14px; }}
+.evo-ico {{ font-size:26px; }}
+.evo-t {{ font-size:16px; font-weight:800; color:var(--text); letter-spacing:.01em; }}
+.evo-s {{ font-size:12px; color:var(--text-2); margin-top:2px; }}
+.evo-badge {{ font-size:11px; font-weight:800; letter-spacing:.08em; padding:6px 12px; border-radius:20px;
+  background:var(--guru-500); color:#fff; white-space:nowrap; box-shadow:0 2px 8px rgba(255,107,91,.35); }}
 @media(max-width:600px){{ .flow-sep span {{ white-space:normal; text-align:center; }} }}
 
 /* Dos embudos */
@@ -814,7 +841,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="flow-sep"><span>📈 Evolutivo · {chart_label}</span></div>
+  <div class="evo-banner">
+    <div class="evo-l"><span class="evo-ico">📈</span><div><div class="evo-t">Evolutivo anual · datos acumulados</div><div class="evo-s">Todo lo que sigue suma el histórico desde el 1 de enero de 2026</div></div></div>
+    <span class="evo-badge">ACUMULADO · {chart_label}</span>
+  </div>
 
   <div class="section-label">Embudos de conversión · acumulado {fun_label}</div>
   <div class="funnels-2">
