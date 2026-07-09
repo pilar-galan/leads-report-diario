@@ -647,8 +647,8 @@ def render(d):
     sales_steps = [
         ("Contactos", t, ""),
         ("Leads", cum["lead"], f'{pct(cum["lead"], t)} del total'),
-        ("MQL", cum["mql"], f'{pct(cum["mql"], t)} del total'),
-        ("SQL Consultoría", cum["sql"], f'{pct(cum["sql"], t)} del total'),
+        ("MQL", cum["mql"], f'{pct(cum["mql"], cum["lead"])} de leads'),
+        ("SQL Consultoría", cum["sql"], f'{pct(cum["sql"], cum["lead"])} de leads'),
         ("Oportunidad", cum["opp"], f'▼ {pct(cum["opp"], cum["sql"])} de SQL'),
         ("Cliente", cum["cli"], f'▼ {pct(cum["cli"], cum["opp"])} de oport.'),
     ]
@@ -975,7 +975,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
     </div>
   </div>
-  <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads.
+  <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).
     <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
     <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>{excl_tests}</strong> test/prueba · <strong>{excl_internal}</strong> internos @gurusup (empleados) · <strong>{excl_imports}</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
     <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
