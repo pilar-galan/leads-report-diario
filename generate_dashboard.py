@@ -425,9 +425,17 @@ def main():
 
     # ── Deals · reunión agendada (demo+) y tabla de pipeline (abiertos) ──
     DEMO_PLUS = {"presentationscheduled", "1033589123", "1119432966"}  # needs-validation, best case, close won
+    # Pipelines para distinguir Brain (GuruSup/Company Brain) de ventas normales
+    try:
+        pdefs = api_get("/crm/v3/pipelines/deals").get("results", [])
+        PL_LABEL = {p["id"]: (p.get("label") or "") for p in pdefs}
+    except Exception as e:
+        print(f"  pipelines error: {e}"); PL_LABEL = {}
+    def is_brain_pl(pid):
+        return "brain" in PL_LABEL.get(pid, "").lower()
     all_deals = fetch_all("deals", [
-        {"propertyName": "pipeline", "operator": "EQ", "value": "default"},
-    ], ["dealname", "dealstage", "createdate", "hs_is_closed",
+        {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
+    ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed",
         "hs_analytics_source", "hs_analytics_source_data_1"])
 
     def valid_deal(n):
@@ -436,20 +444,24 @@ def main():
     def clean_deal(n):
         return re.sub(r'\s*-\s*nuevo tipo de objeto deal\s*$', '', n or "", flags=re.I).strip()
 
-    deals = []            # todos los deals válidos (para reunión)
+    deals = []            # todos los deals válidos abiertos (para reunión)
     open_deals = []       # abiertos marketing (para tabla pipeline)
+    brain_count = ventas_count = 0
     for dl in all_deals:
         p = dl["properties"]
         if not valid_deal(p.get("dealname", "")):
             continue
-        stage = p.get("dealstage", "")
+        stage = p.get("dealstage", ""); pid = p.get("pipeline", "")
         created = (p.get("createdate") or "")[:10]
         src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         deals.append({"stage": stage, "created": created})
-        if p.get("hs_is_closed") != "true" and is_marketing(src, d1):
+        if is_marketing(src, d1):
+            if is_brain_pl(pid): brain_count += 1
+            else: ventas_count += 1
             icon = classify_channel(src, d1)[1]; label = classify_channel(src, d1)[0]
             open_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
-                               "stage": stage, "created": created, "channel": f"{icon} {label}"})
+                               "stage": stage, "created": created, "channel": f"{icon} {label}",
+                               "brain": is_brain_pl(pid)})
 
     reunion_cum = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= fstart)
     reunion_day = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= dstart)
@@ -600,6 +612,7 @@ def main():
         "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
+        "brain_count": brain_count, "ventas_count": ventas_count,
         "excl_tests": tests, "excl_internal": internal, "excl_imports": imports,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
     }
@@ -704,6 +717,10 @@ def render(d):
         call_rows = '<tr><td colspan="3" style="color:var(--muted)">Sin SQL en el período</td></tr>'
 
     # Razones de descarte SQL (ordenadas por volumen)
+    proceso = ('<br><br>⚙️ <strong>Cómo se registran:</strong> cuando un contacto inbound supera <strong>3.000 consultas/mes</strong>, '
+               'salta un aviso automático a <strong>Agustín</strong> (responsable de seguimiento inbound); tras la llamada o el email '
+               'con el contacto, la razón de descarte se registra automáticamente. Si la razón no se reconoce, se lanza una <strong>alerta '
+               'para validar y valorar añadir una nueva razón</strong> identificada por IA. Dato acumulativo desde el 1 de enero.')
     if d["descarte"]:
         mx = d["descarte"][0][1]; tot = sum(n for _, n in d["descarte"])
         descarte_html = ""
@@ -711,16 +728,14 @@ def render(d):
             w = max(6, round(n / mx * 100))
             descarte_html += (f'<div class="drz-row"><div class="drz-l">{esc(reason)}</div>'
                               f'<div class="drz-barwrap"><div class="drz-bar" style="width:{w}%"></div></div>'
-                              f'<div class="drz-n">{n}</div></div>')
-        descarte_note = (f'<strong>{tot}</strong> descartes con razón registrada, de mayor a menor volumen. '
-                         'Unifica «Razón descarte SQL» (contacto) y «Motivo de descalificación» (deal); '
-                         'identificadas por ventas (Agustín/Juanma) en las llamadas.')
+                              f'<div class="drz-n">{n} <span style="font-size:11px;color:var(--muted);font-weight:600">{pct(n, tot)}</span></div></div>')
+        descarte_note = (f'<strong>{tot}</strong> descartes con razón registrada (acumulado) · % sobre el total de descartes, de mayor a menor. '
+                         'Unifica «Razón descarte SQL» (contacto) y «Motivo de descalificación» (deal).' + proceso)
     else:
         descarte_html = ('<div style="color:var(--muted);font-size:13px;padding:6px 0">Aún no hay descartes '
-                         'registrados en la propiedad «Razón descarte SQL». Se irá poblando según ventas la registre tras las llamadas.</div>')
-        descarte_note = ('Catálogo de razones definidas: lead accidental · volumen &lt;500 (→ freemium) · timing '
-                         '(«ahora no es prioridad») · caso de uso equivocado · competidor con integración nativa · '
-                         'intención no cualificada / sin autoridad · build vs buy · precio.')
+                         'registrados. Se poblará automáticamente según ventas los registre.</div>')
+        descarte_note = ('Catálogo de razones definidas: precio/presupuesto · volumen insuficiente · caso de uso/no target · '
+                         'sin autoridad/no cualificado · timing · competidor · build vs buy · lead accidental.' + proceso)
 
     # Pipeline
     by_stage = {}
@@ -748,6 +763,7 @@ def render(d):
         meet_names=d["meet_names"], calls_day=d["calls_day"], ch_cards=ch_cards, call_rows=call_rows,
         descarte_html=descarte_html, descarte_note=descarte_note, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
+        brain_count=d["brain_count"], ventas_count=d["ventas_count"],
         chan_dist_txt=chan_dist_txt,
         excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
         generado=esc(d["generado"]),
@@ -992,6 +1008,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="card">
     <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
       <span class="badge badge-green">{mkt_total} oportunidades de marketing</span></div>
+    <div style="font-size:12px;color:var(--text-2);margin:-6px 0 14px;line-height:1.5;">
+      🧠 <strong style="color:var(--guru-300)">{brain_count}</strong> en Pipeline <strong>Brain</strong> (GuruSup / Company Brain) ·
+      💼 <strong style="color:var(--guru-300)">{ventas_count}</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
     <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
