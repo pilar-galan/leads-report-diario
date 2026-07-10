@@ -717,10 +717,9 @@ def render(d):
         call_rows = '<tr><td colspan="3" style="color:var(--muted)">Sin SQL en el período</td></tr>'
 
     # Razones de descarte SQL (ordenadas por volumen)
-    proceso = ('<br><br>⚙️ <strong>Cómo se registran:</strong> cuando un contacto inbound supera <strong>3.000 consultas/mes</strong>, '
-               'salta un aviso automático a <strong>Agustín</strong> (responsable de seguimiento inbound); tras la llamada o el email '
-               'con el contacto, la razón de descarte se registra automáticamente. Si la razón no se reconoce, se lanza una <strong>alerta '
-               'para validar y valorar añadir una nueva razón</strong> identificada por IA. Dato acumulativo desde el 1 de enero.')
+    proceso = ('<br><br>⚙️ Se registran automáticamente tras el contacto de Agustín (ver «Flujo de precualificación»). '
+               'Si la razón no se reconoce, salta una <strong>alerta para validar/añadir una nueva razón</strong> identificada por IA. '
+               'Acumulativo desde el 1 de enero.')
     if d["descarte"]:
         mx = d["descarte"][0][1]; tot = sum(n for _, n in d["descarte"])
         descarte_html = ""
@@ -905,8 +904,24 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .drz-l {{ flex:0 0 42%; font-size:12px; color:var(--text-2); line-height:1.35; }}
 .drz-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:12px; overflow:hidden; }}
 .drz-bar {{ height:12px; border-radius:5px; background:linear-gradient(90deg,var(--guru-500),var(--guru-400)); }}
-.drz-n {{ flex:0 0 32px; text-align:right; font-size:14px; font-weight:800; color:var(--guru-300); }}
+.drz-n {{ flex:0 0 62px; text-align:right; font-size:14px; font-weight:800; color:var(--guru-300); }}
 @media(max-width:600px){{ .drz-l {{ flex-basis:52%; font-size:11px; }} }}
+/* Flujo de precualificación */
+.preq {{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }}
+.preq-top {{ text-align:center; font-size:15px; font-weight:700; color:var(--text); background:rgba(255,107,91,.12); border:1px solid rgba(255,107,91,.3); border-radius:10px; padding:12px; }}
+.preq-arrow {{ text-align:center; font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.04em; margin:10px 0; }}
+.preq-branches {{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }}
+@media(max-width:640px){{ .preq-branches {{ grid-template-columns:1fr; }} }}
+.preq-card {{ border-radius:12px; padding:16px; border:1px solid var(--border); }}
+.preq-sales {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); }}
+.preq-free {{ background:rgba(34,211,238,.08); border-color:rgba(34,211,238,.3); }}
+.preq-h {{ font-size:13px; font-weight:800; margin-bottom:7px; }}
+.preq-sales .preq-h {{ color:var(--guru-300); }}
+.preq-free .preq-h {{ color:var(--teal); }}
+.preq-b {{ font-size:12px; color:var(--text-2); line-height:1.55; }}
+.preq-tag {{ display:inline-block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:2px 8px; border-radius:20px; margin-bottom:8px; }}
+.preq-sales .preq-tag {{ background:rgba(255,107,91,.2); color:var(--guru-300); }}
+.preq-free .preq-tag {{ background:rgba(34,211,238,.18); color:var(--teal); }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -956,6 +971,24 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
+
+  <div class="section-label">Flujo de precualificación de nuevos contactos</div>
+  <div class="preq">
+    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> → se evalúa su <strong>volumen de consultas/mes</strong></div>
+    <div class="preq-arrow">▼ ▼ ▼</div>
+    <div class="preq-branches">
+      <div class="preq-card preq-sales">
+        <div class="preq-tag">A ventas</div>
+        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
+        <div class="preq-b">Pasa <strong>directo a Agustín</strong> (responsable de seguimiento inbound) con la <strong>preferencia de canal de contacto</strong>. Contacto por llamada o email; si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+      </div>
+      <div class="preq-card preq-free">
+        <div class="preq-tag">Automatizado</div>
+        <div class="preq-h">➖ −3.000 consultas/mes</div>
+        <div class="preq-b"><strong>Email automatizado</strong> de agradecimiento e invitación a <strong>Freemium</strong> (autoservicio).</div>
+      </div>
+    </div>
+  </div>
 
   <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
