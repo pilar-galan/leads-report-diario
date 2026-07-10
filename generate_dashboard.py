@@ -698,11 +698,12 @@ def render(d):
         if c["sql"]:  parts.append(f'{c["sql"]} SQL')
         if c["free"]: parts.append(f'{c["free"]} freem')
         br = " · ".join(parts) or "—"
+        note = '<div class="ch-note">🍪 No aceptaron cookies (origen no rastreable)</div>' if label == "Otros" else ""
         ch_cards += (f'<div class="ch-card" style="--chc:{c["color"]}{dim}">'
                      f'<div class="ch-icon">{c["icon"]}</div><div class="ch-num">{c["n"]}</div>'
                      f'<div class="ch-label">{esc(label)}</div>'
                      f'<div class="ch-pct">{p} del total</div>'
-                     f'<div class="ch-sql">{br}</div></div>\n')
+                     f'<div class="ch-sql">{br}</div>{note}</div>\n')
 
     # Estado SQL (tabla)
     if d["sql_rows"]:
@@ -881,6 +882,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .ch-label {{ font-size:11px; font-weight:600; color:var(--text-2); margin-top:4px; }}
 .ch-pct {{ font-size:10px; color:var(--muted); margin-top:2px; }}
 .ch-sql {{ font-size:11px; font-weight:700; color:var(--text-2); margin-top:5px; }}
+.ch-note {{ font-size:10px; color:var(--muted); margin-top:5px; line-height:1.35; font-style:italic; }}
 
 .card {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:12px; }}
 .card-header {{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }}
