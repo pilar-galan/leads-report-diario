@@ -174,7 +174,8 @@ def is_marketing(src, d1):
 
 
 def is_import(src, d1):
-    return src == "OFFLINE" and (d1 or "") in ("INTEGRATION", "CRM_UI", "IMPORT")
+    # INTEGRATION = altas de la app (freemium); NO se excluyen, se reclasifican a freemium
+    return src == "OFFLINE" and (d1 or "") in ("CRM_UI", "IMPORT")
 
 
 def is_test(rev, email):
@@ -400,9 +401,12 @@ def main():
         lc = p.get("lifecyclestage") or ""
         if is_internal(email): internal += 1; continue
         if is_test(p.get("revision_ventas"), email): tests += 1; continue
-        # Las importaciones se excluyen SALVO que sean freemium (los queremos todos)
+        # Las importaciones (CRM_UI / IMPORT) se excluyen SALVO que sean freemium
         if is_import(src, d1) and lc != "1378463825":
             imports += 1; continue
+        # Altas por la integración de la app = freemium (aunque estén mal cualificadas como opportunity)
+        if src == "OFFLINE" and (d1 or "") == "INTEGRATION":
+            lc = "1378463825"
         hist.append({
             "src": src, "d1": d1, "lc": lc,
             "rev": p.get("revision_ventas") or "",
