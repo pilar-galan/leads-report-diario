@@ -8,25 +8,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* ============ TOKENS · identidad GuruSup (verde vibrante + acento salmón) ============ */
+  /* ============ TOKENS · identidad GuruSup ACTUAL (salmón primario + azul casi negro; verde secundario) ============ */
   :root{
-    --green:#10B981;          /* verde vibrante — primario (mismo token de los dashboards) */
-    --green-bright:#22D39A;   /* verde para fondos oscuros */
-    --green-ink:#0A3D2C;      /* verde profundo — texto/titulares sobre claro (legible) */
-    --green-deep:#072A20;     /* verde bosque — bloques oscuros */
-    --green-deep-2:#0B3A2B;
-    --salmon:#FF6B5B;         /* acento (token histórico de marca) */
-    --salmon-soft:#FFE7E2;
+    --salmon:#FF6B5B;         /* PRIMARIO de marca */
+    --salmon-ink:#D8402C;     /* salmón oscuro, legible sobre blanco */
+    --salmon-soft:#FFE6E1;
+    --green:#10B981;          /* SECUNDARIO — iconografía y algunos datos */
+    --green-bright:#22D39A;   /* verde sobre fondos oscuros */
+    --green-data:#0C9C63;     /* verde legible para datos sobre blanco */
+    --green-soft:#E4F6EE;
+    /* nombres heredados remapeados a la paleta antigua (azul casi negro) */
+    --green-ink:#171334;      /* tinta azul-casi-negra para titulares */
+    --green-deep:#0A0618;     /* azul oscuro casi negro — bloques oscuros */
+    --green-deep-2:#171334;
 
-    --paper:#F3F7F4;          /* off-white con sesgo verde */
+    --paper:#F7F4F7;          /* off-white neutro */
     --surface:#FFFFFF;
-    --surface-2:#EEF4F0;
-    --ink:#12261E;            /* casi-negro verdoso */
-    --muted:#5C7268;          /* secundario */
-    --line:#DCE7E0;           /* hairlines */
-    --dot:var(--green);
+    --surface-2:#F1EDF5;
+    --ink:#171334;            /* azul casi negro */
+    --muted:#6C6784;          /* secundario */
+    --line:#E7E1EC;           /* hairlines */
+    --dot:var(--salmon);
 
-    --shadow:0 1px 2px rgba(10,61,44,.05), 0 12px 32px -18px rgba(10,61,44,.35);
+    --shadow:0 1px 2px rgba(23,19,52,.06), 0 12px 32px -18px rgba(23,19,52,.32);
     --radius:18px;
     --page-w:900px;
 
@@ -35,22 +39,22 @@
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --paper:#061913; --surface:#0C2A20; --surface-2:#0A241B;
-      --ink:#EAF3EE; --muted:#9DB6AB; --line:#194336;
-      --green-ink:#BFEFD9; --green-deep:#04140E; --green-deep-2:#0A241B;
-      --salmon-soft:#3A1E1B;
+      --paper:#070510; --surface:#151233; --surface-2:#100D28;
+      --ink:#ECEAFA; --muted:#A7A2C6; --line:#2A2652;
+      --green-ink:#EAE8FB; --green-deep:#05030E; --green-deep-2:#151233;
+      --salmon-soft:#3A211C;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 16px 40px -20px rgba(0,0,0,.7);
     }
   }
   :root[data-theme="light"]{
-    --paper:#F3F7F4; --surface:#FFFFFF; --surface-2:#EEF4F0;
-    --ink:#12261E; --muted:#5C7268; --line:#DCE7E0;
-    --green-ink:#0A3D2C; --green-deep:#072A20; --green-deep-2:#0B3A2B; --salmon-soft:#FFE7E2;
+    --paper:#F7F4F7; --surface:#FFFFFF; --surface-2:#F1EDF5;
+    --ink:#171334; --muted:#6C6784; --line:#E7E1EC;
+    --green-ink:#171334; --green-deep:#0A0618; --green-deep-2:#171334; --salmon-soft:#FFE6E1;
   }
   :root[data-theme="dark"]{
-    --paper:#061913; --surface:#0C2A20; --surface-2:#0A241B;
-    --ink:#EAF3EE; --muted:#9DB6AB; --line:#194336;
-    --green-ink:#BFEFD9; --green-deep:#04140E; --green-deep-2:#0A241B; --salmon-soft:#3A1E1B;
+    --paper:#070510; --surface:#151233; --surface-2:#100D28;
+    --ink:#ECEAFA; --muted:#A7A2C6; --line:#2A2652;
+    --green-ink:#EAE8FB; --green-deep:#05030E; --green-deep-2:#151233; --salmon-soft:#3A211C;
   }
 
   *{box-sizing:border-box}
@@ -63,7 +67,7 @@
   h1,h2,h3,h4{font-family:var(--f-display); font-weight:600; text-wrap:balance; letter-spacing:-.01em; margin:0;}
   p{margin:0}
   strong{font-weight:600; color:var(--ink)}
-  em{font-style:normal; color:var(--green-ink); font-weight:600}
+  em{font-style:normal; color:var(--salmon-ink); font-weight:600}
 
   /* ============ PÁGINA ============ */
   .book{max-width:var(--page-w); margin:0 auto; padding:26px 20px 60px;}
@@ -73,19 +77,20 @@
     min-height:1180px; display:flex; flex-direction:column;
   }
   .page__foot{
-    margin-top:28px; padding-top:22px; display:flex; align-items:center; justify-content:space-between;
+    margin-top:auto; padding-top:22px; display:flex; align-items:center; justify-content:space-between;
     color:var(--muted); font-size:12px; letter-spacing:.02em;
   }
+  .scene + .page__foot, .cover__meta + .page__foot, .cta + .page__foot{margin-top:24px}
   .page__foot .brandmark{display:flex; align-items:center; gap:8px; font-family:var(--f-display); font-weight:600; color:var(--ink)}
-  .punto{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block;flex:none}
+  .punto{width:9px;height:9px;border-radius:50%;background:var(--salmon);display:inline-block;flex:none}
   .pageno{font-variant-numeric:tabular-nums}
 
   .eyebrow{
     display:inline-flex; align-items:center; gap:9px; font-family:var(--f-display);
-    font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.14em; color:var(--green-ink);
+    font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.14em; color:var(--salmon-ink);
     margin-bottom:22px;
   }
-  .eyebrow::before{content:""; width:22px; height:2px; background:var(--green); border-radius:2px}
+  .eyebrow::before{content:""; width:22px; height:2px; background:var(--salmon); border-radius:2px}
 
   .lead{font-size:16.5px; color:var(--muted); max-width:62ch}
   .h-xl{font-size:40px; line-height:1.08}
@@ -97,32 +102,33 @@
   /* ============ COVER ============ */
   .cover{
     background:
-      radial-gradient(1100px 700px at 78% -10%, rgba(34,211,154,.22), transparent 55%),
-      radial-gradient(700px 520px at 12% 108%, rgba(255,107,91,.16), transparent 55%),
-      linear-gradient(160deg,var(--green-deep) 0%, #04140E 100%);
-    color:#F1FBF6; border:none; overflow:hidden;
+      radial-gradient(1100px 700px at 80% -12%, rgba(255,107,91,.28), transparent 55%),
+      radial-gradient(680px 520px at 8% 110%, rgba(34,211,154,.14), transparent 55%),
+      linear-gradient(160deg,#171334 0%, #0A0618 100%);
+    color:#F4F2FF; border:none; overflow:hidden;
   }
   .cover .rings{position:absolute; inset:0; pointer-events:none; opacity:.5}
-  .cover .rings i{position:absolute; border:1px solid rgba(255,255,255,.09); border-radius:50%}
+  .cover .rings i{position:absolute; border:1px solid rgba(255,255,255,.08); border-radius:50%}
   .cover__brand{display:flex; align-items:center; gap:12px; font-family:var(--f-display); font-weight:700; font-size:19px; letter-spacing:-.01em; z-index:2}
-  .cover__brand .punto{width:12px;height:12px;box-shadow:0 0 20px var(--green-bright)}
-  .cover__eyebrow{color:#8FE9C4}
-  .cover__eyebrow::before{background:var(--green-bright)}
+  .cover__brand .punto{width:12px;height:12px;background:var(--salmon);box-shadow:0 0 22px rgba(255,107,91,.8)}
+  .cover__eyebrow{color:#FFB0A4}
+  .cover__eyebrow::before{background:var(--salmon)}
   .cover h1{font-size:58px; line-height:1.02; font-weight:700; margin:0; z-index:2}
-  .cover h1 span{color:var(--green-bright)}
-  .cover .sub{font-size:18px; color:#C9E7DA; max-width:52ch; margin-top:22px; z-index:2}
+  .cover h1 span{color:#FF8574}
+  .cover .sub{font-size:18px; color:#CFC9EC; max-width:52ch; margin-top:22px; z-index:2}
   .cover .claim{
     z-index:2; margin-top:34px; display:inline-flex; align-items:center; gap:12px;
     font-family:var(--f-display); font-weight:600; font-size:15px;
-    background:rgba(34,211,154,.12); border:1px solid rgba(34,211,154,.35); color:#BFF3DD;
+    background:rgba(255,107,91,.14); border:1px solid rgba(255,107,91,.4); color:#FFCDC4;
     padding:11px 18px; border-radius:999px;
   }
+  .cover .claim .punto{background:var(--salmon)}
   .cover__meta{z-index:2; display:flex; gap:34px; flex-wrap:wrap; margin-top:auto}
   .cover__meta div{display:flex; flex-direction:column; gap:2px}
   .cover__meta .n{font-family:var(--f-display); font-weight:700; font-size:26px; color:#fff; font-variant-numeric:tabular-nums}
-  .cover__meta .l{font-size:12.5px; color:#9FCBBB; text-transform:uppercase; letter-spacing:.08em}
-  .cover .page__foot{color:#7FB8A6}
-  .cover .page__foot .brandmark{color:#EAF7F1}
+  .cover__meta .l{font-size:12.5px; color:#A79FC8; text-transform:uppercase; letter-spacing:.08em}
+  .cover .page__foot{color:#8B84B0}
+  .cover .page__foot .brandmark{color:#EFEBFB}
 
   /* ============ COMPONENTES ============ */
   .kpi-hero{
@@ -130,9 +136,9 @@
     background:linear-gradient(135deg,var(--green-deep),var(--green-deep-2)); color:#EAFBF3;
     display:flex; gap:26px; align-items:center;
   }
-  .kpi-hero::after{content:""; position:absolute; right:-40px; top:-40px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle,rgba(34,211,154,.25),transparent 70%)}
-  .kpi-hero .big{font-family:var(--f-display); font-weight:800; font-size:66px; line-height:.9; color:var(--green-bright); font-variant-numeric:tabular-nums; flex:none}
-  .kpi-hero .txt{font-size:15.5px; color:#CDEBDD}
+  .kpi-hero::after{content:""; position:absolute; right:-40px; top:-40px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle,rgba(255,107,91,.28),transparent 70%)}
+  .kpi-hero .big{font-family:var(--f-display); font-weight:800; font-size:66px; line-height:.9; color:#FF8574; font-variant-numeric:tabular-nums; flex:none}
+  .kpi-hero .txt{font-size:15.5px; color:#D5CFEC}
   .kpi-hero .txt b{color:#fff; font-weight:600}
 
   .cols{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:26px}
@@ -154,13 +160,13 @@
   /* stat tiles */
   .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:24px}
   .stat{background:var(--surface-2); border:1px solid var(--line); border-radius:14px; padding:20px 18px; position:relative}
-  .stat .n{font-family:var(--f-display); font-weight:800; font-size:34px; line-height:1; color:var(--green-ink); font-variant-numeric:tabular-nums}
+  .stat .n{font-family:var(--f-display); font-weight:800; font-size:34px; line-height:1; color:var(--green-data); font-variant-numeric:tabular-nums}
   .stat .n .u{font-size:18px; font-weight:600}
   .stat .l{font-size:13px; color:var(--muted); margin-top:8px; line-height:1.35}
   .stat .who{font-family:var(--f-display); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-top:10px; display:flex; align-items:center; gap:7px}
   .stat .who::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--green); flex:none}
   .stat.dark{background:linear-gradient(135deg,var(--green-deep),var(--green-deep-2)); border-color:transparent}
-  .stat.dark .n{color:var(--green-bright)} .stat.dark .l{color:#BDE0D2} .stat.dark .who{color:#9AD3BE}
+  .stat.dark .n{color:var(--green-bright)} .stat.dark .l{color:#CFC9EC} .stat.dark .who{color:#B7B0D6}
   .stat.dark .who::before{background:var(--green-bright)}
 
   /* before / after bars */
@@ -176,7 +182,7 @@
   .bar .fill.after{background:linear-gradient(90deg,var(--green),var(--green-bright))}
   .bar .tag{width:70px; color:var(--muted); font-family:var(--f-display); font-weight:600}
   .bar .val{width:64px; text-align:right; font-variant-numeric:tabular-nums; font-family:var(--f-display); font-weight:700; color:var(--ink)}
-  .bar.after .val{color:var(--green-ink)}
+  .bar.after .val{color:var(--green-data)}
   .legend{display:flex; gap:20px; margin-top:6px; font-size:12px; color:var(--muted); align-items:center}
   .legend span{display:inline-flex; align-items:center; gap:7px}
   .swatch{width:14px;height:10px;border-radius:3px;display:inline-block}
@@ -189,20 +195,20 @@
   .cmd td .kpi{font-weight:600; color:var(--ink)}
   .cmd td .kpi small{display:block; color:var(--muted); font-weight:400; font-size:12.5px; margin-top:2px}
   .cmd td.now{color:var(--muted); font-variant-numeric:tabular-nums}
-  .cmd td.goal{font-family:var(--f-display); font-weight:700; color:var(--green-ink); font-variant-numeric:tabular-nums; white-space:nowrap}
+  .cmd td.goal{font-family:var(--f-display); font-weight:700; color:var(--green-data); font-variant-numeric:tabular-nums; white-space:nowrap}
   .cmd tr:last-child td{border-bottom:none}
   .cmd .lever{color:var(--muted); font-size:13px}
 
-  .note{margin-top:26px; padding:16px 18px; border-left:3px solid var(--green); background:var(--surface-2); border-radius:0 12px 12px 0; font-size:13px; color:var(--muted)}
-  .note b{color:var(--green-ink)}
+  .note{margin-top:26px; padding:16px 18px; border-left:3px solid var(--salmon); background:var(--surface-2); border-radius:0 12px 12px 0; font-size:13px; color:var(--muted)}
+  .note b{color:var(--salmon-ink)}
 
   .quote{font-family:var(--f-display); font-weight:600; font-size:26px; line-height:1.28; color:var(--ink); text-wrap:balance}
-  .quote .accent{color:var(--green)}
+  .quote .accent{color:var(--salmon)}
 
   .cta{margin-top:auto; background:linear-gradient(135deg,var(--green-deep),var(--green-deep-2)); color:#EAFBF3; border-radius:16px; padding:28px 30px; display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap}
   .cta h3{font-size:22px; color:#fff}
-  .cta p{color:#BDE0D2; font-size:14px; margin-top:4px}
-  .cta .btn{font-family:var(--f-display); font-weight:600; background:var(--green-bright); color:#052018; padding:13px 22px; border-radius:999px; text-decoration:none; white-space:nowrap; font-size:15px}
+  .cta p{color:#CFC9EC; font-size:14px; margin-top:4px}
+  .cta .btn{font-family:var(--f-display); font-weight:600; background:var(--salmon); color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; white-space:nowrap; font-size:15px}
 
   .divider{height:1px;background:var(--line);margin:26px 0}
   .two-up{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:24px}
@@ -211,19 +217,21 @@
   .flow-step .num{font-family:var(--f-display); font-weight:800; color:var(--green); font-size:18px; font-variant-numeric:tabular-nums; flex:none; width:24px}
   .flow-step .b{font-size:14.5px} .flow-step .b b{color:var(--ink)} .flow-step .b span{color:var(--muted); display:block; font-size:13px; margin-top:2px}
 
-  /* ============ ILUSTRACIÓN EDITORIAL (rellena el aire inferior) ============ */
-  .accent-green{color:#0BA05F}
-  .scene{margin-top:auto; padding-top:34px; width:100%}
-  .scene__art{width:100%; height:auto; display:block; overflow:visible}
-  .scene__cap{margin-top:14px; font-family:var(--f-display); font-size:12px; font-weight:500;
-    letter-spacing:.02em; color:var(--muted); display:flex; align-items:center; gap:9px}
-  .scene__cap::before{content:""; width:16px; height:2px; border-radius:2px; background:var(--green)}
-  .scene .fig{stroke:var(--green); stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  /* ============ ILUSTRACIÓN EDITORIAL (rellena el aire inferior, centrada y baja) ============ */
+  .accent-green{color:var(--green-data)}
+  .scene{margin-top:auto; padding-top:30px; width:100%; display:flex; flex-direction:column; align-items:center}
+  .scene__art{width:100%; max-width:540px; height:auto; display:block; margin:0 auto; overflow:visible}
+  .scene__cap{margin-top:16px; font-family:var(--f-display); font-size:12px; font-weight:500;
+    letter-spacing:.02em; color:var(--muted); display:flex; align-items:center; gap:9px; text-align:center}
+  .scene__cap::before{content:""; width:16px; height:2px; border-radius:2px; background:var(--salmon)}
+  .scene .fig{stroke:var(--green); stroke-width:2.4; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .scene .fig-2{stroke:var(--green); stroke-width:2.4; fill:none; opacity:.5; stroke-linecap:round; stroke-linejoin:round}
   .scene .base{stroke:var(--line); stroke-width:2}
-  .scene .accent{stroke:var(--salmon); stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .scene .accent{stroke:var(--salmon); stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round}
   .scene .dotg{fill:var(--green)} .scene .dots{fill:var(--salmon)}
-  .scene .muted{stroke:var(--green); stroke-width:2.5; fill:none; opacity:.32; stroke-linecap:round}
-  .scene .softfill{fill:var(--surface-2)}
+  .scene .muted{stroke:var(--green); stroke-width:2.4; fill:none; opacity:.3; stroke-linecap:round}
+  .scene .fillg{fill:var(--green-soft)} .scene .fills{fill:var(--salmon-soft)}
+  .scene .hand{stroke:var(--salmon); stroke-width:1.8; fill:none; stroke-linecap:round; opacity:.8}
 
   /* ============ RESPONSIVE ============ */
   @media (max-width:720px){
@@ -271,7 +279,7 @@
       <div><span class="n">24/7</span><span class="l">Atención sin esperas</span></div>
       <div><span class="n">×40</span><span class="l">Capacidad automatizada</span></div>
       <div><span class="n">−45%</span><span class="l">Coste operativo</span></div>
-      <div><span class="n" style="color:var(--green-bright)">Especial</span><span class="l">Colegios de Farmacéuticos</span></div>
+      <div><span class="n" style="color:#FF8574">Especial</span><span class="l">Colegios de Farmacéuticos</span></div>
     </div>
     <div class="page__foot">
       <span class="brandmark"><span class="punto"></span>gurusup.com</span>
@@ -314,17 +322,19 @@
     <div class="note"><b>Insight McKinsey.</b> La confianza del paciente ya no depende solo del acto clínico, sino de toda la experiencia: antes, durante y después de la atención.</div>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 148" role="img" aria-label="Ilustración: personas en el centro de la atención">
-        <line class="base" x1="40" y1="128" x2="780" y2="128"/>
-        <g class="fig" style="opacity:.4"><circle cx="130" cy="74" r="15"/><path d="M96 128a34 40 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.6"><circle cx="250" cy="70" r="15"/><path d="M216 128a34 42 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.85"><circle cx="370" cy="74" r="15"/><path d="M336 128a34 40 0 0 1 68 0"/></g>
-        <g class="accent"><circle cx="490" cy="66" r="16"/><path d="M454 128a36 44 0 0 1 72 0"/></g>
-        <g class="fig" style="opacity:.75"><circle cx="610" cy="72" r="15"/><path d="M576 128a34 41 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.5"><circle cx="712" cy="76" r="14"/><path d="M680 128a32 38 0 0 1 64 0"/></g>
-        <circle class="dotg" cx="60" cy="42" r="3" opacity=".5"/><circle class="dotg" cx="770" cy="48" r="3" opacity=".5"/>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: el paciente en el centro, rodeado de la comunidad">
+        <line class="base" x1="58" y1="118" x2="462" y2="118"/>
+        <g class="fig" style="opacity:.5"><circle cx="92" cy="62" r="13"/><path d="M66 118a26 32 0 0 1 52 0"/></g>
+        <g class="fig" style="opacity:.8"><circle cx="181" cy="58" r="13"/><path d="M155 118a26 33 0 0 1 52 0"/></g>
+        <path class="fills" d="M238 118a32 40 0 0 1 64 0Z"/>
+        <circle class="fills" cx="270" cy="52" r="16"/>
+        <g class="accent"><circle cx="270" cy="52" r="16"/><path d="M238 118a32 40 0 0 1 64 0"/></g>
+        <path class="accent" d="M270 30c-4-6-13-3-13 4 0 6 8 10 13 14 5-4 13-8 13-14 0-7-9-10-13-4z"/>
+        <g class="fig" style="opacity:.8"><circle cx="359" cy="58" r="13"/><path d="M333 118a26 33 0 0 1 52 0"/></g>
+        <g class="fig" style="opacity:.5"><circle cx="448" cy="62" r="13"/><path d="M422 118a26 32 0 0 1 52 0"/></g>
+        <circle class="dotg" cx="66" cy="36" r="2.5" opacity=".55"/><circle class="dots" cx="452" cy="32" r="2.5" opacity=".65"/>
       </svg>
-      <div class="scene__cap">El paciente en el centro · la experiencia empieza antes de la consulta</div>
+      <div class="scene__cap">El paciente y el colegiado, en el centro de todo</div>
     </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">02</span></div>
   </section>
@@ -360,14 +370,16 @@
     </div>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: conversación 24/7">
-        <g class="fig"><rect x="120" y="34" width="250" height="84" rx="26"/><path d="M172 118 v24 l24 -24"/></g>
-        <circle class="dotg" cx="205" cy="76" r="6"/><circle class="dotg" cx="245" cy="76" r="6"/><circle class="dotg" cx="285" cy="76" r="6"/>
-        <g class="accent"><rect x="382" y="66" width="168" height="64" rx="22"/><path d="M500 130 v18 l-22 -18"/></g>
-        <g class="fig"><circle cx="672" cy="80" r="40"/><path d="M672 58 v22 l16 12"/></g>
-        <text x="672" y="141" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="var(--green-ink)">24/7</text>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: consultas que se repiten">
+        <path class="fig" d="M118 48a30 30 0 1 0 26 14"/>
+        <path class="fig" d="M118 48l-13 3 3-14"/>
+        <rect class="fig-2" x="176" y="54" width="176" height="62" rx="13"/>
+        <rect class="fig-2" x="194" y="42" width="176" height="62" rx="13" fill="var(--surface)"/>
+        <rect class="fills" x="212" y="30" width="176" height="62" rx="13"/>
+        <rect class="accent" x="212" y="30" width="176" height="62" rx="13"/>
+        <path d="M232 52h116M232 66h92M232 80h68" stroke="var(--salmon)" stroke-width="2" fill="none" stroke-linecap="round" opacity=".65"/>
       </svg>
-      <div class="scene__cap">7 de cada 10 consultas son repetitivas o administrativas</div>
+      <div class="scene__cap">7 de cada 10 consultas se repiten una y otra vez</div>
     </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">03</span></div>
   </section>
@@ -395,14 +407,15 @@
     <div class="note"><b>Human-in-the-loop, por diseño.</b> En GuruSup, el agente intenta resolver y, si no lo consigue en un máximo de intentos, <b>escala a una persona</b> o deja el aviso en el sistema del centro. Las conversaciones con mayor carga emocional siguen siendo humanas.</div>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 128" role="img" aria-label="Ilustración: cuidado y latido">
-        <path class="fig" d="M50 74 H250 l20 -34 26 62 18 -28 H392"/>
-        <path class="accent" d="M470 58c-9-11-27-6-27 8 0 12 15 20 27 30 12-10 27-18 27-30 0-14-18-19-27-8z"/>
-        <path class="fig muted" d="M540 74 H770"/>
-        <path class="fig" style="opacity:.4" d="M662 40 v24 M650 52 h24"/>
-        <circle class="dots" cx="470" cy="30" r="3"/>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: la IA y las personas trabajando juntas">
+        <g class="fig"><rect x="66" y="52" width="70" height="70" rx="16"/><circle cx="101" cy="87" r="12"/><path d="M101 52v-11M101 122v11M66 87h-11M136 87h11"/></g>
+        <circle class="dotg" cx="101" cy="87" r="3"/>
+        <path class="hand" d="M152 96q90 -34 176 -8"/>
+        <circle class="dots" cx="240" cy="74" r="3"/>
+        <path class="fills" d="M378 122a30 38 0 0 1 60 0Z"/><circle class="fills" cx="408" cy="62" r="16"/>
+        <g class="accent"><circle cx="408" cy="62" r="16"/><path d="M378 122a30 38 0 0 1 60 0"/></g>
       </svg>
-      <div class="scene__cap">La IA elimina la espera; las personas aportan criterio y empatía</div>
+      <div class="scene__cap">La IA y las personas trabajan juntas, no una en lugar de la otra</div>
     </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">04</span></div>
   </section>
@@ -437,14 +450,15 @@
     <div class="note"><b>Sin límite de concurrencia.</b> GuruSup crea un agente por cada conversación entrante —ya sea 1 o 200 a la vez— y aprende de conversaciones reales para mejorar solo (auto fine-tuning), con un auditor interno que evita alucinaciones.</div>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: conversación 24/7">
-        <g class="fig"><rect x="120" y="34" width="250" height="84" rx="26"/><path d="M172 118 v24 l24 -24"/></g>
-        <circle class="dotg" cx="205" cy="76" r="6"/><circle class="dotg" cx="245" cy="76" r="6"/><circle class="dotg" cx="285" cy="76" r="6"/>
-        <g class="accent"><rect x="382" y="66" width="168" height="64" rx="22"/><path d="M500 130 v18 l-22 -18"/></g>
-        <g class="fig"><circle cx="672" cy="80" r="40"/><path d="M672 58 v22 l16 12"/></g>
-        <text x="672" y="141" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="var(--green-ink)">24/7</text>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: acompañar todo el recorrido del paciente">
+        <path class="fig-2" stroke-dasharray="1.5 9" d="M92 116C160 116 168 58 236 58S330 112 396 92S452 54 470 52"/>
+        <g class="fig"><circle cx="74" cy="94" r="12"/><path d="M50 120a24 28 0 0 1 48 0"/></g>
+        <circle class="dotg" cx="168" cy="80" r="5"/><circle class="dotg" cx="300" cy="98" r="5"/><circle class="dotg" cx="396" cy="92" r="5"/>
+        <path class="fills" d="M470 30c-12 0-21 9-21 21 0 15 21 31 21 31s21-16 21-31c0-12-9-21-21-21z"/>
+        <path class="accent" d="M470 30c-12 0-21 9-21 21 0 15 21 31 21 31s21-16 21-31c0-12-9-21-21-21z"/>
+        <circle class="dots" cx="470" cy="50" r="6"/>
       </svg>
-      <div class="scene__cap">De responder preguntas a acompañar todo el recorrido</div>
+      <div class="scene__cap">Un mismo acompañamiento en todo el recorrido</div>
     </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">05</span></div>
   </section>
@@ -472,14 +486,19 @@
     </ul>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 128" role="img" aria-label="Ilustración: seguimiento y latido">
-        <path class="fig" d="M50 74 H250 l20 -34 26 62 18 -28 H392"/>
-        <path class="accent" d="M470 58c-9-11-27-6-27 8 0 12 15 20 27 30 12-10 27-18 27-30 0-14-18-19-27-8z"/>
-        <path class="fig muted" d="M540 74 H770"/>
-        <path class="fig" style="opacity:.4" d="M662 40 v24 M650 52 h24"/>
-        <circle class="dots" cx="470" cy="30" r="3"/>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: seguimiento en varios momentos">
+        <line class="base" x1="70" y1="70" x2="450" y2="70"/>
+        <circle class="fills" cx="130" cy="70" r="20"/>
+        <g class="accent"><path d="M122 68a8 9 0 0 1 16 0c0 7 3 8 3 11h-22c0-3 3-4 3-11z"/><path d="M127 82a3 3 0 0 0 6 0"/></g>
+        <circle class="fillg" cx="260" cy="70" r="20"/>
+        <g class="fig"><rect x="248" y="61" width="24" height="16" rx="4"/><path d="M254 77v6l7-6"/></g>
+        <circle class="fillg" cx="390" cy="70" r="20"/>
+        <path class="fig" d="M381 70l6 6 11-13"/>
+        <g font-family="Poppins, sans-serif" font-size="12" font-weight="600" fill="var(--muted)" text-anchor="middle">
+          <text x="130" y="112">8 h</text><text x="260" y="112">24 h</text><text x="390" y="112">48 h</text>
+        </g>
       </svg>
-      <div class="scene__cap">Seguimiento proactivo · adherencia, evolución y confianza</div>
+      <div class="scene__cap">En el momento justo: recordar, revisar y resolver</div>
     </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">06</span></div>
   </section>
@@ -502,13 +521,17 @@
     </div>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: crecimiento de indicadores">
-        <line class="base" x1="55" y1="130" x2="765" y2="130"/>
-        <path class="fig" d="M60 116 C 210 110, 300 76, 430 66 S 660 34, 758 24"/>
-        <circle class="dotg" cx="210" cy="100" r="5" opacity=".55"/>
-        <circle class="dotg" cx="430" cy="66" r="5" opacity=".8"/>
-        <circle class="dotg" cx="600" cy="42" r="5" opacity=".9"/>
-        <circle class="accent" cx="758" cy="24" r="9"/><circle class="dots" cx="758" cy="24" r="3.5"/>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: conversaciones convertidas en datos">
+        <line class="base" x1="150" y1="120" x2="376" y2="120"/>
+        <g class="fig">
+          <rect class="fillg" x="162" y="90" width="22" height="30" rx="4"/>
+          <rect class="fillg" x="192" y="70" width="22" height="50" rx="4"/>
+          <rect class="fillg" x="222" y="98" width="22" height="22" rx="4"/>
+          <rect class="fillg" x="252" y="58" width="22" height="62" rx="4"/>
+          <rect class="fillg" x="282" y="80" width="22" height="40" rx="4"/>
+          <rect class="fillg" x="312" y="100" width="22" height="20" rx="4"/>
+        </g>
+        <g class="accent"><circle cx="263" cy="56" r="26"/><path d="M281 74l22 22"/></g>
       </svg>
       <div class="scene__cap">Cada conversación se convierte en un dato accionable</div>
     </div>
@@ -532,17 +555,6 @@
 
     <div class="note"><b>Las palancas.</b> Con GuruSup en modo borrador el equipo multiplica ×7 su capacidad; en modo automático, ×40. Y como el agente se conecta a la API en el momento del mensaje, <b>no se almacenan datos del paciente</b> — cumplimiento GDPR e ISO 27001.</div>
 
-    <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: crecimiento de indicadores">
-        <line class="base" x1="55" y1="130" x2="765" y2="130"/>
-        <path class="fig" d="M60 116 C 210 110, 300 76, 430 66 S 660 34, 758 24"/>
-        <circle class="dotg" cx="210" cy="100" r="5" opacity=".55"/>
-        <circle class="dotg" cx="430" cy="66" r="5" opacity=".8"/>
-        <circle class="dotg" cx="600" cy="42" r="5" opacity=".9"/>
-        <circle class="accent" cx="758" cy="24" r="9"/><circle class="dots" cx="758" cy="24" r="3.5"/>
-      </svg>
-      <div class="scene__cap">Métricas medidas en cuentas reales de GuruSup</div>
-    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">08</span></div>
   </section>
 
@@ -586,19 +598,6 @@
 
     <div class="note">Hasta el <b>65%</b> de las casuísticas transaccionales resultan automatizables en un cliente real; el tiempo de cola baja a ~3 segundos. Los equipos ganan las horas que hoy se van en lo repetitivo.</div>
 
-    <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 148" role="img" aria-label="Ilustración: equipo y comunidad">
-        <line class="base" x1="40" y1="128" x2="780" y2="128"/>
-        <g class="fig" style="opacity:.45"><circle cx="130" cy="74" r="15"/><path d="M96 128a34 40 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.7"><circle cx="250" cy="70" r="15"/><path d="M216 128a34 42 0 0 1 68 0"/></g>
-        <g class="accent"><circle cx="370" cy="66" r="16"/><path d="M334 128a36 44 0 0 1 72 0"/></g>
-        <g class="fig" style="opacity:.85"><circle cx="490" cy="72" r="15"/><path d="M456 128a34 41 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.6"><circle cx="610" cy="72" r="15"/><path d="M576 128a34 41 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.4"><circle cx="712" cy="76" r="14"/><path d="M680 128a32 38 0 0 1 64 0"/></g>
-        <circle class="dotg" cx="60" cy="42" r="3" opacity=".5"/><circle class="dotg" cx="770" cy="48" r="3" opacity=".5"/>
-      </svg>
-      <div class="scene__cap">Más capacidad de atención sin ampliar la plantilla</div>
-    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">09</span></div>
   </section>
 
@@ -622,16 +621,6 @@
 
     <div class="note"><b>Seguro por diseño.</b> Multicanal, human-in-the-loop y auditable. GDPR compliant e ISO 27001; los datos no se almacenan — el agente se conecta a tu sistema solo en el momento de la conversación.</div>
 
-    <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: canales de conversación">
-        <g class="fig"><rect x="120" y="34" width="250" height="84" rx="26"/><path d="M172 118 v24 l24 -24"/></g>
-        <circle class="dotg" cx="205" cy="76" r="6"/><circle class="dotg" cx="245" cy="76" r="6"/><circle class="dotg" cx="285" cy="76" r="6"/>
-        <g class="accent"><rect x="382" y="66" width="168" height="64" rx="22"/><path d="M500 130 v18 l-22 -18"/></g>
-        <g class="fig"><circle cx="672" cy="80" r="40"/><path d="M672 58 v22 l16 12"/></g>
-        <text x="672" y="141" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="var(--green-ink)">24/7</text>
-      </svg>
-      <div class="scene__cap">WhatsApp · email · voz, en una sola plataforma</div>
-    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">10</span></div>
   </section>
 
@@ -672,17 +661,20 @@
     <div class="note"><b>Dos frentes de valor.</b> (1) Atención al <b>colegiado</b>: colegiación, formación, normativa. (2) El Colegio puede extender la tecnología a sus <b>farmacias</b> para el seguimiento al paciente —adherencia, atención farmacéutica— manteniendo el trato cercano que caracteriza a la profesión.</div>
 
     <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 148" role="img" aria-label="Ilustración: colegio y colegiados">
-        <line class="base" x1="40" y1="128" x2="780" y2="128"/>
-        <g class="fig" style="opacity:.4"><circle cx="130" cy="74" r="15"/><path d="M96 128a34 40 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.6"><circle cx="250" cy="70" r="15"/><path d="M216 128a34 42 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.85"><circle cx="370" cy="74" r="15"/><path d="M336 128a34 40 0 0 1 68 0"/></g>
-        <g class="accent"><circle cx="490" cy="66" r="16"/><path d="M454 128a36 44 0 0 1 72 0"/></g>
-        <g class="fig" style="opacity:.75"><circle cx="610" cy="72" r="15"/><path d="M576 128a34 41 0 0 1 68 0"/></g>
-        <g class="fig" style="opacity:.5"><circle cx="712" cy="76" r="14"/><path d="M680 128a32 38 0 0 1 64 0"/></g>
-        <circle class="dotg" cx="60" cy="42" r="3" opacity=".5"/><circle class="dotg" cx="770" cy="48" r="3" opacity=".5"/>
+      <svg class="scene__art" viewBox="0 0 520 150" role="img" aria-label="Ilustración: el Colegio y sus colegiados">
+        <g class="fig">
+          <path d="M70 60L120 36L170 60"/>
+          <line x1="66" y1="70" x2="174" y2="70"/>
+          <line x1="82" y1="74" x2="82" y2="116"/><line x1="104" y1="74" x2="104" y2="116"/>
+          <line x1="136" y1="74" x2="136" y2="116"/><line x1="158" y1="74" x2="158" y2="116"/>
+          <line x1="62" y1="118" x2="178" y2="118"/>
+        </g>
+        <path class="hand" d="M188 96q86 -34 168 -8"/>
+        <g class="fig"><circle cx="366" cy="70" r="13"/><path d="M340 118a26 33 0 0 1 52 0"/></g>
+        <path class="fills" d="M404 118a28 35 0 0 1 56 0Z"/><circle class="fills" cx="432" cy="66" r="14"/>
+        <g class="accent"><circle cx="432" cy="66" r="14"/><path d="M404 118a28 35 0 0 1 56 0"/></g>
       </svg>
-      <div class="scene__cap">Colegio y colegiados, más cerca y sin esperas</div>
+      <div class="scene__cap">El Colegio, más cerca de cada colegiado</div>
     </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>Especial Colegios de Farmacéuticos</span><span class="pageno">11</span></div>
   </section>
@@ -709,23 +701,13 @@
 
     <div class="note"><b>Nota de rigor.</b> Las columnas «Hoy» y «Objetivo» son ilustrativas para un Colegio; los rangos se apoyan en KPIs medidos en cuentas reales de GuruSup (Reveni, GuruWalk, GoTrendier, COCUNAT, The Balance Phone) y en el business case de referencia. Se afinan con un diagnóstico inicial.</div>
 
-    <div class="scene">
-      <svg class="scene__art" viewBox="0 0 820 128" role="img" aria-label="Ilustración: del colegiado al paciente">
-        <path class="fig" d="M50 74 H250 l20 -34 26 62 18 -28 H392"/>
-        <path class="accent" d="M470 58c-9-11-27-6-27 8 0 12 15 20 27 30 12-10 27-18 27-30 0-14-18-19-27-8z"/>
-        <path class="fig muted" d="M540 74 H770"/>
-        <path class="fig" style="opacity:.4" d="M662 40 v24 M650 52 h24"/>
-        <circle class="dots" cx="470" cy="30" r="3"/>
-      </svg>
-      <div class="scene__cap">Del colegiado al paciente en la farmacia · atención farmacéutica</div>
-    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>Especial Colegios de Farmacéuticos</span><span class="pageno">12</span></div>
   </section>
 
   <!-- ============ 13 · CIERRE ============ -->
   <section class="page">
     <span class="eyebrow">El propósito</span>
-    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:20px 0">
+    <div style="flex:0 1 auto; display:flex; flex-direction:column; justify-content:flex-start; padding:26px 0 0">
       <p class="quote">La IA no reemplaza la confianza.<br><span class="accent">La amplifica.</span></p>
       <p class="lead" style="margin-top:22px; font-size:17px">Las organizaciones que liderarán los próximos años combinarán tecnología, empatía, automatización, conocimiento y acompañamiento humano. Porque la mejor atención no es solo la que responde rápido: es la que hace sentir acompañado al paciente en cada interacción.</p>
       <div class="pill-list" style="margin-top:24px">
