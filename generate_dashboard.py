@@ -39,7 +39,13 @@ MARKETING_SOURCES = {
 LC_RANK = {
     "subscriber": 0, "lead": 1, "marketingqualifiedlead": 2,
     "salesqualifiedlead": 3, "opportunity": 4, "customer": 5,
+    # Etapas de precualificación por volumen (van a ventas) = SQL
+    "1394675094": 3,  # >3000Consultas
+    "1394675095": 3,  # <3000Consultas
+    "1394675096": 3,  # NoSabeNumeroConversaciones
 }
+# Etapas que se consideran SQL (para conteos y tabla de seguimiento)
+SQL_STAGES = {"salesqualifiedlead", "1394675094", "1394675095", "1394675096"}
 
 STAGE_LABELS = [
     ("1107496610",           "Discovery",      "pill-discov"),
@@ -548,7 +554,7 @@ def main():
         label, icon, color = classify_channel(c["src"], c["d1"])
         e = chan.setdefault(label, {"n": 0, "lead": 0, "sql": 0, "free": 0, "icon": icon, "color": color})
         e["n"] += 1
-        if c["lc"] == "salesqualifiedlead": e["sql"] += 1
+        if c["lc"] in SQL_STAGES: e["sql"] += 1
         elif is_free(c): e["free"] += 1
         else: e["lead"] += 1
     for lbl, fd in FIXED_CHANNELS.items():
@@ -559,7 +565,7 @@ def main():
     # ── SQL del día (seguimiento de ventas) ──
     sql_rows = []
     for c in daily:
-        if c["lc"] == "salesqualifiedlead":
+        if c["lc"] in SQL_STAGES:
             label, _, _ = classify_channel(c["src"], c["d1"])
             name = c["firstname"] or (c["email"].split("@")[0] if c["email"] else "—")
             sql_rows.append({"name": name, "company": c["company"], "channel": label,
