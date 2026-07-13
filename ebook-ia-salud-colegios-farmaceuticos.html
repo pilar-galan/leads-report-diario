@@ -73,7 +73,7 @@
     min-height:1180px; display:flex; flex-direction:column;
   }
   .page__foot{
-    margin-top:auto; padding-top:26px; display:flex; align-items:center; justify-content:space-between;
+    margin-top:28px; padding-top:22px; display:flex; align-items:center; justify-content:space-between;
     color:var(--muted); font-size:12px; letter-spacing:.02em;
   }
   .page__foot .brandmark{display:flex; align-items:center; gap:8px; font-family:var(--f-display); font-weight:600; color:var(--ink)}
@@ -117,7 +117,7 @@
     background:rgba(34,211,154,.12); border:1px solid rgba(34,211,154,.35); color:#BFF3DD;
     padding:11px 18px; border-radius:999px;
   }
-  .cover__meta{z-index:2; display:flex; gap:34px; flex-wrap:wrap; margin-top:8px}
+  .cover__meta{z-index:2; display:flex; gap:34px; flex-wrap:wrap; margin-top:auto}
   .cover__meta div{display:flex; flex-direction:column; gap:2px}
   .cover__meta .n{font-family:var(--f-display); font-weight:700; font-size:26px; color:#fff; font-variant-numeric:tabular-nums}
   .cover__meta .l{font-size:12.5px; color:#9FCBBB; text-transform:uppercase; letter-spacing:.08em}
@@ -157,9 +157,11 @@
   .stat .n{font-family:var(--f-display); font-weight:800; font-size:34px; line-height:1; color:var(--green-ink); font-variant-numeric:tabular-nums}
   .stat .n .u{font-size:18px; font-weight:600}
   .stat .l{font-size:13px; color:var(--muted); margin-top:8px; line-height:1.35}
-  .stat .who{font-family:var(--f-display); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--salmon); margin-top:10px}
+  .stat .who{font-family:var(--f-display); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-top:10px; display:flex; align-items:center; gap:7px}
+  .stat .who::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--green); flex:none}
   .stat.dark{background:linear-gradient(135deg,var(--green-deep),var(--green-deep-2)); border-color:transparent}
-  .stat.dark .n{color:var(--green-bright)} .stat.dark .l{color:#BDE0D2} .stat.dark .who{color:#FF9384}
+  .stat.dark .n{color:var(--green-bright)} .stat.dark .l{color:#BDE0D2} .stat.dark .who{color:#9AD3BE}
+  .stat.dark .who::before{background:var(--green-bright)}
 
   /* before / after bars */
   .ba{display:grid; gap:16px; margin-top:24px}
@@ -209,6 +211,20 @@
   .flow-step .num{font-family:var(--f-display); font-weight:800; color:var(--green); font-size:18px; font-variant-numeric:tabular-nums; flex:none; width:24px}
   .flow-step .b{font-size:14.5px} .flow-step .b b{color:var(--ink)} .flow-step .b span{color:var(--muted); display:block; font-size:13px; margin-top:2px}
 
+  /* ============ ILUSTRACIÓN EDITORIAL (rellena el aire inferior) ============ */
+  .accent-green{color:#0BA05F}
+  .scene{margin-top:auto; padding-top:34px; width:100%}
+  .scene__art{width:100%; height:auto; display:block; overflow:visible}
+  .scene__cap{margin-top:14px; font-family:var(--f-display); font-size:12px; font-weight:500;
+    letter-spacing:.02em; color:var(--muted); display:flex; align-items:center; gap:9px}
+  .scene__cap::before{content:""; width:16px; height:2px; border-radius:2px; background:var(--green)}
+  .scene .fig{stroke:var(--green); stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .scene .base{stroke:var(--line); stroke-width:2}
+  .scene .accent{stroke:var(--salmon); stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .scene .dotg{fill:var(--green)} .scene .dots{fill:var(--salmon)}
+  .scene .muted{stroke:var(--green); stroke-width:2.5; fill:none; opacity:.32; stroke-linecap:round}
+  .scene .softfill{fill:var(--surface-2)}
+
   /* ============ RESPONSIVE ============ */
   @media (max-width:720px){
     .page{padding:34px 24px; min-height:0}
@@ -245,7 +261,7 @@
       <i style="width:300px;height:300px;left:-80px;bottom:-90px;border-color:rgba(255,107,91,.18)"></i>
     </div>
     <div class="cover__brand"><span class="punto"></span>gurusup</div>
-    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:38px 0">
+    <div style="flex:0 1 auto; display:flex; flex-direction:column; justify-content:flex-start; padding:78px 0 0">
       <span class="eyebrow cover__eyebrow">eBook · Sector Salud 2026</span>
       <h1>IA conversacional<br>para el <span>sector salud</span></h1>
       <p class="sub">Cómo clínicas, hospitales, farmacias y colegios profesionales usan agentes de IA para dar atención inmediata, automatizar procesos y mejorar la experiencia —sin sustituir el valor humano.</p>
@@ -297,6 +313,19 @@
 
     <div class="note"><b>Insight McKinsey.</b> La confianza del paciente ya no depende solo del acto clínico, sino de toda la experiencia: antes, durante y después de la atención.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 148" role="img" aria-label="Ilustración: personas en el centro de la atención">
+        <line class="base" x1="40" y1="128" x2="780" y2="128"/>
+        <g class="fig" style="opacity:.4"><circle cx="130" cy="74" r="15"/><path d="M96 128a34 40 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.6"><circle cx="250" cy="70" r="15"/><path d="M216 128a34 42 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.85"><circle cx="370" cy="74" r="15"/><path d="M336 128a34 40 0 0 1 68 0"/></g>
+        <g class="accent"><circle cx="490" cy="66" r="16"/><path d="M454 128a36 44 0 0 1 72 0"/></g>
+        <g class="fig" style="opacity:.75"><circle cx="610" cy="72" r="15"/><path d="M576 128a34 41 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.5"><circle cx="712" cy="76" r="14"/><path d="M680 128a32 38 0 0 1 64 0"/></g>
+        <circle class="dotg" cx="60" cy="42" r="3" opacity=".5"/><circle class="dotg" cx="770" cy="48" r="3" opacity=".5"/>
+      </svg>
+      <div class="scene__cap">El paciente en el centro · la experiencia empieza antes de la consulta</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">02</span></div>
   </section>
 
@@ -330,6 +359,16 @@
       </div>
     </div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: conversación 24/7">
+        <g class="fig"><rect x="120" y="34" width="250" height="84" rx="26"/><path d="M172 118 v24 l24 -24"/></g>
+        <circle class="dotg" cx="205" cy="76" r="6"/><circle class="dotg" cx="245" cy="76" r="6"/><circle class="dotg" cx="285" cy="76" r="6"/>
+        <g class="accent"><rect x="382" y="66" width="168" height="64" rx="22"/><path d="M500 130 v18 l-22 -18"/></g>
+        <g class="fig"><circle cx="672" cy="80" r="40"/><path d="M672 58 v22 l16 12"/></g>
+        <text x="672" y="141" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="var(--green-ink)">24/7</text>
+      </svg>
+      <div class="scene__cap">7 de cada 10 consultas son repetitivas o administrativas</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">03</span></div>
   </section>
 
@@ -355,6 +394,16 @@
 
     <div class="note"><b>Human-in-the-loop, por diseño.</b> En GuruSup, el agente intenta resolver y, si no lo consigue en un máximo de intentos, <b>escala a una persona</b> o deja el aviso en el sistema del centro. Las conversaciones con mayor carga emocional siguen siendo humanas.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 128" role="img" aria-label="Ilustración: cuidado y latido">
+        <path class="fig" d="M50 74 H250 l20 -34 26 62 18 -28 H392"/>
+        <path class="accent" d="M470 58c-9-11-27-6-27 8 0 12 15 20 27 30 12-10 27-18 27-30 0-14-18-19-27-8z"/>
+        <path class="fig muted" d="M540 74 H770"/>
+        <path class="fig" style="opacity:.4" d="M662 40 v24 M650 52 h24"/>
+        <circle class="dots" cx="470" cy="30" r="3"/>
+      </svg>
+      <div class="scene__cap">La IA elimina la espera; las personas aportan criterio y empatía</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">04</span></div>
   </section>
 
@@ -387,6 +436,16 @@
 
     <div class="note"><b>Sin límite de concurrencia.</b> GuruSup crea un agente por cada conversación entrante —ya sea 1 o 200 a la vez— y aprende de conversaciones reales para mejorar solo (auto fine-tuning), con un auditor interno que evita alucinaciones.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: conversación 24/7">
+        <g class="fig"><rect x="120" y="34" width="250" height="84" rx="26"/><path d="M172 118 v24 l24 -24"/></g>
+        <circle class="dotg" cx="205" cy="76" r="6"/><circle class="dotg" cx="245" cy="76" r="6"/><circle class="dotg" cx="285" cy="76" r="6"/>
+        <g class="accent"><rect x="382" y="66" width="168" height="64" rx="22"/><path d="M500 130 v18 l-22 -18"/></g>
+        <g class="fig"><circle cx="672" cy="80" r="40"/><path d="M672 58 v22 l16 12"/></g>
+        <text x="672" y="141" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="var(--green-ink)">24/7</text>
+      </svg>
+      <div class="scene__cap">De responder preguntas a acompañar todo el recorrido</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">05</span></div>
   </section>
 
@@ -412,6 +471,16 @@
       <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Vuelve a contactar automáticamente</li>
     </ul>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 128" role="img" aria-label="Ilustración: seguimiento y latido">
+        <path class="fig" d="M50 74 H250 l20 -34 26 62 18 -28 H392"/>
+        <path class="accent" d="M470 58c-9-11-27-6-27 8 0 12 15 20 27 30 12-10 27-18 27-30 0-14-18-19-27-8z"/>
+        <path class="fig muted" d="M540 74 H770"/>
+        <path class="fig" style="opacity:.4" d="M662 40 v24 M650 52 h24"/>
+        <circle class="dots" cx="470" cy="30" r="3"/>
+      </svg>
+      <div class="scene__cap">Seguimiento proactivo · adherencia, evolución y confianza</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">06</span></div>
   </section>
 
@@ -432,13 +501,24 @@
       <div class="txt">Un <b>auditor de back-office</b> clasifica automáticamente las conversaciones, detecta oportunidades de mejora y mantiene un historial de versiones de cada agente. La IA deja de ser un canal: se convierte en una herramienta de gestión que te dice <b>qué necesitan realmente</b> tus pacientes y tu equipo.</div>
     </div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: crecimiento de indicadores">
+        <line class="base" x1="55" y1="130" x2="765" y2="130"/>
+        <path class="fig" d="M60 116 C 210 110, 300 76, 430 66 S 660 34, 758 24"/>
+        <circle class="dotg" cx="210" cy="100" r="5" opacity=".55"/>
+        <circle class="dotg" cx="430" cy="66" r="5" opacity=".8"/>
+        <circle class="dotg" cx="600" cy="42" r="5" opacity=".9"/>
+        <circle class="accent" cx="758" cy="24" r="9"/><circle class="dots" cx="758" cy="24" r="3.5"/>
+      </svg>
+      <div class="scene__cap">Cada conversación se convierte en un dato accionable</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">07</span></div>
   </section>
 
   <!-- ============ 08 · RESULTADOS REALES (ALTO VALOR) ============ -->
   <section class="page">
     <span class="eyebrow">Resultados que ya ocurren</span>
-    <h2 class="h-xl">No es teoría.<br>Son <span class="accent-salmon">KPIs reales</span> de clientes.</h2>
+    <h2 class="h-xl">No es teoría.<br>Son <span class="accent-green">KPIs reales</span> de clientes.</h2>
     <p class="lead" style="margin-top:14px">Cifras medidas en cuentas reales de GuruSup en distintos sectores. Esto es lo que un despliegue bien hecho mueve desde las primeras semanas.</p>
 
     <div class="stats">
@@ -452,6 +532,17 @@
 
     <div class="note"><b>Las palancas.</b> Con GuruSup en modo borrador el equipo multiplica ×7 su capacidad; en modo automático, ×40. Y como el agente se conecta a la API en el momento del mensaje, <b>no se almacenan datos del paciente</b> — cumplimiento GDPR e ISO 27001.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: crecimiento de indicadores">
+        <line class="base" x1="55" y1="130" x2="765" y2="130"/>
+        <path class="fig" d="M60 116 C 210 110, 300 76, 430 66 S 660 34, 758 24"/>
+        <circle class="dotg" cx="210" cy="100" r="5" opacity=".55"/>
+        <circle class="dotg" cx="430" cy="66" r="5" opacity=".8"/>
+        <circle class="dotg" cx="600" cy="42" r="5" opacity=".9"/>
+        <circle class="accent" cx="758" cy="24" r="9"/><circle class="dots" cx="758" cy="24" r="3.5"/>
+      </svg>
+      <div class="scene__cap">Métricas medidas en cuentas reales de GuruSup</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">08</span></div>
   </section>
 
@@ -495,6 +586,19 @@
 
     <div class="note">Hasta el <b>65%</b> de las casuísticas transaccionales resultan automatizables en un cliente real; el tiempo de cola baja a ~3 segundos. Los equipos ganan las horas que hoy se van en lo repetitivo.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 148" role="img" aria-label="Ilustración: equipo y comunidad">
+        <line class="base" x1="40" y1="128" x2="780" y2="128"/>
+        <g class="fig" style="opacity:.45"><circle cx="130" cy="74" r="15"/><path d="M96 128a34 40 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.7"><circle cx="250" cy="70" r="15"/><path d="M216 128a34 42 0 0 1 68 0"/></g>
+        <g class="accent"><circle cx="370" cy="66" r="16"/><path d="M334 128a36 44 0 0 1 72 0"/></g>
+        <g class="fig" style="opacity:.85"><circle cx="490" cy="72" r="15"/><path d="M456 128a34 41 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.6"><circle cx="610" cy="72" r="15"/><path d="M576 128a34 41 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.4"><circle cx="712" cy="76" r="14"/><path d="M680 128a32 38 0 0 1 64 0"/></g>
+        <circle class="dotg" cx="60" cy="42" r="3" opacity=".5"/><circle class="dotg" cx="770" cy="48" r="3" opacity=".5"/>
+      </svg>
+      <div class="scene__cap">Más capacidad de atención sin ampliar la plantilla</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">09</span></div>
   </section>
 
@@ -518,6 +622,16 @@
 
     <div class="note"><b>Seguro por diseño.</b> Multicanal, human-in-the-loop y auditable. GDPR compliant e ISO 27001; los datos no se almacenan — el agente se conecta a tu sistema solo en el momento de la conversación.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 150" role="img" aria-label="Ilustración: canales de conversación">
+        <g class="fig"><rect x="120" y="34" width="250" height="84" rx="26"/><path d="M172 118 v24 l24 -24"/></g>
+        <circle class="dotg" cx="205" cy="76" r="6"/><circle class="dotg" cx="245" cy="76" r="6"/><circle class="dotg" cx="285" cy="76" r="6"/>
+        <g class="accent"><rect x="382" y="66" width="168" height="64" rx="22"/><path d="M500 130 v18 l-22 -18"/></g>
+        <g class="fig"><circle cx="672" cy="80" r="40"/><path d="M672 58 v22 l16 12"/></g>
+        <text x="672" y="141" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="var(--green-ink)">24/7</text>
+      </svg>
+      <div class="scene__cap">WhatsApp · email · voz, en una sola plataforma</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>IA conversacional en salud 2026</span><span class="pageno">10</span></div>
   </section>
 
@@ -557,6 +671,19 @@
 
     <div class="note"><b>Dos frentes de valor.</b> (1) Atención al <b>colegiado</b>: colegiación, formación, normativa. (2) El Colegio puede extender la tecnología a sus <b>farmacias</b> para el seguimiento al paciente —adherencia, atención farmacéutica— manteniendo el trato cercano que caracteriza a la profesión.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 148" role="img" aria-label="Ilustración: colegio y colegiados">
+        <line class="base" x1="40" y1="128" x2="780" y2="128"/>
+        <g class="fig" style="opacity:.4"><circle cx="130" cy="74" r="15"/><path d="M96 128a34 40 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.6"><circle cx="250" cy="70" r="15"/><path d="M216 128a34 42 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.85"><circle cx="370" cy="74" r="15"/><path d="M336 128a34 40 0 0 1 68 0"/></g>
+        <g class="accent"><circle cx="490" cy="66" r="16"/><path d="M454 128a36 44 0 0 1 72 0"/></g>
+        <g class="fig" style="opacity:.75"><circle cx="610" cy="72" r="15"/><path d="M576 128a34 41 0 0 1 68 0"/></g>
+        <g class="fig" style="opacity:.5"><circle cx="712" cy="76" r="14"/><path d="M680 128a32 38 0 0 1 64 0"/></g>
+        <circle class="dotg" cx="60" cy="42" r="3" opacity=".5"/><circle class="dotg" cx="770" cy="48" r="3" opacity=".5"/>
+      </svg>
+      <div class="scene__cap">Colegio y colegiados, más cerca y sin esperas</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>Especial Colegios de Farmacéuticos</span><span class="pageno">11</span></div>
   </section>
 
@@ -582,6 +709,16 @@
 
     <div class="note"><b>Nota de rigor.</b> Las columnas «Hoy» y «Objetivo» son ilustrativas para un Colegio; los rangos se apoyan en KPIs medidos en cuentas reales de GuruSup (Reveni, GuruWalk, GoTrendier, COCUNAT, The Balance Phone) y en el business case de referencia. Se afinan con un diagnóstico inicial.</div>
 
+    <div class="scene">
+      <svg class="scene__art" viewBox="0 0 820 128" role="img" aria-label="Ilustración: del colegiado al paciente">
+        <path class="fig" d="M50 74 H250 l20 -34 26 62 18 -28 H392"/>
+        <path class="accent" d="M470 58c-9-11-27-6-27 8 0 12 15 20 27 30 12-10 27-18 27-30 0-14-18-19-27-8z"/>
+        <path class="fig muted" d="M540 74 H770"/>
+        <path class="fig" style="opacity:.4" d="M662 40 v24 M650 52 h24"/>
+        <circle class="dots" cx="470" cy="30" r="3"/>
+      </svg>
+      <div class="scene__cap">Del colegiado al paciente en la farmacia · atención farmacéutica</div>
+    </div>
     <div class="page__foot"><span class="brandmark"><span class="punto"></span>Especial Colegios de Farmacéuticos</span><span class="pageno">12</span></div>
   </section>
 
