@@ -289,6 +289,61 @@ def count_meetings_held(start_iso, end_iso):
         return 0
 
 
+def parse_hs_dt(v):
+    """Convierte un valor de fecha de HubSpot (epoch ms o ISO) a datetime UTC."""
+    if not v:
+        return None
+    v = str(v)
+    try:
+        if v.isdigit():
+            return datetime.fromtimestamp(int(v) / 1000, timezone.utc)
+        return datetime.fromisoformat(v.replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def _chunks(lst, n=100):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
+def deal_meeting_starts(deal_ids):
+    """{deal_id: [datetime, ...]} con las horas de inicio de las reuniones asociadas a cada deal."""
+    out = {}
+    if not deal_ids:
+        return out
+    # 1) Asociaciones deal -> meetings (v4 batch)
+    d2m, mids = {}, set()
+    for chunk in _chunks(deal_ids):
+        try:
+            res = api_post("/crm/v4/associations/deals/meetings/batch/read",
+                           {"inputs": [{"id": str(i)} for i in chunk]})
+        except Exception as e:
+            print(f"  assoc deals->meetings error: {e}"); continue
+        for r in res.get("results", []):
+            did = str(r.get("from", {}).get("id"))
+            ms = [str(t.get("toObjectId")) for t in r.get("to", []) if t.get("toObjectId")]
+            d2m[did] = ms; mids.update(ms)
+        time.sleep(0.2)
+    # 2) Hora de inicio de cada meeting (v3 batch read)
+    starts = {}
+    for chunk in _chunks(list(mids)):
+        try:
+            res = api_post("/crm/v3/objects/meetings/batch/read",
+                           {"properties": ["hs_meeting_start_time"],
+                            "inputs": [{"id": m} for m in chunk]})
+        except Exception as e:
+            print(f"  meetings batch read error: {e}"); continue
+        for m in res.get("results", []):
+            dt = parse_hs_dt(m.get("properties", {}).get("hs_meeting_start_time"))
+            if dt:
+                starts[m["id"]] = dt
+        time.sleep(0.2)
+    for did, ms in d2m.items():
+        out[did] = sorted(starts[m] for m in ms if m in starts)
+    return out
+
+
 # ─────────────── SVG chart ───────────────
 def svg_cumulative(cum, daily, labels, color):
     """cum: lista acumulada; daily: incremento diario; labels: 'DD mmm' por día."""
@@ -472,6 +527,21 @@ def main():
             open_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
                                "stage": stage, "created": created, "channel": f"{icon} {label}",
                                "brain": is_brain_pl(pid)})
+
+    # Fecha de la reunión (discovery/demo) programada para cada deal del pipeline
+    mtg = deal_meeting_starts([d["id"] for d in open_deals])
+    now_utc = es_now.astimezone(timezone.utc)
+    for od in open_deals:
+        starts = mtg.get(od["id"], [])
+        upcoming = [s for s in starts if s >= now_utc]
+        chosen = upcoming[0] if upcoming else (starts[-1] if starts else None)
+        od["mtg_future"] = bool(upcoming)           # True si es una reunión futura
+        od["mtg_sort"] = chosen.timestamp() if chosen else float("inf")
+        if chosen:
+            ch_es = chosen.astimezone(tz)
+            od["mtg_txt"] = f"{ch_es.day} {MESES3[ch_es.month-1]} · {ch_es.strftime('%H:%M')}"
+        else:
+            od["mtg_txt"] = ""
 
     reunion_cum = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= fstart)
     reunion_day = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= dstart)
@@ -768,14 +838,21 @@ def render(d):
         by_stage.setdefault(deal["stage"], []).append(deal)
     deal_rows = ""
     for st_id, label, pill in STAGE_LABELS:
-        group = sorted(by_stage.get(st_id, []), key=lambda x: x["channel"])
+        # Ordenadas por fecha de reunión, de más cercana a más lejana (sin fecha al final)
+        group = sorted(by_stage.get(st_id, []), key=lambda x: (x.get("mtg_sort", float("inf")), x["channel"]))
         if not group:
             continue
-        deal_rows += f'<tr class="stage-divider"><td colspan="3">{esc(label)} · {len(group)} deals</td></tr>'
+        deal_rows += f'<tr class="stage-divider"><td colspan="4">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
             nt = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
+            if deal.get("mtg_txt"):
+                cls = "dt-next" if deal.get("mtg_future") else "dt-past"
+                fecha_td = f'<td class="{cls}">{esc(deal["mtg_txt"])}</td>'
+            else:
+                fecha_td = '<td class="dt-none">—</td>'
             deal_rows += (f'<tr data-name="{esc(deal["name"].lower())}"><td><strong>{esc(deal["name"])}</strong>{nt}</td>'
-                          f'<td>{esc(deal["channel"])}</td><td><span class="pill {pill}">{esc(label)}</span></td></tr>')
+                          f'<td>{esc(deal["channel"])}</td><td><span class="pill {pill}">{esc(label)}</span></td>'
+                          f'{fecha_td}</tr>')
     chan_dist_txt = " · ".join(f"{n} {esc(lbl)}" for lbl, n in sorted(d["chan_dist"].items(), key=lambda x: -x[1])) or "—"
 
     return TEMPLATE.format(
@@ -923,6 +1000,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pill-demo {{ background:rgba(16,185,129,.15); color:var(--green); }}
 .pill-discov {{ background:rgba(255,107,91,.15); color:#F5D5C8; }}
 .pill-best {{ background:rgba(245,158,11,.15); color:var(--amber); }}
+.dt-next {{ font-weight:700; color:var(--guru-300); white-space:nowrap; }}
+.dt-past {{ color:var(--muted); white-space:nowrap; }}
+.dt-none {{ color:var(--muted); }}
 .new-tag {{ font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; background:rgba(16,185,129,.2); color:var(--green); text-transform:uppercase; }}
 .alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }}
 .alert-muted {{ background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }}
@@ -1083,10 +1163,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       💼 <strong style="color:var(--guru-300)">{ventas_count}</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
-    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th></tr></thead>
+    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th><th>📅 Reunión</th></tr></thead>
     <tbody>{deal_rows}</tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Reparto por canal: {chan_dist_txt}.</div></div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Reparto por canal: {chan_dist_txt}. Dentro de cada etapa se ordenan por <strong>fecha de reunión</strong> (discovery/demo), de la más próxima a la más lejana; en <span class="dt-next">salmón</span> las reuniones futuras.</div></div>
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
