@@ -997,7 +997,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="preq-card preq-free">
         <div class="preq-tag">Automatizado</div>
         <div class="preq-h">➖ −3.000 consultas/mes</div>
-        <div class="preq-b"><strong>Email automatizado</strong> de agradecimiento e invitación a <strong>Freemium</strong> (autoservicio).</div>
+        <div class="preq-b"><strong>Email automatizado</strong> de agradecimiento y se <strong>descarta</strong>. Ya no se deriva a Freemium.</div>
       </div>
     </div>
   </div>
@@ -1034,6 +1034,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="fn-note">De contacto a freemium y su activación comercial</div>
       <div class="pyramid">{free_pyr}</div>
       <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
+      <div class="fn-highlight" style="background:rgba(255,138,101,.10);border-color:rgba(255,138,101,.35)">⚠️ <strong>Vamos a retirar la opción de registro gratuito de la web</strong>, por lo que este canal de entrada de freemium dejará de alimentarse.</div>
     </div>
   </div>
   <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).
