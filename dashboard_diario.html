@@ -188,6 +188,22 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .alert { border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }
 .alert-muted { background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }
 .caption { font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }
+.og-head { display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+.og-stat { flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+.og-stat b { display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }
+.og-stat span { font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }
+.og-stat.og-content { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); }
+.og-stat.og-content b { color:#6ee7b7; }
+.og-stat.og-noinfo { background:rgba(123,118,160,.08); border-color:rgba(123,118,160,.3); }
+.og-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.og-l { flex:0 0 40%; font-size:12px; color:var(--text-2); line-height:1.3; }
+.og-barwrap { flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:13px; overflow:hidden; }
+.og-bar { height:13px; border-radius:5px; background:linear-gradient(90deg,#7b76a0,#a5a1c8); }
+.og-row.og-content .og-bar { background:linear-gradient(90deg,#0E7490,#22D3EE); }
+.og-row.og-noinfo .og-bar { background:linear-gradient(90deg,#5a5680,#7b76a0); }
+.og-n { flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }
+.og-p { font-size:11px; color:var(--muted); font-weight:600; }
+@media(max-width:640px){ .og-l { flex-basis:50%; } }
 .drz-head { display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
 .drz-stat { flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
 .drz-stat b { display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }
@@ -299,7 +315,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </details>
 
   <div class="section-label">Contactos generados · últimas 24h</div>
-  <div class="day-kpis"><div class="f-card f-c-default"><div class="fc-label">Contactos</div><div class="fc-value">13</div><div class="fc-sub">últimas 24h</div></div><div class="f-card f-c-default"><div class="fc-label">Leads</div><div class="fc-value">6</div><div class="fc-sub">46% del total</div></div><div class="f-card f-c-orange"><div class="fc-label">SQL Consultoría</div><div class="fc-value">1</div><div class="fc-sub">8% del total</div></div><div class="f-card f-c-teal"><div class="fc-label">Freemium</div><div class="fc-value">6</div><div class="fc-sub">46% del total</div></div><div class="f-card f-c-green"><div class="fc-label">Reuniones y llamadas</div><div class="fc-value">3</div><div class="fc-sub">0 agendadas · 3 llamadas</div></div><div class="f-card f-c-default"><div class="fc-label">Oportunidades</div><div class="fc-value">0</div><div class="fc-sub">0% del total</div></div></div>
+  <div class="day-kpis"><div class="f-card f-c-default"><div class="fc-label">Contactos</div><div class="fc-value">13</div><div class="fc-sub">últimas 24h</div></div><div class="f-card f-c-default"><div class="fc-label">Leads</div><div class="fc-value">6</div><div class="fc-sub">46% del total · 📘 3 con contenido · ❔ 1 sin info</div></div><div class="f-card f-c-orange"><div class="fc-label">SQL Consultoría</div><div class="fc-value">1</div><div class="fc-sub">8% del total</div></div><div class="f-card f-c-teal"><div class="fc-label">Freemium</div><div class="fc-value">6</div><div class="fc-sub">46% del total</div></div><div class="f-card f-c-green"><div class="fc-label">Reuniones y llamadas</div><div class="fc-value">3</div><div class="fc-sub">0 agendadas · 3 llamadas</div></div><div class="f-card f-c-default"><div class="fc-label">Oportunidades</div><div class="fc-value">0</div><div class="fc-sub">0% del total</div></div></div>
   <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · <strong>Reuniones y llamadas</strong> = reuniones agendadas (demos) + llamadas de los SDR (Agustín/Juanma): <strong>3</strong> llamadas hoy · Reuniones hoy: <strong>Víctor Mollá</strong> (Chat web)</div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
@@ -337,6 +353,12 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
     <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>181</strong> test/prueba · <strong>0</strong> internos @gurusup (empleados) · <strong>250</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
     <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
+
+  <div class="section-label">Origen de los leads · ¿de dónde vienen? · acumulado desde el 1 de enero</div>
+  <div class="card">
+    <div class="og-head"><div class="og-stat og-content"><b>599</b><span>con contenido de marketing<br>(ebook · blog · webinar · herramienta · newsletter) = <b>MQL de facto</b></span></div><div class="og-stat og-noinfo"><b>162</b><span>sin información<br>(entraron sin dejar rastro de contenido)</span></div><div class="og-stat"><b>1598</b><span>leads totales<br>clasificados por origen</span></div></div><div class="og-bars"><div class="og-row"><div class="og-l">🎯 Formulario de demo</div><div class="og-barwrap"><div class="og-bar" style="width:100%"></div></div><div class="og-n">766 <span class="og-p">48%</span></div></div><div class="og-row og-content"><div class="og-l">📝 Blog / artículo</div><div class="og-barwrap"><div class="og-bar" style="width:60%"></div></div><div class="og-n">463 <span class="og-p">29%</span></div></div><div class="og-row og-noinfo"><div class="og-l">❔ Sin información</div><div class="og-barwrap"><div class="og-bar" style="width:21%"></div></div><div class="og-n">162 <span class="og-p">10%</span></div></div><div class="og-row og-content"><div class="og-l">🎥 Webinar</div><div class="og-barwrap"><div class="og-bar" style="width:13%"></div></div><div class="og-n">96 <span class="og-p">6%</span></div></div><div class="og-row"><div class="og-l">📣 Lead Ads (paid)</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">48 <span class="og-p">3%</span></div></div><div class="og-row og-content"><div class="og-l">📘 Ebook / descargable</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">40 <span class="og-p">3%</span></div></div><div class="og-row"><div class="og-l">• Otro formulario</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">13 <span class="og-p">1%</span></div></div><div class="og-row"><div class="og-l">🧠 GuruSup Brain</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">6 <span class="og-p">0%</span></div></div><div class="og-row"><div class="og-l">🤝 Partners</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">4 <span class="og-p">0%</span></div></div></div>
+    <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
+  </div>
 
   <div class="section-label">Razones de descarte / descualificación de SQL · acumulado desde el 1 de enero</div>
   <div class="card">
@@ -377,7 +399,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
       <span class="badge badge-green">29 oportunidades de marketing</span></div>
     <div style="font-size:12px;color:var(--text-2);margin:-6px 0 14px;line-height:1.5;">
-      🧠 <strong style="color:var(--guru-300)">4</strong> en Pipeline <strong>Brain</strong> (GuruSup / Company Brain) ·
+      🧠 <strong style="color:var(--guru-300)">0</strong> en Pipeline <strong>Brain</strong> (GuruSup / Company Brain) ·
       💼 <strong style="color:var(--guru-300)">25</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
