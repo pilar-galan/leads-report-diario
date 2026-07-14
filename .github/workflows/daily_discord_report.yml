@@ -2,10 +2,10 @@ name: Daily Leads Report
 
 on:
   schedule:
-    # Mar–Vie a las 8:00h España (06:00 UTC verano) · ventana últimas 24h
-    - cron: '0 6 * * 2-5'
-    # Lunes a las 9:00h España (07:00 UTC verano) · cubre viernes 8:00 → lunes 9:00
-    - cron: '0 7 * * 1'
+    # Lun–Vie a las 9:00h España (07:00 UTC en horario de verano CEST)
+    #  · Mar–Vie: ventana últimas 24h (ayer 9:00 → hoy 9:00)
+    #  · Lun: cubre el fin de semana (viernes 9:00 → lunes 9:00)
+    - cron: '0 7 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
 
       - name: Generar dashboard con datos reales de HubSpot
         env:
@@ -34,3 +42,52 @@ jobs:
             git commit -m "chore: actualización diaria del dashboard (datos HubSpot)"
             git push
           fi
+
+      - name: Enviar dashboard diario a Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_THREAD_ID: ${{ secrets.DISCORD_THREAD_ID }}
+          DASHBOARD_URL: https://pilar-galan.github.io/leads-report-diario/dashboard_diario.html
+        run: |
+          python3 << 'PYEOF'
+          import os, json, requests
+          from datetime import date, timedelta
+
+          webhook   = os.environ['DISCORD_WEBHOOK_URL']
+          thread_id = os.environ.get('DISCORD_THREAD_ID', '').strip()
+          dash_url  = os.environ['DASHBOARD_URL']
+
+          # Ventana reflejada en el mensaje (misma lógica que el generador):
+          # lunes cubre el fin de semana (viernes → lunes), resto últimas 24h.
+          hoy = date.today()
+          dias_atras = 3 if hoy.weekday() == 0 else 1
+          desde = hoy - timedelta(days=dias_atras)
+          MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
+          periodo = f"{desde.day} {MESES[desde.month-1]} 9:00 → {hoy.day} {MESES[hoy.month-1]} 9:00 (hora España)"
+          if hoy.weekday() == 0:
+              periodo += " · incluye fin de semana"
+
+          asunto = "Dashboard diario de seguimiento de Leads"
+          message = {
+              "content": f"**{asunto}**",
+              "embeds": [{
+                  "title": f"📊 {asunto}",
+                  "description": f"**Período:** {periodo}\n\n👉 **Ver dashboard completo →** {dash_url}",
+                  "color": 0xFF6B5B,
+                  "footer": {"text": "GuruSup · Dashboard Diario · datos actualizados desde HubSpot"},
+              }],
+          }
+
+          url = webhook + (f"?thread_id={thread_id}" if thread_id else "")
+
+          # Adjuntar también el HTML por robustez (por si el enlace aún no ha propagado).
+          try:
+              with open("dashboard_diario.html", "rb") as fh:
+                  files = {"file": ("dashboard_diario.html", fh, "text/html")}
+                  r = requests.post(url, data={"payload_json": json.dumps(message)}, files=files)
+          except FileNotFoundError:
+              r = requests.post(url, json=message)
+
+          print("Discord status:", r.status_code, r.text[:300])
+          r.raise_for_status()
+          PYEOF

@@ -367,9 +367,9 @@ def main():
         periodo_txt = period_ov or (f"{start.day} {MESES3[start.month-1]} → "
                                     f"{es_now.day} {MESES3[es_now.month-1]} {es_now.year}")
     else:
-        today_8   = es_now.replace(hour=8, minute=0, second=0, microsecond=0)
+        today_9   = es_now.replace(hour=9, minute=0, second=0, microsecond=0)
         days_back = 3 if es_now.weekday() == 0 else 1
-        start     = today_8 - timedelta(days=days_back)
+        start     = today_9 - timedelta(days=days_back)
         fecha_larga = f"{DIAS[es_now.weekday()]}, {es_now.day} de {MESES[es_now.month-1]} de {es_now.year}"
         periodo_txt = (f"{start.day} {MESES3[start.month-1]} {start.strftime('%H:%M')} → "
                        f"{es_now.day} {MESES3[es_now.month-1]} {es_now.strftime('%H:%M')} (hora España)")
