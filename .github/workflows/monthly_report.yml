@@ -47,6 +47,9 @@ jobs:
           GEN_TITLE:  ${{ inputs.title }}
           GEN_PERIOD: ${{ inputs.period }}
           GEN_FECHA:  ${{ inputs.fecha }}
+          GEN_PAID_SPEND: ${{ vars.GEN_PAID_SPEND }}
+          GEN_PAID_SPEND_GOOGLE: ${{ vars.GEN_PAID_SPEND_GOOGLE }}
+          GEN_PAID_SPEND_SOCIAL: ${{ vars.GEN_PAID_SPEND_SOCIAL }}
         run: python3 generate_dashboard.py
 
       - name: Publicar informe mensual

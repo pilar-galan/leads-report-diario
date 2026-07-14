@@ -727,6 +727,30 @@ def main():
               "total": origin_total, "content_set": CONTENT_ORIGINS,
               "d_content": d_lead_content, "d_noinfo": d_lead_noinfo, "d_total": len(daily_leads)}
 
+    # ── Paid media (Google Ads + Social Ads) · embudo acumulado desde 1 ene ──
+    def chan_label(c):
+        return classify_channel(c["src"], c["d1"])[0]
+    def paid_funnel(lst):
+        return {
+            "contactos": len(lst),
+            "leads": sum(1 for c in lst if rank(c["lc"]) >= 1),
+            "mql":  sum(1 for c in lst if rank(c["lc"]) >= 2),
+            "sql":  sum(1 for c in lst if rank(c["lc"]) >= 3),
+            "opp":  len({compkey(c) for c in lst if c["lc"] == "opportunity"}),
+        }
+    paid_google = [c for c in hist_fun if chan_label(c) == "Google Ads"]
+    paid_social = [c for c in hist_fun if chan_label(c) == "Social Ads"]
+    paid_all = paid_google + paid_social
+    paid = {
+        "total": paid_funnel(paid_all),
+        "google": paid_funnel(paid_google),
+        "social": paid_funnel(paid_social),
+        # Gasto (no disponible vía API; configurable por env, en €). 0/"" = pendiente de conectar.
+        "spend_total": os.environ.get("GEN_PAID_SPEND", "").strip(),
+        "spend_google": os.environ.get("GEN_PAID_SPEND_GOOGLE", "").strip(),
+        "spend_social": os.environ.get("GEN_PAID_SPEND_SOCIAL", "").strip(),
+    }
+
     # Oportunidades y clientes = EMPRESAS (ciclo de vida); reunión = deals en demo+
     agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
     # Reuniones agendadas (24h) = demos agendadas + llamadas de los SDR (Agustín/Juanma)
@@ -871,7 +895,7 @@ def main():
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
         "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
-        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq, "origin": origin,
+        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq, "origin": origin, "paid": paid,
         "mkt_deals": open_deals, "mkt_total": len(open_deals), "lost_deals": lost_deals,
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
@@ -1078,6 +1102,56 @@ def render(d):
         '</div>'
         f'<div class="og-bars">{og_rows}</div>')
 
+    # ── Paid media (embudo + gasto + desglose por canal) ──
+    pd_ = d["paid"]; ptot = pd_["total"]
+    def cost_per(spend, n):
+        try:
+            if spend and n:
+                return f'{round(float(str(spend).replace(",", ".")) / n)} €'
+        except Exception:
+            pass
+        return "—"
+    def money(s):
+        return f'{s} €' if s else '<span class="pm-pend">pendiente de conectar</span>'
+    pcont = ptot["contactos"] or 1
+    paid_stages = [
+        ("Contactos", ptot["contactos"], "", "#7b76a0"),
+        ("Leads", ptot["leads"], f'{pct(ptot["leads"], pcont)} de contactos', "#a855f7"),
+        ("MQL", ptot["mql"], f'{pct(ptot["mql"], ptot["leads"] or 1)} de leads', "#8b5cf6"),
+        ("SQL", ptot["sql"], f'{pct(ptot["sql"], ptot["leads"] or 1)} de leads', "#7c3aed"),
+        ("Oportunidad", ptot["opp"], f'{pct(ptot["opp"], ptot["sql"] or 1)} de SQL · empresas', "#6d28d9"),
+    ]
+    pm_track = '<div class="flow-track">'
+    for i, (name, val, conv, color) in enumerate(paid_stages):
+        if i > 0:
+            pm_track += f'<div class="flow-arrow"><span class="fa-pct">{conv.split(" ")[0]}</span><span class="fa-base">{" ".join(conv.split(" ")[1:])}</span></div>'
+        pm_track += (f'<div class="fstage" style="border-top-color:{color}">'
+                     f'<div class="fs-count" style="color:{color}">{val}</div>'
+                     f'<div class="fs-name">{esc(name)}</div></div>')
+    pm_track += '</div>'
+    # Cabecera de gasto + coste por resultado
+    sp = pd_["spend_total"]
+    pm_head = (
+        '<div class="pm-head">'
+        f'<div class="pm-stat pm-spend"><b>{money(sp)}</b><span>gasto total en paid media<br>(acumulado desde 1 ene)</span></div>'
+        f'<div class="pm-stat"><b>{cost_per(sp, ptot["leads"])}</b><span>coste por lead (CPL)</span></div>'
+        f'<div class="pm-stat"><b>{cost_per(sp, ptot["sql"])}</b><span>coste por SQL</span></div>'
+        f'<div class="pm-stat pm-ok"><b>{cost_per(sp, ptot["opp"])}</b><span>coste por oportunidad</span></div>'
+        '</div>')
+    # Desglose por canal
+    def pm_row(nombre, icon, fn, spend):
+        return (f'<tr><td>{icon} <strong>{nombre}</strong></td>'
+                f'<td>{money(spend)}</td><td>{fn["leads"]}</td><td>{fn["mql"]}</td>'
+                f'<td>{fn["sql"]}</td><td>{fn["opp"]}</td>'
+                f'<td>{cost_per(spend, fn["leads"])}</td></tr>')
+    pm_table = (
+        '<table class="table pm-table"><thead><tr><th>Canal</th><th>Gasto</th><th>Leads</th>'
+        '<th>MQL</th><th>SQL</th><th>Oport.</th><th>CPL</th></tr></thead><tbody>'
+        + pm_row("Google Ads", "🔍", pd_["google"], pd_["spend_google"])
+        + pm_row("Social Ads", "📣", pd_["social"], pd_["spend_social"])
+        + '</tbody></table>')
+    paid_html = pm_head + pm_track + pm_table
+
     # Rama <3.000: número grande + explicación pequeña
     preq_free_stats = (
         '<div class="pqbig">'
@@ -1194,7 +1268,7 @@ def render(d):
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
         sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full,
         preq_sales_stats=preq_sales_stats, preq_free_stats=preq_free_stats, origin_html=origin_html,
-        canal_pref_html=canal_pref_html,
+        canal_pref_html=canal_pref_html, paid_html=paid_html,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
@@ -1492,6 +1566,17 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .cpref-row {{ font-size:13px; color:var(--text-2); margin-bottom:6px; display:flex; align-items:center; gap:8px; }}
 .cpref-dot {{ width:11px; height:11px; border-radius:3px; display:inline-block; }}
 .cpref-note {{ font-size:11px; color:var(--muted); margin-top:6px; }}
+.pm-head {{ display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }}
+.pm-stat {{ flex:1; min-width:130px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
+.pm-stat b {{ display:block; font-size:24px; font-weight:800; color:var(--text); line-height:1.1; }}
+.pm-stat span {{ font-size:10px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }}
+.pm-stat.pm-spend {{ background:rgba(168,85,247,.08); border-color:rgba(168,85,247,.35); }}
+.pm-stat.pm-spend b {{ color:#c4b5fd; }}
+.pm-stat.pm-ok {{ background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); }}
+.pm-stat.pm-ok b {{ color:#6ee7b7; }}
+.pm-pend {{ font-size:13px; color:var(--muted); font-weight:600; }}
+.pm-table {{ margin-top:16px; }}
+.pm-table td {{ font-variant-numeric:tabular-nums; }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -1558,6 +1643,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
+
+  <div class="section-label">Paid media · gasto y embudo · acumulado desde el 1 de enero</div>
+  <div class="card">
+    {paid_html}
+    <div class="alert alert-muted"><span>💰</span><div>Embudo de los canales de <strong>pago</strong> (Google Ads + Social Ads) desde el 1 de enero: contactos → leads → MQL → SQL → oportunidades (empresas), con % de conversión. El <strong>gasto</strong> se rellena manualmente (aún no conectado a Google/Meta Ads); en cuanto lo tengamos, se calculan CPL, coste por SQL y por oportunidad automáticamente.</div></div>
+  </div>
 
   <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
