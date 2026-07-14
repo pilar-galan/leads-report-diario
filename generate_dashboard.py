@@ -60,7 +60,9 @@ DEAL_RANK = {"1107496610": 1, "presentationscheduled": 2, "1033589123": 3, "clos
 UNIFY_DESCARTE = {
     # razon_descarte_sql (contactos)
     "Lead accidental (no recuerda registrarse, clic por error, curiosidad, broma": "Lead accidental / no recuerda",
-    "Volumen <500 → Freemium": "Volumen insuficiente",
+    "Volumen <500 → Freemium": "Volumen insuficiente (<3.000 consultas/mes)",
+    "Menos de 3.000 consultas/mes": "Volumen insuficiente (<3.000 consultas/mes)",
+    "Menos de 3000 volumen de consultas al mes": "Volumen insuficiente (<3.000 consultas/mes)",
     "Timing — \"ahora no es prioridad\"": "Timing / no es prioridad",
     "Caso de uso equivocado (esperan mensajería masiva)": "Caso de uso / no target",
     "Competidor con integración vertical nativa": "Competidor",
@@ -71,7 +73,7 @@ UNIFY_DESCARTE = {
     "No interés": "Timing / no es prioridad",
     "No target": "Caso de uso / no target",
     "No hay presu": "Precio / presupuesto",
-    "No hay volumen": "Volumen insuficiente",
+    "No hay volumen": "Volumen insuficiente (<3.000 consultas/mes)",
     "Contato incorrecto": "Sin autoridad / no cualificado",
     "Test": "Test",
     "Otros": "Otros",
@@ -274,6 +276,19 @@ def count_sdr_calls(start_iso, end_iso):
         return len(res)
     except Exception as e:
         print(f"  sdr calls error: {e}")
+        return 0
+
+
+def count_sdr_emails(start_iso, end_iso):
+    """Nº de emails enviados por los SDR (Agustín/Juanma) en el rango."""
+    try:
+        res = fetch_all("emails", [
+            {"propertyName": "hubspot_owner_id", "operator": "IN", "values": SDR_OWNERS},
+            {"propertyName": "hs_timestamp", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+        ], ["hs_timestamp"])
+        return len(res)
+    except Exception as e:
+        print(f"  sdr emails error: {e}")
         return 0
 
 
@@ -528,10 +543,32 @@ def main():
                                "stage": stage, "created": created, "channel": f"{icon} {label}",
                                "brain": is_brain_pl(pid)})
 
-    # Fecha de la reunión (discovery/demo) programada para cada deal del pipeline
-    mtg = deal_meeting_starts([d["id"] for d in open_deals])
+    # Deals PERDIDOS (closed-lost) de marketing → sección de perdidos inbound
+    lost_deals = []
+    try:
+        for dl in fetch_all("deals", [
+            {"propertyName": "hs_is_closed", "operator": "EQ", "value": "true"},
+            {"propertyName": "hs_is_closed_won", "operator": "EQ", "value": "false"},
+            {"propertyName": "createdate", "operator": "GTE", "value": funnel_iso},
+        ], ["dealname", "dealstage", "pipeline", "createdate",
+            "hs_analytics_source", "hs_analytics_source_data_1"]):
+            p = dl["properties"]
+            if not valid_deal(p.get("dealname", "")):
+                continue
+            src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
+            if not is_marketing(src, d1):
+                continue
+            icon, label = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
+            lost_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
+                               "stage": "lost", "created": (p.get("createdate") or "")[:10],
+                               "channel": f"{icon} {label}", "brain": is_brain_pl(p.get("pipeline", ""))})
+    except Exception as e:
+        print(f"  lost deals error: {e}")
+
+    # Fecha de la reunión (discovery/demo) programada para cada deal del pipeline (abiertos + perdidos)
+    mtg = deal_meeting_starts([d["id"] for d in open_deals] + [d["id"] for d in lost_deals])
     now_utc = es_now.astimezone(timezone.utc)
-    for od in open_deals:
+    for od in open_deals + lost_deals:
         starts = mtg.get(od["id"], [])
         upcoming = [s for s in starts if s >= now_utc]
         chosen = upcoming[0] if upcoming else (starts[-1] if starts else None)
@@ -585,6 +622,7 @@ def main():
         "gestionado": sql_disp["gestionado"],
         "opp": opp_cum,
         "calls_cum": count_sdr_calls(funnel_iso, end_iso),
+        "emails_cum": count_sdr_emails(funnel_iso, end_iso),
         "reuniones_cum": reunion_cum,
     }
 
@@ -728,7 +766,7 @@ def main():
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
         "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
         "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq,
-        "mkt_deals": open_deals, "mkt_total": len(open_deals),
+        "mkt_deals": open_deals, "mkt_total": len(open_deals), "lost_deals": lost_deals,
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
         "brain_count": brain_count, "ventas_count": ventas_count,
@@ -817,10 +855,10 @@ def render(d):
     free_now = cum["free"]
     flow_html += (
         '<div class="flow-freenote">'
-        f'<b>*</b> Los <b>contactos que no pasan a Lead</b> ({free_now} ahora mismo) se quedan como '
-        '<b>Freemium</b> —altas gratuitas por la app— en el «limbo» del embudo. '
-        'Cuando se retire el <b>registro gratuito de la web</b>, prácticamente todo el total de contactos '
-        'pasará directo a Lead → MQL → SQL.</div>')
+        f'* El porcentaje de contactos que no pasan a Lead ({free_now} ahora mismo) corresponde a los '
+        'Freemium —altas gratuitas por la app— que se quedan en el «limbo» del embudo. '
+        'Cuando se retire el registro gratuito de la web, dejarán de tratarse y generarse, y prácticamente '
+        'todo el total de contactos pasará directo a Lead → MQL → SQL.</div>')
 
     # Rama: estado / disposición de los SQL
     st = sd["total"] or 1
@@ -864,17 +902,25 @@ def render(d):
 
     # ── Contadores de las ramas del workflow de precualificación ──
     pq = d["preq"]
+    # Rama Agustín: evolución del flujo (llegan → contacto → reunión → oportunidad)
     preq_sales_stats = (
-        '<div class="pqs">'
-        f'<div class="pqs-item"><b>{pq["agustin"]}</b><span>SQL enviados a Agustín<br>(demo · tarea de contacto)</span></div>'
-        f'<div class="pqs-item"><b>{pq["reuniones_cum"]} · {pq["calls_cum"]}</b><span>reuniones agendadas ·<br>llamadas hechas (SDR)</span></div>'
-        f'<div class="pqs-item pqs-ok"><b>{pq["opp"]}</b><span>han pasado a<br>Oportunidad (empresas)</span></div>'
+        '<div class="pqflow">'
+        f'<div class="pqf-step"><b>{pq["agustin"]}</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div>'
+        '<div class="pqf-arrow">→</div>'
+        f'<div class="pqf-step"><b>📞 {pq["calls_cum"]}</b><span>llamadas hechas</span></div>'
+        f'<div class="pqf-step"><b>✉️ {pq["emails_cum"]}</b><span>emails enviados</span></div>'
+        '<div class="pqf-arrow">→</div>'
+        f'<div class="pqf-step"><b>📅 {pq["reuniones_cum"]}</b><span>reuniones agendadas</span></div>'
+        '<div class="pqf-arrow">→</div>'
+        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["opp"]}</b><span>oportunidades<br>(empresas)</span></div>'
         '</div>')
+    # Rama <3.000: número grande + explicación pequeña
     preq_free_stats = (
-        '<div class="pqs">'
-        f'<div class="pqs-item pqs-bad"><b>{pq["lt3000"]}</b><span>descalificados por<br>&lt;3.000 consultas/mes</span></div>'
-        '<div class="pqs-item"><span>📧 Reciben <b>email de agradecimiento</b> y entran en la lista de HubSpot '
-        '<b>«Descalificación de SQLs por &lt;3.000 consultas/mes»</b> para decidir siguiente paso.</span></div>'
+        '<div class="pqbig">'
+        f'<div class="pqbig-n">{pq["lt3000"]}</div>'
+        '<div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes. Reciben email de agradecimiento; '
+        '<b>ya no se derivan a Freemium</b>. Quedan identificados en la lista de HubSpot '
+        '<b>«Descalificación de SQLs · &lt;3.000 consultas/mes»</b> para decidir el siguiente paso.</div>'
         '</div>')
 
     # Resumen 24h · KPIs (% sobre el total de contactos, NO es un embudo)
@@ -950,14 +996,17 @@ def render(d):
         descarte_note = ('Catálogo de razones definidas: precio/presupuesto · volumen insuficiente · caso de uso/no target · '
                          'sin autoridad/no cualificado · timing · competidor · build vs buy · lead accidental.' + proceso)
 
-    # Pipeline
+    # Pipeline · etapas + perdidos (inbound). Orden dentro de cada etapa por CANAL.
     by_stage = {}
     for deal in d["mkt_deals"]:
         by_stage.setdefault(deal["stage"], []).append(deal)
     deal_rows = ""
-    for st_id, label, pill in STAGE_LABELS:
-        # Ordenadas por fecha de reunión, de más cercana a más lejana (sin fecha al final)
-        group = sorted(by_stage.get(st_id, []), key=lambda x: (x.get("mtg_sort", float("inf")), x["channel"]))
+    stage_defs = list(STAGE_LABELS) + [("lost", "Perdido (inbound)", "pill-lost")]
+    lost_group = d.get("lost_deals", [])
+    for st_id, label, pill in stage_defs:
+        group = lost_group if st_id == "lost" else by_stage.get(st_id, [])
+        # Ordenadas por canal (y, dentro del canal, por fecha de reunión)
+        group = sorted(group, key=lambda x: (x["channel"], x.get("mtg_sort", float("inf"))))
         if not group:
             continue
         deal_rows += f'<tr class="stage-divider"><td colspan="4">{esc(label)} · {len(group)} deals</td></tr>'
@@ -1106,8 +1155,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fbc.ok {{ background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.35); color:#a7f3d0; }}
 .fbc.bad {{ background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.35); color:#fecaca; }}
 .fs-star {{ color:#fff; font-weight:800; }}
-.flow-freenote {{ margin-top:6px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.18); border-radius:8px; padding:10px 13px; font-size:12px; color:#fff; line-height:1.5; }}
-.flow-freenote b {{ color:#fff; }}
+.flow-freenote {{ margin-top:6px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.18); border-radius:8px; padding:10px 13px; font-size:12px; color:#fff; line-height:1.5; font-weight:400; }}
 .fb-razbox {{ margin-top:14px; border:1px solid rgba(239,68,68,.28); background:rgba(239,68,68,.05); border-radius:10px; padding:13px 14px; }}
 .fb-raz-head {{ font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.4; }}
 .fbr-row {{ display:flex; align-items:center; gap:10px; margin-bottom:7px; }}
@@ -1174,6 +1222,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pill-demo {{ background:rgba(16,185,129,.15); color:var(--green); }}
 .pill-discov {{ background:rgba(255,107,91,.15); color:#F5D5C8; }}
 .pill-best {{ background:rgba(245,158,11,.15); color:var(--amber); }}
+.pill-lost {{ background:rgba(239,68,68,.15); color:#fca5a5; }}
 .dt-next {{ font-weight:700; color:var(--guru-300); white-space:nowrap; }}
 .dt-past {{ color:var(--muted); white-space:nowrap; }}
 .dt-none {{ color:var(--muted); }}
@@ -1220,6 +1269,17 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pqs-item.pqs-ok b {{ color:#6ee7b7; }}
 .pqs-item.pqs-bad {{ border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.08); }}
 .pqs-item.pqs-bad b {{ color:#fca5a5; }}
+.pqflow {{ display:flex; align-items:stretch; gap:6px; margin-top:12px; flex-wrap:wrap; }}
+.pqf-step {{ flex:1; min-width:96px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:9px 10px; text-align:center; }}
+.pqf-step b {{ display:block; font-size:18px; font-weight:800; color:var(--text); line-height:1.1; }}
+.pqf-step span {{ font-size:10px; color:var(--muted); line-height:1.3; }}
+.pqf-step.pqf-ok {{ border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.09); }}
+.pqf-step.pqf-ok b {{ color:#6ee7b7; }}
+.pqf-arrow {{ align-self:center; color:var(--muted); font-size:15px; }}
+.pqbig {{ display:flex; align-items:center; gap:14px; margin-top:12px; }}
+.pqbig-n {{ font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }}
+.pqbig-t {{ font-size:11px; color:var(--text-2); line-height:1.45; }}
+@media(max-width:640px){{ .pqflow {{ flex-direction:column; }} .pqf-arrow {{ transform:rotate(90deg); }} }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -1287,43 +1347,17 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="section-label">Flujo de precualificación de nuevos contactos</div>
-  <div class="preq">
-    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> → se evalúa su <strong>volumen de consultas/mes</strong></div>
-    <div class="preq-arrow">▼ ▼ ▼</div>
-    <div class="preq-branches">
-      <div class="preq-card preq-sales">
-        <div class="preq-tag">A ventas · tarea a Agustín</div>
-        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
-        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
-        {preq_sales_stats}
-      </div>
-      <div class="preq-card preq-free">
-        <div class="preq-tag">Automatizado · descarte</div>
-        <div class="preq-h">➖ −3.000 consultas/mes</div>
-        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento. Ya no se deriva a Freemium.</div>
-        {preq_free_stats}
-      </div>
-    </div>
-  </div>
-
   <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
     <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
       <span class="badge badge-green">📞 Seguimiento comercial</span></div>
     <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
     <tbody>{call_rows}</tbody></table>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas».</div></div>
-  </div>
-
-  <div class="section-label">Razones de descarte / descualificación de SQL · acumulado desde el 1 de enero</div>
-  <div class="card">
-    <div class="drz">{descarte_html}</div>
-    <div class="alert alert-muted"><span>💬</span><div>{descarte_note}</div></div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas»: si se ha contactado, está pendiente o se ha descartado (con su razón).</div></div>
   </div>
 
   <div class="evo-banner">
-    <div class="evo-l"><span class="evo-ico">📈</span><div><div class="evo-t">Evolutivo anual · datos acumulados</div><div class="evo-s">Todo lo que sigue suma el histórico desde el 1 de enero de 2026</div></div></div>
+    <div class="evo-l"><span class="evo-ico">📈</span><div><div class="evo-t">A partir de aquí · Evolutivo anual acumulado</div><div class="evo-s">Fin de las últimas 24h. Todo lo que sigue suma el histórico desde el 1 de enero de 2026</div></div></div>
     <span class="evo-badge">ACUMULADO · {chart_label}</span>
   </div>
 
@@ -1337,6 +1371,32 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
     <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>{excl_tests}</strong> test/prueba · <strong>{excl_internal}</strong> internos @gurusup (empleados) · <strong>{excl_imports}</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
     <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
+
+  <div class="section-label">Razones de descarte / descualificación de SQL · acumulado desde el 1 de enero</div>
+  <div class="card">
+    <div class="drz">{descarte_html}</div>
+    <div class="alert alert-muted"><span>💬</span><div>{descarte_note}</div></div>
+  </div>
+
+  <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
+  <div class="preq">
+    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
+    <div class="preq-arrow">▼ ▼ ▼</div>
+    <div class="preq-branches">
+      <div class="preq-card preq-sales">
+        <div class="preq-tag">A ventas · tarea a Agustín</div>
+        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
+        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+        {preq_sales_stats}
+      </div>
+      <div class="preq-card preq-free">
+        <div class="preq-tag">Automatizado · descarte</div>
+        <div class="preq-h">➖ −3.000 consultas/mes</div>
+        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento.</div>
+        {preq_free_stats}
+      </div>
+    </div>
+  </div>
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
   <div class="charts-2">
@@ -1355,10 +1415,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       💼 <strong style="color:var(--guru-300)">{ventas_count}</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
-    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa</th><th>📅 Reunión</th></tr></thead>
+    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa / estado</th><th>📅 Última reunión</th></tr></thead>
     <tbody>{deal_rows}</tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Reparto por canal: {chan_dist_txt}. Dentro de cada etapa se ordenan por <strong>fecha de reunión</strong> (discovery/demo), de la más próxima a la más lejana; en <span class="dt-next">salmón</span> las reuniones futuras.</div></div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Incluye las etapas del pipeline (Discovery → Demo → Best Case) y los <span class="dt-past">perdidos inbound</span>. Cada fila muestra empresa, canal y etapa/estado, <strong>ordenadas dentro de cada etapa por canal</strong>. La fecha es la <strong>última reunión</strong> (en <span class="dt-next">salmón</span> si es futura). Reparto por canal: {chan_dist_txt}.</div></div>
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
