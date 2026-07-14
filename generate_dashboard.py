@@ -723,8 +723,13 @@ def main():
     def add_reason(raw):
         if not raw:
             return
-        label = UNIFY_DESCARTE.get(raw, raw)
-        drz[label] = drz.get(label, 0) + 1
+        # La propiedad puede ser multi-opción (valores separados por «;»)
+        for part in str(raw).split(";"):
+            part = part.strip()
+            if not part:
+                continue
+            label = UNIFY_DESCARTE.get(part, part)
+            drz[label] = drz.get(label, 0) + 1
     # Acumulado desde el 1 de enero (chart_iso): contactos/deals creados en el período con razón registrada.
     try:
         for c in fetch_all("contacts",
