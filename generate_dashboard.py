@@ -901,6 +901,19 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .main {{ max-width:1160px; margin:0 auto; padding:24px 20px 60px; }}
 .section-label {{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:32px 0 14px; }}
 .section-label:first-child {{ margin-top:0; }}
+.glossary {{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:4px 18px; margin-bottom:26px; }}
+.glossary summary {{ cursor:pointer; list-style:none; padding:12px 0; font-size:14px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }}
+.glossary summary::-webkit-details-marker {{ display:none; }}
+.glossary summary::after {{ content:"▸"; margin-left:auto; color:var(--muted); transition:transform .2s; }}
+.glossary[open] summary::after {{ transform:rotate(90deg); }}
+.glossary .gl-ico {{ font-size:16px; }}
+.glossary .gl-hint {{ font-weight:400; font-size:11px; color:var(--muted); }}
+.gl-grid {{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:6px 0 16px; }}
+@media(max-width:760px){{ .gl-grid {{ grid-template-columns:1fr; }} }}
+.gl-card {{ background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:9px; padding:11px 13px; }}
+.gl-card b {{ display:block; font-size:13px; color:var(--guru-300); margin-bottom:3px; }}
+.gl-card .gl-en {{ font-weight:400; font-size:11px; color:var(--muted); }}
+.gl-card span {{ font-size:12px; color:var(--text-2); line-height:1.45; }}
 
 /* Banda etapas de ciclo de vida */
 .lc-band {{ display:flex; flex-wrap:wrap; align-items:center; gap:20px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 22px; }}
@@ -933,6 +946,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 /* Dos embudos */
 .funnels-2 {{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }}
 @media(max-width:760px){{ .funnels-2 {{ grid-template-columns:1fr; }} }}
+.funnels-1 {{ display:block; }}
+.funnels-1 .fn-box {{ max-width:720px; margin:0 auto; }}
 .fn-box {{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 18px 20px; }}
 .fn-title {{ font-size:13px; font-weight:800; margin-bottom:4px; }}
 .fn-note {{ font-size:11px; color:var(--muted); margin-bottom:14px; }}
@@ -1081,6 +1096,22 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
 <div class="main">
 
+  <details class="glossary">
+    <summary><span class="gl-ico">📖</span> Minidiccionario · qué significa cada término <span class="gl-hint">(pulsa para desplegar)</span></summary>
+    <div class="gl-grid">
+      <div class="gl-card"><b>Contacto</b><span>Cualquier registro que entra en el CRM en el período. Excluye tests, empleados @gurusup e importaciones (salvo freemium).</span></div>
+      <div class="gl-card"><b>Lead</b><span>Contacto con interés real que avanza en el ciclo de vida (etapa «lead» o superior). Es una métrica <em>acumulativa</em>: incluye a los que ya pasaron a etapas posteriores.</span></div>
+      <div class="gl-card"><b>MQL <span class="gl-en">· Marketing Qualified Lead</span></b><span>Lead cualificado por marketing: encaja con el perfil objetivo, pero todavía no está listo para que ventas lo trabaje.</span></div>
+      <div class="gl-card"><b>SQL <span class="gl-en">· Sales Qualified Lead</span></b><span>Lead validado como oportunidad real de negocio: pide demo y cualifica (p. ej. por volumen de consultas/mes). Se mide como <strong>% sobre leads</strong>.</span></div>
+      <div class="gl-card"><b>Oportunidad</b><span>Empresa (no contacto) con un deal activo en el pipeline de ventas. Se cuenta como <strong>empresa única</strong>.</span></div>
+      <div class="gl-card"><b>Cliente</b><span>Empresa que ha cerrado como cliente (customer). También se cuenta como empresa única.</span></div>
+      <div class="gl-card"><b>Reunión agendada (al período)</b><span>Demos/discovery agendadas en la ventana de tiempo, más las llamadas de los SDR (Agustín/Juanma) del período.</span></div>
+      <div class="gl-card"><b>Freemium</b><span>Alta gratuita por la app (autoservicio). No forma parte del embudo comercial; por eso no cuenta como lead ni oportunidad.</span></div>
+      <div class="gl-card"><b>Descarte / descualificación</b><span>SQL que no avanza. Se registra siempre el <strong>motivo</strong> (precio, volumen, timing, etc.) para analizar patrones.</span></div>
+      <div class="gl-card"><b>Pipeline</b><span>Conjunto de oportunidades (empresas) abiertas por etapa: Discovery → Demo/Reunión → Best Case → Cliente.</span></div>
+    </div>
+  </details>
+
   <div class="section-label">Contactos generados · últimas 24h</div>
   <div class="day-kpis">{day_funnel}</div>
   <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · <strong>Reuniones y llamadas</strong> = reuniones agendadas (demos) + llamadas de los SDR (Agustín/Juanma): <strong>{calls_day}</strong> llamadas hoy · Reuniones hoy: {meet_names}</div>
@@ -1126,22 +1157,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <span class="evo-badge">ACUMULADO · {chart_label}</span>
   </div>
 
-  <div class="section-label">Embudos de conversión · acumulado {fun_label}</div>
-  <div class="funnels-2">
+  <div class="section-label">Embudo de conversión comercial · acumulado {fun_label}</div>
+  <div class="funnels-1">
     <div class="fn-box">
       <div class="fn-title">🛠️ Proceso comercial (ventas)</div>
       <div class="fn-note">De contacto a cliente · leads, SQL y conversiones</div>
       <div class="pyramid">{sales_pyr}</div>
     </div>
-    <div class="fn-box">
-      <div class="fn-title" style="color:var(--teal)">⚡ Activación Freemium</div>
-      <div class="fn-note">De contacto a freemium y su activación comercial</div>
-      <div class="pyramid">{free_pyr}</div>
-      <div class="fn-highlight">🚧 El proceso de activación de cuentas freemium está en <strong>fase de validación y definición</strong>: estamos trabajando en cómo activarlas y en la mejor forma de comunicación con ellas.</div>
-      <div class="fn-highlight" style="background:rgba(255,138,101,.10);border-color:rgba(255,138,101,.35)">⚠️ <strong>Vamos a retirar la opción de registro gratuito de la web</strong>, por lo que este canal de entrada de freemium dejará de alimentarse.</div>
-    </div>
   </div>
-  <div class="caption">ℹ️ Cómo leer los embudos: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).
+  <div class="caption">ℹ️ Cómo leer el embudo: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).
     <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
     <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>{excl_tests}</strong> test/prueba · <strong>{excl_internal}</strong> internos @gurusup (empleados) · <strong>{excl_imports}</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
     <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
