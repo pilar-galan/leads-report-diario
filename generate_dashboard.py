@@ -573,6 +573,21 @@ def main():
     # Contactos que ya avanzaron a Oportunidad/Cliente (rank>=4)
     sql_disp["avanzados"] = sum(1 for c in hist_fun if rank(c["lc"]) >= 4)
 
+    # ── Ramas del workflow de precualificación (por volumen de consultas) ──
+    n_lt3000  = sum(1 for c in hist_fun if c["lc"] == "1394675095")   # <3000 → descartar + email
+    n_gt3000  = sum(1 for c in hist_fun if c["lc"] == "1394675094")   # >3000 → Agustín
+    n_nosabe  = sum(1 for c in hist_fun if c["lc"] == "1394675096")   # no sé → Agustín
+    n_sqldemo = sum(1 for c in hist_fun if c["lc"] == "salesqualifiedlead")
+    preq = {
+        "agustin": n_gt3000 + n_nosabe + n_sqldemo,   # todo lo que va a ventas (demo)
+        "gt3000": n_gt3000, "nosabe": n_nosabe, "sqldemo": n_sqldemo,
+        "lt3000": n_lt3000,
+        "gestionado": sql_disp["gestionado"],
+        "opp": opp_cum,
+        "calls_cum": count_sdr_calls(funnel_iso, end_iso),
+        "reuniones_cum": reunion_cum,
+    }
+
     # Oportunidades y clientes = EMPRESAS (ciclo de vida); reunión = deals en demo+
     agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
     # Reuniones agendadas (24h) = demos agendadas + llamadas de los SDR (Agustín/Juanma)
@@ -712,7 +727,7 @@ def main():
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
         "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
-        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp,
+        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq,
         "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
@@ -792,16 +807,41 @@ def render(d):
     for i, (name, val, conv, why, base, color) in enumerate(flow_stages):
         if i > 0:
             flow_html += f'<div class="flow-arrow"><span class="fa-pct">{conv}</span><span class="fa-base">{base}</span></div>'
+        star = ' <span class="fs-star">*</span>' if name == "Leads" else ""
         flow_html += (f'<div class="fstage" style="border-top-color:{color}">'
                       f'<div class="fs-count" style="color:{color}">{val}</div>'
-                      f'<div class="fs-name">{esc(name)}</div>'
+                      f'<div class="fs-name">{esc(name)}{star}</div>'
                       f'<div class="fs-why">{esc(why)}</div></div>')
     flow_html += '</div>'
+    # Nota destacada: los contactos que no pasan a Lead son freemium
+    free_now = cum["free"]
+    flow_html += (
+        '<div class="flow-freenote">'
+        f'<b>*</b> Los <b>contactos que no pasan a Lead</b> ({free_now} ahora mismo) se quedan como '
+        '<b>Freemium</b> —altas gratuitas por la app— en el «limbo» del embudo. '
+        'Cuando se retire el <b>registro gratuito de la web</b>, prácticamente todo el total de contactos '
+        'pasará directo a Lead → MQL → SQL.</div>')
 
     # Rama: estado / disposición de los SQL
     st = sd["total"] or 1
     resueltos = sd["gestionado"] + sd["descartado"] or 1
-    top_raz = " · ".join(f'{esc(r)} ({n})' for r, n in d["descarte"][:3]) or "sin razón registrada"
+    # Bloque visual de razones de descarte (volumen + % sobre el total de descartes)
+    drz_tot = sum(n for _, n in d["descarte"])
+    if d["descarte"]:
+        drz_mx = d["descarte"][0][1] or 1
+        raz_rows = ""
+        for r, n in d["descarte"]:
+            w = max(8, round(n / drz_mx * 100))
+            raz_rows += (f'<div class="fbr-row"><div class="fbr-l">{esc(r)}</div>'
+                         f'<div class="fbr-barwrap"><div class="fbr-bar" style="width:{w}%"></div></div>'
+                         f'<div class="fbr-n">{n} <span class="fbr-p">{pct(n, drz_tot)}</span></div></div>')
+        raz_block = (
+            f'<div class="fb-raz-head">🔴 <b>{sd["descartado"]} SQL descartados</b> · '
+            f'{pct(sd["descartado"], st)} del total de SQL · razones registradas ({drz_tot}):</div>'
+            f'<div class="fbr">{raz_rows}</div>'
+            '<div class="fbr-foot">Volumen y % de cada razón sobre el total de descartes con motivo registrado. Detalle acumulado más abajo.</div>')
+    else:
+        raz_block = '<div class="fb-raz-head">Sin razones de descarte registradas todavía.</div>'
     flow_branch = (
         '<div class="flow-branch">'
         f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
@@ -818,9 +858,24 @@ def render(d):
         f'<div class="fbc ok">✅ <b>{pct(cum["opp"], cum["sql"])}</b> de los SQL pasan a <b>Oportunidad</b></div>'
         f'<div class="fbc bad">❌ <b>{pct(sd["descartado"], resueltos)}</b> de los SQL resueltos se <b>descartan</b></div>'
         '</div>'
-        f'<div class="fb-raz">🔍 <b>Principales razones de descarte:</b> {top_raz}. <span class="fb-raz-more">(detalle completo más abajo)</span></div>'
+        f'<div class="fb-razbox">{raz_block}</div>'
         '</div>')
     flow_full = flow_html + flow_branch
+
+    # ── Contadores de las ramas del workflow de precualificación ──
+    pq = d["preq"]
+    preq_sales_stats = (
+        '<div class="pqs">'
+        f'<div class="pqs-item"><b>{pq["agustin"]}</b><span>SQL enviados a Agustín<br>(demo · tarea de contacto)</span></div>'
+        f'<div class="pqs-item"><b>{pq["reuniones_cum"]} · {pq["calls_cum"]}</b><span>reuniones agendadas ·<br>llamadas hechas (SDR)</span></div>'
+        f'<div class="pqs-item pqs-ok"><b>{pq["opp"]}</b><span>han pasado a<br>Oportunidad (empresas)</span></div>'
+        '</div>')
+    preq_free_stats = (
+        '<div class="pqs">'
+        f'<div class="pqs-item pqs-bad"><b>{pq["lt3000"]}</b><span>descalificados por<br>&lt;3.000 consultas/mes</span></div>'
+        '<div class="pqs-item"><span>📧 Reciben <b>email de agradecimiento</b> y entran en la lista de HubSpot '
+        '<b>«Descalificación de SQLs por &lt;3.000 consultas/mes»</b> para decidir siguiente paso.</span></div>'
+        '</div>')
 
     # Resumen 24h · KPIs (% sobre el total de contactos, NO es un embudo)
     dtot = dd["total"]
@@ -922,6 +977,7 @@ def render(d):
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
         sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full,
+        preq_sales_stats=preq_sales_stats, preq_free_stats=preq_free_stats,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
@@ -1049,8 +1105,19 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fbc {{ flex:1; min-width:200px; border-radius:9px; padding:12px 14px; font-size:13px; }}
 .fbc.ok {{ background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.35); color:#a7f3d0; }}
 .fbc.bad {{ background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.35); color:#fecaca; }}
-.fb-raz {{ margin-top:12px; font-size:12px; color:var(--text-2); line-height:1.5; }}
-.fb-raz-more {{ color:var(--muted); }}
+.fs-star {{ color:#fff; font-weight:800; }}
+.flow-freenote {{ margin-top:6px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.18); border-radius:8px; padding:10px 13px; font-size:12px; color:#fff; line-height:1.5; }}
+.flow-freenote b {{ color:#fff; }}
+.fb-razbox {{ margin-top:14px; border:1px solid rgba(239,68,68,.28); background:rgba(239,68,68,.05); border-radius:10px; padding:13px 14px; }}
+.fb-raz-head {{ font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.4; }}
+.fbr-row {{ display:flex; align-items:center; gap:10px; margin-bottom:7px; }}
+.fbr-l {{ flex:0 0 40%; font-size:12px; color:var(--text-2); line-height:1.3; }}
+.fbr-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:12px; overflow:hidden; }}
+.fbr-bar {{ height:12px; border-radius:5px; background:linear-gradient(90deg,#B23320,#FF8B7D); }}
+.fbr-n {{ flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }}
+.fbr-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
+.fbr-foot {{ font-size:10px; color:var(--muted); margin-top:8px; line-height:1.4; }}
+@media(max-width:640px){{ .fbr-l {{ flex-basis:48%; }} }}
 
 /* Gráficos */
 .charts-2 {{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }}
@@ -1145,6 +1212,14 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .preq-tag {{ display:inline-block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:2px 8px; border-radius:20px; margin-bottom:8px; }}
 .preq-sales .preq-tag {{ background:rgba(255,107,91,.2); color:var(--guru-300); }}
 .preq-free .preq-tag {{ background:rgba(34,211,238,.18); color:var(--teal); }}
+.pqs {{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }}
+.pqs-item {{ flex:1; min-width:120px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:9px 11px; }}
+.pqs-item b {{ display:block; font-size:20px; font-weight:800; color:var(--text); line-height:1.1; }}
+.pqs-item span {{ font-size:10px; color:var(--muted); line-height:1.35; }}
+.pqs-item.pqs-ok {{ border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.08); }}
+.pqs-item.pqs-ok b {{ color:#6ee7b7; }}
+.pqs-item.pqs-bad {{ border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.08); }}
+.pqs-item.pqs-bad b {{ color:#fca5a5; }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -1191,16 +1266,17 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <details class="glossary">
     <summary><span class="gl-ico">📖</span> Minidiccionario · qué significa cada término <span class="gl-hint">(pulsa para desplegar)</span></summary>
     <div class="gl-grid">
-      <div class="gl-card"><b>Contacto</b><span>Cualquier registro que entra en el CRM en el período. Excluye tests, empleados @gurusup e importaciones (salvo freemium).</span></div>
-      <div class="gl-card"><b>Lead</b><span>Contacto con interés real que avanza en el ciclo de vida (etapa «lead» o superior). Es una métrica <em>acumulativa</em>: incluye a los que ya pasaron a etapas posteriores.</span></div>
-      <div class="gl-card"><b>MQL <span class="gl-en">· Marketing Qualified Lead</span></b><span>Lead cualificado por marketing: encaja con el perfil objetivo, pero todavía no está listo para que ventas lo trabaje.</span></div>
-      <div class="gl-card"><b>SQL <span class="gl-en">· Sales Qualified Lead</span></b><span>Lead validado como oportunidad real de negocio: pide demo y cualifica (p. ej. por volumen de consultas/mes). Se mide como <strong>% sobre leads</strong>.</span></div>
-      <div class="gl-card"><b>Oportunidad</b><span>Empresa (no contacto) con un deal activo en el pipeline de ventas. Se cuenta como <strong>empresa única</strong>.</span></div>
+      <div class="gl-card"><b>Contacto</b><span>Cualquier registro (un email) que entra en el CRM por alguna acción. Excluye tests, empleados @gurusup e importaciones (salvo freemium).</span></div>
+      <div class="gl-card"><b>Lead</b><span>Contacto que ha entrado en el CRM pero <strong>aún no está cualificado</strong> ni tiene un interés identificado. Es, básicamente, un email que ha entrado por alguna acción.</span></div>
+      <div class="gl-card"><b>MQL <span class="gl-en">· Marketing Qualified Lead</span></b><span>Contacto que en algún momento ha <strong>consumido contenido de marketing</strong> (ebook, caso de éxito, webinar o cualquier material informativo sobre el producto o los clientes). Ha mostrado un interés más cualificado.</span></div>
+      <div class="gl-card"><b>SQL <span class="gl-en">· Sales Qualified Lead</span></b><span>Contacto con un <strong>problema / necesidad (pain) identificado</strong> que ve a GuruSup como posible solución y está valorando herramientas de este tipo. Solicita de forma <strong>proactiva</strong> una reunión, llamada o demo con ventas. Cada SQL lleva su <strong>razón de cualificación o descarte</strong> para aprender del proceso.</span></div>
+      <div class="gl-card"><b>Oportunidad</b><span>SQL <strong>precualificado</strong> del que se genera un negocio (deal) para agendar la <strong>primera reunión (Discovery)</strong> en el pipeline y validar si encajan necesidad, expectativas y propuesta antes de la demo. Se cuenta como <strong>empresa única</strong>.</span></div>
       <div class="gl-card"><b>Cliente</b><span>Empresa que ha cerrado como cliente (customer). También se cuenta como empresa única.</span></div>
+      <div class="gl-card"><b>Pipeline de ventas</b><span>Se abre al generarse una oportunidad. Tiene <strong>distintas etapas</strong> (Discovery → Demo/Reunión → Best Case → Cliente) e identifica el punto en el que está cada negocio en su camino a cliente.</span></div>
+      <div class="gl-card"><b>Funnel / embudo</b><span>El <strong>journey</strong> o viaje del contacto desde que entra hasta que convierte, pasando por todas las etapas (Contacto → Lead → MQL → SQL → Oportunidad → Cliente).</span></div>
       <div class="gl-card"><b>Reunión agendada (al período)</b><span>Demos/discovery agendadas en la ventana de tiempo, más las llamadas de los SDR (Agustín/Juanma) del período.</span></div>
+      <div class="gl-card"><b>Descarte / descualificación</b><span>SQL que no avanza. Se registra el <strong>motivo</strong> (precio, volumen, timing, etc.) para analizar patrones y aprender del proceso.</span></div>
       <div class="gl-card"><b>Freemium</b><span>Alta gratuita por la app (autoservicio). No forma parte del embudo comercial; por eso no cuenta como lead ni oportunidad.</span></div>
-      <div class="gl-card"><b>Descarte / descualificación</b><span>SQL que no avanza. Se registra siempre el <strong>motivo</strong> (precio, volumen, timing, etc.) para analizar patrones.</span></div>
-      <div class="gl-card"><b>Pipeline</b><span>Conjunto de oportunidades (empresas) abiertas por etapa: Discovery → Demo/Reunión → Best Case → Cliente.</span></div>
     </div>
   </details>
 
@@ -1217,14 +1293,16 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="preq-arrow">▼ ▼ ▼</div>
     <div class="preq-branches">
       <div class="preq-card preq-sales">
-        <div class="preq-tag">A ventas</div>
+        <div class="preq-tag">A ventas · tarea a Agustín</div>
         <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
-        <div class="preq-b">Pasa <strong>directo a Agustín</strong> (responsable de seguimiento inbound) con la <strong>preferencia de canal de contacto</strong>. Contacto por llamada o email; si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+        {preq_sales_stats}
       </div>
       <div class="preq-card preq-free">
-        <div class="preq-tag">Automatizado</div>
+        <div class="preq-tag">Automatizado · descarte</div>
         <div class="preq-h">➖ −3.000 consultas/mes</div>
-        <div class="preq-b"><strong>Email automatizado</strong> de agradecimiento y se <strong>descarta</strong>. Ya no se deriva a Freemium.</div>
+        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento. Ya no se deriva a Freemium.</div>
+        {preq_free_stats}
       </div>
     </div>
   </div>
