@@ -583,14 +583,19 @@ def main():
             return
         label = UNIFY_DESCARTE.get(raw, raw)
         drz[label] = drz.get(label, 0) + 1
+    # Acumulado desde el 1 de enero (chart_iso): contactos/deals creados en el período con razón registrada.
     try:
-        for c in fetch_all("contacts", [{"propertyName": "razon_descarte_sql", "operator": "HAS_PROPERTY"}],
+        for c in fetch_all("contacts",
+                           [{"propertyName": "razon_descarte_sql", "operator": "HAS_PROPERTY"},
+                            {"propertyName": "createdate", "operator": "GTE", "value": chart_iso}],
                            ["razon_descarte_sql"]):
             add_reason(c["properties"].get("razon_descarte_sql"))
     except Exception as e:
         print(f"  razon_descarte_sql error: {e}")
     try:
-        for dl in fetch_all("deals", [{"propertyName": "motivo_de_descalificacion", "operator": "HAS_PROPERTY"}],
+        for dl in fetch_all("deals",
+                            [{"propertyName": "motivo_de_descalificacion", "operator": "HAS_PROPERTY"},
+                             {"propertyName": "createdate", "operator": "GTE", "value": chart_iso}],
                             ["motivo_de_descalificacion"]):
             add_reason(dl["properties"].get("motivo_de_descalificacion"))
     except Exception as e:
@@ -733,13 +738,23 @@ def render(d):
                'Acumulativo desde el 1 de enero.')
     if d["descarte"]:
         mx = d["descarte"][0][1]; tot = sum(n for _, n in d["descarte"])
-        descarte_html = ""
-        for reason, n in d["descarte"]:
+        top_reason, top_n = d["descarte"][0]
+        # Cabecera con los tres datos clave de un vistazo
+        descarte_html = (
+            '<div class="drz-head">'
+            f'<div class="drz-stat"><b>{tot}</b><span>descartes totales<br>desde el 1 de enero</span></div>'
+            f'<div class="drz-stat"><b>{len(d["descarte"])}</b><span>razones distintas<br>registradas</span></div>'
+            f'<div class="drz-stat drz-stat-top"><b>{pct(top_n, tot)}</b><span>razón principal<br>{esc(top_reason)}</span></div>'
+            '</div>')
+        for i, (reason, n) in enumerate(d["descarte"]):
             w = max(6, round(n / mx * 100))
-            descarte_html += (f'<div class="drz-row"><div class="drz-l">{esc(reason)}</div>'
-                              f'<div class="drz-barwrap"><div class="drz-bar" style="width:{w}%"></div></div>'
-                              f'<div class="drz-n">{n} <span style="font-size:11px;color:var(--muted);font-weight:600">{pct(n, tot)}</span></div></div>')
-        descarte_note = (f'<strong>{tot}</strong> descartes con razón registrada (acumulado) · % sobre el total de descartes, de mayor a menor. '
+            top = " drz-bar-top" if i == 0 else ""
+            descarte_html += (f'<div class="drz-row"><div class="drz-rank">{i+1}</div>'
+                              f'<div class="drz-l">{esc(reason)}</div>'
+                              f'<div class="drz-barwrap"><div class="drz-bar{top}" style="width:{w}%"></div></div>'
+                              f'<div class="drz-n">{n} <span class="drz-pct">{pct(n, tot)}</span></div></div>')
+        descarte_note = (f'Volumen total: <strong>{tot}</strong> descartes con razón registrada <strong>desde el 1 de enero</strong> · '
+                         'ordenados de mayor a menor peso, con su % sobre el total. '
                          'Unifica «Razón descarte SQL» (contacto) y «Motivo de descalificación» (deal).' + proceso)
     else:
         descarte_html = ('<div style="color:var(--muted);font-size:13px;padding:6px 0">Aún no hay descartes '
@@ -912,12 +927,21 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }}
 .alert-muted {{ background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }}
 .caption {{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }}
-.drz-row {{ display:flex; align-items:center; gap:12px; margin-bottom:9px; }}
-.drz-l {{ flex:0 0 42%; font-size:12px; color:var(--text-2); line-height:1.35; }}
-.drz-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:12px; overflow:hidden; }}
-.drz-bar {{ height:12px; border-radius:5px; background:linear-gradient(90deg,var(--guru-500),var(--guru-400)); }}
-.drz-n {{ flex:0 0 62px; text-align:right; font-size:14px; font-weight:800; color:var(--guru-300); }}
-@media(max-width:600px){{ .drz-l {{ flex-basis:52%; font-size:11px; }} }}
+.drz-head {{ display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }}
+.drz-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
+.drz-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
+.drz-stat span {{ font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }}
+.drz-stat-top {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); }}
+.drz-stat-top b {{ color:var(--guru-300); }}
+.drz-row {{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }}
+.drz-rank {{ flex:0 0 22px; height:22px; line-height:22px; text-align:center; font-size:11px; font-weight:800; color:var(--muted); background:rgba(255,255,255,.05); border-radius:6px; }}
+.drz-l {{ flex:0 0 38%; font-size:12px; color:var(--text-2); line-height:1.35; }}
+.drz-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:14px; overflow:hidden; }}
+.drz-bar {{ height:14px; border-radius:5px; background:linear-gradient(90deg,var(--guru-500),var(--guru-400)); }}
+.drz-bar-top {{ background:linear-gradient(90deg,#FF6B5B,#FF8A65); box-shadow:0 0 10px rgba(255,107,91,.35); }}
+.drz-n {{ flex:0 0 74px; text-align:right; font-size:14px; font-weight:800; color:var(--guru-300); }}
+.drz-pct {{ font-size:11px; color:var(--muted); font-weight:600; }}
+@media(max-width:600px){{ .drz-l {{ flex-basis:46%; font-size:11px; }} .drz-stat b {{ font-size:22px; }} }}
 /* Flujo de precualificación */
 .preq {{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }}
 .preq-top {{ text-align:center; font-size:15px; font-weight:700; color:var(--text); background:rgba(255,107,91,.12); border:1px solid rgba(255,107,91,.3); border-radius:10px; padding:12px; }}
@@ -1011,7 +1035,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas».</div></div>
   </div>
 
-  <div class="section-label">Razones de descarte / descualificación de SQL</div>
+  <div class="section-label">Razones de descarte / descualificación de SQL · acumulado desde el 1 de enero</div>
   <div class="card">
     <div class="drz">{descarte_html}</div>
     <div class="alert alert-muted"><span>💬</span><div>{descarte_note}</div></div>
