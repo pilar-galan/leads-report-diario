@@ -175,6 +175,55 @@ def is_marketing(src, d1):
     return src in MARKETING_SOURCES or (src == "OFFLINE" and (d1 or "") == "CONVERSATIONS")
 
 
+# Fuentes que consideramos inbound web «puro» para el pipeline Brain (orgánico / formulario web / campañas)
+BRAIN_INBOUND_SOURCES = {"ORGANIC_SEARCH", "PAID_SEARCH", "PAID_SOCIAL", "SOCIAL_MEDIA", "OTHER_CAMPAIGNS"}
+
+def is_inbound_web(src):
+    return src in BRAIN_INBOUND_SOURCES
+
+
+# Buckets de origen del lead (según formulario / evento de conversión de HubSpot)
+ORIGIN_ORDER = [
+    "Sin información", "Ebook / descargable", "Blog / artículo", "Herramienta / calculadora",
+    "Newsletter", "Webinar", "Formulario de demo", "Lead Ads (paid)",
+    "GuruSup Brain", "Partners", "Otro formulario",
+]
+
+def classify_origin(conv, webinar=""):
+    """Clasifica el origen de un contacto según su evento de conversión / formulario."""
+    if webinar:
+        return "Webinar"
+    if not conv:
+        return "Sin información"
+    low = conv.lower()
+    form = low.split(":")[-1].strip()   # el formulario es el último segmento «página: formulario»
+    if "webinar" in low:
+        return "Webinar"
+    if "ebook" in form:
+        return "Ebook / descargable"
+    if "newsletter" in form:
+        return "Newsletter"
+    if any(k in form for k in ("calculator", "calculadora", "generator", "generador", "roi",
+                               "template", "plantilla", "herramienta", "tool", "gerador", "modelos")):
+        return "Herramienta / calculadora"
+    if any(k in form for k in ("lead ads", "lead generation", "facebook lead", "linkedin lead",
+                               "form_cg", "formulario base", "formulario campaña", "3000consultas")):
+        return "Lead Ads (paid)"
+    if "brain" in low:
+        return "GuruSup Brain"
+    if any(k in form for k in ("partner", "socios", "afiliados", "affiliados", "partners")):
+        return "Partners"
+    if any(k in form for k in ("demo", "reserva", "nuevo formulario contacto", "see gurusup",
+                               "ve gurusup", "vea gurusup", "demostrac", "in action", "acción",
+                               "book your demo", "pre cualific")):
+        return "Formulario de demo"
+    if "productos blog" in form or "blog" in form:
+        return "Blog / artículo"
+    if form.startswith(".") or any(k in form for k in ("flex", "space-y", ".gap", ".p-6", ".mt-6", ".max-w")):
+        return "Blog / artículo"
+    return "Otro formulario"
+
+
 def is_import(src, d1):
     # INTEGRATION = altas de la app (freemium); NO se excluyen, se reclasifican a freemium
     return src == "OFFLINE" and (d1 or "") in ("CRM_UI", "IMPORT")
@@ -459,7 +508,8 @@ def main():
         {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
     ], ["email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
-        "hs_lead_status", "createdate"])
+        "hs_lead_status", "createdate", "recent_conversion_event_name",
+        "first_conversion_event_name", "fuente_webinar"])
 
     hist = []
     imports = tests = internal = 0
@@ -485,6 +535,8 @@ def main():
             "email": email, "firstname": p.get("firstname") or "", "company": p.get("company") or "",
             "created": (p.get("createdate") or "")[:10],
             "created_full": p.get("createdate") or "",
+            "conv": p.get("recent_conversion_event_name") or p.get("first_conversion_event_name") or "",
+            "webinar": p.get("fuente_webinar") or "",
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -536,8 +588,9 @@ def main():
         src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         deals.append({"stage": stage, "created": created})
         if is_marketing(src, d1):
-            if is_brain_pl(pid): brain_count += 1
-            else: ventas_count += 1
+            # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
+            if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
+            elif not is_brain_pl(pid): ventas_count += 1
             icon = classify_channel(src, d1)[1]; label = classify_channel(src, d1)[0]
             open_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
                                "stage": stage, "created": created, "channel": f"{icon} {label}",
@@ -625,6 +678,29 @@ def main():
         "emails_cum": count_sdr_emails(funnel_iso, end_iso),
         "reuniones_cum": reunion_cum,
     }
+
+    # ── Origen de los leads (por formulario / evento de conversión) ──
+    CONTENT_ORIGINS = {"Ebook / descargable", "Blog / artículo",
+                       "Herramienta / calculadora", "Newsletter", "Webinar"}
+    def lead_pop(lst):
+        return [c for c in lst if rank(c["lc"]) >= 1 and not is_free(c)]
+    origin_counts = {}
+    for c in lead_pop(hist_fun):
+        b = classify_origin(c["conv"], c["webinar"])
+        origin_counts[b] = origin_counts.get(b, 0) + 1
+    origin_sorted = sorted(origin_counts.items(), key=lambda x: -x[1])
+    origin_content = sum(v for k, v in origin_counts.items() if k in CONTENT_ORIGINS)
+    origin_noinfo = origin_counts.get("Sin información", 0)
+    origin_total = sum(origin_counts.values())
+    # Split diario (para el KPI de leads)
+    daily_leads = lead_pop(daily)
+    d_lead_content = sum(1 for c in daily_leads
+                         if classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
+    d_lead_noinfo = sum(1 for c in daily_leads
+                        if classify_origin(c["conv"], c["webinar"]) == "Sin información")
+    origin = {"sorted": origin_sorted, "content": origin_content, "noinfo": origin_noinfo,
+              "total": origin_total, "content_set": CONTENT_ORIGINS,
+              "d_content": d_lead_content, "d_noinfo": d_lead_noinfo, "d_total": len(daily_leads)}
 
     # Oportunidades y clientes = EMPRESAS (ciclo de vida); reunión = deals en demo+
     agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
@@ -770,7 +846,7 @@ def main():
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
         "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
-        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq,
+        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq, "origin": origin,
         "mkt_deals": open_deals, "mkt_total": len(open_deals), "lost_deals": lost_deals,
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
@@ -919,6 +995,32 @@ def render(d):
         '<div class="pqf-arrow">→</div>'
         f'<div class="pqf-step pqf-ok"><b>🎯 {pq["opp"]}</b><span>oportunidades<br>(empresas)</span></div>'
         '</div>')
+    # ── Origen de los leads (de dónde vienen) ──
+    og = d["origin"]
+    og_tot = og["total"] or 1
+    ORIGIN_ICON = {
+        "Sin información": "❔", "Ebook / descargable": "📘", "Blog / artículo": "📝",
+        "Herramienta / calculadora": "🧮", "Newsletter": "📰", "Webinar": "🎥",
+        "Formulario de demo": "🎯", "Lead Ads (paid)": "📣", "GuruSup Brain": "🧠",
+        "Partners": "🤝", "Otro formulario": "•",
+    }
+    og_mx = og["sorted"][0][1] if og["sorted"] else 1
+    og_rows = ""
+    for name, n in og["sorted"]:
+        w = max(6, round(n / og_mx * 100))
+        is_content = name in og["content_set"]
+        cls = " og-content" if is_content else (" og-noinfo" if name == "Sin información" else "")
+        og_rows += (f'<div class="og-row{cls}"><div class="og-l">{ORIGIN_ICON.get(name, "•")} {esc(name)}</div>'
+                    f'<div class="og-barwrap"><div class="og-bar" style="width:{w}%"></div></div>'
+                    f'<div class="og-n">{n} <span class="og-p">{pct(n, og_tot)}</span></div></div>')
+    origin_html = (
+        '<div class="og-head">'
+        f'<div class="og-stat og-content"><b>{og["content"]}</b><span>con contenido de marketing<br>(ebook · blog · webinar · herramienta · newsletter) = <b>MQL de facto</b></span></div>'
+        f'<div class="og-stat og-noinfo"><b>{og["noinfo"]}</b><span>sin información<br>(entraron sin dejar rastro de contenido)</span></div>'
+        f'<div class="og-stat"><b>{og["total"]}</b><span>leads totales<br>clasificados por origen</span></div>'
+        '</div>'
+        f'<div class="og-bars">{og_rows}</div>')
+
     # Rama <3.000: número grande + explicación pequeña
     preq_free_stats = (
         '<div class="pqbig">'
@@ -934,7 +1036,7 @@ def render(d):
         return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div><div class="fc-sub">{sub}</div></div>'
     day_cards = "".join([
         dcard("Contactos", dtot, "últimas 24h"),
-        dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total'),
+        dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total · 📘 {og["d_content"]} con contenido · ❔ {og["d_noinfo"]} sin info'),
         dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-orange"),
         dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-teal"),
         dcard("Reuniones y llamadas", d["agenda_day"], f'{max(d["agenda_day"]-d["calls_day"],0)} agendadas · {d["calls_day"]} llamadas', "f-c-green"),
@@ -1031,7 +1133,7 @@ def render(d):
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
         sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full,
-        preq_sales_stats=preq_sales_stats, preq_free_stats=preq_free_stats,
+        preq_sales_stats=preq_sales_stats, preq_free_stats=preq_free_stats, origin_html=origin_html,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
@@ -1235,6 +1337,22 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }}
 .alert-muted {{ background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }}
 .caption {{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }}
+.og-head {{ display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }}
+.og-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
+.og-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
+.og-stat span {{ font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }}
+.og-stat.og-content {{ background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); }}
+.og-stat.og-content b {{ color:#6ee7b7; }}
+.og-stat.og-noinfo {{ background:rgba(123,118,160,.08); border-color:rgba(123,118,160,.3); }}
+.og-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
+.og-l {{ flex:0 0 40%; font-size:12px; color:var(--text-2); line-height:1.3; }}
+.og-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:13px; overflow:hidden; }}
+.og-bar {{ height:13px; border-radius:5px; background:linear-gradient(90deg,#7b76a0,#a5a1c8); }}
+.og-row.og-content .og-bar {{ background:linear-gradient(90deg,#0E7490,#22D3EE); }}
+.og-row.og-noinfo .og-bar {{ background:linear-gradient(90deg,#5a5680,#7b76a0); }}
+.og-n {{ flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }}
+.og-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
+@media(max-width:640px){{ .og-l {{ flex-basis:50%; }} }}
 .drz-head {{ display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }}
 .drz-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
 .drz-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
@@ -1376,6 +1494,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
     <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>{excl_tests}</strong> test/prueba · <strong>{excl_internal}</strong> internos @gurusup (empleados) · <strong>{excl_imports}</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
     <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
+
+  <div class="section-label">Origen de los leads · ¿de dónde vienen? · acumulado desde el 1 de enero</div>
+  <div class="card">
+    {origin_html}
+    <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
+  </div>
 
   <div class="section-label">Razones de descarte / descualificación de SQL · acumulado desde el 1 de enero</div>
   <div class="card">
