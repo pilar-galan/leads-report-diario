@@ -554,6 +554,25 @@ def main():
 
     cum = funnel_counts(hist_fun)
     dd  = funnel_counts(daily)
+
+    # ── Disposición de los SQL (estado de gestión por «Revisión ventas») ──
+    def rev_group(rev):
+        r = rev or ""
+        if r in ("Ya gestionado", "Aceptado para gestión comercial", "En revisión"):
+            return "gestionado"
+        if r == "No aplica / Descartado":
+            return "descartado"
+        if r in ("Duplicado", "Test"):
+            return "excluido"
+        return "pendiente"   # «Pendiente de revisión» o sin asignar
+    sql_stage_contacts = [c for c in hist_fun if c["lc"] in SQL_STAGES]
+    sql_disp = {"total": len(sql_stage_contacts), "gestionado": 0,
+                "pendiente": 0, "descartado": 0, "excluido": 0}
+    for c in sql_stage_contacts:
+        sql_disp[rev_group(c["rev"])] += 1
+    # Contactos que ya avanzaron a Oportunidad/Cliente (rank>=4)
+    sql_disp["avanzados"] = sum(1 for c in hist_fun if rank(c["lc"]) >= 4)
+
     # Oportunidades y clientes = EMPRESAS (ciclo de vida); reunión = deals en demo+
     agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
     # Reuniones agendadas (24h) = demos agendadas + llamadas de los SDR (Agustín/Juanma)
@@ -693,7 +712,7 @@ def main():
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
         "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
-        "channels": channels, "sql_rows": sql_rows,
+        "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp,
         "mkt_deals": open_deals, "mkt_total": len(open_deals),
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
@@ -758,6 +777,50 @@ def render(d):
     ]
     sales_pyr = pyramid(sales_steps, sales_pal, split=3)   # SQL en adelante = evolutivo
     free_pyr = pyramid(free_steps, free_pal, split=2)       # Oportunidad en adelante = evolutivo
+
+    # ── Flujo del contacto al cliente (proceso + estados + conversión) ──
+    sd = d["sql_disp"]
+    flow_stages = [
+        ("Contactos", t, "", "Todos los que entran en el CRM. Excluye test, empleados @gurusup e importaciones.", "", "#7b76a0"),
+        ("Leads", cum["lead"], pct(cum["lead"], t), "Muestran interés real: descargan contenido, rellenan formulario o escriben por el chat.", "del total", "#F3ABA0"),
+        ("MQL", cum["mql"], pct(cum["mql"], cum["lead"]), "Cualificados por marketing: encajan con el perfil objetivo.", "de leads", "#EF8A78"),
+        ("SQL", cum["sql"], pct(cum["sql"], cum["lead"]), "Piden demo o cualifican por volumen de consultas (>3.000 · <3.000 · «no lo sé»).", "de leads", "#E8543F"),
+        ("Oportunidad", cum["opp"], pct(cum["opp"], cum["sql"]), "Empresas con un deal activo en el pipeline de ventas.", "de SQL · empresas", "#C0392B"),
+        ("Cliente", cum["cli"], pct(cum["cli"], cum["opp"]), "Empresas que han cerrado como cliente.", "de oport. · empresas", "#8E2A1E"),
+    ]
+    flow_html = '<div class="flow-track">'
+    for i, (name, val, conv, why, base, color) in enumerate(flow_stages):
+        if i > 0:
+            flow_html += f'<div class="flow-arrow"><span class="fa-pct">{conv}</span><span class="fa-base">{base}</span></div>'
+        flow_html += (f'<div class="fstage" style="border-top-color:{color}">'
+                      f'<div class="fs-count" style="color:{color}">{val}</div>'
+                      f'<div class="fs-name">{esc(name)}</div>'
+                      f'<div class="fs-why">{esc(why)}</div></div>')
+    flow_html += '</div>'
+
+    # Rama: estado / disposición de los SQL
+    st = sd["total"] or 1
+    resueltos = sd["gestionado"] + sd["descartado"] or 1
+    top_raz = " · ".join(f'{esc(r)} ({n})' for r, n in d["descarte"][:3]) or "sin razón registrada"
+    flow_branch = (
+        '<div class="flow-branch">'
+        f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
+        '<div class="fb-states">'
+        f'<div class="fb-state ok"><div class="fbs-n">{sd["gestionado"]}</div><div class="fbs-l">🟢 Gestionados</div>'
+        f'<div class="fbs-p">{pct(sd["gestionado"], st)} de los SQL</div><small>contactados por ventas (llamada / email)</small></div>'
+        f'<div class="fb-state pend"><div class="fbs-n">{sd["pendiente"]}</div><div class="fbs-l">🟡 Pendientes</div>'
+        f'<div class="fbs-p">{pct(sd["pendiente"], st)} de los SQL</div><small>aún sin revisar / asignar</small></div>'
+        f'<div class="fb-state bad"><div class="fbs-n">{sd["descartado"]}</div><div class="fbs-l">🔴 Descartados</div>'
+        f'<div class="fbs-p">{pct(sd["descartado"], st)} de los SQL</div><small>no cualifican</small></div>'
+        '</div>'
+        '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL gestionados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (Agustín / Juanma) → si cualifican pasan a <b>Oportunidad</b>.</div>'
+        '<div class="fb-conv">'
+        f'<div class="fbc ok">✅ <b>{pct(cum["opp"], cum["sql"])}</b> de los SQL pasan a <b>Oportunidad</b></div>'
+        f'<div class="fbc bad">❌ <b>{pct(sd["descartado"], resueltos)}</b> de los SQL resueltos se <b>descartan</b></div>'
+        '</div>'
+        f'<div class="fb-raz">🔍 <b>Principales razones de descarte:</b> {top_raz}. <span class="fb-raz-more">(detalle completo más abajo)</span></div>'
+        '</div>')
+    flow_full = flow_html + flow_branch
 
     # Resumen 24h · KPIs (% sobre el total de contactos, NO es un embudo)
     dtot = dd["total"]
@@ -858,7 +921,7 @@ def render(d):
     return TEMPLATE.format(
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
-        sales_pyr=sales_pyr, free_pyr=free_pyr,
+        sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
@@ -959,6 +1022,35 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pyr-conv {{ font-size:11px; font-weight:700; color:var(--muted); margin:5px 0; }}
 .pyr-split {{ font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--guru-300); margin:10px 0 6px; padding-top:8px; border-top:1px dashed var(--border); }}
 .fn-highlight {{ margin-top:14px; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.25); color:#a5f3fc; border-radius:8px; padding:10px 12px; font-size:11px; line-height:1.5; }}
+/* ── Flujo del contacto al cliente ── */
+.flow-track {{ display:flex; align-items:stretch; gap:6px; overflow-x:auto; padding:4px 2px 10px; }}
+.fstage {{ flex:1 1 0; min-width:135px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-top:3px solid var(--muted); border-radius:10px; padding:12px 12px 13px; }}
+.fs-count {{ font-size:26px; font-weight:800; line-height:1.05; }}
+.fs-name {{ font-size:13px; font-weight:700; color:var(--text); margin:2px 0 6px; }}
+.fs-why {{ font-size:11px; color:var(--muted); line-height:1.4; }}
+.flow-arrow {{ flex:0 0 auto; align-self:center; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 2px; }}
+.flow-arrow::before {{ content:"→"; font-size:16px; color:var(--muted); }}
+.fa-pct {{ font-size:12px; font-weight:800; color:var(--guru-300); }}
+.fa-base {{ font-size:9px; color:var(--muted); white-space:nowrap; }}
+.flow-branch {{ margin-top:16px; border-top:1px dashed var(--border); padding-top:16px; }}
+.fb-head {{ font-size:13px; font-weight:700; margin-bottom:12px; }}
+.fb-states {{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }}
+@media(max-width:640px){{ .fb-states {{ grid-template-columns:1fr; }} .flow-track {{ flex-direction:column; }} .flow-arrow::before {{ content:"↓"; }} .fstage {{ min-width:0; }} }}
+.fb-state {{ border:1px solid var(--border); border-radius:10px; padding:12px 13px; background:rgba(255,255,255,.03); }}
+.fb-state.ok {{ border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.07); }}
+.fb-state.pend {{ border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.07); }}
+.fb-state.bad {{ border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.07); }}
+.fbs-n {{ font-size:28px; font-weight:800; color:var(--text); line-height:1; }}
+.fbs-l {{ font-size:13px; font-weight:700; margin-top:3px; }}
+.fbs-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
+.fb-state small {{ display:block; font-size:11px; color:var(--muted); margin-top:5px; line-height:1.35; }}
+.fb-demo {{ margin-top:14px; background:rgba(255,107,91,.07); border:1px solid rgba(255,107,91,.28); border-radius:9px; padding:11px 13px; font-size:12px; line-height:1.5; color:var(--text-2); }}
+.fb-conv {{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }}
+.fbc {{ flex:1; min-width:200px; border-radius:9px; padding:12px 14px; font-size:13px; }}
+.fbc.ok {{ background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.35); color:#a7f3d0; }}
+.fbc.bad {{ background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.35); color:#fecaca; }}
+.fb-raz {{ margin-top:12px; font-size:12px; color:var(--text-2); line-height:1.5; }}
+.fb-raz-more {{ color:var(--muted); }}
 
 /* Gráficos */
 .charts-2 {{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }}
@@ -1157,13 +1249,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <span class="evo-badge">ACUMULADO · {chart_label}</span>
   </div>
 
-  <div class="section-label">Embudo de conversión comercial · acumulado {fun_label}</div>
-  <div class="funnels-1">
-    <div class="fn-box">
-      <div class="fn-title">🛠️ Proceso comercial (ventas)</div>
-      <div class="fn-note">De contacto a cliente · leads, SQL y conversiones</div>
-      <div class="pyramid">{sales_pyr}</div>
-    </div>
+  <div class="section-label">Flujo del contacto al cliente · proceso y conversión · acumulado {fun_label}</div>
+  <div class="fn-box">
+    <div class="fn-title">🔄 Del contacto al cliente</div>
+    <div class="fn-note">Cada etapa, por qué se clasifica así, su volumen y el % de conversión respecto a la etapa anterior</div>
+    {flow_full}
   </div>
   <div class="caption">ℹ️ Cómo leer el embudo: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).
     <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
