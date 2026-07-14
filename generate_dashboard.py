@@ -509,7 +509,7 @@ def main():
     ], ["email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
         "hs_lead_status", "createdate", "recent_conversion_event_name",
-        "first_conversion_event_name", "fuente_webinar"])
+        "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto"])
 
     hist = []
     imports = tests = internal = 0
@@ -537,6 +537,7 @@ def main():
             "created_full": p.get("createdate") or "",
             "conv": p.get("recent_conversion_event_name") or p.get("first_conversion_event_name") or "",
             "webinar": p.get("fuente_webinar") or "",
+            "canal_pref": p.get("preferencia_canal_de_contacto") or "",
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -587,7 +588,7 @@ def main():
         created = (p.get("createdate") or "")[:10]
         src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         deals.append({"stage": stage, "created": created})
-        if is_marketing(src, d1):
+        if is_marketing(src, d1) and created >= fstart:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
             elif not is_brain_pl(pid): ventas_count += 1
@@ -662,6 +663,24 @@ def main():
         sql_disp[rev_group(c["rev"])] += 1
     # Contactos que ya avanzaron a Oportunidad/Cliente (rank>=4)
     sql_disp["avanzados"] = sum(1 for c in hist_fun if rank(c["lc"]) >= 4)
+    # Estado del lead (hs_lead_status) de los SQL → explica por qué no han pasado a oportunidad
+    LEAD_STATE_LABELS = {
+        "OPEN_DEAL": ("En negociación · deal abierto", "adv"),
+        "cliente": ("Cliente", "adv"),
+        "OPEN": ("En contacto", "warm"),
+        "ATTEMPTED_TO_CONTACT": ("Lead caliente · contactado, en proceso", "warm"),
+        "Mareado": ("Mareado · da largas / sin respuesta", "cold"),
+        "UNQUALIFIED": ("Lead frío · no cualifica", "cold"),
+        "usuario_free": ("Prueba gratuita", "cold"),
+        "": ("Sin asignar / sin trabajar", "cold"),
+    }
+    ls_counts = {}
+    for c in sql_stage_contacts:
+        lbl, grp = LEAD_STATE_LABELS.get(c["lead_state"], (c["lead_state"] or "Sin asignar", "cold"))
+        ls_counts.setdefault(lbl, [0, grp])
+        ls_counts[lbl][0] += 1
+    sql_disp["lead_status"] = sorted(([lbl, n, grp] for lbl, (n, grp) in ls_counts.items()), key=lambda x: -x[1])
+    sql_disp["en_oport"] = sum(1 for c in sql_stage_contacts if c["lead_state"] in ("OPEN_DEAL", "cliente"))
 
     # ── Ramas del workflow de precualificación (por volumen de consultas) ──
     n_lt3000  = sum(1 for c in hist_fun if c["lc"] == "1394675095")   # <3000 → descartar + email
@@ -678,6 +697,12 @@ def main():
         "emails_cum": count_sdr_emails(funnel_iso, end_iso),
         "reuniones_cum": reunion_cum,
     }
+    # Preferencia de canal de contacto (del formulario demo) entre los SQL
+    pref_llamada = sum(1 for c in sql_stage_contacts if c["canal_pref"] == "Llamada por teléfono")
+    pref_email   = sum(1 for c in sql_stage_contacts if c["canal_pref"] == "Email")
+    preq["pref_llamada"] = pref_llamada
+    preq["pref_email"] = pref_email
+    preq["pref_total"] = pref_llamada + pref_email
 
     # ── Origen de los leads (por formulario / evento de conversión) ──
     CONTENT_ORIGINS = {"Ebook / descargable", "Blog / artículo",
@@ -915,7 +940,7 @@ def render(d):
     # ── Flujo del contacto al cliente (proceso + estados + conversión) ──
     sd = d["sql_disp"]
     flow_stages = [
-        ("Contactos", t, "", "Todos los que entran en el CRM. Excluye test, empleados @gurusup e importaciones.", "", "#7b76a0"),
+        ("Contactos", t, "", "Incluye TODO lo que entra (también los Freemium, que suman al total pero no pasan a Lead). Excluye test, empleados @gurusup e importaciones.", "", "#7b76a0"),
         ("Leads", cum["lead"], pct(cum["lead"], t), "Muestran interés real: descargan contenido, rellenan formulario o escriben por el chat.", "del total", "#F3ABA0"),
         ("MQL", cum["mql"], pct(cum["mql"], cum["lead"]), "Cualificados por marketing: encajan con el perfil objetivo.", "de leads", "#EF8A78"),
         ("SQL", cum["sql"], pct(cum["sql"], cum["lead"]), "Piden demo o cualifican por volumen de consultas (>3.000 · <3.000 · «no lo sé»).", "de leads", "#E8543F"),
@@ -961,6 +986,21 @@ def render(d):
             '<div class="fbr-foot">Volumen y % de cada razón sobre el total de descartes con motivo registrado. Detalle acumulado más abajo.</div>')
     else:
         raz_block = '<div class="fb-raz-head">Sin razones de descarte registradas todavía.</div>'
+    # Estado del lead de los SQL (por qué han pasado o no a oportunidad)
+    GRP_ICON = {"adv": "🟢", "warm": "🟡", "cold": "🔴"}
+    ls_rows = ""
+    for lbl, n, grp in sd.get("lead_status", []):
+        ls_rows += (f'<div class="ls-row ls-{grp}"><span class="ls-ico">{GRP_ICON.get(grp,"•")}</span>'
+                    f'<span class="ls-l">{esc(lbl)}</span>'
+                    f'<span class="ls-n">{n} <span class="ls-p">{pct(n, st)}</span></span></div>')
+    ls_block = (
+        '<div class="fb-lsbox">'
+        f'<div class="fb-ls-head">🧭 ¿En qué estado están esos SQL? · <b>{sd.get("en_oport",0)}</b> con negocio/oportunidad abierta · '
+        'el resto explica <b>por qué aún no han pasado</b> a oportunidad (estado del lead en HubSpot):</div>'
+        f'<div class="ls-list">{ls_rows}</div>'
+        '<div class="fbr-foot">Los SQL que sí pasan a Oportunidad <b>salen de la etapa SQL</b> (pasan a etapa Oportunidad, contadas como empresas arriba). '
+        'Este desglose muestra los que <b>siguen en SQL</b> y su estado: 🟢 avanzando · 🟡 en proceso/contactados · 🔴 fríos, sin respuesta o sin trabajar.</div>'
+        '</div>')
     flow_branch = (
         '<div class="flow-branch">'
         f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
@@ -972,11 +1012,12 @@ def render(d):
         f'<div class="fb-state bad"><div class="fbs-n">{sd["descartado"]}</div><div class="fbs-l">🔴 Descartados</div>'
         f'<div class="fbs-p">{pct(sd["descartado"], st)} de los SQL</div><small>no cualifican</small></div>'
         '</div>'
-        '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL gestionados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (Agustín / Juanma) → si cualifican pasan a <b>Oportunidad</b>.</div>'
+        '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL gestionados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (<b>Agustín</b>) → si cualifican pasan a <b>Oportunidad</b>.</div>'
         '<div class="fb-conv">'
         f'<div class="fbc ok">✅ <b>{pct(cum["opp"], cum["sql"])}</b> de los SQL pasan a <b>Oportunidad</b></div>'
         f'<div class="fbc bad">❌ <b>{pct(sd["descartado"], resueltos)}</b> de los SQL resueltos se <b>descartan</b></div>'
         '</div>'
+        f'{ls_block}'
         f'<div class="fb-razbox">{raz_block}</div>'
         '</div>')
     flow_full = flow_html + flow_branch
@@ -984,17 +1025,33 @@ def render(d):
     # ── Contadores de las ramas del workflow de precualificación ──
     pq = d["preq"]
     # Rama Agustín: evolución del flujo (llegan → contacto → reunión → oportunidad)
+    email_step = (f'<div class="pqf-step"><b>✉️ {pq["emails_cum"]}</b><span>emails enviados<br>(desde su cuenta)</span></div>'
+                  if pq["emails_cum"] > 0 else "")
     preq_sales_stats = (
         '<div class="pqflow">'
         f'<div class="pqf-step"><b>{pq["agustin"]}</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div>'
         '<div class="pqf-arrow">→</div>'
         f'<div class="pqf-step"><b>📞 {pq["calls_cum"]}</b><span>llamadas hechas</span></div>'
-        f'<div class="pqf-step"><b>✉️ {pq["emails_cum"]}</b><span>emails enviados</span></div>'
+        f'{email_step}'
         '<div class="pqf-arrow">→</div>'
         f'<div class="pqf-step"><b>📅 {pq["reuniones_cum"]}</b><span>reuniones agendadas</span></div>'
         '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["opp"]}</b><span>oportunidades<br>(empresas)</span></div>'
+        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["opp"]}</b><span>oportunidades en<br>pipeline (empresas)</span></div>'
         '</div>')
+    # Donut · preferencia de canal de contacto (del formulario demo)
+    pt = pq["pref_total"] or 1
+    pll, pem = pq["pref_llamada"], pq["pref_email"]
+    ang = round(pll / pt * 360)
+    canal_pref_html = (
+        '<div class="cpref">'
+        f'<div class="cpref-donut" style="background:conic-gradient(#FF8B7D 0deg {ang}deg,#22D3EE {ang}deg 360deg)">'
+        f'<div class="cpref-hole"><b>{pq["pref_total"]}</b><span>con preferencia</span></div></div>'
+        '<div class="cpref-leg">'
+        '<div class="cpref-t">Preferencia de canal de contacto <span>(campo del formulario demo)</span></div>'
+        f'<div class="cpref-row"><span class="cpref-dot" style="background:#FF8B7D"></span> 📞 Llamada por teléfono · <b>{pll}</b> ({pct(pll, pt)})</div>'
+        f'<div class="cpref-row"><span class="cpref-dot" style="background:#22D3EE"></span> ✉️ Email · <b>{pem}</b> ({pct(pem, pt)})</div>'
+        '<div class="cpref-note">Solo cuenta los SQL que han indicado preferencia en el formulario.</div>'
+        '</div></div>')
     # ── Origen de los leads (de dónde vienen) ──
     og = d["origin"]
     og_tot = og["total"] or 1
@@ -1034,13 +1091,16 @@ def render(d):
     dtot = dd["total"]
     def dcard(label, val, sub, cls="f-c-default"):
         return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div><div class="fc-sub">{sub}</div></div>'
+    video_day = max(d["agenda_day"] - d["calls_day"], 0)
+    # Grupo 1 · ESTADOS (mismo tono): contactos, leads, SQL, freemium
+    # Grupo 2 · ACCIONES/EVOLUCIÓN (otro tono): reuniones agendadas, oportunidades (ya son empresas)
     day_cards = "".join([
-        dcard("Contactos", dtot, "últimas 24h"),
-        dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total · 📘 {og["d_content"]} con contenido · ❔ {og["d_noinfo"]} sin info'),
-        dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-orange"),
-        dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-teal"),
-        dcard("Reuniones y llamadas", d["agenda_day"], f'{max(d["agenda_day"]-d["calls_day"],0)} agendadas · {d["calls_day"]} llamadas', "f-c-green"),
-        dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total'),
+        dcard("Contactos", dtot, "últimas 24h · total que entra", "f-c-state"),
+        dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total · 📘 {og["d_content"]} con contenido · ❔ {og["d_noinfo"]} sin info', "f-c-state"),
+        dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-state"),
+        dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-state"),
+        dcard("Reuniones agendadas", d["agenda_day"], f'📞 {d["calls_day"]} llamadas · 🎥 {video_day} videollamadas', "f-c-action"),
+        dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total · empresas', "f-c-action"),
     ])
     day_funnel = day_cards
 
@@ -1134,6 +1194,7 @@ def render(d):
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
         sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full,
         preq_sales_stats=preq_sales_stats, preq_free_stats=preq_free_stats, origin_html=origin_html,
+        canal_pref_html=canal_pref_html,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
         peak_leads=d["peak_leads"], peak_sql=d["peak_sql"], peak_opp=d["peak_opp"], peak_cli=d["peak_cli"],
         day_funnel=day_funnel, d_free=dd["free"], d_free_pct=pct(dd["free"], dd["total"]), d_total=dd["total"],
@@ -1207,15 +1268,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .flow-sep::before, .flow-sep::after {{ content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),var(--border),transparent); }}
 .flow-sep span {{ font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }}
 .evo-banner {{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
-  margin:38px 0 18px; padding:16px 20px; border-radius:14px;
-  background:linear-gradient(100deg, rgba(255,107,91,.16), rgba(34,211,238,.12));
-  border:1px solid rgba(255,107,91,.35); box-shadow:0 0 24px rgba(255,107,91,.10); }}
+  margin:40px 0 20px; padding:18px 22px; border-radius:14px;
+  background:linear-gradient(100deg, #FF6B5B, #FF8B7D);
+  border:1px solid rgba(255,107,91,.6); box-shadow:0 6px 22px rgba(255,107,91,.28); }}
 .evo-l {{ display:flex; align-items:center; gap:14px; }}
 .evo-ico {{ font-size:26px; }}
-.evo-t {{ font-size:16px; font-weight:800; color:var(--text); letter-spacing:.01em; }}
-.evo-s {{ font-size:12px; color:var(--text-2); margin-top:2px; }}
+.evo-t {{ font-size:16px; font-weight:800; color:#fff; letter-spacing:.01em; }}
+.evo-s {{ font-size:12px; color:rgba(255,255,255,.92); margin-top:2px; }}
 .evo-badge {{ font-size:11px; font-weight:800; letter-spacing:.08em; padding:6px 12px; border-radius:20px;
-  background:var(--guru-500); color:#fff; white-space:nowrap; box-shadow:0 2px 8px rgba(255,107,91,.35); }}
+  background:rgba(255,255,255,.22); color:#fff; white-space:nowrap; border:1px solid rgba(255,255,255,.35); }}
 @media(max-width:600px){{ .flow-sep span {{ white-space:normal; text-align:center; }} }}
 
 /* Dos embudos */
@@ -1272,6 +1333,17 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fbr-n {{ flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }}
 .fbr-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
 .fbr-foot {{ font-size:10px; color:var(--muted); margin-top:8px; line-height:1.4; }}
+.fb-lsbox {{ margin-top:14px; border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:10px; padding:13px 14px; }}
+.fb-ls-head {{ font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.4; }}
+.ls-list {{ display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; }}
+@media(max-width:640px){{ .ls-list {{ grid-template-columns:1fr; }} }}
+.ls-row {{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-2); padding:5px 8px; border-radius:7px; background:rgba(255,255,255,.02); }}
+.ls-row.ls-adv {{ background:rgba(16,185,129,.08); }}
+.ls-row.ls-warm {{ background:rgba(245,158,11,.07); }}
+.ls-row.ls-cold {{ background:rgba(239,68,68,.06); }}
+.ls-l {{ flex:1; line-height:1.3; }}
+.ls-n {{ font-weight:800; color:var(--text); }}
+.ls-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
 @media(max-width:640px){{ .fbr-l {{ flex-basis:48%; }} }}
 
 /* Gráficos */
@@ -1296,6 +1368,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .f-c-orange {{ --fc:var(--orange); --fv:var(--orange); }}
 .f-c-green {{ --fc:var(--green); --fv:var(--green); }}
 .f-c-teal {{ --fc:var(--teal); --fv:var(--teal); }}
+/* Grupo ESTADOS (salmón) vs grupo ACCIONES/EVOLUCIÓN → empresas (teal) */
+.f-c-state {{ --fc:var(--guru-500); --fv:var(--guru-300); }}
+.f-c-state {{ background:rgba(255,107,91,.05); }}
+.f-c-action {{ --fc:var(--teal); --fv:var(--teal); }}
+.f-c-action {{ background:rgba(34,211,238,.06); }}
 .day-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }}
 @media(max-width:900px){{ .day-kpis {{ grid-template-columns:repeat(3,1fr); }} }}
 @media(max-width:520px){{ .day-kpis {{ grid-template-columns:repeat(2,1fr); }} }}
@@ -1303,10 +1380,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .free-kpi .fk-num {{ font-size:32px; font-weight:800; color:var(--teal); }}
 .free-kpi .fk-txt {{ font-size:12px; color:var(--text-2); }}
 
-.channels-grid {{ display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }}
-@media(max-width:900px){{ .channels-grid {{ grid-template-columns:repeat(3,1fr); }} }}
+.channels-grid {{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:8px; }}
+@media(max-width:900px){{ .channels-grid {{ grid-auto-flow:row; grid-template-columns:repeat(3,1fr); }} }}
 @media(max-width:550px){{ .channels-grid {{ grid-template-columns:repeat(2,1fr); }} }}
-.ch-card {{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 12px; position:relative; overflow:hidden; }}
+.ch-card {{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 9px; position:relative; overflow:hidden; }}
 .ch-card::before {{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--chc,var(--guru-500)); }}
 .ch-icon {{ font-size:17px; margin-bottom:5px; }}
 .ch-num {{ font-size:28px; font-weight:800; line-height:1; color:var(--chc,var(--text)); }}
@@ -1403,6 +1480,18 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pqbig-n {{ font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }}
 .pqbig-t {{ font-size:11px; color:var(--text-2); line-height:1.45; }}
 @media(max-width:640px){{ .pqflow {{ flex-direction:column; }} .pqf-arrow {{ transform:rotate(90deg); }} }}
+.preq-pref {{ margin-top:16px; }}
+.cpref {{ display:flex; align-items:center; gap:20px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; padding:16px 18px; flex-wrap:wrap; }}
+.cpref-donut {{ width:110px; height:110px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }}
+.cpref-hole {{ width:70px; height:70px; border-radius:50%; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; }}
+.cpref-hole b {{ font-size:24px; font-weight:800; color:var(--text); line-height:1; }}
+.cpref-hole span {{ font-size:9px; color:var(--muted); }}
+.cpref-leg {{ flex:1; min-width:220px; }}
+.cpref-t {{ font-size:13px; font-weight:700; margin-bottom:10px; }}
+.cpref-t span {{ font-weight:400; font-size:11px; color:var(--muted); }}
+.cpref-row {{ font-size:13px; color:var(--text-2); margin-bottom:6px; display:flex; align-items:center; gap:8px; }}
+.cpref-dot {{ width:11px; height:11px; border-radius:3px; display:inline-block; }}
+.cpref-note {{ font-size:11px; color:var(--muted); margin-top:6px; }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -1501,12 +1590,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
   </div>
 
-  <div class="section-label">Razones de descarte / descualificación de SQL · acumulado desde el 1 de enero</div>
-  <div class="card">
-    <div class="drz">{descarte_html}</div>
-    <div class="alert alert-muted"><span>💬</span><div>{descarte_note}</div></div>
-  </div>
-
   <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
   <div class="preq">
     <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
@@ -1525,6 +1608,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
         {preq_free_stats}
       </div>
     </div>
+    <div class="preq-pref">{canal_pref_html}</div>
   </div>
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
