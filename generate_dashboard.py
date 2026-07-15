@@ -1192,7 +1192,7 @@ def render(d):
         dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total · 📘 {og["d_content"]} con contenido · ❔ {og["d_noinfo"]} sin info', "f-c-state"),
         dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-state"),
         dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-state"),
-        dcard("Reuniones agendadas", d["agenda_day"], f'📞 {d["calls_day"]} llamadas · 🎥 {video_day} videollamadas', "f-c-action"),
+        dcard("Llamadas realizadas SQL", d["calls_day"], f'🎥 {video_day} reuniones/videollamadas agendadas', "f-c-action"),
         dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total · empresas', "f-c-action"),
     ])
     day_funnel = day_cards
