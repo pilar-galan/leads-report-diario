@@ -1,0 +1,57 @@
+name: Refresh Dashboard (near real-time)
+
+on:
+  schedule:
+    # A1 · Cada 15 min, L-V ~8:00–19:45h España (06:00–17:45 UTC en horario de verano CEST)
+    - cron: '*/15 6-17 * * 1-5'
+  # A2 · Disparo al cambiar un lead/deal en HubSpot (vía Make/webhook → repository_dispatch)
+  repository_dispatch:
+    types: [hubspot-change]
+  workflow_dispatch:
+
+# Evita que varias regeneraciones se pisen (debounce): cancela la anterior en curso
+concurrency:
+  group: dashboard-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Regenerar dashboard con datos reales de HubSpot
+        env:
+          HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+          GEN_PAID_SPEND: ${{ vars.GEN_PAID_SPEND }}
+          GEN_PAID_SPEND_GOOGLE: ${{ vars.GEN_PAID_SPEND_GOOGLE }}
+          GEN_PAID_SPEND_SOCIAL: ${{ vars.GEN_PAID_SPEND_SOCIAL }}
+        run: python3 generate_dashboard.py
+
+      - name: Publicar si hay cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dashboard_diario.html
+          if git diff --staged --quiet; then
+            echo "Sin cambios en el dashboard"
+          else
+            git commit -m "chore: refresco del dashboard (near real-time · HubSpot)"
+            # Reintentos con rebase por si otra ejecución empujó justo antes
+            for i in 1 2 3 4 5; do
+              git pull --rebase origin main && git push && break
+              echo "push falló, reintento $i…"; sleep $((i*3))
+            done
+          fi
