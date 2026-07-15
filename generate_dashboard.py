@@ -318,6 +318,10 @@ def fetch_marketing_meetings(start_iso, end_iso):
 SDR_OWNERS = ["92703778", "92703779"]  # Agustín Di Nardo · Juan Manuel (Juanma) Jura
 AGUSTIN_OWNER = "92703778"             # Agustín · responsable de seguimiento inbound
 
+# Deals mal atribuidos a marketing (heredados/comercial): se excluyen del conteo de marketing
+# (siguen contando en el volumen total del pipeline). Coincidencia por subcadena en el nombre.
+EXCLUDE_MKT = {"xtrim", "plenergy"}
+
 def agustin_sql_calls(start_iso, end_iso):
     """Llamadas de AGUSTÍN en el rango, cruzadas con sus contactos SQL.
     Devuelve {'unique': nº de SQL distintos llamados, 'attempts': nº total de llamadas a SQL}."""
@@ -631,21 +635,25 @@ def main():
 
     deals = []            # todos los deals válidos abiertos (para reunión)
     open_deals = []       # abiertos marketing (para tabla pipeline)
+    total_pipeline = 0    # volumen total de negocios abiertos en el pipeline
     brain_count = ventas_count = 0
     for dl in all_deals:
         p = dl["properties"]
+        name = clean_deal(p.get("dealname", "—")) or "—"
         if not valid_deal(p.get("dealname", "")):
             continue
+        total_pipeline += 1
         stage = p.get("dealstage", ""); pid = p.get("pipeline", "")
         created = (p.get("createdate") or "")[:10]
         src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         deals.append({"stage": stage, "created": created})
-        if is_marketing(src, d1) and created >= fstart:
+        excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
+        if is_marketing(src, d1) and created >= fstart and not excluded:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
             elif not is_brain_pl(pid): ventas_count += 1
             icon = classify_channel(src, d1)[1]; label = classify_channel(src, d1)[0]
-            open_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
+            open_deals.append({"id": dl["id"], "name": name,
                                "stage": stage, "created": created, "channel": f"{icon} {label}",
                                "brain": is_brain_pl(pid)})
 
@@ -967,6 +975,7 @@ def main():
         "peak_cli": peak_insight(hist, lambda c: c["lc"] == "customer"),
         "channels": channels, "sql_rows": sql_rows, "sql_disp": sql_disp, "preq": preq, "origin": origin, "paid": paid,
         "mkt_deals": open_deals, "mkt_total": len(open_deals), "lost_deals": lost_deals,
+        "total_pipeline": total_pipeline,
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
         "brain_count": brain_count, "ventas_count": ventas_count,
@@ -1875,9 +1884,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
     <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
-      <span class="badge badge-green">{mkt_total} oportunidades de marketing</span></div>
+      <span class="badge badge-green">{total_pipeline} negocios en pipeline (total)</span></div>
     <div style="font-size:12px;color:var(--text-2);margin:-6px 0 14px;line-height:1.5;">
-      🧠 <strong style="color:var(--guru-300)">{brain_count}</strong> en Pipeline <strong>Brain</strong> (GuruSup / Company Brain) ·
+      De ese total, <strong style="color:var(--guru-300)">{mkt_total}</strong> son <strong>oportunidades de marketing</strong> (inbound real; se excluyen deals heredados/comercial mal atribuidos como Xtrim o Plenergy) ·
+      🧠 <strong style="color:var(--guru-300)">{brain_count}</strong> en Pipeline <strong>Brain</strong> ·
       💼 <strong style="color:var(--guru-300)">{ventas_count}</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
