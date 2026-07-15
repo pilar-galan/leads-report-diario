@@ -260,6 +260,8 @@ def funnel_counts(lst):
         "total": len(lst),
         "lead": sum(1 for c in lst if rank(c["lc"]) >= 1),
         "lead_pure": sum(1 for c in lst if rank(c["lc"]) in (1, 2)),  # lead/MQL, aún no SQL
+        "lead1": sum(1 for c in lst if rank(c["lc"]) == 1),  # solo Lead (no MQL/SQL)
+        "mql_only": sum(1 for c in lst if rank(c["lc"]) == 2),  # solo MQL
         "mql": sum(1 for c in lst if rank(c["lc"]) >= 2),  # alcanzaron MQL (acumulativo)
         "sql":  sum(1 for c in lst if rank(c["lc"]) >= 3),
         "opp":  sum(1 for c in lst if rank(c["lc"]) >= 4),
@@ -1189,17 +1191,35 @@ def render(d):
     def dcard(label, val, sub, cls="f-c-default"):
         return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div><div class="fc-sub">{sub}</div></div>'
     video_day = max(d["agenda_day"] - d["calls_day"], 0)
-    # Grupo 1 · ESTADOS (mismo tono): contactos, leads, SQL, freemium
-    # Grupo 2 · ACCIONES/EVOLUCIÓN (otro tono): reuniones agendadas, oportunidades (ya son empresas)
-    day_cards = "".join([
-        dcard("Contactos", dtot, "últimas 24h · total que entra", "f-c-state"),
-        dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total · 📘 {og["d_content"]} con contenido · ❔ {og["d_noinfo"]} sin info', "f-c-state"),
-        dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-state"),
-        dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-state"),
-        dcard("Llamadas realizadas SQL", d["agenda_day"], f'📞 {d["calls_day"]} llamadas telefónicas · 🎥 {video_day} videollamadas', "f-c-action"),
-        dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total · empresas', "f-c-action"),
-    ])
-    day_funnel = day_cards
+    # Flujo visual: Contactos = Leads + MQL + SQL  →  Llamadas realizadas SQL  (+ Oportunidades si >0)
+    day_flow = (
+        '<div class="dayflow">'
+        f'<div class="df-card df-state"><div class="fc-label">Contactos</div><div class="fc-value">{dtot}</div>'
+        '<div class="fc-sub">total que entra · 24h</div></div>'
+        '<div class="df-op">=</div>'
+        '<div class="df-group">'
+        f'<div class="df-card df-state"><div class="fc-label">Leads</div><div class="fc-value">{dd["lead1"]}</div>'
+        f'<div class="fc-sub">📘 {og["d_content"]} contenido · ❔ {og["d_noinfo"]} sin info</div></div>'
+        '<div class="df-op">+</div>'
+        f'<div class="df-card df-state"><div class="fc-label">MQL</div><div class="fc-value">{dd["mql_only"]}</div>'
+        '<div class="fc-sub">consumió contenido</div></div>'
+        '<div class="df-op">+</div>'
+        f'<div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">{dd["sql"]}</div>'
+        '<div class="fc-sub">piden demo</div></div>'
+        '</div>'
+        '<div class="df-op df-arrow">→</div>'
+        f'<div class="df-card df-action"><div class="fc-label">Llamadas realizadas SQL</div><div class="fc-value">{d["calls_day"]}</div>'
+        f'<div class="fc-sub">📞 {d["calls_day"]} llamadas · 🎥 {video_day} videollamadas</div></div>'
+    )
+    if dd["opp"] > 0:
+        day_flow += (f'<div class="df-op df-arrow">→</div>'
+                     f'<div class="df-card df-action"><div class="fc-label">Oportunidades</div><div class="fc-value">{dd["opp"]}</div>'
+                     f'<div class="fc-sub">{pct(dd["opp"], dtot)} del total · empresas</div></div>')
+    day_flow += '</div>'
+    # Freemium aparte (fuera del embudo comercial)
+    day_flow += (f'<div class="dayfree"><b>{dd["free"]}</b> Freemium · {pct(dd["free"], dtot)} del total '
+                 '<span>(altas gratuitas por la app · fuera del embudo comercial)</span></div>')
+    day_funnel = day_flow
 
     # Canales
     ch_cards = ""
@@ -1485,6 +1505,19 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .day-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }}
 @media(max-width:900px){{ .day-kpis {{ grid-template-columns:repeat(3,1fr); }} }}
 @media(max-width:520px){{ .day-kpis {{ grid-template-columns:repeat(2,1fr); }} }}
+.dayflow {{ display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }}
+.df-group {{ display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }}
+.df-card {{ flex:1; min-width:130px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }}
+.df-card .fc-value {{ font-size:30px; }}
+.df-state {{ border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }}
+.df-action {{ border-top-color:var(--teal); background:rgba(34,211,238,.06); }}
+.df-action .fc-value {{ color:var(--teal); }}
+.df-op {{ align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }}
+.df-arrow {{ color:var(--guru-300); }}
+.dayfree {{ margin-top:12px; background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.25); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--text-2); }}
+.dayfree b {{ color:var(--teal); font-size:18px; }}
+.dayfree span {{ color:var(--muted); font-size:11px; }}
+@media(max-width:760px){{ .dayflow, .df-group {{ flex-direction:column; }} .df-op {{ transform:rotate(90deg); align-self:center; }} }}
 .free-kpi {{ margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }}
 .free-kpi .fk-num {{ font-size:32px; font-weight:800; color:var(--teal); }}
 .free-kpi .fk-txt {{ font-size:12px; color:var(--text-2); }}
@@ -1686,8 +1719,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   </details>
 
   <div class="section-label">Contactos generados · últimas 24h</div>
-  <div class="day-kpis">{day_funnel}</div>
-  <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · <strong>Reuniones y llamadas</strong> = reuniones agendadas (demos) + llamadas de los SDR (Agustín/Juanma): <strong>{calls_day}</strong> llamadas hoy · Reuniones hoy: {meet_names}</div>
+  {day_funnel}
+  <div class="caption">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: {meet_names}</div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
