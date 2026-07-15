@@ -316,6 +316,54 @@ def fetch_marketing_meetings(start_iso, end_iso):
 
 
 SDR_OWNERS = ["92703778", "92703779"]  # Agustín Di Nardo · Juan Manuel (Juanma) Jura
+AGUSTIN_OWNER = "92703778"             # Agustín · responsable de seguimiento inbound
+
+def agustin_sql_calls(start_iso, end_iso):
+    """Llamadas de AGUSTÍN en el rango, cruzadas con sus contactos SQL.
+    Devuelve {'unique': nº de SQL distintos llamados, 'attempts': nº total de llamadas a SQL}."""
+    res = {"unique": 0, "attempts": 0}
+    try:
+        calls = fetch_all("calls", [
+            {"propertyName": "hubspot_owner_id", "operator": "EQ", "value": AGUSTIN_OWNER},
+            {"propertyName": "hs_timestamp", "operator": "BETWEEN", "value": start_iso, "highValue": end_iso},
+        ], ["hs_timestamp"])
+    except Exception as e:
+        print(f"  agustin calls error: {e}"); return res
+    call_ids = [c["id"] for c in calls]
+    if not call_ids:
+        return res
+    # Asociación llamada → contacto
+    call2contact = {}
+    for chunk in _chunks(call_ids):
+        try:
+            a = api_post("/crm/v4/associations/calls/contacts/batch/read",
+                         {"inputs": [{"id": str(i)} for i in chunk]})
+        except Exception as e:
+            print(f"  assoc calls->contacts error: {e}"); continue
+        for r in a.get("results", []):
+            cid = str(r.get("from", {}).get("id"))
+            call2contact[cid] = [str(t.get("toObjectId")) for t in r.get("to", []) if t.get("toObjectId")]
+        time.sleep(0.2)
+    contact_ids = {c for tos in call2contact.values() for c in tos}
+    if not contact_ids:
+        return res
+    # Etapa de ciclo de vida de esos contactos
+    stage = {}
+    for chunk in _chunks(list(contact_ids)):
+        try:
+            b = api_post("/crm/v3/objects/contacts/batch/read",
+                         {"properties": ["lifecyclestage"], "inputs": [{"id": c} for c in chunk]})
+        except Exception as e:
+            print(f"  contacts batch read error: {e}"); continue
+        for m in b.get("results", []):
+            stage[m["id"]] = m.get("properties", {}).get("lifecyclestage") or ""
+        time.sleep(0.2)
+    sql_contacts = {c for c in contact_ids if stage.get(c) in SQL_STAGES}
+    res["unique"] = len(sql_contacts)
+    res["attempts"] = sum(1 for tos in call2contact.values()
+                          if any(stage.get(t) in SQL_STAGES for t in tos))
+    return res
+
 
 def count_sdr_calls(start_iso, end_iso):
     """Nº de llamadas de los SDR (Agustín/Juanma) en el rango (por hs_timestamp)."""
@@ -645,6 +693,7 @@ def main():
     reunion_cum = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= fstart)
     reunion_day = sum(1 for d in deals if d["stage"] in DEMO_PLUS and d["created"] >= dstart)
     calls_day = count_sdr_calls(start_iso, end_iso)   # llamadas de Agustín/Juanma en 24h
+    agu_calls = agustin_sql_calls(start_iso, end_iso)  # SQL únicos llamados por Agustín (+ intentos)
 
     # Reuniones (calendario) del día -> nombres (ventana diaria, ligero)
     meetings = fetch_marketing_meetings(start_iso, end_iso)
@@ -906,6 +955,7 @@ def main():
         "fun_label": f"{funnel_start.day} {MESES3[funnel_start.month-1]} {funnel_start.year} → hoy",
         "chart_label": f"{d0.day} {MESES3[d0.month-1]} {d0.year} → hoy",
         "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day, "calls_day": calls_day,
+        "agu_unique": agu_calls["unique"], "agu_attempts": agu_calls["attempts"],
         "meet_names": meet_names,
         "svg_leads": svg_cumulative(*ch_leads, labels, "#FF6B5B"),
         "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
@@ -1217,8 +1267,8 @@ def render(d):
         f'<div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">{dd["sql"]}</div>'
         '<div class="fc-sub">piden demo</div></div>'
         '<div class="df-op df-arrow">→</div>'
-        f'<div class="df-card df-action"><div class="fc-label">Llamadas realizadas SQL</div><div class="fc-value">{d["calls_day"]}</div>'
-        f'<div class="fc-sub">📞 {d["calls_day"]} llamadas telefónicas · 🎥 {video_day} videollamadas/mail</div></div>'
+        f'<div class="df-card df-action"><div class="fc-label">SQL contactados por Agustín</div><div class="fc-value">{d["agu_unique"]}</div>'
+        f'<div class="fc-sub">📞 {d["agu_unique"]} SQL únicos llamados · 🔁 {d["agu_attempts"]} intentos (con reintentos) · 🎥 {video_day} videollamadas</div></div>'
         f'{opp_step}'
         '</div></div>'
         # Rama freemium
