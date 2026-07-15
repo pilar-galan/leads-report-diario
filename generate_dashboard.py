@@ -837,10 +837,17 @@ def main():
             chan[lbl] = {"n": 0, "lead": 0, "sql": 0, "free": 0, "icon": fd["icon"], "color": fd["color"]}
     channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
-    # ── SQL del día (seguimiento de ventas) ──
+    # ── SQL del día (seguimiento de ventas) · una fila por empresa/contacto (sin repetidos) ──
     sql_rows = []
+    seen_sql = set()
     for c in daily:
         if c["lc"] in SQL_STAGES:
+            key = (c["company"].strip().lower() or c["email"].strip().lower()
+                   or (c["firstname"] or "").strip().lower())
+            if key and key in seen_sql:
+                continue
+            if key:
+                seen_sql.add(key)
             label, _, _ = classify_channel(c["src"], c["d1"])
             name = c["firstname"] or (c["email"].split("@")[0] if c["email"] else "—")
             sql_rows.append({"name": name, "company": c["company"], "channel": label,
