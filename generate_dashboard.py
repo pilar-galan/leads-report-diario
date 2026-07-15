@@ -1623,6 +1623,18 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 #gs-gate input {{ width:100%; padding:11px 14px; border-radius:8px; border:1px solid #2e2a5a; background:#161330; color:#f0edff; font-size:15px; margin-bottom:12px; outline:none; letter-spacing:.08em; }}
 #gs-gate button {{ width:100%; padding:11px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; font-size:15px; font-weight:700; }}
 #gs-gate .err {{ color:#ef4444; font-size:12px; margin-top:8px; display:none; }}
+.refresh-fab {{ position:fixed; right:20px; bottom:20px; z-index:900; cursor:pointer;
+  background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; border:none; border-radius:30px;
+  padding:12px 18px; font-size:14px; font-weight:700; box-shadow:0 6px 20px rgba(255,107,91,.4); }}
+.refresh-fab:hover {{ filter:brightness(1.05); }}
+.refresh-toast {{ position:fixed; right:20px; bottom:74px; z-index:900; max-width:340px;
+  background:#1e1b42; border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  font-size:12px; color:var(--text-2); line-height:1.5; box-shadow:0 8px 28px rgba(0,0,0,.4);
+  opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s; }}
+.refresh-toast.show {{ opacity:1; transform:translateY(0); pointer-events:auto; }}
+.refresh-toast .rt-btn {{ display:inline-block; margin-top:10px; cursor:pointer; border:none;
+  background:var(--guru-500); color:#fff; font-weight:700; font-size:12px; padding:7px 12px; border-radius:8px; }}
+@media(max-width:600px){{ .refresh-fab {{ right:12px; bottom:12px; padding:10px 14px; font-size:13px; }} }}
 </style>
 <script>
 (function(){{
@@ -1762,6 +1774,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     GuruSup · Dashboard Diario · generado el {generado} (hora España)
   </div>
 </div>
+
+<button class="refresh-fab" onclick="pedirActualizacion()" title="Forzar una actualización de los datos ahora">🔄 Actualizar datos</button>
+<div id="refresh-toast" class="refresh-toast"></div>
+
 <script>
 window.filtrarEmpresas=function(){{
   var q=document.getElementById('emp-search').value.toLowerCase().trim();
@@ -1773,6 +1789,13 @@ window.filtrarEmpresas=function(){{
     while(nx&&!nx.classList.contains('stage-divider')){{ if(nx.style.display!=='none') has=true; nx=nx.nextElementSibling; }}
     dv.style.display=(has||!q)?'':'none'; }});
   var em=document.getElementById('emp-empty'); if(em) em.style.display=vis===0?'block':'none';
+}};
+window.pedirActualizacion=function(){{
+  window.open('https://github.com/pilar-galan/gurusup-radar-ia/actions/workflows/refresh_dashboard.yml','_blank','noopener');
+  var t=document.getElementById('refresh-toast');
+  t.innerHTML='Se ha abierto <b>GitHub Actions</b> en otra pestaña. Pulsa <b>“Run workflow”</b> y, en ~1 minuto, vuelve aquí y recarga. <button class="rt-btn" onclick="location.reload()">Recargar ahora</button>';
+  t.classList.add('show');
+  setTimeout(function(){{ t.classList.remove('show'); }}, 15000);
 }};
 </script>
 </body>
