@@ -1581,8 +1581,16 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .df-card {{ flex:1; min-width:120px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }}
 .df-card .fc-value {{ font-size:34px; }}
 .df-state {{ border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }}
-.df-action {{ border-top-color:var(--teal); background:rgba(34,211,238,.06); }}
+.df-action {{ border-top-color:var(--teal); background:rgba(34,211,238,.10); box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 4px 18px rgba(34,211,238,.15); position:relative; }}
 .df-action .fc-value {{ color:var(--teal); }}
+.df-action::before {{ content:"ACCIÓN"; position:absolute; top:-9px; right:10px; font-size:9px; font-weight:800; letter-spacing:.08em; color:#0a2a2f; background:var(--teal); padding:2px 7px; border-radius:10px; }}
+/* Portada / titular del día (bloque 24h) */
+.hero24 {{ background:linear-gradient(135deg, rgba(255,107,91,.10) 0%, rgba(17,14,40,.4) 45%, rgba(34,211,238,.10) 100%); border:1px solid rgba(255,107,91,.28); border-radius:18px; padding:20px 22px 14px; margin-bottom:30px; box-shadow:0 10px 44px rgba(0,0,0,.35); }}
+.hero24-head {{ display:flex; flex-direction:column; gap:2px; margin-bottom:16px; }}
+.h24-kicker {{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--guru-300); }}
+.h24-title {{ font-size:22px; font-weight:800; color:var(--text); line-height:1.15; }}
+.hero24-cap {{ margin-top:14px; }}
+@media(max-width:600px){{ .h24-title {{ font-size:17px; }} }}
 .df-op {{ align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }}
 .df-arrow {{ color:var(--guru-300); }}
 /* Árbol de dos ramas (24h) · Contactos = origen de ambas */
@@ -1806,9 +1814,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     </div>
   </details>
 
-  <div class="section-label">Contactos generados · últimas 24h</div>
-  {day_funnel}
-  <div class="caption">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: {meet_names}</div>
+  <div class="hero24">
+    <div class="hero24-head"><span class="h24-kicker">📣 Titular del día · últimas 24h</span>
+      <span class="h24-title">Nuevos contactos y en qué estado están</span></div>
+    {day_funnel}
+    <div class="caption hero24-cap">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: {meet_names}</div>
+  </div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
