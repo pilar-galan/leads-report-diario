@@ -1223,8 +1223,12 @@ def render(d):
         '</div></div>'
         # Rama freemium
         '<div class="dt-branch dt-free">'
-        f'<div class="dt-btag dt-free-tag">🧊 Freemium · <b>{pct(dd["free"], dtot)}</b> del total ({dd["free"]})</div>'
-        '<div class="dt-free-txt">Altas gratuitas por la app. <b>No pasan por Leads, MQL ni SQL</b>, ni por reuniones. Se quedan aquí (fuera del embudo comercial).</div>'
+        f'<div class="dt-btag dt-free-tag">🧊 Producto gratuito · <b>{pct(dd["free"], dtot)}</b> del total</div>'
+        '<div class="dt-row">'
+        f'<div class="df-card df-free-card"><div class="fc-label">Free</div><div class="fc-value">{dd["free"]}</div>'
+        f'<div class="fc-sub">{pct(dd["free"], dtot)} del total</div></div>'
+        '<div class="dt-free-txt">Altas gratuitas por la app. <b>No pasan por Leads, MQL ni SQL</b>, ni por reuniones agendadas. Se quedan aquí, fuera del embudo comercial.</div>'
+        '</div>'
         '</div>'
         '</div>'
         '</div>')
@@ -1523,9 +1527,14 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .df-arrow {{ color:var(--guru-300); }}
 /* Árbol de dos ramas (24h) */
 .daytree {{ display:flex; align-items:stretch; gap:12px; flex-wrap:wrap; }}
-.dt-root {{ flex:0 0 auto; min-width:150px; align-self:center; background:rgba(255,255,255,.04); border:1px solid var(--border); border-left:4px solid var(--guru-400); border-radius:10px; padding:14px 16px; }}
-.dt-root .fc-value {{ font-size:36px; }}
+.dt-root {{ flex:0 0 auto; min-width:170px; align-self:center; text-align:center; background:linear-gradient(135deg,rgba(255,107,91,.12),rgba(34,211,238,.10)); border:1px solid rgba(255,107,91,.3); border-radius:14px; padding:20px 22px; }}
+.dt-root .fc-label {{ font-size:11px; }}
+.dt-root .fc-value {{ font-size:64px; font-weight:800; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }}
+.dt-root .fc-sub {{ font-size:11px; }}
 .dt-split {{ align-self:center; font-size:26px; color:var(--guru-300); font-weight:800; }}
+.df-free-card {{ flex:0 0 auto; min-width:120px; border-top-color:var(--teal); background:rgba(34,211,238,.08); text-align:center; }}
+.df-free-card .fc-value {{ font-size:34px; color:var(--teal); }}
+.dt-free-txt {{ flex:1; align-self:center; }}
 .dt-branches {{ flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px; }}
 .dt-branch {{ border:1px solid var(--border); border-radius:12px; padding:12px 14px; }}
 .dt-com {{ background:rgba(255,107,91,.05); border-color:rgba(255,107,91,.28); }}
