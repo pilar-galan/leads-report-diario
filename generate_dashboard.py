@@ -520,7 +520,9 @@ def main():
         d1 = p.get("hs_analytics_source_data_1") or ""
         lc = p.get("lifecyclestage") or ""
         if is_internal(email): internal += 1; continue
-        if is_test(p.get("revision_ventas"), email): tests += 1; continue
+        # No excluir como test a quien ya ha llegado a Oportunidad/Cliente (son negocios reales)
+        if is_test(p.get("revision_ventas"), email) and LC_RANK.get(lc, 0) < 4:
+            tests += 1; continue
         # Las importaciones (CRM_UI / IMPORT) se excluyen SALVO que sean freemium
         if is_import(src, d1) and lc != "1378463825":
             imports += 1; continue
