@@ -674,13 +674,17 @@ def main():
         "usuario_free": ("Prueba gratuita", "cold"),
         "": ("Sin asignar / sin trabajar", "cold"),
     }
+    # El desglose por estado se hace SOLO sobre los GESTIONADOS (así suma al total de gestionados)
+    gest_contacts = [c for c in sql_stage_contacts if rev_group(c["rev"]) == "gestionado"]
     ls_counts = {}
-    for c in sql_stage_contacts:
+    for c in gest_contacts:
         lbl, grp = LEAD_STATE_LABELS.get(c["lead_state"], (c["lead_state"] or "Sin asignar", "cold"))
         ls_counts.setdefault(lbl, [0, grp])
         ls_counts[lbl][0] += 1
     sql_disp["lead_status"] = sorted(([lbl, n, grp] for lbl, (n, grp) in ls_counts.items()), key=lambda x: -x[1])
-    sql_disp["en_oport"] = sum(1 for c in sql_stage_contacts if c["lead_state"] in ("OPEN_DEAL", "cliente"))
+    # De los gestionados, cuántos tienen negocio/oportunidad abierta (deal abierto o cliente)
+    sql_disp["en_oport"] = sum(1 for c in gest_contacts if c["lead_state"] in ("OPEN_DEAL", "cliente"))
+    sql_disp["ls_base"] = len(gest_contacts)
 
     # ── Ramas del workflow de precualificación (por volumen de consultas) ──
     n_lt3000  = sum(1 for c in hist_fun if c["lc"] == "1394675095")   # <3000 → descartar + email
@@ -975,20 +979,11 @@ def render(d):
     for i, (name, val, conv, why, base, color) in enumerate(flow_stages):
         if i > 0:
             flow_html += f'<div class="flow-arrow"><span class="fa-pct">{conv}</span><span class="fa-base">{base}</span></div>'
-        star = ' <span class="fs-star">*</span>' if name == "Leads" else ""
         flow_html += (f'<div class="fstage" style="border-top-color:{color}">'
                       f'<div class="fs-count" style="color:{color}">{val}</div>'
-                      f'<div class="fs-name">{esc(name)}{star}</div>'
+                      f'<div class="fs-name">{esc(name)}</div>'
                       f'<div class="fs-why">{esc(why)}</div></div>')
     flow_html += '</div>'
-    # Nota destacada: los contactos que no pasan a Lead son freemium
-    free_now = cum["free"]
-    flow_html += (
-        '<div class="flow-freenote">'
-        f'* El porcentaje de contactos que no pasan a Lead ({free_now} ahora mismo) corresponde a los '
-        'Freemium —altas gratuitas por la app— que se quedan en el «limbo» del embudo. '
-        'Cuando se retire el registro gratuito de la web, dejarán de tratarse y generarse, y prácticamente '
-        'todo el total de contactos pasará directo a Lead → MQL → SQL.</div>')
 
     # Rama: estado / disposición de los SQL
     st = sd["total"] or 1
@@ -1010,23 +1005,25 @@ def render(d):
             '<div class="fbr-foot">Volumen y % de cada razón sobre el total de descartes con motivo registrado. Detalle acumulado más abajo.</div>')
     else:
         raz_block = '<div class="fb-raz-head">Sin razones de descarte registradas todavía.</div>'
-    # Estado del lead de los SQL (por qué han pasado o no a oportunidad)
+    # Estado del lead de los GESTIONADOS (suma al total de gestionados)
     GRP_ICON = {"adv": "🟢", "warm": "🟡", "cold": "🔴"}
+    lb = sd.get("ls_base", 0) or 1
     ls_rows = ""
     for lbl, n, grp in sd.get("lead_status", []):
         ls_rows += (f'<div class="ls-row ls-{grp}"><span class="ls-ico">{GRP_ICON.get(grp,"•")}</span>'
                     f'<span class="ls-l">{esc(lbl)}</span>'
-                    f'<span class="ls-n">{n} <span class="ls-p">{pct(n, st)}</span></span></div>')
+                    f'<span class="ls-n">{n} <span class="ls-p">{pct(n, lb)}</span></span></div>')
     ls_block = (
         '<div class="fb-lsbox">'
-        f'<div class="fb-ls-head">🧭 ¿En qué estado están esos SQL? · <b>{sd.get("en_oport",0)}</b> con negocio/oportunidad abierta · '
-        'el resto explica <b>por qué aún no han pasado</b> a oportunidad (estado del lead en HubSpot):</div>'
+        f'<div class="fb-ls-head">🧭 De los <b>{sd.get("ls_base",0)} SQL gestionados</b> por Agustín · '
+        f'<b>{sd.get("en_oport",0)}</b> tienen <b>oportunidad / negocio abierto</b> en pipeline '
+        f'({pct(sd.get("en_oport",0), lb)}) · el resto sigue en SQL con este estado (suma = gestionados):</div>'
         f'<div class="ls-list">{ls_rows}</div>'
-        '<div class="fbr-foot">Los SQL que sí pasan a Oportunidad <b>salen de la etapa SQL</b> (pasan a etapa Oportunidad, contadas como empresas arriba). '
-        'Este desglose muestra los que <b>siguen en SQL</b> y su estado: 🟢 avanzando · 🟡 en proceso/contactados · 🔴 fríos, sin respuesta o sin trabajar.</div>'
+        '<div class="fbr-foot">🟢 avanzando (deal abierto/cliente) · 🟡 en proceso/contactados · 🔴 fríos, mareados, prueba gratuita o sin trabajar. '
+        'Los que sí generan oportunidad y avanzan de verdad <b>salen de la etapa SQL</b> hacia Oportunidad (empresas, arriba).</div>'
         '</div>')
     flow_branch = (
-        '<div class="flow-branch">'
+        '<div class="flow-branch nobrd">'
         f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
         '<div class="fb-states">'
         f'<div class="fb-state ok"><div class="fbs-n">{sd["gestionado"]}</div><div class="fbs-l">🟢 Gestionados</div>'
@@ -1038,13 +1035,14 @@ def render(d):
         '</div>'
         '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL gestionados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (<b>Agustín</b>) → si cualifican pasan a <b>Oportunidad</b>.</div>'
         '<div class="fb-conv">'
-        f'<div class="fbc ok">✅ <b>{pct(cum["opp"], cum["sql"])}</b> de los SQL pasan a <b>Oportunidad</b></div>'
+        f'<div class="fbc ok">✅ <b>{sd.get("en_oport",0)}</b> de los {sd.get("ls_base",0)} gestionados ({pct(sd.get("en_oport",0), lb)}) tienen <b>oportunidad abierta</b></div>'
         f'<div class="fbc bad">❌ <b>{pct(sd["descartado"], resueltos)}</b> de los SQL resueltos se <b>descartan</b></div>'
         '</div>'
         f'{ls_block}'
         f'<div class="fb-razbox">{raz_block}</div>'
         '</div>')
-    flow_full = flow_html + flow_branch
+    # Se separan: el embudo (flow_html) y la rama de estado de SQL (flow_branch) para intercalar Paid media
+    flow_full = flow_html
 
     # ── Contadores de las ramas del workflow de precualificación ──
     pq = d["preq"]
@@ -1266,7 +1264,7 @@ def render(d):
     return TEMPLATE.format(
         title=esc(d["title"]), fecha_larga=esc(d["fecha_larga"]), periodo_txt=esc(d["periodo_txt"]),
         fun_label=esc(d["fun_label"]), chart_label=esc(d["chart_label"]),
-        sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full,
+        sales_pyr=sales_pyr, free_pyr=free_pyr, flow_full=flow_full, flow_branch=flow_branch,
         preq_sales_stats=preq_sales_stats, preq_free_stats=preq_free_stats, origin_html=origin_html,
         canal_pref_html=canal_pref_html, paid_html=paid_html,
         svg_leads=d["svg_leads"], svg_sql=d["svg_sql"], svg_opp=d["svg_opp"], svg_cli=d["svg_cli"],
@@ -1380,6 +1378,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fa-pct {{ font-size:12px; font-weight:800; color:var(--guru-300); }}
 .fa-base {{ font-size:9px; color:var(--muted); white-space:nowrap; }}
 .flow-branch {{ margin-top:16px; border-top:1px dashed var(--border); padding-top:16px; }}
+.flow-branch.nobrd {{ margin-top:0; border-top:none; padding-top:0; }}
 .fb-head {{ font-size:13px; font-weight:700; margin-bottom:12px; }}
 .fb-states {{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }}
 @media(max-width:640px){{ .fb-states {{ grid-template-columns:1fr; }} .flow-track {{ flex-direction:column; }} .flow-arrow::before {{ content:"↓"; }} .fstage {{ min-width:0; }} }}
@@ -1644,12 +1643,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="section-label">Paid media · gasto y embudo · acumulado desde el 1 de enero</div>
-  <div class="card">
-    {paid_html}
-    <div class="alert alert-muted"><span>💰</span><div>Embudo de los canales de <strong>pago</strong> (Google Ads + Social Ads) desde el 1 de enero: contactos → leads → MQL → SQL → oportunidades (empresas), con % de conversión. El <strong>gasto</strong> se rellena manualmente (aún no conectado a Google/Meta Ads); en cuanto lo tengamos, se calculan CPL, coste por SQL y por oportunidad automáticamente.</div></div>
-  </div>
-
   <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
   <div class="card">
     <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
@@ -1670,10 +1663,18 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="fn-note">Cada etapa, por qué se clasifica así, su volumen y el % de conversión respecto a la etapa anterior</div>
     {flow_full}
   </div>
-  <div class="caption">ℹ️ Cómo leer el embudo: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).
-    <br><br><strong>¿Qué contactos NO llegan a Lead?</strong>
-    <br>• Ya excluidos <em>antes</em> de contar (no están en el total): <strong>{excl_tests}</strong> test/prueba · <strong>{excl_internal}</strong> internos @gurusup (empleados) · <strong>{excl_imports}</strong> de integraciones/importaciones <em>(salvo freemium, que sí se cuentan)</em>.
-    <br>• Dentro de los contactos contados, los que no pasan a Lead son sobre todo <strong>freemium</strong> (altas por la app) y <strong>suscriptores / sin etapa asignada</strong>.</div>
+  <div class="caption">ℹ️ Cómo leer el embudo: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).</div>
+
+  <div class="section-label">Paid media · gasto y embudo · acumulado desde el 1 de enero</div>
+  <div class="card">
+    {paid_html}
+    <div class="alert alert-muted"><span>💰</span><div>Embudo de los canales de <strong>pago</strong> (Google Ads + Social Ads) desde el 1 de enero: contactos → leads → MQL → SQL → oportunidades (empresas), con % de conversión. El <strong>gasto</strong> aún no está conectado (lo estamos trabajando); en cuanto se cargue, se calculan CPL, coste por SQL y por oportunidad automáticamente.</div></div>
+  </div>
+
+  <div class="section-label">Estado de los SQL · gestión, conversión y descarte · acumulado</div>
+  <div class="fn-box">
+    {flow_branch}
+  </div>
 
   <div class="section-label">Origen de los leads · ¿de dónde vienen? · acumulado desde el 1 de enero</div>
   <div class="card">
