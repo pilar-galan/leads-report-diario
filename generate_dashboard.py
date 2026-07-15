@@ -1042,6 +1042,7 @@ def render(d):
     flow_branch = (
         '<div class="flow-branch nobrd">'
         f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
+        f'{ls_block}'
         '<div class="fb-states">'
         f'<div class="fb-state ok"><div class="fbs-n">{sd["gestionado"]}</div><div class="fbs-l">🟢 Contactados / gestionados</div>'
         f'<div class="fbs-p">{pct(sd["gestionado"], st)} de los SQL</div><small>se les ha llamado o agendado (Agustín)</small></div>'
@@ -1052,7 +1053,6 @@ def render(d):
         '</div>'
         '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL contactados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (<b>Agustín</b>) → si cualifican pasan a <b>Oportunidad</b>.</div>'
         f'{conv_block}'
-        f'{ls_block}'
         f'<div class="fb-razbox">{raz_block}</div>'
         '</div>')
     # Se separan: el embudo (flow_html) y la rama de estado de SQL (flow_branch) para intercalar Paid media
