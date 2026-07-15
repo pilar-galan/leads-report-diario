@@ -607,7 +607,7 @@ def main():
             {"propertyName": "hs_is_closed_won", "operator": "EQ", "value": "false"},
             {"propertyName": "createdate", "operator": "GTE", "value": funnel_iso},
         ], ["dealname", "dealstage", "pipeline", "createdate",
-            "hs_analytics_source", "hs_analytics_source_data_1"]):
+            "hs_analytics_source", "hs_analytics_source_data_1", "motivo_de_descalificacion"]):
             p = dl["properties"]
             if not valid_deal(p.get("dealname", "")):
                 continue
@@ -615,9 +615,13 @@ def main():
             if not is_marketing(src, d1):
                 continue
             icon, label = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
+            raw_mot = p.get("motivo_de_descalificacion") or ""
+            razon = " · ".join(UNIFY_DESCARTE.get(x.strip(), x.strip())
+                               for x in raw_mot.split(";") if x.strip())
             lost_deals.append({"id": dl["id"], "name": clean_deal(p.get("dealname", "—")) or "—",
                                "stage": "lost", "created": (p.get("createdate") or "")[:10],
-                               "channel": f"{icon} {label}", "brain": is_brain_pl(p.get("pipeline", ""))})
+                               "channel": f"{icon} {label}", "brain": is_brain_pl(p.get("pipeline", "")),
+                               "razon": razon})
     except Exception as e:
         print(f"  lost deals error: {e}")
 
@@ -1269,7 +1273,7 @@ def render(d):
         group = sorted(group, key=lambda x: (x["channel"], x.get("mtg_sort", float("inf"))))
         if not group:
             continue
-        deal_rows += f'<tr class="stage-divider"><td colspan="4">{esc(label)} · {len(group)} deals</td></tr>'
+        deal_rows += f'<tr class="stage-divider"><td colspan="5">{esc(label)} · {len(group)} deals</td></tr>'
         for deal in group:
             nt = ' <span class="new-tag">NUEVO</span>' if deal["id"] in d["nuevos_ids"] else ""
             if deal.get("mtg_txt"):
@@ -1277,9 +1281,12 @@ def render(d):
                 fecha_td = f'<td class="{cls}">{esc(deal["mtg_txt"])}</td>'
             else:
                 fecha_td = '<td class="dt-none">—</td>'
+            razon = deal.get("razon", "")
+            razon_td = (f'<td><span class="pill pill-lost">{esc(razon)}</span></td>'
+                        if razon else '<td class="dt-none"></td>')
             deal_rows += (f'<tr data-name="{esc(deal["name"].lower())}"><td><strong>{esc(deal["name"])}</strong>{nt}</td>'
                           f'<td>{esc(deal["channel"])}</td><td><span class="pill {pill}">{esc(label)}</span></td>'
-                          f'{fecha_td}</tr>')
+                          f'{fecha_td}{razon_td}</tr>')
     chan_dist_txt = " · ".join(f"{n} {esc(lbl)}" for lbl, n in sorted(d["chan_dist"].items(), key=lambda x: -x[1])) or "—"
 
     return TEMPLATE.format(
@@ -1729,6 +1736,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   </div>
   <div class="caption">ℹ️ Cómo leer el embudo: <strong>«Leads» y «MQL» son acumulativos</strong> —incluyen a los contactos que ya avanzaron a etapas posteriores (SQL, oportunidad o cliente)—, por eso cada etapa es menor que la anterior. <strong>«Oportunidad» y «Cliente» se cuentan como empresas únicas</strong> (una por compañía), no como contactos; por eso no suman contra los contactos/leads. <strong>MQL y SQL se calculan como % sobre leads</strong> (no sobre el total de contactos, que incluye freemium y no forma parte del embudo comercial).</div>
 
+  <div class="section-label">Leads · origen y desglose · acumulado desde el 1 de enero</div>
+  <div class="card">
+    {origin_html}
+    <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Cada bloque con su % sobre el total de leads. Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
+  </div>
+
   <div class="section-label">Paid media · gasto y embudo · acumulado desde el 1 de enero</div>
   <div class="card">
     {paid_html}
@@ -1738,12 +1751,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Estado de los SQL · gestión, conversión y descarte · acumulado</div>
   <div class="fn-box">
     {flow_branch}
-  </div>
-
-  <div class="section-label">Origen de los leads · ¿de dónde vienen? · acumulado desde el 1 de enero</div>
-  <div class="card">
-    {origin_html}
-    <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
   </div>
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
@@ -1763,7 +1770,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       💼 <strong style="color:var(--guru-300)">{ventas_count}</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
-    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa / estado</th><th>📅 Última reunión</th></tr></thead>
+    <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa / estado</th><th>📅 Última reunión</th><th>Razón de descarte</th></tr></thead>
     <tbody>{deal_rows}</tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
     <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Incluye las etapas del pipeline (Discovery → Demo → Best Case) y los <span class="dt-past">perdidos inbound</span>. Cada fila muestra empresa, canal y etapa/estado, <strong>ordenadas dentro de cada etapa por canal</strong>. La fecha es la <strong>última reunión</strong> (en <span class="dt-next">salmón</span> si es futura). Reparto por canal: {chan_dist_txt}.</div></div>
