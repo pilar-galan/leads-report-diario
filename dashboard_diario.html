@@ -36,7 +36,9 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .glossary .gl-hint { font-weight:400; font-size:11px; color:var(--muted); }
 .gl-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:6px 0 16px; }
 @media(max-width:760px){ .gl-grid { grid-template-columns:1fr; } }
-.gl-card { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:9px; padding:11px 13px; }
+.gl-card { display:flex; gap:11px; align-items:flex-start; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:9px; padding:11px 13px; }
+.gl-card.gl-wide { grid-column:1 / -1; border-color:rgba(255,107,91,.3); background:rgba(255,107,91,.05); }
+.gl-card .gl-e { font-size:20px; flex:0 0 auto; line-height:1.2; }
 .gl-card b { display:block; font-size:13px; color:var(--guru-300); margin-bottom:3px; }
 .gl-card .gl-en { font-weight:400; font-size:11px; color:var(--muted); }
 .gl-card span { font-size:12px; color:var(--text-2); line-height:1.45; }
@@ -177,32 +179,33 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 @media(max-width:900px){ .day-kpis { grid-template-columns:repeat(3,1fr); } }
 @media(max-width:520px){ .day-kpis { grid-template-columns:repeat(2,1fr); } }
 .df-card { flex:1; min-width:120px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }
-.df-card .fc-value { font-size:28px; }
+.df-card .fc-value { font-size:34px; }
 .df-state { border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }
 .df-action { border-top-color:var(--teal); background:rgba(34,211,238,.06); }
 .df-action .fc-value { color:var(--teal); }
-.df-op { align-self:center; font-size:20px; font-weight:800; color:var(--muted); flex:0 0 auto; }
+.df-op { align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }
 .df-arrow { color:var(--guru-300); }
-/* Árbol de dos ramas (24h) */
-.daytree { display:flex; align-items:stretch; gap:12px; flex-wrap:wrap; }
-.dt-root { flex:0 0 auto; min-width:170px; align-self:center; text-align:center; background:linear-gradient(135deg,rgba(255,107,91,.12),rgba(34,211,238,.10)); border:1px solid rgba(255,107,91,.3); border-radius:14px; padding:20px 22px; }
-.dt-root .fc-label { font-size:11px; }
-.dt-root .fc-value { font-size:64px; font-weight:800; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+/* Árbol de dos ramas (24h) · Contactos = origen de ambas */
+.daytree { display:flex; align-items:stretch; gap:14px; flex-wrap:wrap; }
+.dt-root { flex:0 0 auto; min-width:190px; align-self:stretch; display:flex; flex-direction:column; justify-content:center; text-align:center; background:linear-gradient(135deg,rgba(255,107,91,.16),rgba(34,211,238,.12)); border:2px solid rgba(255,107,91,.4); border-radius:16px; padding:22px 24px; box-shadow:0 6px 24px rgba(255,107,91,.18); }
+.dt-root .fc-label { font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+.dt-root .fc-value { font-size:72px; font-weight:800; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 .dt-root .fc-sub { font-size:11px; }
-.dt-split { align-self:center; font-size:26px; color:var(--guru-300); font-weight:800; }
+.dt-branches { flex:1; min-width:280px; display:flex; flex-direction:column; gap:12px; }
+.dt-branch { display:flex; align-items:center; gap:10px; }
+.dt-arm { flex:0 0 auto; font-size:26px; font-weight:800; color:var(--guru-300); }
+.dt-free .dt-arm { color:var(--teal); }
+.dt-body { flex:1; border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+.dt-com .dt-body { background:rgba(255,107,91,.05); border-color:rgba(255,107,91,.28); }
+.dt-free .dt-body { background:rgba(34,211,238,.05); border-color:rgba(34,211,238,.28); }
 .df-free-card { flex:0 0 auto; min-width:120px; border-top-color:var(--teal); background:rgba(34,211,238,.08); text-align:center; }
 .df-free-card .fc-value { font-size:34px; color:var(--teal); }
-.dt-free-txt { flex:1; align-self:center; }
-.dt-branches { flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px; }
-.dt-branch { border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
-.dt-com { background:rgba(255,107,91,.05); border-color:rgba(255,107,91,.28); }
-.dt-free { background:rgba(34,211,238,.05); border-color:rgba(34,211,238,.28); }
+.dt-free-txt { flex:1; align-self:center; font-size:13px; color:var(--text-2); line-height:1.5; }
 .dt-btag { font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:10px; }
 .dt-btag b { color:var(--guru-300); font-size:14px; }
 .dt-free-tag b { color:var(--teal); }
 .dt-row { display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }
-.dt-free-txt { font-size:13px; color:var(--text-2); line-height:1.5; }
-@media(max-width:760px){ .daytree { flex-direction:column; } .dt-split { transform:rotate(90deg); } .dt-row { flex-direction:column; } .df-op { transform:rotate(90deg); align-self:center; } }
+@media(max-width:760px){ .daytree { flex-direction:column; } .dt-branch { flex-direction:column; align-items:stretch; } .dt-arm { transform:rotate(90deg); align-self:center; } .dt-row { flex-direction:column; } .df-op { transform:rotate(90deg); align-self:center; } }
 .free-kpi { margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }
 .free-kpi .fk-num { font-size:32px; font-weight:800; color:var(--teal); }
 .free-kpi .fk-txt { font-size:12px; color:var(--text-2); }
@@ -381,30 +384,30 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
-  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Miércoles, 15 de julio de 2026 · 14 jul 09:00 → 15 jul 16:37 (hora España)</p></div></div>
-  <div class="sync-bar">Generado el 15 Jul 2026 · 16:37 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
+  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Miércoles, 15 de julio de 2026 · 14 jul 09:00 → 15 jul 16:45 (hora España)</p></div></div>
+  <div class="sync-bar">Generado el 15 Jul 2026 · 16:45 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
 
 <div class="main">
 
   <details class="glossary">
     <summary><span class="gl-ico">📖</span> Minidiccionario · qué significa cada término <span class="gl-hint">(pulsa para desplegar)</span></summary>
     <div class="gl-grid">
-      <div class="gl-card"><b>Contacto</b><span>Cualquier registro (un email) que entra en el CRM por alguna acción. Excluye tests, empleados @gurusup e importaciones (salvo freemium).</span></div>
-      <div class="gl-card"><b>Lead</b><span>Contacto que ha entrado en el CRM pero <strong>aún no está cualificado</strong> ni tiene un interés identificado. Es, básicamente, un email que ha entrado por alguna acción.</span></div>
-      <div class="gl-card"><b>MQL <span class="gl-en">· Marketing Qualified Lead</span></b><span>Contacto que en algún momento ha <strong>consumido contenido de marketing</strong> (ebook, caso de éxito, webinar o cualquier material informativo sobre el producto o los clientes). Ha mostrado un interés más cualificado.</span></div>
-      <div class="gl-card"><b>SQL <span class="gl-en">· Sales Qualified Lead</span></b><span>Contacto con un <strong>problema / necesidad (pain) identificado</strong> que ve a GuruSup como posible solución y está valorando herramientas de este tipo. Solicita de forma <strong>proactiva</strong> una reunión, llamada o demo con ventas. Cada SQL lleva su <strong>razón de cualificación o descarte</strong> para aprender del proceso.</span></div>
-      <div class="gl-card"><b>Oportunidad</b><span>SQL <strong>precualificado</strong> del que se genera un negocio (deal) para agendar la <strong>primera reunión (Discovery)</strong> en el pipeline y validar si encajan necesidad, expectativas y propuesta antes de la demo. Se cuenta como <strong>empresa única</strong>.</span></div>
-      <div class="gl-card"><b>Cliente</b><span>Empresa que ha cerrado como cliente (customer). También se cuenta como empresa única.</span></div>
-      <div class="gl-card"><b>Pipeline de ventas</b><span>Se abre al generarse una oportunidad. Tiene <strong>distintas etapas</strong> (Discovery → Demo/Reunión → Best Case → Cliente) e identifica el punto en el que está cada negocio en su camino a cliente.</span></div>
-      <div class="gl-card"><b>Funnel / embudo</b><span>El <strong>journey</strong> o viaje del contacto desde que entra hasta que convierte, pasando por todas las etapas (Contacto → Lead → MQL → SQL → Oportunidad → Cliente).</span></div>
-      <div class="gl-card"><b>Reunión agendada (al período)</b><span>Demos/discovery agendadas en la ventana de tiempo, más las llamadas de los SDR (Agustín/Juanma) del período.</span></div>
-      <div class="gl-card"><b>Descarte / descualificación</b><span>SQL que no avanza. Se registra el <strong>motivo</strong> (precio, volumen, timing, etc.) para analizar patrones y aprender del proceso.</span></div>
-      <div class="gl-card"><b>Freemium</b><span>Alta gratuita por la app (autoservicio). No forma parte del embudo comercial; por eso no cuenta como lead ni oportunidad.</span></div>
+      <div class="gl-card"><span class="gl-e">👤</span><div><b>Contacto</b><span>Cualquier persona (un email) que entra en el CRM. Excluye tests, empleados e importaciones.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🌱</span><div><b>Lead</b><span>Contacto <strong>sin cualificar</strong>: ha entrado, pero aún no sabemos su interés.</span></div></div>
+      <div class="gl-card"><span class="gl-e">📘</span><div><b>MQL <span class="gl-en">· Marketing Qualified Lead</span></b><span>Lead que ha <strong>consumido contenido</strong> (ebook, webinar, blog…). Interés medio.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🎯</span><div><b>SQL <span class="gl-en">· Sales Qualified Lead</span></b><span>Tiene una <strong>necesidad real</strong> y <strong>pide demo/reunión</strong> con ventas. Listo para trabajar.</span></div></div>
+      <div class="gl-card"><span class="gl-e">💼</span><div><b>Oportunidad</b><span>SQL con <strong>negocio (deal) abierto</strong> en el pipeline. Se cuenta por <strong>empresa</strong>.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🏆</span><div><b>Cliente</b><span>Empresa que ha <strong>cerrado</strong> y ya compra. Se cuenta por empresa.</span></div></div>
+      <div class="gl-card gl-wide"><span class="gl-e">🛠️</span><div><b>Pipeline de ventas <span class="gl-en">· pipeline de negocio</span></b><span>Se <strong>abre al crear un nuevo deal</strong> (oportunidad) y recorre las etapas del negocio: <strong>Discovery → Demo → Best Case → Cliente</strong>. Muestra en qué punto está cada empresa camino a cliente.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🔄</span><div><b>Funnel / embudo</b><span>El <strong>viaje</strong> del contacto de principio a fin: Contacto → Lead → MQL → SQL → Oportunidad → Cliente.</span></div></div>
+      <div class="gl-card"><span class="gl-e">📅</span><div><b>Reunión agendada</b><span>Demo/discovery citada + llamadas de los SDR en el período.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🚫</span><div><b>Descarte</b><span>SQL que no avanza. Se anota el <strong>motivo</strong> (precio, volumen, timing…).</span></div></div>
+      <div class="gl-card"><span class="gl-e">🧊</span><div><b>Freemium</b><span>Alta <strong>gratis por la app</strong>. No entra en el embudo comercial.</span></div></div>
     </div>
   </details>
 
   <div class="section-label">Contactos generados · últimas 24h</div>
-  <div class="daytree"><div class="dt-root"><div class="fc-label">Contactos · últimas 24h</div><div class="fc-value">27</div><div class="fc-sub">total de nuevos contactos que entran</div></div><div class="dt-split">➜</div><div class="dt-branches"><div class="dt-branch dt-com"><div class="dt-btag">🛠️ Proceso comercial · <b>93%</b> del total (25)</div><div class="dt-row"><div class="df-card df-state"><div class="fc-label">Leads</div><div class="fc-value">13</div><div class="fc-sub">📘 1 contenido · ❔ 12 sin info</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">MQL</div><div class="fc-value">0</div><div class="fc-sub">consumió contenido</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">12</div><div class="fc-sub">piden demo</div></div><div class="df-op df-arrow">→</div><div class="df-card df-action"><div class="fc-label">SQL contactados por Agustín</div><div class="fc-value">14</div><div class="fc-sub">📞 14 SQL únicos llamados · 🔁 15 intentos (con reintentos) · 🎥 0 videollamadas</div></div></div></div><div class="dt-branch dt-free"><div class="dt-btag dt-free-tag">🧊 Producto gratuito · <b>7%</b> del total</div><div class="dt-row"><div class="df-card df-free-card"><div class="fc-label">Free</div><div class="fc-value">2</div><div class="fc-sub">7% del total</div></div><div class="dt-free-txt">Altas gratuitas por la app. <b>No pasan por Leads, MQL ni SQL</b>, ni por reuniones agendadas. Se quedan aquí, fuera del embudo comercial.</div></div></div></div></div>
+  <div class="daytree"><div class="dt-root"><div class="fc-label">Contactos · últimas 24h</div><div class="fc-value">27</div><div class="fc-sub">total de nuevos contactos que entran</div></div><div class="dt-branches"><div class="dt-branch dt-com"><div class="dt-arm">→</div><div class="dt-body"><div class="dt-btag">🛠️ Proceso comercial · <b>93%</b> del total (25)</div><div class="dt-row"><div class="df-card df-state"><div class="fc-label">Leads</div><div class="fc-value">13</div><div class="fc-sub">📘 1 contenido · ❔ 12 sin info</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">MQL</div><div class="fc-value">0</div><div class="fc-sub">consumió contenido</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">12</div><div class="fc-sub">piden demo</div></div><div class="df-op df-arrow">→</div><div class="df-card df-action"><div class="fc-label">SQL contactados por Agustín</div><div class="fc-value">14</div><div class="fc-sub">📞 14 SQL únicos llamados · 🔁 15 intentos (con reintentos) · 🎥 0 videollamadas</div></div></div></div></div><div class="dt-branch dt-free"><div class="dt-arm">→</div><div class="dt-body"><div class="dt-btag dt-free-tag">🧊 Producto gratuito · <b>7%</b> del total</div><div class="dt-row"><div class="df-card df-free-card"><div class="fc-label">Free</div><div class="fc-value">2</div><div class="fc-sub">7% del total</div></div><div class="dt-free-txt">Altas gratuitas por la app. <b>No pasan por Leads, MQL ni SQL</b>, ni por reuniones agendadas. Se quedan aquí, fuera del embudo comercial.</div></div></div></div></div></div>
   <div class="caption">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: <strong>Gonzalo</strong> (Social Ads) · <strong>Jaume</strong> (Chat web)</div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
@@ -502,7 +505,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 15 Jul 2026 · 16:37 (hora España)
+    GuruSup · Dashboard Diario · generado el 15 Jul 2026 · 16:45 (hora España)
   </div>
 </div>
 
