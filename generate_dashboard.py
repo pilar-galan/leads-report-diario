@@ -1191,13 +1191,23 @@ def render(d):
     def dcard(label, val, sub, cls="f-c-default"):
         return f'<div class="f-card {cls}"><div class="fc-label">{label}</div><div class="fc-value">{val}</div><div class="fc-sub">{sub}</div></div>'
     video_day = max(d["agenda_day"] - d["calls_day"], 0)
-    # Flujo visual: Contactos = Leads + MQL + SQL  →  Llamadas realizadas SQL  (+ Oportunidades si >0)
+    comercial = dd["lead"]   # rank>=1 = todo lo que entra al embudo comercial
+    # Árbol: Contactos → (rama comercial: Leads+MQL+SQL → Llamadas)  y  (rama freemium: fin)
+    opp_step = ""
+    if dd["opp"] > 0:
+        opp_step = (f'<div class="df-op df-arrow">→</div>'
+                    f'<div class="df-card df-action"><div class="fc-label">Oportunidades</div><div class="fc-value">{dd["opp"]}</div>'
+                    f'<div class="fc-sub">empresas</div></div>')
     day_flow = (
-        '<div class="dayflow">'
-        f'<div class="df-card df-state"><div class="fc-label">Contactos</div><div class="fc-value">{dtot}</div>'
-        '<div class="fc-sub">total que entra · 24h</div></div>'
-        '<div class="df-op">=</div>'
-        '<div class="df-group">'
+        '<div class="daytree">'
+        f'<div class="dt-root"><div class="fc-label">Contactos · últimas 24h</div><div class="fc-value">{dtot}</div>'
+        '<div class="fc-sub">total de nuevos contactos que entran</div></div>'
+        '<div class="dt-split">➜</div>'
+        '<div class="dt-branches">'
+        # Rama comercial
+        '<div class="dt-branch dt-com">'
+        f'<div class="dt-btag">🛠️ Proceso comercial · <b>{pct(comercial, dtot)}</b> del total ({comercial})</div>'
+        '<div class="dt-row">'
         f'<div class="df-card df-state"><div class="fc-label">Leads</div><div class="fc-value">{dd["lead1"]}</div>'
         f'<div class="fc-sub">📘 {og["d_content"]} contenido · ❔ {og["d_noinfo"]} sin info</div></div>'
         '<div class="df-op">+</div>'
@@ -1206,19 +1216,18 @@ def render(d):
         '<div class="df-op">+</div>'
         f'<div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">{dd["sql"]}</div>'
         '<div class="fc-sub">piden demo</div></div>'
-        '</div>'
         '<div class="df-op df-arrow">→</div>'
         f'<div class="df-card df-action"><div class="fc-label">Llamadas realizadas SQL</div><div class="fc-value">{d["calls_day"]}</div>'
-        f'<div class="fc-sub">📞 {d["calls_day"]} llamadas · 🎥 {video_day} videollamadas</div></div>'
-    )
-    if dd["opp"] > 0:
-        day_flow += (f'<div class="df-op df-arrow">→</div>'
-                     f'<div class="df-card df-action"><div class="fc-label">Oportunidades</div><div class="fc-value">{dd["opp"]}</div>'
-                     f'<div class="fc-sub">{pct(dd["opp"], dtot)} del total · empresas</div></div>')
-    day_flow += '</div>'
-    # Freemium aparte (fuera del embudo comercial)
-    day_flow += (f'<div class="dayfree"><b>{dd["free"]}</b> Freemium · {pct(dd["free"], dtot)} del total '
-                 '<span>(altas gratuitas por la app · fuera del embudo comercial)</span></div>')
+        f'<div class="fc-sub">📞 {d["calls_day"]} llamadas telefónicas · 🎥 {video_day} videollamadas/mail</div></div>'
+        f'{opp_step}'
+        '</div></div>'
+        # Rama freemium
+        '<div class="dt-branch dt-free">'
+        f'<div class="dt-btag dt-free-tag">🧊 Freemium · <b>{pct(dd["free"], dtot)}</b> del total ({dd["free"]})</div>'
+        '<div class="dt-free-txt">Altas gratuitas por la app. <b>No pasan por Leads, MQL ni SQL</b>, ni por reuniones. Se quedan aquí (fuera del embudo comercial).</div>'
+        '</div>'
+        '</div>'
+        '</div>')
     day_funnel = day_flow
 
     # Canales
@@ -1505,19 +1514,28 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .day-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }}
 @media(max-width:900px){{ .day-kpis {{ grid-template-columns:repeat(3,1fr); }} }}
 @media(max-width:520px){{ .day-kpis {{ grid-template-columns:repeat(2,1fr); }} }}
-.dayflow {{ display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }}
-.df-group {{ display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }}
-.df-card {{ flex:1; min-width:130px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }}
-.df-card .fc-value {{ font-size:30px; }}
+.df-card {{ flex:1; min-width:120px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }}
+.df-card .fc-value {{ font-size:28px; }}
 .df-state {{ border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }}
 .df-action {{ border-top-color:var(--teal); background:rgba(34,211,238,.06); }}
 .df-action .fc-value {{ color:var(--teal); }}
-.df-op {{ align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }}
+.df-op {{ align-self:center; font-size:20px; font-weight:800; color:var(--muted); flex:0 0 auto; }}
 .df-arrow {{ color:var(--guru-300); }}
-.dayfree {{ margin-top:12px; background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.25); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--text-2); }}
-.dayfree b {{ color:var(--teal); font-size:18px; }}
-.dayfree span {{ color:var(--muted); font-size:11px; }}
-@media(max-width:760px){{ .dayflow, .df-group {{ flex-direction:column; }} .df-op {{ transform:rotate(90deg); align-self:center; }} }}
+/* Árbol de dos ramas (24h) */
+.daytree {{ display:flex; align-items:stretch; gap:12px; flex-wrap:wrap; }}
+.dt-root {{ flex:0 0 auto; min-width:150px; align-self:center; background:rgba(255,255,255,.04); border:1px solid var(--border); border-left:4px solid var(--guru-400); border-radius:10px; padding:14px 16px; }}
+.dt-root .fc-value {{ font-size:36px; }}
+.dt-split {{ align-self:center; font-size:26px; color:var(--guru-300); font-weight:800; }}
+.dt-branches {{ flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px; }}
+.dt-branch {{ border:1px solid var(--border); border-radius:12px; padding:12px 14px; }}
+.dt-com {{ background:rgba(255,107,91,.05); border-color:rgba(255,107,91,.28); }}
+.dt-free {{ background:rgba(34,211,238,.05); border-color:rgba(34,211,238,.28); }}
+.dt-btag {{ font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:10px; }}
+.dt-btag b {{ color:var(--guru-300); font-size:14px; }}
+.dt-free-tag b {{ color:var(--teal); }}
+.dt-row {{ display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }}
+.dt-free-txt {{ font-size:13px; color:var(--text-2); line-height:1.5; }}
+@media(max-width:760px){{ .daytree {{ flex-direction:column; }} .dt-split {{ transform:rotate(90deg); }} .dt-row {{ flex-direction:column; }} .df-op {{ transform:rotate(90deg); align-self:center; }} }}
 .free-kpi {{ margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }}
 .free-kpi .fk-num {{ font-size:32px; font-weight:800; color:var(--teal); }}
 .free-kpi .fk-txt {{ font-size:12px; color:var(--text-2); }}
