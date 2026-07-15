@@ -1098,21 +1098,28 @@ def render(d):
         "Partners": "🤝", "Otro formulario": "•",
     }
     og_mx = og["sorted"][0][1] if og["sorted"] else 1
-    og_rows = ""
-    for name, n in og["sorted"]:
+    resto = og["total"] - og["content"]
+    def og_row(name, n, cls):
         w = max(6, round(n / og_mx * 100))
-        is_content = name in og["content_set"]
-        cls = " og-content" if is_content else (" og-noinfo" if name == "Sin información" else "")
-        og_rows += (f'<div class="og-row{cls}"><div class="og-l">{ORIGIN_ICON.get(name, "•")} {esc(name)}</div>'
-                    f'<div class="og-barwrap"><div class="og-bar" style="width:{w}%"></div></div>'
-                    f'<div class="og-n">{n} <span class="og-p">{pct(n, og_tot)}</span></div></div>')
+        return (f'<div class="og-row{cls}"><div class="og-l">{ORIGIN_ICON.get(name, "•")} {esc(name)}</div>'
+                f'<div class="og-barwrap"><div class="og-bar" style="width:{w}%"></div></div>'
+                f'<div class="og-n">{n} <span class="og-p">{pct(n, og_tot)}</span></div></div>')
+    content_rows = "".join(og_row(name, n, " og-content") for name, n in og["sorted"] if name in og["content_set"])
+    rest_rows = "".join(og_row(name, n, (" og-noinfo" if name == "Sin información" else ""))
+                        for name, n in og["sorted"] if name not in og["content_set"])
+    content_rows = content_rows or '<div class="fbr-foot">Sin leads de contenido todavía.</div>'
     origin_html = (
         '<div class="og-head">'
-        f'<div class="og-stat og-content"><b>{og["content"]}</b><span>con contenido de marketing<br>(ebook · blog · webinar · herramienta · newsletter) = <b>MQL de facto</b></span></div>'
-        f'<div class="og-stat og-noinfo"><b>{og["noinfo"]}</b><span>sin información<br>(entraron sin dejar rastro de contenido)</span></div>'
-        f'<div class="og-stat"><b>{og["total"]}</b><span>leads totales<br>clasificados por origen</span></div>'
+        f'<div class="og-stat"><b>{og["total"]}</b><span>leads totales<br>(acumulado desde 1 ene)</span></div>'
+        f'<div class="og-stat og-content"><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
+        '<span>MQL · han consumido <b>contenido de marketing</b><br>(ebook · blog · webinar · herramienta · newsletter)</span></div>'
+        f'<div class="og-stat og-noinfo"><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
+        '<span>resto de leads<br>(sin información + demo + lead ads + otros)</span></div>'
         '</div>'
-        f'<div class="og-bars">{og_rows}</div>')
+        '<div class="og-sub">📘 MQL · leads por tipo de contenido consumido</div>'
+        f'<div class="og-bars">{content_rows}</div>'
+        '<div class="og-sub">Resto de leads · por origen</div>'
+        f'<div class="og-bars">{rest_rows}</div>')
 
     # ── Paid media (embudo + gasto + desglose por canal) ──
     pd_ = d["paid"]; ptot = pd_["total"]
@@ -1510,6 +1517,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .alert {{ border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }}
 .alert-muted {{ background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }}
 .caption {{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }}
+.og-sub {{ font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; }}
+.og-pct {{ font-size:14px; font-weight:700; color:var(--muted); }}
 .og-head {{ display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }}
 .og-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
 .og-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
@@ -1675,6 +1684,27 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas»: si se ha contactado, está pendiente o se ha descartado (con su razón).</div></div>
   </div>
 
+  <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
+  <div class="preq">
+    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
+    <div class="preq-arrow">▼ ▼ ▼</div>
+    <div class="preq-branches">
+      <div class="preq-card preq-sales">
+        <div class="preq-tag">A ventas · tarea a Agustín</div>
+        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
+        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+        {preq_sales_stats}
+      </div>
+      <div class="preq-card preq-free">
+        <div class="preq-tag">Automatizado · descarte</div>
+        <div class="preq-h">➖ −3.000 consultas/mes</div>
+        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento.</div>
+        {preq_free_stats}
+      </div>
+    </div>
+    <div class="preq-pref">{canal_pref_html}</div>
+  </div>
+
   <div class="evo-banner">
     <div class="evo-l"><span class="evo-ico">📈</span><div><div class="evo-t">A partir de aquí · Evolutivo anual acumulado</div><div class="evo-s">Fin de las últimas 24h. Todo lo que sigue suma el histórico desde el 1 de enero de 2026</div></div></div>
     <span class="evo-badge">ACUMULADO · {chart_label}</span>
@@ -1703,27 +1733,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="card">
     {origin_html}
     <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
-  </div>
-
-  <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
-  <div class="preq">
-    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
-    <div class="preq-arrow">▼ ▼ ▼</div>
-    <div class="preq-branches">
-      <div class="preq-card preq-sales">
-        <div class="preq-tag">A ventas · tarea a Agustín</div>
-        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
-        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
-        {preq_sales_stats}
-      </div>
-      <div class="preq-card preq-free">
-        <div class="preq-tag">Automatizado · descarte</div>
-        <div class="preq-h">➖ −3.000 consultas/mes</div>
-        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento.</div>
-        {preq_free_stats}
-      </div>
-    </div>
-    <div class="preq-pref">{canal_pref_html}</div>
   </div>
 
   <div class="section-label">Evolución anual acumulada · {chart_label}</div>
