@@ -1265,10 +1265,9 @@ def render(d):
     for deal in d["mkt_deals"]:
         by_stage.setdefault(deal["stage"], []).append(deal)
     deal_rows = ""
-    stage_defs = list(STAGE_LABELS) + [("lost", "Perdido (inbound)", "pill-lost")]
-    lost_group = d.get("lost_deals", [])
+    stage_defs = list(STAGE_LABELS)   # sin la sección de perdidos (a petición)
     for st_id, label, pill in stage_defs:
-        group = lost_group if st_id == "lost" else by_stage.get(st_id, [])
+        group = by_stage.get(st_id, [])
         # Ordenadas por canal (y, dentro del canal, por fecha de reunión)
         group = sorted(group, key=lambda x: (x["channel"], x.get("mtg_sort", float("inf"))))
         if not group:
@@ -1773,7 +1772,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa / estado</th><th>📅 Última reunión</th><th>Razón de descarte</th></tr></thead>
     <tbody>{deal_rows}</tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades cuyo contacto entró por canal de marketing. Incluye las etapas del pipeline (Discovery → Demo → Best Case) y los <span class="dt-past">perdidos inbound</span>. Cada fila muestra empresa, canal y etapa/estado, <strong>ordenadas dentro de cada etapa por canal</strong>. La fecha es la <strong>última reunión</strong> (en <span class="dt-next">salmón</span> si es futura). Reparto por canal: {chan_dist_txt}.</div></div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades <strong>activas</strong> cuyo contacto entró por canal de marketing, por etapa del pipeline (Discovery → Demo → Best Case). Cada fila muestra empresa, canal y etapa/estado, <strong>ordenadas dentro de cada etapa por canal</strong>. La fecha es la <strong>última reunión</strong> (en <span class="dt-next">salmón</span> si es futura). Reparto por canal: {chan_dist_txt}.</div></div>
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
