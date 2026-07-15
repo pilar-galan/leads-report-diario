@@ -1192,7 +1192,7 @@ def render(d):
         dcard("Leads", dd["lead_pure"], f'{pct(dd["lead_pure"], dtot)} del total · 📘 {og["d_content"]} con contenido · ❔ {og["d_noinfo"]} sin info', "f-c-state"),
         dcard("SQL Consultoría", dd["sql"], f'{pct(dd["sql"], dtot)} del total', "f-c-state"),
         dcard("Freemium", dd["free"], f'{pct(dd["free"], dtot)} del total', "f-c-state"),
-        dcard("Llamadas realizadas SQL", d["calls_day"], f'🎥 {video_day} reuniones/videollamadas agendadas', "f-c-action"),
+        dcard("Llamadas realizadas SQL", d["agenda_day"], f'📞 {d["calls_day"]} llamadas telefónicas · 🎥 {video_day} videollamadas', "f-c-action"),
         dcard("Oportunidades", dd["opp"], f'{pct(dd["opp"], dtot)} del total · empresas', "f-c-action"),
     ])
     day_funnel = day_cards
@@ -1623,11 +1623,11 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 #gs-gate input {{ width:100%; padding:11px 14px; border-radius:8px; border:1px solid #2e2a5a; background:#161330; color:#f0edff; font-size:15px; margin-bottom:12px; outline:none; letter-spacing:.08em; }}
 #gs-gate button {{ width:100%; padding:11px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; font-size:15px; font-weight:700; }}
 #gs-gate .err {{ color:#ef4444; font-size:12px; margin-top:8px; display:none; }}
-.refresh-fab {{ position:fixed; right:20px; bottom:20px; z-index:900; cursor:pointer;
+.refresh-fab {{ position:fixed; right:20px; top:16px; z-index:1000; cursor:pointer;
   background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; border:none; border-radius:30px;
-  padding:12px 18px; font-size:14px; font-weight:700; box-shadow:0 6px 20px rgba(255,107,91,.4); }}
+  padding:10px 16px; font-size:13px; font-weight:700; box-shadow:0 6px 20px rgba(255,107,91,.4); }}
 .refresh-fab:hover {{ filter:brightness(1.05); }}
-.refresh-toast {{ position:fixed; right:20px; bottom:74px; z-index:900; max-width:340px;
+.refresh-toast {{ position:fixed; right:20px; top:60px; z-index:1000; max-width:340px;
   background:#1e1b42; border:1px solid var(--border); border-radius:12px; padding:14px 16px;
   font-size:12px; color:var(--text-2); line-height:1.5; box-shadow:0 8px 28px rgba(0,0,0,.4);
   opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s; }}
@@ -1657,8 +1657,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
-  <div class="header-title"><h1>{title}</h1><p>{fecha_larga} · {periodo_txt}</p></div>
-  <span class="live-badge"><span class="live-dot"></span>Live · HubSpot</span></div>
+  <div class="header-title"><h1>{title}</h1><p>{fecha_larga} · {periodo_txt}</p></div></div>
   <div class="sync-bar">Generado el {generado} · embudos acumulados {fun_label} · gráficos anuales {chart_label}</div></div>
 
 <div class="main">
@@ -1687,15 +1686,6 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
-  <div class="card">
-    <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
-      <span class="badge badge-green">📞 Seguimiento comercial</span></div>
-    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
-    <tbody>{call_rows}</tbody></table>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas»: si se ha contactado, está pendiente o se ha descartado (con su razón).</div></div>
-  </div>
-
   <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
   <div class="preq">
     <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
@@ -1715,6 +1705,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       </div>
     </div>
     <div class="preq-pref">{canal_pref_html}</div>
+  </div>
+
+  <div class="section-label">Seguimiento de ventas · estado de los SQL · últimas 24h</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
+      <span class="badge badge-green">📞 Seguimiento comercial</span></div>
+    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
+    <tbody>{call_rows}</tbody></table>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas»: si se ha contactado, está pendiente o se ha descartado (con su razón).</div></div>
   </div>
 
   <div class="evo-banner">
