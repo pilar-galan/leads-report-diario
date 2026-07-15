@@ -214,6 +214,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .alert { border-radius:8px; padding:10px 14px; font-size:12px; margin-top:14px; display:flex; align-items:flex-start; gap:8px; }
 .alert-muted { background:rgba(123,118,160,.06); border:1px solid rgba(123,118,160,.2); color:var(--muted); }
 .caption { font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }
+.og-sub { font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; }
+.og-pct { font-size:14px; font-weight:700; color:var(--muted); }
 .og-head { display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
 .og-stat { flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
 .og-stat b { display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }
@@ -387,6 +389,27 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
     <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas»: si se ha contactado, está pendiente o se ha descartado (con su razón).</div></div>
   </div>
 
+  <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
+  <div class="preq">
+    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
+    <div class="preq-arrow">▼ ▼ ▼</div>
+    <div class="preq-branches">
+      <div class="preq-card preq-sales">
+        <div class="preq-tag">A ventas · tarea a Agustín</div>
+        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
+        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+        <div class="pqflow"><div class="pqf-step"><b>150</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📞 116</b><span>llamadas hechas</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📅 30</b><span>reuniones agendadas</span></div><div class="pqf-arrow">→</div><div class="pqf-step pqf-ok"><b>🎯 110</b><span>oportunidades en<br>pipeline (empresas)</span></div></div>
+      </div>
+      <div class="preq-card preq-free">
+        <div class="preq-tag">Automatizado · descarte</div>
+        <div class="preq-h">➖ −3.000 consultas/mes</div>
+        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento.</div>
+        <div class="pqbig"><div class="pqbig-n">4</div><div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes. Reciben email de agradecimiento; <b>ya no se derivan a Freemium</b>. Quedan identificados en la lista de HubSpot <b>«Descalificación de SQLs · &lt;3.000 consultas/mes»</b> para decidir el siguiente paso.</div></div>
+      </div>
+    </div>
+    <div class="preq-pref"><div class="cpref"><div class="cpref-donut" style="background:conic-gradient(#FF8B7D 0deg 166deg,#22D3EE 166deg 360deg)"><div class="cpref-hole"><b>13</b><span>con preferencia</span></div></div><div class="cpref-leg"><div class="cpref-t">Preferencia de canal de contacto <span>(campo del formulario demo)</span></div><div class="cpref-row"><span class="cpref-dot" style="background:#FF8B7D"></span> 📞 Llamada por teléfono · <b>6</b> (46%)</div><div class="cpref-row"><span class="cpref-dot" style="background:#22D3EE"></span> ✉️ Email · <b>7</b> (54%)</div><div class="cpref-note">Solo cuenta los SQL que han indicado preferencia en el formulario.</div></div></div></div>
+  </div>
+
   <div class="evo-banner">
     <div class="evo-l"><span class="evo-ico">📈</span><div><div class="evo-t">A partir de aquí · Evolutivo anual acumulado</div><div class="evo-s">Fin de las últimas 24h. Todo lo que sigue suma el histórico desde el 1 de enero de 2026</div></div></div>
     <span class="evo-badge">ACUMULADO · 1 ene 2026 → hoy</span>
@@ -413,29 +436,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 
   <div class="section-label">Origen de los leads · ¿de dónde vienen? · acumulado desde el 1 de enero</div>
   <div class="card">
-    <div class="og-head"><div class="og-stat og-content"><b>602</b><span>con contenido de marketing<br>(ebook · blog · webinar · herramienta · newsletter) = <b>MQL de facto</b></span></div><div class="og-stat og-noinfo"><b>166</b><span>sin información<br>(entraron sin dejar rastro de contenido)</span></div><div class="og-stat"><b>1615</b><span>leads totales<br>clasificados por origen</span></div></div><div class="og-bars"><div class="og-row"><div class="og-l">🎯 Formulario de demo</div><div class="og-barwrap"><div class="og-bar" style="width:100%"></div></div><div class="og-n">770 <span class="og-p">48%</span></div></div><div class="og-row og-content"><div class="og-l">📝 Blog / artículo</div><div class="og-barwrap"><div class="og-bar" style="width:61%"></div></div><div class="og-n">466 <span class="og-p">29%</span></div></div><div class="og-row og-noinfo"><div class="og-l">❔ Sin información</div><div class="og-barwrap"><div class="og-bar" style="width:22%"></div></div><div class="og-n">166 <span class="og-p">10%</span></div></div><div class="og-row og-content"><div class="og-l">🎥 Webinar</div><div class="og-barwrap"><div class="og-bar" style="width:12%"></div></div><div class="og-n">96 <span class="og-p">6%</span></div></div><div class="og-row"><div class="og-l">📣 Lead Ads (paid)</div><div class="og-barwrap"><div class="og-bar" style="width:7%"></div></div><div class="og-n">53 <span class="og-p">3%</span></div></div><div class="og-row og-content"><div class="og-l">📘 Ebook / descargable</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">40 <span class="og-p">2%</span></div></div><div class="og-row"><div class="og-l">• Otro formulario</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">14 <span class="og-p">1%</span></div></div><div class="og-row"><div class="og-l">🧠 GuruSup Brain</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">6 <span class="og-p">0%</span></div></div><div class="og-row"><div class="og-l">🤝 Partners</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">4 <span class="og-p">0%</span></div></div></div>
+    <div class="og-head"><div class="og-stat"><b>1615</b><span>leads totales<br>(acumulado desde 1 ene)</span></div><div class="og-stat og-content"><b>602 <span class="og-pct">37%</span></b><span>MQL · han consumido <b>contenido de marketing</b><br>(ebook · blog · webinar · herramienta · newsletter)</span></div><div class="og-stat og-noinfo"><b>1013 <span class="og-pct">63%</span></b><span>resto de leads<br>(sin información + demo + lead ads + otros)</span></div></div><div class="og-sub">📘 MQL · leads por tipo de contenido consumido</div><div class="og-bars"><div class="og-row og-content"><div class="og-l">📝 Blog / artículo</div><div class="og-barwrap"><div class="og-bar" style="width:61%"></div></div><div class="og-n">466 <span class="og-p">29%</span></div></div><div class="og-row og-content"><div class="og-l">🎥 Webinar</div><div class="og-barwrap"><div class="og-bar" style="width:12%"></div></div><div class="og-n">96 <span class="og-p">6%</span></div></div><div class="og-row og-content"><div class="og-l">📘 Ebook / descargable</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">40 <span class="og-p">2%</span></div></div></div><div class="og-sub">Resto de leads · por origen</div><div class="og-bars"><div class="og-row"><div class="og-l">🎯 Formulario de demo</div><div class="og-barwrap"><div class="og-bar" style="width:100%"></div></div><div class="og-n">770 <span class="og-p">48%</span></div></div><div class="og-row og-noinfo"><div class="og-l">❔ Sin información</div><div class="og-barwrap"><div class="og-bar" style="width:22%"></div></div><div class="og-n">166 <span class="og-p">10%</span></div></div><div class="og-row"><div class="og-l">📣 Lead Ads (paid)</div><div class="og-barwrap"><div class="og-bar" style="width:7%"></div></div><div class="og-n">53 <span class="og-p">3%</span></div></div><div class="og-row"><div class="og-l">• Otro formulario</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">14 <span class="og-p">1%</span></div></div><div class="og-row"><div class="og-l">🧠 GuruSup Brain</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">6 <span class="og-p">0%</span></div></div><div class="og-row"><div class="og-l">🤝 Partners</div><div class="og-barwrap"><div class="og-bar" style="width:6%"></div></div><div class="og-n">4 <span class="og-p">0%</span></div></div></div>
     <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
-  </div>
-
-  <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
-  <div class="preq">
-    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
-    <div class="preq-arrow">▼ ▼ ▼</div>
-    <div class="preq-branches">
-      <div class="preq-card preq-sales">
-        <div class="preq-tag">A ventas · tarea a Agustín</div>
-        <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
-        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
-        <div class="pqflow"><div class="pqf-step"><b>150</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📞 116</b><span>llamadas hechas</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📅 30</b><span>reuniones agendadas</span></div><div class="pqf-arrow">→</div><div class="pqf-step pqf-ok"><b>🎯 110</b><span>oportunidades en<br>pipeline (empresas)</span></div></div>
-      </div>
-      <div class="preq-card preq-free">
-        <div class="preq-tag">Automatizado · descarte</div>
-        <div class="preq-h">➖ −3.000 consultas/mes</div>
-        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento.</div>
-        <div class="pqbig"><div class="pqbig-n">4</div><div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes. Reciben email de agradecimiento; <b>ya no se derivan a Freemium</b>. Quedan identificados en la lista de HubSpot <b>«Descalificación de SQLs · &lt;3.000 consultas/mes»</b> para decidir el siguiente paso.</div></div>
-      </div>
-    </div>
-    <div class="preq-pref"><div class="cpref"><div class="cpref-donut" style="background:conic-gradient(#FF8B7D 0deg 166deg,#22D3EE 166deg 360deg)"><div class="cpref-hole"><b>13</b><span>con preferencia</span></div></div><div class="cpref-leg"><div class="cpref-t">Preferencia de canal de contacto <span>(campo del formulario demo)</span></div><div class="cpref-row"><span class="cpref-dot" style="background:#FF8B7D"></span> 📞 Llamada por teléfono · <b>6</b> (46%)</div><div class="cpref-row"><span class="cpref-dot" style="background:#22D3EE"></span> ✉️ Email · <b>7</b> (54%)</div><div class="cpref-note">Solo cuenta los SQL que han indicado preferencia en el formulario.</div></div></div></div>
   </div>
 
   <div class="section-label">Evolución anual acumulada · 1 ene 2026 → hoy</div>
