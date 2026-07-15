@@ -1391,7 +1391,7 @@ def render(d):
         meet_names=d["meet_names"], calls_day=d["calls_day"], ch_cards=ch_cards, call_rows=call_rows,
         descarte_html=descarte_html, descarte_note=descarte_note, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
-        brain_count=d["brain_count"], ventas_count=d["ventas_count"],
+        brain_count=d["brain_count"], ventas_count=d["ventas_count"], total_pipeline=d["total_pipeline"],
         chan_dist_txt=chan_dist_txt,
         excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
         generado=esc(d["generado"]),
