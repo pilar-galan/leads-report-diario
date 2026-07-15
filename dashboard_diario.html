@@ -176,6 +176,19 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .day-kpis { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
 @media(max-width:900px){ .day-kpis { grid-template-columns:repeat(3,1fr); } }
 @media(max-width:520px){ .day-kpis { grid-template-columns:repeat(2,1fr); } }
+.dayflow { display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }
+.df-group { display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }
+.df-card { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }
+.df-card .fc-value { font-size:30px; }
+.df-state { border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }
+.df-action { border-top-color:var(--teal); background:rgba(34,211,238,.06); }
+.df-action .fc-value { color:var(--teal); }
+.df-op { align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }
+.df-arrow { color:var(--guru-300); }
+.dayfree { margin-top:12px; background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.25); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--text-2); }
+.dayfree b { color:var(--teal); font-size:18px; }
+.dayfree span { color:var(--muted); font-size:11px; }
+@media(max-width:760px){ .dayflow, .df-group { flex-direction:column; } .df-op { transform:rotate(90deg); align-self:center; } }
 .free-kpi { margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:baseline; gap:12px; }
 .free-kpi .fk-num { font-size:32px; font-weight:800; color:var(--teal); }
 .free-kpi .fk-txt { font-size:12px; color:var(--text-2); }
@@ -354,8 +367,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
-  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Miércoles, 15 de julio de 2026 · 14 jul 09:00 → 15 jul 13:16 (hora España)</p></div></div>
-  <div class="sync-bar">Generado el 15 Jul 2026 · 13:16 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
+  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Miércoles, 15 de julio de 2026 · 14 jul 09:00 → 15 jul 13:20 (hora España)</p></div></div>
+  <div class="sync-bar">Generado el 15 Jul 2026 · 13:20 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
 
 <div class="main">
 
@@ -377,8 +390,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </details>
 
   <div class="section-label">Contactos generados · últimas 24h</div>
-  <div class="day-kpis"><div class="f-card f-c-state"><div class="fc-label">Contactos</div><div class="fc-value">20</div><div class="fc-sub">últimas 24h · total que entra</div></div><div class="f-card f-c-state"><div class="fc-label">Leads</div><div class="fc-value">5</div><div class="fc-sub">25% del total · 📘 0 con contenido · ❔ 5 sin info</div></div><div class="f-card f-c-state"><div class="fc-label">SQL Consultoría</div><div class="fc-value">12</div><div class="fc-sub">60% del total</div></div><div class="f-card f-c-state"><div class="fc-label">Freemium</div><div class="fc-value">3</div><div class="fc-sub">15% del total</div></div><div class="f-card f-c-action"><div class="fc-label">Llamadas realizadas SQL</div><div class="fc-value">17</div><div class="fc-sub">📞 17 llamadas telefónicas · 🎥 0 videollamadas</div></div><div class="f-card f-c-action"><div class="fc-label">Oportunidades</div><div class="fc-value">0</div><div class="fc-sub">0% del total · empresas</div></div></div>
-  <div class="caption">ℹ️ No es un embudo: cada valor es el <strong>% sobre el total de contactos</strong> generados en las últimas 24h. · <strong>Reuniones y llamadas</strong> = reuniones agendadas (demos) + llamadas de los SDR (Agustín/Juanma): <strong>17</strong> llamadas hoy · Reuniones hoy: <strong>Gonzalo</strong> (Social Ads) · <strong>Jaume</strong> (Chat web)</div>
+  <div class="dayflow"><div class="df-card df-state"><div class="fc-label">Contactos</div><div class="fc-value">20</div><div class="fc-sub">total que entra · 24h</div></div><div class="df-op">=</div><div class="df-group"><div class="df-card df-state"><div class="fc-label">Leads</div><div class="fc-value">5</div><div class="fc-sub">📘 0 contenido · ❔ 5 sin info</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">MQL</div><div class="fc-value">0</div><div class="fc-sub">consumió contenido</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">12</div><div class="fc-sub">piden demo</div></div></div><div class="df-op df-arrow">→</div><div class="df-card df-action"><div class="fc-label">Llamadas realizadas SQL</div><div class="fc-value">18</div><div class="fc-sub">📞 18 llamadas · 🎥 0 videollamadas</div></div></div><div class="dayfree"><b>3</b> Freemium · 15% del total <span>(altas gratuitas por la app · fuera del embudo comercial)</span></div>
+  <div class="caption">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: <strong>Gonzalo</strong> (Social Ads) · <strong>Jaume</strong> (Chat web)</div>
 
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid"><div class="ch-card" style="--chc:#a855f7"><div class="ch-icon">📣</div><div class="ch-num">9</div><div class="ch-label">Social Ads</div><div class="ch-pct">45% del total</div><div class="ch-sql">9 SQL</div></div>
@@ -400,7 +413,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
         <div class="preq-tag">A ventas · tarea a Agustín</div>
         <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
         <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
-        <div class="pqflow"><div class="pqf-step"><b>152</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📞 129</b><span>llamadas hechas</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📅 30</b><span>reuniones agendadas</span></div><div class="pqf-arrow">→</div><div class="pqf-step pqf-ok"><b>🎯 110</b><span>oportunidades en<br>pipeline (empresas)</span></div></div>
+        <div class="pqflow"><div class="pqf-step"><b>152</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📞 130</b><span>llamadas hechas</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📅 30</b><span>reuniones agendadas</span></div><div class="pqf-arrow">→</div><div class="pqf-step pqf-ok"><b>🎯 110</b><span>oportunidades en<br>pipeline (empresas)</span></div></div>
       </div>
       <div class="preq-card preq-free">
         <div class="preq-tag">Automatizado · descarte</div>
@@ -475,7 +488,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 15 Jul 2026 · 13:16 (hora España)
+    GuruSup · Dashboard Diario · generado el 15 Jul 2026 · 13:20 (hora España)
   </div>
 </div>
 
