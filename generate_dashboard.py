@@ -674,17 +674,18 @@ def main():
         "usuario_free": ("Prueba gratuita", "cold"),
         "": ("Sin asignar / sin trabajar", "cold"),
     }
-    # El desglose por estado se hace SOLO sobre los GESTIONADOS (así suma al total de gestionados)
-    gest_contacts = [c for c in sql_stage_contacts if rev_group(c["rev"]) == "gestionado"]
+    # El desglose por «temperatura» del lead se hace sobre el TOTAL de SQL (suma = total de SQL)
     ls_counts = {}
-    for c in gest_contacts:
+    for c in sql_stage_contacts:
         lbl, grp = LEAD_STATE_LABELS.get(c["lead_state"], (c["lead_state"] or "Sin asignar", "cold"))
         ls_counts.setdefault(lbl, [0, grp])
         ls_counts[lbl][0] += 1
     sql_disp["lead_status"] = sorted(([lbl, n, grp] for lbl, (n, grp) in ls_counts.items()), key=lambda x: -x[1])
-    # De los gestionados, cuántos tienen negocio/oportunidad abierta (deal abierto o cliente)
+    sql_disp["ls_base"] = len(sql_stage_contacts)   # total de SQL
+    # De los CONTACTADOS/gestionados, cuántos tienen negocio/oportunidad abierta (deal abierto o cliente)
+    gest_contacts = [c for c in sql_stage_contacts if rev_group(c["rev"]) == "gestionado"]
     sql_disp["en_oport"] = sum(1 for c in gest_contacts if c["lead_state"] in ("OPEN_DEAL", "cliente"))
-    sql_disp["ls_base"] = len(gest_contacts)
+    sql_disp["en_medio"] = len(gest_contacts) - sql_disp["en_oport"]
 
     # ── Ramas del workflow de precualificación (por volumen de consultas) ──
     n_lt3000  = sum(1 for c in hist_fun if c["lc"] == "1394675095")   # <3000 → descartar + email
@@ -740,7 +741,7 @@ def main():
             "leads": sum(1 for c in lst if rank(c["lc"]) >= 1),
             "mql":  sum(1 for c in lst if rank(c["lc"]) >= 2),
             "sql":  sum(1 for c in lst if rank(c["lc"]) >= 3),
-            "opp":  len({compkey(c) for c in lst if c["lc"] == "opportunity"}),
+            "opp":  sum(1 for c in lst if rank(c["lc"]) >= 4),   # oportunidad + cliente (contactos reales)
         }
     paid_google = [c for c in hist_fun if chan_label(c) == "Google Ads"]
     paid_social = [c for c in hist_fun if chan_label(c) == "Social Ads"]
@@ -1012,7 +1013,7 @@ def render(d):
             '<div class="fbr-foot">Volumen y % de cada razón sobre el total de descartes con motivo registrado. Detalle acumulado más abajo.</div>')
     else:
         raz_block = '<div class="fb-raz-head">Sin razones de descarte registradas todavía.</div>'
-    # Estado del lead de los GESTIONADOS (suma al total de gestionados)
+    # Temperatura del lead sobre el TOTAL de SQL (suma = total de SQL)
     GRP_ICON = {"adv": "🟢", "warm": "🟡", "cold": "🔴"}
     lb = sd.get("ls_base", 0) or 1
     ls_rows = ""
@@ -1022,29 +1023,33 @@ def render(d):
                     f'<span class="ls-n">{n} <span class="ls-p">{pct(n, lb)}</span></span></div>')
     ls_block = (
         '<div class="fb-lsbox">'
-        f'<div class="fb-ls-head">🧭 De los <b>{sd.get("ls_base",0)} SQL gestionados</b> por Agustín · '
-        f'<b>{sd.get("en_oport",0)}</b> tienen <b>oportunidad / negocio abierto</b> en pipeline '
-        f'({pct(sd.get("en_oport",0), lb)}) · el resto sigue en SQL con este estado (suma = gestionados):</div>'
+        f'<div class="fb-ls-head">🌡️ Temperatura del lead · sobre el <b>total de {sd["total"]} SQL</b> (suma = total de SQL):</div>'
         f'<div class="ls-list">{ls_rows}</div>'
         '<div class="fbr-foot">🟢 avanzando (deal abierto/cliente) · 🟡 en proceso/contactados · 🔴 fríos, mareados, prueba gratuita o sin trabajar. '
-        'Los que sí generan oportunidad y avanzan de verdad <b>salen de la etapa SQL</b> hacia Oportunidad (empresas, arriba).</div>'
+        'Es la razón por la que los que están «en medio» aún no pasan a oportunidad.</div>'
+        '</div>')
+    # Paso intermedio: de los contactados, cuántos → oportunidad y cuántos «en medio»
+    conv_block = (
+        '<div class="fb-mid">'
+        f'<div class="fb-mid-step"><b>{sd["gestionado"]}</b><span>📞 contactados / agendados<br>(llamada o email · {pct(sd["gestionado"], st)} de los SQL)</span></div>'
+        '<div class="pqf-arrow">→</div>'
+        f'<div class="fb-mid-step fb-mid-ok"><b>{sd.get("en_oport",0)}</b><span>🎯 han pasado a<br>Oportunidad ({pct(sd.get("en_oport",0), sd["gestionado"] or 1)} de contactados)</span></div>'
+        '<div class="pqf-arrow">→</div>'
+        f'<div class="fb-mid-step fb-mid-mid"><b>{sd.get("en_medio",0)}</b><span>⏳ en medio: contactados<br>sin convertir aún (ver temperatura y descartes)</span></div>'
         '</div>')
     flow_branch = (
         '<div class="flow-branch nobrd">'
         f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
         '<div class="fb-states">'
-        f'<div class="fb-state ok"><div class="fbs-n">{sd["gestionado"]}</div><div class="fbs-l">🟢 Gestionados</div>'
-        f'<div class="fbs-p">{pct(sd["gestionado"], st)} de los SQL</div><small>contactados por ventas (llamada / email)</small></div>'
-        f'<div class="fb-state pend"><div class="fbs-n">{sd["pendiente"]}</div><div class="fbs-l">🟡 Pendientes</div>'
+        f'<div class="fb-state ok"><div class="fbs-n">{sd["gestionado"]}</div><div class="fbs-l">🟢 Contactados / gestionados</div>'
+        f'<div class="fbs-p">{pct(sd["gestionado"], st)} de los SQL</div><small>se les ha llamado o agendado (Agustín)</small></div>'
+        f'<div class="fb-state pend"><div class="fbs-n">{sd["pendiente"]}</div><div class="fbs-l">🟡 Sin contactar / pendientes</div>'
         f'<div class="fbs-p">{pct(sd["pendiente"], st)} de los SQL</div><small>aún sin revisar / asignar</small></div>'
         f'<div class="fb-state bad"><div class="fbs-n">{sd["descartado"]}</div><div class="fbs-l">🔴 Descartados</div>'
-        f'<div class="fbs-p">{pct(sd["descartado"], st)} de los SQL</div><small>no cualifican</small></div>'
+        f'<div class="fbs-p">{pct(sd["descartado"], st)} de los SQL</div><small>no cualifican (ver razones)</small></div>'
         '</div>'
-        '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL gestionados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (<b>Agustín</b>) → si cualifican pasan a <b>Oportunidad</b>.</div>'
-        '<div class="fb-conv">'
-        f'<div class="fbc ok">✅ <b>{sd.get("en_oport",0)}</b> de los {sd.get("ls_base",0)} gestionados ({pct(sd.get("en_oport",0), lb)}) tienen <b>oportunidad abierta</b></div>'
-        f'<div class="fbc bad">❌ <b>{pct(sd["descartado"], resueltos)}</b> de los SQL resueltos se <b>descartan</b></div>'
-        '</div>'
+        '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL contactados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (<b>Agustín</b>) → si cualifican pasan a <b>Oportunidad</b>.</div>'
+        f'{conv_block}'
         f'{ls_block}'
         f'<div class="fb-razbox">{raz_block}</div>'
         '</div>')
@@ -1413,6 +1418,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fbr-n {{ flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }}
 .fbr-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
 .fbr-foot {{ font-size:10px; color:var(--muted); margin-top:8px; line-height:1.4; }}
+.fb-mid {{ display:flex; align-items:stretch; gap:8px; margin-top:14px; flex-wrap:wrap; }}
+.fb-mid-step {{ flex:1; min-width:150px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:10px; padding:12px 13px; }}
+.fb-mid-step b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1; }}
+.fb-mid-step span {{ font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:5px; }}
+.fb-mid-step.fb-mid-ok {{ border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.09); }}
+.fb-mid-step.fb-mid-ok b {{ color:#6ee7b7; }}
+.fb-mid-step.fb-mid-mid {{ border-color:rgba(245,158,11,.4); background:rgba(245,158,11,.08); }}
+.fb-mid-step.fb-mid-mid b {{ color:#fcd34d; }}
+@media(max-width:640px){{ .fb-mid {{ flex-direction:column; }} }}
 .fb-lsbox {{ margin-top:14px; border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:10px; padding:13px 14px; }}
 .fb-ls-head {{ font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.4; }}
 .ls-list {{ display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; }}
