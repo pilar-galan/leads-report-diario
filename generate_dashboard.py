@@ -843,9 +843,20 @@ def main():
                          if classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
     d_lead_noinfo = sum(1 for c in daily_leads
                         if classify_origin(c["conv"], c["webinar"]) == "Sin información")
+    # Leads (etapa = lead) descartados / fríos tras trato de ventas + su origen
+    def is_disc_lead(c):
+        return c["lead_state"] in ("UNQUALIFIED", "Mareado") or c["rev"] == "No aplica / Descartado"
+    lead_stage = [c for c in lead_pop(hist_fun) if c["lc"] == "lead"]
+    lead_desc = [c for c in lead_stage if is_disc_lead(c)]
+    ld_origin = {}
+    for c in lead_desc:
+        b = classify_origin(c["conv"], c["webinar"])
+        ld_origin[b] = ld_origin.get(b, 0) + 1
     origin = {"sorted": origin_sorted, "content": origin_content, "noinfo": origin_noinfo,
               "total": origin_total, "content_set": CONTENT_ORIGINS, "leadads": leadads_sorted,
-              "d_content": d_lead_content, "d_noinfo": d_lead_noinfo, "d_total": len(daily_leads)}
+              "d_content": d_lead_content, "d_noinfo": d_lead_noinfo, "d_total": len(daily_leads),
+              "lead_stage": len(lead_stage), "lead_desc": len(lead_desc),
+              "lead_desc_origin": sorted(ld_origin.items(), key=lambda x: -x[1])}
 
     # ── Paid media (Google Ads + Social Ads) · embudo acumulado desde 1 ene ──
     def chan_label(c):
@@ -1245,6 +1256,19 @@ def render(d):
         for lbl, n in og.get("leadads", []))
     leadads_block = (f'<div class="og-sub">📣 Lead Ads (paid) · por fuente y contenido</div>'
                      f'<div class="og-bars">{leadads_rows}</div>') if og.get("leadads") else ""
+    # Leads descartados (etapa = lead, fríos/no cualificados) + su origen
+    ld_n = og.get("lead_desc", 0); ld_base = og.get("lead_stage", 0) or 1
+    ld_mx = og["lead_desc_origin"][0][1] if og.get("lead_desc_origin") else 1
+    ld_rows = "".join(
+        f'<div class="og-row"><div class="og-l">{ORIGIN_ICON.get(name, "•")} {esc(name)}</div>'
+        f'<div class="og-barwrap"><div class="og-bar" style="width:{max(6, round(n/ld_mx*100))}%;background:linear-gradient(90deg,#B23320,#FF8B7D)"></div></div>'
+        f'<div class="og-n">{n} <span class="og-p">{pct(n, ld_n or 1)}</span></div></div>'
+        for name, n in og.get("lead_desc_origin", []))
+    leaddesc_block = (
+        f'<div class="og-sub">🔴 Leads descartados · {ld_n} de {og.get("lead_stage",0)} leads ({pct(ld_n, ld_base)}) · por origen</div>'
+        f'<div class="og-bars">{ld_rows}</div>'
+        '<div class="fbr-foot">Leads (etapa «lead») marcados como <b>fríos / no cualificados</b> tras el trato de ventas (estado del lead). % sobre el total de leads en etapa «lead».</div>'
+    ) if ld_n else ""
     origin_html = (
         '<div class="og-head">'
         f'<div class="og-stat og-total"><div class="og-tag">LEADS TOTALES</div><b>{og["total"]}</b><span>acumulado desde el 1 de enero</span></div>'
@@ -1257,7 +1281,8 @@ def render(d):
         f'<div class="og-bars">{content_rows}</div>'
         '<div class="og-sub">🔭 TOFU · resto de leads por origen</div>'
         f'<div class="og-bars">{rest_rows}</div>'
-        f'{leadads_block}')
+        f'{leadads_block}'
+        f'{leaddesc_block}')
 
     # ── Paid media (embudo + gasto + desglose por canal) ──
     pd_ = d["paid"]; ptot = pd_["total"]
