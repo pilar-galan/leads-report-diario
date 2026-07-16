@@ -1224,8 +1224,9 @@ def render(d):
                 f'<div class="og-barwrap"><div class="og-bar" style="width:{w}%"></div></div>'
                 f'<div class="og-n">{n} <span class="og-p">{pct(n, og_tot)}</span></div></div>')
     content_rows = "".join(og_row(name, n, " og-content") for name, n in og["sorted"] if name in og["content_set"])
+    # Resto de leads (TOFU): sin «Lead Ads (paid)» agregado — se muestra desglosado aparte
     rest_rows = "".join(og_row(name, n, (" og-noinfo" if name == "Sin información" else ""))
-                        for name, n in og["sorted"] if name not in og["content_set"])
+                        for name, n in og["sorted"] if name not in og["content_set"] and name != "Lead Ads (paid)")
     content_rows = content_rows or '<div class="fbr-foot">Sin leads de contenido todavía.</div>'
     # Sub-desglose de Lead Ads (paid): fuente + contenido
     la_tot = sum(n for _, n in og.get("leadads", [])) or 1
@@ -1240,14 +1241,14 @@ def render(d):
     origin_html = (
         '<div class="og-head">'
         f'<div class="og-stat og-total"><div class="og-tag">LEADS TOTALES</div><b>{og["total"]}</b><span>acumulado desde el 1 de enero</span></div>'
-        f'<div class="og-stat og-content"><div class="og-tag">MQL · CONTENIDO</div><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
-        '<span>han consumido <b>contenido de marketing</b> (ebook · blog · webinar · herramienta · newsletter)</span></div>'
-        f'<div class="og-stat og-noinfo"><div class="og-tag">RESTO DE LEADS</div><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
-        '<span>sin información + demo + lead ads + otros</span></div>'
+        f'<div class="og-stat og-content"><div class="og-tag">📗 MOFU / BOFU · CONTENIDO DE VALOR</div><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
+        '<span>han <b>consumido contenido</b> (ebook · webinar · calculadora · comparativa · newsletter). Consideración/decisión = <b>MQL de facto</b>.</span></div>'
+        f'<div class="og-stat og-noinfo"><div class="og-tag">🔭 TOFU · DESCUBRIMIENTO</div><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
+        '<span>sin rastro de contenido de valor (sin info, blog suelto, formulario demo, otros). Menos intención.</span></div>'
         '</div>'
-        '<div class="og-sub">📘 MQL · leads por tipo de contenido consumido</div>'
+        '<div class="og-sub">📗 MOFU/BOFU · leads por tipo de contenido consumido</div>'
         f'<div class="og-bars">{content_rows}</div>'
-        '<div class="og-sub">Resto de leads · por origen</div>'
+        '<div class="og-sub">🔭 TOFU · resto de leads por origen</div>'
         f'<div class="og-bars">{rest_rows}</div>'
         f'{leadads_block}')
 
@@ -1453,6 +1454,7 @@ def render(d):
         descarte_html=descarte_html, descarte_note=descarte_note, deal_rows=deal_rows,
         mkt_total=d["mkt_total"], nuevos_deals=d["nuevos_deals"], demos_pipeline=d["demos_pipeline"],
         brain_count=d["brain_count"], ventas_count=d["ventas_count"], total_pipeline=d["total_pipeline"],
+        mql_stage=d["cum"]["mql"],
         chan_dist_txt=chan_dist_txt,
         excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
         generado=esc(d["generado"]),
@@ -1899,6 +1901,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
       <div class="gl-card"><span class="gl-e">📅</span><div><b>Reunión agendada</b><span>Demo/discovery citada + llamadas de los SDR en el período.</span></div></div>
       <div class="gl-card"><span class="gl-e">🚫</span><div><b>Descarte</b><span>SQL que no avanza. Se anota el <strong>motivo</strong> (precio, volumen, timing…).</span></div></div>
       <div class="gl-card"><span class="gl-e">🧊</span><div><b>Freemium</b><span>Alta <strong>gratis por la app</strong>. No entra en el embudo comercial.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🔭</span><div><b>TOFU <span class="gl-en">· Top of the Funnel</span></b><span>Fase de <strong>descubrimiento</strong>: el lead curiosea, se informa por encima. Poca intención (blog, artículos).</span></div></div>
+      <div class="gl-card"><span class="gl-e">📗</span><div><b>MOFU <span class="gl-en">· Middle of the Funnel</span></b><span>Fase de <strong>consideración</strong>: consume contenido <strong>más formativo/de valor</strong> (ebook, webinar, newsletter). Se está formando.</span></div></div>
+      <div class="gl-card"><span class="gl-e">🎯</span><div><b>BOFU <span class="gl-en">· Bottom of the Funnel</span></b><span>Fase de <strong>decisión</strong>: compara y evalúa herramientas (calculadora ROI, comparativas, demo). Alta intención.</span></div></div>
     </div>
   </details>
 
@@ -1959,7 +1964,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Leads · origen y desglose · acumulado desde el 1 de enero</div>
   <div class="card">
     {origin_html}
-    <div class="alert alert-muted"><span>💡</span><div>Diferencia los leads que llegan <strong>por contenido de marketing</strong> (ebook, blog, webinar, herramienta/calculadora, newsletter) —que son <strong>MQL de facto</strong>— de los que entran <strong>sin información</strong> (sin rastro de contenido) y del resto de orígenes (formulario de demo, lead ads, Brain…). Cada bloque con su % sobre el total de leads. Clasificado por el formulario/evento de conversión de HubSpot.</div></div>
+    <div class="alert alert-muted"><span>💡</span><div><b>TOFU/MOFU/BOFU:</b> los <b>MOFU/BOFU</b> han consumido contenido de valor (consideración/decisión) = <b>MQL de facto</b>; los <b>TOFU</b> están en descubrimiento (menos intención). Clasificado por el formulario/evento de conversión de HubSpot.
+    <br><br>⚠️ <b>¿Por qué aquí hay más «MQL» que en el embudo de arriba?</b> Arriba, «MQL {mql_stage}» es la <b>etapa de ciclo de vida</b> de HubSpot (contactos que ventas/marketing han <b>promocionado</b> a MQL o más). Aquí, «MOFU/BOFU» cuenta a <b>todos los que han consumido contenido</b> (comportamiento), aunque HubSpot los siga marcando como «lead». La diferencia = leads que consumen contenido pero <b>aún no están promocionados</b> a etapa MQL en el CRM (oportunidad de nutrición). Tu nuevo workflow (calculadora → MQL) irá cerrando esa brecha.</div></div>
   </div>
 
   <div class="section-label">Paid media · gasto y embudo · acumulado desde el 1 de enero</div>
