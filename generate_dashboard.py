@@ -1854,9 +1854,9 @@ def render_exec(d):
     # ---------- 1 · EXECUTIVE SUMMARY ----------
     kpis = [
         ("Nuevos contactos", cum["total"], tr["contactos"], ""),
-        ("Leads", cum["leads"], tr["leads"], pv(cum["leads"], cum["total"]) + " de contactos"),
-        ("MQL", cum["mql"], tr["mql"], pv(cum["mql"], cum["leads"]) + " de leads"),
-        ("SQL", cum["sql"], tr["sql"], pv(cum["sql"], cum["leads"]) + " de leads"),
+        ("Leads", cum["lead"], tr["leads"], pv(cum["lead"], cum["total"]) + " de contactos"),
+        ("MQL", cum["mql"], tr["mql"], pv(cum["mql"], cum["lead"]) + " de leads"),
+        ("SQL", cum["sql"], tr["sql"], pv(cum["sql"], cum["lead"]) + " de leads"),
         ("Reuniones", reuni, tr["reuniones"], "deals en fase demo+"),
         ("Oportunidades", cum["opp"], tr["opp"], pv(cum["opp"], cum["sql"]) + " de SQL · empresas"),
         ("Clientes", cum["cli"], tr["cli"], pv(cum["cli"], cum["opp"]) + " de oport. · empresas"),
@@ -1866,7 +1866,7 @@ def render_exec(d):
         f'<div class="kt">{arrow(t)}{("· " + sub) if sub else ""}</div></div>'.replace(",", ".")
         for lab, val, t, sub in kpis)
     rates = [
-        ("Lead → SQL", pv(cum["sql"], cum["leads"])),
+        ("Lead → SQL", pv(cum["sql"], cum["lead"])),
         ("SQL → Reunión", pv(reuni, cum["sql"])),
         ("Reunión → Oportunidad", pv(cum["opp"], reuni)),
         ("Oportunidad → Cliente", pv(cum["cli"], cum["opp"])),
@@ -1879,7 +1879,7 @@ def render_exec(d):
     # ---------- 2 · EVOLUCIÓN ACUMULADA ----------
     charts = [
         ("Nuevos contactos", cum["total"], d["svg_contactos"]),
-        ("Leads", cum["leads"], d["svg_leads"]),
+        ("Leads", cum["lead"], d["svg_leads"]),
         ("MQL", cum["mql"], d["svg_mql"]),
         ("SQL", cum["sql"], d["svg_sql"]),
         ("Reuniones", reuni, d["svg_reun"]),
@@ -1892,7 +1892,7 @@ def render_exec(d):
         for lab, val, svg in charts)
 
     # ---------- 3 · FUNNEL ----------
-    stages = [("Contactos", cum["total"]), ("Leads", cum["leads"]), ("MQL", cum["mql"]),
+    stages = [("Contactos", cum["total"]), ("Leads", cum["lead"]), ("MQL", cum["mql"]),
               ("SQL", cum["sql"]), ("Reunión", reuni), ("Oportunidad", cum["opp"]), ("Cliente", cum["cli"])]
     top = stages[0][1] or 1
     fn_rows = ""
