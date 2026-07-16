@@ -63,6 +63,8 @@ UNIFY_DESCARTE = {
     "Volumen <500 → Freemium": "Volumen insuficiente (<3.000 consultas/mes)",
     "Menos de 3.000 consultas/mes": "Volumen insuficiente (<3.000 consultas/mes)",
     "Menos de 3000 volumen de consultas al mes": "Volumen insuficiente (<3.000 consultas/mes)",
+    "Volumen menos 3k consultas (Volumen <500 → Freemium)": "Volumen insuficiente (<3.000 consultas/mes)",
+    "Volumen menos 3k consultas": "Volumen insuficiente (<3.000 consultas/mes)",
     "Timing — \"ahora no es prioridad\"": "Timing / no es prioridad",
     "Caso de uso equivocado (esperan mensajería masiva)": "Caso de uso / no target",
     "Competidor con integración vertical nativa": "Competidor",
@@ -591,7 +593,8 @@ def main():
     ], ["email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
         "hs_lead_status", "createdate", "recent_conversion_event_name",
-        "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto"])
+        "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto",
+        "razon_descarte_sql"])
 
     hist = []
     imports = tests = internal = noinfo = 0
@@ -627,6 +630,7 @@ def main():
             "conv": p.get("recent_conversion_event_name") or p.get("first_conversion_event_name") or "",
             "webinar": p.get("fuente_webinar") or "",
             "canal_pref": p.get("preferencia_canal_de_contacto") or "",
+            "razon": p.get("razon_descarte_sql") or "",
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -977,8 +981,11 @@ def main():
                 seen_sql.add(key)
             label, _, _ = classify_channel(c["src"], c["d1"])
             name = c["firstname"] or (c["email"].split("@")[0] if c["email"] else "—")
+            razon_u = " · ".join(UNIFY_DESCARTE.get(x.strip(), x.strip())
+                                  for x in (c.get("razon") or "").split(";") if x.strip())
             sql_rows.append({"name": name, "company": c["company"], "channel": label,
-                             "state": c["sql_state"] or "Pendiente", "rev": c["rev"] or "Pendiente de revisión"})
+                             "state": c["sql_state"] or "Pendiente", "rev": c["rev"] or "Pendiente de revisión",
+                             "razon": razon_u})
     sql_rows.sort(key=lambda r: r["channel"])
 
     # ── Razón de descarte/descalificación UNIFICADA (contacto razon_descarte_sql + deal motivo_de_descalificacion) ──
@@ -1412,11 +1419,14 @@ def render(d):
         for r in d["sql_rows"]:
             emp = esc(r["company"]) if r["company"] else "—"
             desc = "" if r["rev"] != "No aplica / Descartado" else ' · <span style="color:var(--red)">descartado</span>'
+            razon_td = (f'<td><span class="pill pill-lost">{esc(r["razon"])}</span></td>'
+                        if r.get("razon") else '<td class="dt-none">—</td>')
             call_rows += (f'<tr><td><strong>{esc(r["name"])}</strong></td>'
                           f'<td>{emp} · <em>{esc(r["channel"])}</em></td>'
-                          f'<td><span class="pill pill-demo">{esc(r["state"])}</span>{desc}</td></tr>')
+                          f'<td><span class="pill pill-demo">{esc(r["state"])}</span>{desc}</td>'
+                          f'{razon_td}</tr>')
     else:
-        call_rows = '<tr><td colspan="3" style="color:var(--muted)">Sin SQL en el período</td></tr>'
+        call_rows = '<tr><td colspan="4" style="color:var(--muted)">Sin SQL en el período</td></tr>'
 
     # Razones de descarte SQL (ordenadas por volumen)
     proceso = ('<br><br>⚙️ Se registran automáticamente tras el contacto de Agustín (ver «Flujo de precualificación»). '
@@ -1985,7 +1995,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="card">
     <div class="card-header"><span class="card-title">SQL del período · empresa, canal y estado</span>
       <span class="badge badge-green">📞 Seguimiento comercial</span></div>
-    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th></tr></thead>
+    <table class="table"><thead><tr><th>SQL</th><th>Empresa · canal</th><th>Estado</th><th>Razón de descarte</th></tr></thead>
     <tbody>{call_rows}</tbody></table>
     <div class="alert alert-muted"><span>ℹ️</span><div>Estado tomado de «Estado SQL Consultoría» y «Revisión ventas»: si se ha contactado, está pendiente o se ha descartado (con su razón).</div></div>
   </div>
