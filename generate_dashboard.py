@@ -1118,6 +1118,9 @@ def main():
     ch_mqlc = series(hist, lambda c: not is_free(c) and rank(c["lc"]) >= 1
                      and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
     ch_sqls = series(hist, lambda c: c["lc"] in SQL_STAGES)
+    # Comparativa semanal: alinear MQL/SQL con el dato mostrado (de facto / etapa consultoría)
+    trends["mql"] = trend7(ch_mqlc[1])
+    trends["sql"] = trend7(ch_sqls[1])
     exec_extra["svg_mql_m"] = svg_exec_month(*ch_mqlc, labels, "#57e08a")
     exec_extra["svg_sql_m"] = svg_exec_month(*ch_sqls, labels, "#f5b544")
     exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
@@ -1158,8 +1161,9 @@ def main():
         e["contactos"] += 1
         r = rank(c["lc"])
         if r >= 1: e["leads"] += 1
-        if r >= 2: e["mql"] += 1
-        if r >= 3: e["sql"] += 1
+        # MQL = de facto (contenido consumido) · SQL = etapa consultoría (coherente con los KPIs)
+        if r >= 1 and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS: e["mql"] += 1
+        if c["lc"] in SQL_STAGES: e["sql"] += 1
         if r >= 4: e["opp_c"] += 1
         if r >= 5: e["cli_c"] += 1
     chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
@@ -2323,13 +2327,22 @@ def render_exec(d):
     pipe_cnt = ex.get("pipeline_count", opp_ch_tot)
     pipe_known = ex.get("pipeline_value_known", 0)
 
-    # ---------- RENDIMIENTO POR CANAL ----------
-    cf = d["chan_funnel"][:7]
-    rows_ch = "".join(
-        f'<tr><td>{esc(lbl)}</td><td class="tnum">{fmt(e["contactos"])}</td><td class="tnum">{fmt(e["leads"])}</td>'
-        f'<td class="tnum">{fmt(e["mql"])}</td><td class="tnum">{fmt(e["sql"])}</td><td class="tnum hi">{e.get("opp",0)}</td>'
-        f'<td class="tnum cv">{pvf(e.get("opp",0), e["contactos"])}</td></tr>'
-        for lbl, e in cf)
+    # ---------- RENDIMIENTO POR CANAL (mismo dato que la matriz · suma = total contactos) ----------
+    dbc_t = ex.get("deals_by_chan", {})
+    cf = ex["chan_matrix"]
+    def _row(lbl, e):
+        opp = len(dbc_t.get(lbl, []))
+        return (f'<tr><td>{esc(lbl)}</td><td class="tnum">{fmt(e["contactos"])}</td><td class="tnum">{fmt(e["leads"])}</td>'
+                f'<td class="tnum">{fmt(e["mql"])}</td><td class="tnum hi">{fmt(e["sql"])}</td><td class="tnum">{opp}</td>'
+                f'<td class="tnum cv">{pvf(opp, e["contactos"])}</td></tr>')
+    rows_ch = "".join(_row(lbl, e) for lbl, e in cf)
+    # fila TOTAL
+    tt = {k: sum(e.get(k, 0) for _, e in cf) for k in ("contactos", "leads", "mql", "sql")}
+    tt_opp = sum(len(v) for v in dbc_t.values())
+    rows_ch += (f'<tr style="border-top:2px solid var(--line2);font-weight:800">'
+                f'<td>TOTAL</td><td class="tnum">{fmt(tt["contactos"])}</td><td class="tnum">{fmt(tt["leads"])}</td>'
+                f'<td class="tnum">{fmt(tt["mql"])}</td><td class="tnum hi">{fmt(tt["sql"])}</td><td class="tnum">{tt_opp}</td>'
+                f'<td class="tnum cv">{pvf(tt_opp, tt["contactos"])}</td></tr>')
 
     # ---------- INSIGHTS ----------
     insights = []
@@ -2465,7 +2478,6 @@ def render_exec(d):
   <h2 class="sh">Estado de los MQL <span class="tot">· {fmt(ctot)}</span> · contenido consumido</h2>
   <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars">{content_html}</div>
-  <div class="pend" style="margin-top:16px">⏳ <b>Tiempo medio hasta SQL y conversión por tipo de contenido</b>: pendientes (requieren fecha de conversión a SQL por contacto).</div>
 </section>
 
 <section>
