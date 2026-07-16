@@ -230,6 +230,28 @@ def classify_origin(conv, webinar=""):
     return "Otro formulario"
 
 
+def leadads_label(conv):
+    """Desglose de Lead Ads (paid): fuente (LinkedIn/Facebook) + contenido (ebook, formulario…)."""
+    low = (conv or "").lower()
+    plat = "LinkedIn" if "linkedin" in low else ("Facebook" if "facebook" in low else "Lead Ad")
+    form = low.split(":")[-1].strip()
+    if "ebook inmobil" in low:
+        content = "Ebook Inmobiliarias"
+    elif "ebook" in low:
+        content = "Ebook (contenido)"
+    elif "3000consultas" in form or "3000 consultas" in low:
+        content = "Formulario +3.000 consultas"
+    elif "form_cg" in form:
+        content = "Formulario CG"
+    elif "formulario base" in form:
+        content = "Formulario base (abierto)"
+    elif "formulario" in form:
+        content = "Formulario genérico"
+    else:
+        content = (form[:26] or "sin detalle")
+    return f"{plat} · {content}"
+
+
 def is_import(src, d1):
     # INTEGRATION = altas de la app (freemium); NO se excluyen, se reclasifican a freemium
     return src == "OFFLINE" and (d1 or "") in ("CRM_UI", "IMPORT")
@@ -798,10 +820,15 @@ def main():
     def lead_pop(lst):
         return [c for c in lst if rank(c["lc"]) >= 1 and not is_free(c)]
     origin_counts = {}
+    leadads_counts = {}
     for c in lead_pop(hist_fun):
         b = classify_origin(c["conv"], c["webinar"])
         origin_counts[b] = origin_counts.get(b, 0) + 1
+        if b == "Lead Ads (paid)":
+            lbl = leadads_label(c["conv"])
+            leadads_counts[lbl] = leadads_counts.get(lbl, 0) + 1
     origin_sorted = sorted(origin_counts.items(), key=lambda x: -x[1])
+    leadads_sorted = sorted(leadads_counts.items(), key=lambda x: -x[1])
     origin_content = sum(v for k, v in origin_counts.items() if k in CONTENT_ORIGINS)
     origin_noinfo = origin_counts.get("Sin información", 0)
     origin_total = sum(origin_counts.values())
@@ -812,7 +839,7 @@ def main():
     d_lead_noinfo = sum(1 for c in daily_leads
                         if classify_origin(c["conv"], c["webinar"]) == "Sin información")
     origin = {"sorted": origin_sorted, "content": origin_content, "noinfo": origin_noinfo,
-              "total": origin_total, "content_set": CONTENT_ORIGINS,
+              "total": origin_total, "content_set": CONTENT_ORIGINS, "leadads": leadads_sorted,
               "d_content": d_lead_content, "d_noinfo": d_lead_noinfo, "d_total": len(daily_leads)}
 
     # ── Paid media (Google Ads + Social Ads) · embudo acumulado desde 1 ene ──
@@ -1189,6 +1216,16 @@ def render(d):
     rest_rows = "".join(og_row(name, n, (" og-noinfo" if name == "Sin información" else ""))
                         for name, n in og["sorted"] if name not in og["content_set"])
     content_rows = content_rows or '<div class="fbr-foot">Sin leads de contenido todavía.</div>'
+    # Sub-desglose de Lead Ads (paid): fuente + contenido
+    la_tot = sum(n for _, n in og.get("leadads", [])) or 1
+    la_mx = og["leadads"][0][1] if og.get("leadads") else 1
+    leadads_rows = "".join(
+        f'<div class="og-row"><div class="og-l">{esc(lbl)}</div>'
+        f'<div class="og-barwrap"><div class="og-bar" style="width:{max(6, round(n/la_mx*100))}%"></div></div>'
+        f'<div class="og-n">{n} <span class="og-p">{pct(n, la_tot)}</span></div></div>'
+        for lbl, n in og.get("leadads", []))
+    leadads_block = (f'<div class="og-sub">📣 Lead Ads (paid) · por fuente y contenido</div>'
+                     f'<div class="og-bars">{leadads_rows}</div>') if og.get("leadads") else ""
     origin_html = (
         '<div class="og-head">'
         f'<div class="og-stat og-total"><div class="og-tag">LEADS TOTALES</div><b>{og["total"]}</b><span>acumulado desde el 1 de enero</span></div>'
@@ -1200,7 +1237,8 @@ def render(d):
         '<div class="og-sub">📘 MQL · leads por tipo de contenido consumido</div>'
         f'<div class="og-bars">{content_rows}</div>'
         '<div class="og-sub">Resto de leads · por origen</div>'
-        f'<div class="og-bars">{rest_rows}</div>')
+        f'<div class="og-bars">{rest_rows}</div>'
+        f'{leadads_block}')
 
     # ── Paid media (embudo + gasto + desglose por canal) ──
     pd_ = d["paid"]; ptot = pd_["total"]
