@@ -1113,9 +1113,13 @@ def main():
     exec_extra["reun_by_stage"] = reun_by_stage
     exec_extra["reun_total"] = sum(reun_by_stage.values())
     exec_extra["reun_trend"] = trend7(ch_reun_all[1])
-    # Charts ejecutivos con totales por mes (MQL/SQL/Opp/Cli)
-    exec_extra["svg_mql_m"] = svg_exec_month(*ch_mql, labels, "#57e08a")
-    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql, labels, "#f5b544")
+    # Charts ejecutivos con totales por mes · series que CUADRAN con los KPIs:
+    #   MQL = de facto (leads con contenido consumido) ~604 · SQL = etapa SQL-consultoría ~161
+    ch_mqlc = series(hist, lambda c: not is_free(c) and rank(c["lc"]) >= 1
+                     and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
+    ch_sqls = series(hist, lambda c: c["lc"] in SQL_STAGES)
+    exec_extra["svg_mql_m"] = svg_exec_month(*ch_mqlc, labels, "#57e08a")
+    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sqls, labels, "#f5b544")
     exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
     exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
     # Calidad del dato (sobre contactos desde 1 ene): email corporativo, teléfono, empresa
@@ -1956,7 +1960,7 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .chartc{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px}
 .chartc .chd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
 .chartc h3{font-size:13.5px;font-weight:800;color:var(--ink)}
-.chartc .cbig{font-size:24px;font-weight:800;color:var(--brand);line-height:1}
+.chartc .cbig{font-size:32px;font-weight:800;color:var(--brand);line-height:1;letter-spacing:-.02em}
 .chartc .cn{font-size:11px;color:var(--mut);margin-bottom:8px}
 .chartc svg{width:100%;height:auto;display:block}
 .fnhead2{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--mut);margin-bottom:10px;font-weight:700}
@@ -2015,6 +2019,7 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .qcol .qp{font-size:12px;color:var(--sky);font-weight:800;margin-top:4px}
 .qcol .qsplit{font-size:11px;color:var(--ink2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line2);font-weight:700}
 .qcol .qsplit small{color:var(--mut);font-weight:600}
+.qcol .qnote{font-size:9.5px;color:var(--mut);margin-top:6px;font-style:italic}
 .brow.big24 .bn{font-size:19px} .brow.big24 .bn .sub{font-size:10px}
 .bf.ok{background:linear-gradient(90deg,var(--brand-d),var(--brand))!important}
 .bf.bad{background:linear-gradient(90deg,#b23b4e,var(--bad))!important}
@@ -2147,8 +2152,8 @@ def render_exec(d):
 
     # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
     charts = [
-        ("MQL", cum["mql"], ex["svg_mql_m"]),
-        ("SQL", cum["sql"], ex["svg_sql_m"]),
+        ("MQL", mql_d, ex["svg_mql_m"]),
+        ("SQL", sql_d, ex["svg_sql_m"]),
         ("Oportunidades", opp_e, ex["svg_opp_m"]),
         ("Clientes", cli_e, ex["svg_cli_m"]),
     ]
@@ -2225,7 +2230,8 @@ def render_exec(d):
         f'<div class="qcol"><div class="qi">🏢</div><div class="qv tnum">{fmt(ql["company"])}</div><div class="ql">Empresa identificada</div><div class="qp">{pv(ql["company"], qt)}</div></div>'
         f'<div class="qcol"><div class="qi">🗣️</div><div class="qv tnum">{fmt(pr["total"])}</div><div class="ql">Preferencia de contacto</div>'
         f'<div class="qp">{pv(pr["total"], qt)} lo indican</div>'
-        f'<div class="qsplit">📞 {pr["tel"]} <small>({pv(pr["tel"], pr_t)})</small> · ✉️ {pr["mail"]} <small>({pv(pr["mail"], pr_t)})</small></div></div>')
+        f'<div class="qsplit">📞 {pr["tel"]} <small>({pv(pr["tel"], pr_t)})</small> · ✉️ {pr["mail"]} <small>({pv(pr["mail"], pr_t)})</small></div>'
+        f'<div class="qnote">campo del formulario desde el 9 jul</div></div>')
     vq = ex.get("volq", {}); vq_t = sum(vq.values()) or 1
     VOLROWS = [("✅ ≥ 3.000 consultas/mes", vq.get("ge3000", 0), "ok"),
                ("🤷 «No lo sé»", vq.get("nose", 0), ""),
@@ -2443,9 +2449,6 @@ def render_exec(d):
   <h2 class="sh">Calidad de los nuevos contactos</h2>
   <div class="sd">Sobre el total de contactos desde el 1 de enero: completitud del dato (email corporativo, teléfono, empresa) y preferencia de contacto declarada.</div>
   <div class="q3">{qcols}</div>
-  <h3 style="font-size:14px;font-weight:800;margin:26px 0 6px">Volumen de consultas declarado <span style="color:var(--brand)">· {fmt(vq_t)}</span></h3>
-  <div class="sd" style="margin-bottom:14px">Campo del formulario que elige el usuario: es lo que determina si <b>cualifica</b> (≥3.000 o «no lo sé») o no (&lt;3.000).</div>
-  <div class="bars">{volq_html}</div>
 </section>
 
 <section>
