@@ -758,8 +758,12 @@ def main():
         STAGE_WON = {s["id"] for p in pdefs for s in p.get("stages", [])
                      if (s.get("metadata", {}) or {}).get("isClosed") == "true"
                      and (s.get("metadata", {}) or {}).get("probability") == "1.0"}
+        # Pipeline de VENTAS = el que contiene las etapas Discovery/Demo/Best Case
+        SALES_STAGE_IDS = {"1107496610", "presentationscheduled", "1033589123"}
+        SALES_PL = {p["id"] for p in pdefs
+                    if any(s["id"] in SALES_STAGE_IDS for s in p.get("stages", []))}
     except Exception as e:
-        print(f"  pipelines error: {e}"); PL_LABEL = {}; STAGE_ID_LABEL = {}; STAGE_WON = set()
+        print(f"  pipelines error: {e}"); PL_LABEL = {}; STAGE_ID_LABEL = {}; STAGE_WON = set(); SALES_PL = set()
     def is_brain_pl(pid):
         return "brain" in PL_LABEL.get(pid, "").lower()
     all_deals = fetch_all("deals", [
@@ -799,7 +803,8 @@ def main():
                 amount = 0.0
             open_deals.append({"id": dl["id"], "name": name,
                                "stage": stage, "stage_label": STAGE_ID_LABEL.get(stage, "Otra etapa"),
-                               "is_won": stage in STAGE_WON, "amount": amount,
+                               "is_won": stage in STAGE_WON, "amount": amount, "pid": pid,
+                               "is_sales": pid in SALES_PL,
                                "created": created, "channel": f"{icon} {label}",
                                "brain": is_brain_pl(pid)})
 
@@ -1155,8 +1160,8 @@ def main():
         if r >= 5: e["cli_c"] += 1
     chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
     exec_extra["chan_matrix"] = chan_matrix
-    # ── Pipeline de ventas: SOLO oportunidades abiertas (no clientes/ganados) de inbound ──
-    opp_deals = [dl for dl in open_deals if not dl.get("is_won")]
+    # ── Pipeline de ventas: SOLO oportunidades abiertas del pipeline de VENTAS (no clientes/onboarding/freemium/ganados) ──
+    opp_deals = [dl for dl in open_deals if dl.get("is_sales") and not dl.get("is_won")]
     exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in opp_deals)
     exec_extra["pipeline_count"] = len(opp_deals)
     exec_extra["pipeline_value_known"] = sum(1 for dl in opp_deals if dl.get("amount", 0) > 0)
