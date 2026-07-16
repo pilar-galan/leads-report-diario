@@ -1915,19 +1915,19 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 
   <div class="section-label">Flujo de precualificación de nuevos contactos · seguimiento de Agustín desde el 9 de julio</div>
   <div class="preq">
-    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
+    <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong> <span style="color:var(--muted);font-weight:400;">(acción implantada el 9 jul; los datos son evolutivos <b>a partir de esa fecha</b>, no de todo el histórico). Todos son <b>SQL</b>.</span></div>
     <div class="preq-arrow">▼ ▼ ▼</div>
     <div class="preq-branches">
       <div class="preq-card preq-sales">
-        <div class="preq-tag">A ventas · tarea a Agustín</div>
+        <div class="preq-tag">Precualificación · a Agustín</div>
         <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
-        <div class="preq-b">Se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar de forma personalizada por el <strong>canal que el usuario ha indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
+        <div class="preq-b">SQL que <strong>sí precualifican</strong>: se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar por el <strong>canal indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
         {preq_sales_stats}
       </div>
       <div class="preq-card preq-free">
-        <div class="preq-tag">Automatizado · descarte</div>
+        <div class="preq-tag">Descarte inicial · automatizado</div>
         <div class="preq-h">➖ −3.000 consultas/mes</div>
-        <div class="preq-b">Se <strong>descalifica</strong> y recibe un <strong>email automatizado</strong> de agradecimiento.</div>
+        <div class="preq-b">SQL con <strong>volumen insuficiente</strong> (&lt;3.000 consultas): <strong>descarte inicial automático</strong> — reciben un email de agradecimiento. No pasan a Agustín.</div>
         {preq_free_stats}
       </div>
     </div>
