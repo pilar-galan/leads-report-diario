@@ -831,7 +831,9 @@ def main():
     preq["ag_calls_unique"] = ag["unique"]
     preq["ag_calls_attempts"] = ag["attempts"]
     preq["ag_reuniones"] = sum(1 for x in deals if x["stage"] in DEMO_PLUS and x["created"] >= AG_START)
-    preq["ag_opp"] = len({compkey(c) for c in hist if c["lc"] == "opportunity" and c["created"] >= AG_START})
+    # Oportunidad = deal NUEVO en pipeline (inbound marketing) creado desde el 9 jul (abierto o cerrado)
+    preq["ag_opp"] = (sum(1 for x in open_deals if x["created"] >= AG_START)
+                      + sum(1 for x in lost_deals if x["created"] >= AG_START))
     # Razones de descarte de los SQL que fueron a Agustín (por qué se caen)
     ag_sql_contacts = [c for c in hist if c["lc"] in ("salesqualifiedlead", "1394675094", "1394675096")
                        and c["created"] >= AG_START]
