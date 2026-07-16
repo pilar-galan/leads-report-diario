@@ -136,6 +136,8 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .elist{list-style:none;text-align:left;font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:9px}
 .elist li{padding-left:20px;position:relative} .elist li::before{content:"→";position:absolute;left:0;color:var(--warn)}
 .fstep.bad2 b{color:var(--bad)}
+.part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
+.part.part-bad{color:var(--bad)}
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
 .pcol.b{border-color:rgba(255,202,92,.3)}
@@ -212,7 +214,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> de negocio</h1>
   <p>Qué entra, cómo evoluciona, dónde se pierde negocio y qué decidir hoy. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>16 Jul 2026 · 23:36</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>16 Jul 2026 · 23:44</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="border-top:none">
@@ -284,8 +286,10 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 
 <section>
   <div class="q">09 · ¿Qué ocurre con los SQL?</div>
-  <h2 class="sh">Estado de los SQL <span class="tot">· 164</span> · precualificación</h2>
-  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen de consultas: con <b>≥3.000 o «no lo sé»</b> se asignan a Agustín como propietario y los gestiona; con <b>&lt;3.000</b> reciben un email automático y quedan en una lista dinámica para revisar más adelante.</div>
+  <h2 class="sh">Estado de los SQL <span class="tot">· 164</span></h2>
+  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen: con <b>≥3.000 o «no lo sé»</b> se asignan a Agustín y los gestiona; con <b>&lt;3.000</b> reciben un email automático. Esta sección se divide en dos partes: los <b>tratados</b> y los <b>descartados</b>.</div>
+
+  <div class="part">① SQL tratados · subflujo y feedback</div>
   <div class="p2">
     <div class="pcol">
       <h4>🟢 Precualifican · gestión de Agustín</h4>
@@ -294,15 +298,13 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
         <div class="fstep"><b>25</b><span>SQL totales<br>a Agustín</span></div>
         <div class="farr"><span class="fp">92%</span>→</div>
         <div class="fstep"><b>23</b><span>agendados /<br>llamados</span></div>
-        <div class="farr"><span class="fp">28%</span>→</div>
-        <div class="fstep bad2"><b>7</b><span>descartados</span></div>
         <div class="farr"><span class="fp">8%</span>→</div>
         <div class="fstep ok"><b>🎯 2</b><span>oportunidad</span></div>
       </div>
       <details class="razd">
-        <summary><span class="chev">▶</span> 🔴 Ver razones de descarte · 15 en esta acción</summary>
+        <summary><span class="chev">▶</span> 🔴 Ver descartados de Agustín · 7 · razones</summary>
         <div class="razbox">
-          <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre el total descartado</div>
+          <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre sus descartados</div>
           <div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">12 <small>80%</small></span></div><div class="mrow"><span class="ml">Lead accidental / no recuerda</span><span class="mn">2 <small>13%</small></span></div><div class="mrow"><span class="ml">Caso de uso / no target</span><span class="mn">1 <small>7%</small></span></div>
         </div>
       </details>
@@ -327,18 +329,15 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
       </details>
     </div>
   </div>
-</section>
 
-<section>
-  <div class="q">10 · ¿Dónde perdemos negocio?</div>
-  <h2 class="sh">Motivos de descarte · SQL <span class="tot">· 44</span></h2>
-  <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), no solo de un paso. Aquí se ve dónde actuar.</div>
+  <div class="part part-bad" style="margin-top:30px">② SQL descartados · 44 · dónde perdemos negocio</div>
+  <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
   <div class="bars"><div class="brow"><span class="bl">Volumen insuficiente (&lt;3.000 consultas/mes)</span><div class="bt"><div class="bf" style="width:100%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">31<br><small>70%</small></span></div><div class="brow"><span class="bl">Lead accidental / no recuerda</span><div class="bt"><div class="bf" style="width:16%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">5<br><small>11%</small></span></div><div class="brow"><span class="bl">Sin autoridad / no cualificado</span><div class="bt"><div class="bf" style="width:6%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">2<br><small>5%</small></span></div><div class="brow"><span class="bl">Caso de uso / no target</span><div class="bt"><div class="bf" style="width:6%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">2<br><small>5%</small></span></div><div class="brow"><span class="bl">Precio / presupuesto</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div><div class="brow"><span class="bl">Timing / no es prioridad</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div><div class="brow"><span class="bl">Competidor</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div><div class="brow"><span class="bl">NO responde</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div></div>
   <div class="note">El <b>70%</b> de los descartes con motivo son por «Volumen insuficiente (&lt;3.000 consultas/mes)». Total con razón registrada: <b>44</b>.</div>
 </section>
 
 <section>
-  <div class="q">11 · ¿Cómo va el pipeline?</div>
+  <div class="q">10 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· 11</span> abiertas de inbound</h2>
   <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa.</div>
   <div class="cards" style="margin-bottom:18px">
@@ -350,15 +349,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 </section>
 
 <section>
-  <div class="q">12 · ¿Qué canal genera negocio real?</div>
-  <h2 class="sh">Rendimiento por canal</h2>
-  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL. Última columna: conversión <b>contacto → oportunidad</b>.</div>
-  <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
-  <tbody><tr><td>Tráfico directo</td><td class="tnum">1.249</td><td class="tnum">781</td><td class="tnum">100</td><td class="tnum">100</td><td class="tnum hi">9</td><td class="tnum cv"><1%</td></tr><tr><td>Google Ads</td><td class="tnum">125</td><td class="tnum">118</td><td class="tnum">78</td><td class="tnum">78</td><td class="tnum hi">4</td><td class="tnum cv">3%</td></tr><tr><td>SEO Orgánico</td><td class="tnum">343</td><td class="tnum">302</td><td class="tnum">73</td><td class="tnum">73</td><td class="tnum hi">6</td><td class="tnum cv">2%</td></tr><tr><td>Chat web</td><td class="tnum">33</td><td class="tnum">28</td><td class="tnum">27</td><td class="tnum">27</td><td class="tnum hi">1</td><td class="tnum cv">3%</td></tr><tr><td>Social Ads</td><td class="tnum">105</td><td class="tnum">105</td><td class="tnum">19</td><td class="tnum">19</td><td class="tnum hi">2</td><td class="tnum cv">2%</td></tr><tr><td>Eventos / Campañas</td><td class="tnum">12</td><td class="tnum">11</td><td class="tnum">7</td><td class="tnum">7</td><td class="tnum hi">2</td><td class="tnum cv">17%</td></tr><tr><td>Otros</td><td class="tnum">710</td><td class="tnum">113</td><td class="tnum">4</td><td class="tnum">4</td><td class="tnum hi">0</td><td class="tnum cv">0%</td></tr></tbody></table></div>
-</section>
-
-<section>
-  <div class="q">13 · ¿Cerramos?</div>
+  <div class="q">11 · ¿Cerramos?</div>
   <h2 class="sh">Clientes <span class="tot">· 35</span> empresas</h2>
   <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
   <div class="cards">
@@ -368,6 +359,14 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 16 Jul 2026 · 23:36 (hora España) · documento confidencial</footer>
+<section>
+  <div class="q">12 · ¿Qué canal genera negocio real?</div>
+  <h2 class="sh">Rendimiento por canal</h2>
+  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL. Última columna: conversión <b>contacto → oportunidad</b>.</div>
+  <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
+  <tbody><tr><td>Tráfico directo</td><td class="tnum">1.249</td><td class="tnum">781</td><td class="tnum">100</td><td class="tnum">100</td><td class="tnum hi">9</td><td class="tnum cv"><1%</td></tr><tr><td>Google Ads</td><td class="tnum">125</td><td class="tnum">118</td><td class="tnum">78</td><td class="tnum">78</td><td class="tnum hi">4</td><td class="tnum cv">3%</td></tr><tr><td>SEO Orgánico</td><td class="tnum">343</td><td class="tnum">302</td><td class="tnum">73</td><td class="tnum">73</td><td class="tnum hi">6</td><td class="tnum cv">2%</td></tr><tr><td>Chat web</td><td class="tnum">33</td><td class="tnum">28</td><td class="tnum">27</td><td class="tnum">27</td><td class="tnum hi">1</td><td class="tnum cv">3%</td></tr><tr><td>Social Ads</td><td class="tnum">105</td><td class="tnum">105</td><td class="tnum">19</td><td class="tnum">19</td><td class="tnum hi">2</td><td class="tnum cv">2%</td></tr><tr><td>Eventos / Campañas</td><td class="tnum">12</td><td class="tnum">11</td><td class="tnum">7</td><td class="tnum">7</td><td class="tnum hi">2</td><td class="tnum cv">17%</td></tr><tr><td>Otros</td><td class="tnum">710</td><td class="tnum">113</td><td class="tnum">4</td><td class="tnum">4</td><td class="tnum hi">0</td><td class="tnum cv">0%</td></tr></tbody></table></div>
+</section>
+
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 16 Jul 2026 · 23:44 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
