@@ -199,6 +199,12 @@ def classify_origin(conv, webinar=""):
     form = low.split(":")[-1].strip()   # el formulario es el último segmento «página: formulario»
     if "webinar" in low:
         return "Webinar"
+    # Calculadora / herramienta: detectar en TODA la cadena (el keyword suele estar en el título de página,
+    # p. ej. «...calculator | gurusup: .space-y-4»). Incluye la calculadora AHT.
+    if any(k in low for k in ("calculator", "calculadora", "aht-calculator", "/tools/",
+                              "template generator", "generador de plantillas", "gerador de modelos",
+                              "herramienta gratuita", "free tool", "roi calculator", "savings calculator")):
+        return "Herramienta / calculadora"
     if "ebook" in form:
         return "Ebook / descargable"
     if "newsletter" in form:
