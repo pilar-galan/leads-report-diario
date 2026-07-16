@@ -613,12 +613,18 @@ def svg_exec_month(cum, daily, labels, color):
     marks = ""
     monthname = {"ene": "Ene", "feb": "Feb", "mar": "Mar", "abr": "Abr", "may": "May", "jun": "Jun",
                  "jul": "Jul", "ago": "Ago", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dic": "Dic"}
+    prev_cum = 0
     for m, i in last_idx.items():
         x, y, v = X(i), Y(cum[i]), cum[i]
-        up = y - 10 if y > 34 else y + 16
+        delta = v - prev_cum          # generados en ESE mes
+        prev_cum = v
+        ty = y - 24 if y > 48 else y + 14   # total (grande)
+        dy = ty + 11                        # +generados (pequeño), debajo del total
         marks += (f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{color}"/>'
-                  f'<text x="{x:.0f}" y="{up:.0f}" text-anchor="middle" fill="{color}" '
-                  f'font-size="10.5" font-weight="800">{v}</text>'
+                  f'<text x="{x:.0f}" y="{ty:.0f}" text-anchor="middle" fill="{color}" '
+                  f'font-size="12" font-weight="800">{v}</text>'
+                  f'<text x="{x:.0f}" y="{dy:.0f}" text-anchor="middle" fill="#9fc4b3" '
+                  f'font-size="8.5" font-weight="700">+{delta}</text>'
                   f'<text x="{x:.0f}" y="{H-8}" text-anchor="middle" fill="#7a988a" font-size="9.5">{monthname.get(m,m)}</text>')
     return (f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" '
             f'style="display:block;height:auto">'
@@ -1919,21 +1925,21 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .chartc .cbig{font-size:24px;font-weight:800;color:var(--brand);line-height:1}
 .chartc .cn{font-size:11px;color:var(--mut);margin-bottom:8px}
 .chartc svg{width:100%;height:auto;display:block}
-.fnhead{display:flex;justify-content:flex-end;font-size:11px;color:var(--mut);margin-bottom:8px}
-.fnhead b{color:var(--brand)}
+.fnhead2{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--mut);margin-bottom:10px;font-weight:700}
+.fnhead2 .rr{color:var(--sky)}
 .fn{display:flex;flex-direction:column;gap:9px}
-.fn .row{display:grid;grid-template-columns:128px 1fr;gap:16px;align-items:center}
+.fn .row{display:grid;grid-template-columns:128px 1fr 116px;gap:16px;align-items:center}
 .fn .lab{text-align:right} .fn .lab .n{font-size:22px;font-weight:800;line-height:1}
 .fn .lab .t{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:700;margin-top:3px}
 .fn .track{position:relative;height:44px;display:flex;align-items:center}
 .fn .fill{height:100%;border-radius:10px;min-width:70px;display:flex;align-items:center;padding-left:15px;
   font-size:12px;font-weight:800;color:#052012;
   background:linear-gradient(90deg,var(--brand-deep),var(--brand-2));box-shadow:0 0 24px rgba(111,240,162,.12)}
-.fn .conv{position:absolute;right:0;font-size:11px;color:var(--ink2);background:rgba(12,27,21,.85);
+.fn .conv{position:absolute;right:8px;font-size:11px;color:var(--ink2);background:rgba(12,27,21,.85);
   border:1px solid var(--line2);border-radius:999px;padding:3px 11px;white-space:nowrap}
 .fn .conv b{color:var(--brand)}
-.fn .emp{position:absolute;right:0;font-size:10.5px;color:var(--sky);
-  background:rgba(104,209,245,.12);border:1px solid rgba(104,209,245,.3);border-radius:999px;padding:3px 10px;white-space:nowrap;font-weight:700}
+.fn .empc{text-align:right;color:var(--sky);font-weight:800;font-size:19px;line-height:1;font-variant-numeric:tabular-nums}
+.fn .empc span{display:block;font-size:9.5px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
 .bars{display:flex;flex-direction:column;gap:9px}
 .brow{display:grid;grid-template-columns:170px 1fr 70px;gap:12px;align-items:center;font-size:13px}
 .brow.zero{opacity:.42}
@@ -1944,7 +1950,7 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 /* matriz por fuente */
 .mxwrap{overflow-x:auto}
 .matrix{min-width:720px;display:flex;flex-direction:column;gap:7px}
-.mx-head,.mx-row{display:grid;grid-template-columns:1.7fr .8fr .7fr .7fr .8fr .8fr .8fr .9fr;gap:8px;align-items:center}
+.mx-head,.mx-row{display:grid;grid-template-columns:1.8fr .9fr .75fr .75fr .85fr 1fr 1fr;gap:8px;align-items:center}
 .mx-head{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:800;padding:0 12px 4px}
 .mx-head span{text-align:right} .mx-head span:first-child{text-align:left}
 .mx-row{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:12px;padding:11px 12px}
@@ -2040,6 +2046,10 @@ def render_exec(d):
         except (TypeError, ValueError): return str(n)
     def pv(a, b):
         return f"{round(a / b * 100)}%" if b else "—"
+    def pvf(a, b):
+        if not b: return "—"
+        r = a / b * 100
+        return "<1%" if 0 < r < 1 else f"{round(r)}%"
     def arrow(t):
         s = {"up": "▲", "down": "▼", "flat": "▬"}[t["dir"]]
         dv = t.get("delta", 0)
@@ -2101,15 +2111,11 @@ def render_exec(d):
     fn_rows = ""
     for i, (lab, val, emp) in enumerate(stages):
         w = max(6, round(val / top * 100))
-        if emp is not None:
-            right = f'<span class="emp">🏢 {fmt(emp)} empresas</span>'
-        elif i == 0:
-            right = ""
-        else:
-            right = f'<span class="conv">{pv(val, stages[i-1][1])} vs {stages[i-1][0].lower()} · <b>{pv(val, top)}</b> del total</span>'
+        conv = "" if i == 0 else f'<span class="conv">{pv(val, stages[i-1][1])} vs {stages[i-1][0].lower()}</span>'
+        empcell = f'<div class="empc">🏢 {fmt(emp)}<span>empresas</span></div>' if emp is not None else '<div class="empc"></div>'
         fn_rows += (f'<div class="row"><div class="lab"><div class="n tnum">{fmt(val)}</div>'
                     f'<div class="t">{lab}</div></div><div class="track">'
-                    f'<div class="fill" style="width:{w}%"></div>{right}</div></div>')
+                    f'<div class="fill" style="width:{w}%"></div>{conv}</div>{empcell}</div>')
 
     # ---------- CONTACTOS POR FUENTE · matriz acumulada ----------
     cm = ex["chan_matrix"]
@@ -2117,26 +2123,27 @@ def render_exec(d):
     cmax = max((e["contactos"] for _, e in cm), default=0) or 1
     def cell(v, extra="", cls=""):
         return f'<div class="mx-cell {cls}"><span class="v tnum">{fmt(v)}</span>{extra}</div>'
+    dbc_m = ex.get("deals_by_chan", {})
     mx_rows = ""
     for lbl, e in cm:
-        empo = f'<span class="emp">🏢 {e["opp_emp"]}</span>' if e["opp_c"] else '<span class="p">—</span>'
-        empc = f'<span class="emp">🏢 {e["cli_emp"]}</span>' if e["cli_c"] else '<span class="p">—</span>'
+        opp_deals = len(dbc_m.get(lbl, []))   # oportunidades REALES = negocios asociados en pipeline
+        empo = '<span class="emp">🏢 negocios</span>' if opp_deals else '<span class="p">—</span>'
         pct_c = f'<span class="p">{pv(e["contactos"], cm_tot)}</span>'
         bar_w = round(e["contactos"] / cmax * 100)
-        conv_c = pv(e["sql"], e["contactos"])
+        conv_o = pvf(opp_deals, e["contactos"])
         mx_rows += (
             '<div class="mx-row">'
             f'<div class="c1"><span class="nm">{esc(lbl)}</span>'
             f'<div class="bt"><div class="bf" style="width:{bar_w}%"></div></div></div>'
             + cell(e["contactos"], pct_c)
             + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
-            + cell(e["opp_c"], empo) + cell(e["cli_c"], empc)
-            + f'<div class="mx-cell cv"><span class="v tnum">{conv_c}</span><span class="p">SQL/canal</span></div>'
+            + cell(opp_deals, empo)
+            + f'<div class="mx-cell cv"><span class="v tnum">{conv_o}</span><span class="p">contacto→op.</span></div>'
             + '</div>')
     matrix_html = (
         '<div class="mxwrap"><div class="matrix">'
         '<div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span>'
-        '<span>MQL</span><span>SQL</span><span>Oport.</span><span>Cliente</span><span>Conv. SQL</span></div>'
+        '<span>MQL</span><span>SQL</span><span>Oport. (negocios)</span><span>Contacto→Op.</span></div>'
         + mx_rows + '</div></div>')
 
     # ---------- 24H ----------
@@ -2245,7 +2252,7 @@ def render_exec(d):
     rows_ch = "".join(
         f'<tr><td>{esc(lbl)}</td><td class="tnum">{fmt(e["contactos"])}</td><td class="tnum">{fmt(e["leads"])}</td>'
         f'<td class="tnum">{fmt(e["mql"])}</td><td class="tnum">{fmt(e["sql"])}</td><td class="tnum hi">{e.get("opp",0)}</td>'
-        f'<td class="tnum cv">{pv(e.get("opp",0), e["contactos"])}</td></tr>'
+        f'<td class="tnum cv">{pvf(e.get("opp",0), e["contactos"])}</td></tr>'
         for lbl, e in cf)
 
     # ---------- INSIGHTS ----------
@@ -2340,7 +2347,7 @@ def render_exec(d):
   <div class="q">03 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Funnel comercial</h2>
   <div class="sd">Volumen de <b>contactos</b> por etapa (un único flujo comparable). En Oportunidad y Cliente añadimos el nº de <b>empresas</b>.</div>
-  <div class="fnhead">Conversión mostrada <b>&nbsp;sobre contactos&nbsp;</b></div>
+  <div class="fnhead2"><span>📊 Volumen de contactos · conversión paso a paso (mismo dato comparable)</span><span class="rr">🏢 Empresas / negocios</span></div>
   <div class="fn">{fn_rows}</div>
   <div class="note">El flujo de barras es siempre <b>volumen de contactos</b> para que sea comparable. A partir de Oportunidad, el negocio se mide por <b>empresa</b> (chip azul): son unidades distintas, por eso no bajan «en proporción».</div>
 </section>
@@ -2348,7 +2355,7 @@ def render_exec(d):
 <section>
   <div class="q">04 · ¿De qué fuentes entra el negocio?</div>
   <h2 class="sh">Contactos por fuente <span class="tot">· {fmt(cm_tot)}</span> · acumulado 1 ene</h2>
-  <div class="sd">Volumen de contactos por canal de inbound marketing y cómo avanzan por el embudo. Todo son <b>contactos</b>; en Oportunidad y Cliente el chip 🏢 es el nº de empresas. Última columna: <b>conversión a SQL</b> del propio canal.</div>
+  <div class="sd">Volumen de contactos por canal de inbound marketing y cómo avanzan por el embudo. Todo son <b>contactos</b>; en Oportunidad contamos solo los que tienen un <b>negocio asociado en el pipeline</b> (no toda la etapa de ciclo de vida). Última columna: <b>conversión contacto → oportunidad</b> del canal.</div>
   {matrix_html}
 </section>
 
