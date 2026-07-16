@@ -1186,17 +1186,20 @@ def render(d):
     # ── Contadores de las ramas del workflow de precualificación ──
     pq = d["preq"]
     # Rama Agustín: estado/evolución de cada SQL DESDE EL 9 JUL (llegan → llamadas → reuniones → oportunidades)
+    ag_base = pq["ag_sql"] or 1
     preq_sales_stats = (
         '<div class="pqflow">'
-        f'<div class="pqf-step"><b>{pq["ag_sql"]}</b><span>SQL llegan a Agustín<br>(tarea · desde {pq["ag_start"]})</span></div>'
-        '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step"><b>📞 {pq["ag_calls_unique"]}</b><span>SQL llamados · {pq["ag_calls_attempts"]} intentos<br>'
-        f'📞 {pq["ag_calls_attempts"]} telefónicas · 🎥 {pq["ag_reuniones"]} videollamadas</span></div>'
-        '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step"><b>📅 {pq["ag_reuniones"]}</b><span>reuniones agendadas</span></div>'
-        '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["ag_opp"]}</b><span>oportunidades<br>creadas (empresas)</span></div>'
-        '</div>')
+        f'<div class="pqf-step"><b>{pq["ag_sql"]}</b><span>SQL a Agustín<br>(desde {pq["ag_start"]}) · base 100%</span></div>'
+        f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_calls_unique"], ag_base)}</span>→</div>'
+        f'<div class="pqf-step"><b>📞 {pq["ag_calls_unique"]}</b><span>SQL contactados<br>{pct(pq["ag_calls_unique"], ag_base)} de los SQL</span></div>'
+        f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_reuniones"], ag_base)}</span>→</div>'
+        f'<div class="pqf-step"><b>📅 {pq["ag_reuniones"]}</b><span>reuniones agendadas<br>{pct(pq["ag_reuniones"], ag_base)} de los SQL</span></div>'
+        f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_opp"], ag_base)}</span>→</div>'
+        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["ag_opp"]}</b><span>oportunidades creadas<br>{pct(pq["ag_opp"], ag_base)} de los SQL</span></div>'
+        '</div>'
+        '<div class="pqf-channel">📲 <b>Canal de contacto:</b> '
+        f'<span class="pqf-ch-tel">📞 {pq["ag_calls_attempts"]} por teléfono</span> · '
+        f'<span class="pqf-ch-vid">💻 {pq["ag_reuniones"]} por videollamada / mail agendado</span></div>')
     # Donut · preferencia de canal de contacto (del formulario demo)
     pt = pq["pref_total"] or 1
     pll, pem = pq["pref_llamada"], pq["pref_email"]
@@ -1306,13 +1309,16 @@ def render(d):
         + '</tbody></table>')
     paid_html = pm_head + pm_track + pm_table
 
-    # Rama <3.000: número grande + explicación pequeña
+    # Rama <3.000: número grande + bullets
     preq_free_stats = (
         '<div class="pqbig">'
         f'<div class="pqbig-n">{pq["ag_lt3000"]}</div>'
-        '<div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes (desde 9 jul). Reciben email de agradecimiento; '
-        '<b>ya no se derivan a Freemium</b>. Quedan identificados en la lista de HubSpot '
-        '<b>«Descalificación de SQLs · &lt;3.000 consultas/mes»</b> para decidir el siguiente paso.</div>'
+        '<ul class="pqbig-ul">'
+        '<li><b>Descarte inicial automático</b> (desde 9 jul).</li>'
+        '<li>Reciben <b>email de agradecimiento</b>.</li>'
+        '<li>Entran en la lista de HubSpot <b>«Descalificación de SQLs · &lt;3.000»</b> — dinámica, crece con cada descarte.</li>'
+        '<li>Razón de descarte SQL <b>automatizada = «&lt;3.000 consultas»</b> → se verá en el evolutivo.</li>'
+        '</ul>'
         '</div>')
 
     # Resumen 24h · KPIs (% sobre el total de contactos, NO es un embudo)
@@ -1676,9 +1682,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .hero24 {{ background:linear-gradient(135deg, rgba(255,107,91,.16) 0%, rgba(46,42,90,.28) 50%, rgba(34,211,238,.16) 100%); border:1px solid rgba(255,107,91,.35); border-radius:18px; padding:20px 22px 14px; margin-bottom:30px; box-shadow:0 8px 34px rgba(255,107,91,.12); }}
 .hero24 .section-label {{ color:var(--guru-300); }}
 .hero24-cap {{ margin-top:14px; }}
-.down-link {{ text-align:center; margin:-14px 0 20px; font-size:13px; color:var(--text-2); }}
+.down-link {{ text-align:left; margin:-10px 0 18px; padding-left:70px; font-size:13px; color:var(--text-2); }}
 .down-link .dl-arrow {{ display:block; font-size:22px; color:var(--guru-300); font-weight:800; line-height:1; margin-bottom:2px; }}
 .down-link b {{ color:var(--guru-300); }}
+@media(max-width:760px){{ .down-link {{ text-align:center; padding-left:0; }} }}
 .df-op {{ align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }}
 .df-arrow {{ color:var(--guru-300); }}
 /* Árbol de dos ramas (24h) · Contactos = origen de ambas */
@@ -1809,11 +1816,17 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pqf-step span {{ font-size:10px; color:var(--muted); line-height:1.3; }}
 .pqf-step.pqf-ok {{ border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.09); }}
 .pqf-step.pqf-ok b {{ color:#6ee7b7; }}
-.pqf-arrow {{ align-self:center; color:var(--muted); font-size:15px; }}
-.pqbig {{ display:flex; align-items:center; gap:14px; margin-top:12px; }}
+.pqf-arrow {{ align-self:center; color:var(--muted); font-size:15px; display:flex; flex-direction:column; align-items:center; }}
+.pqf-pct {{ font-size:11px; font-weight:800; color:var(--guru-300); }}
+.pqf-channel {{ margin-top:10px; font-size:12px; color:var(--text-2); background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; padding:8px 12px; }}
+.pqf-ch-tel {{ color:#6ee7b7; font-weight:700; }}
+.pqf-ch-vid {{ color:#c4b5fd; font-weight:700; }}
+.pqbig {{ display:flex; align-items:center; gap:16px; margin-top:12px; }}
 .pqbig-n {{ font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }}
 .pqbig-t {{ font-size:11px; color:var(--text-2); line-height:1.45; }}
-@media(max-width:640px){{ .pqflow {{ flex-direction:column; }} .pqf-arrow {{ transform:rotate(90deg); }} }}
+.pqbig-ul {{ margin:0; padding-left:18px; font-size:12px; color:var(--text-2); line-height:1.55; }}
+.pqbig-ul li {{ margin-bottom:3px; }}
+@media(max-width:640px){{ .pqflow {{ flex-direction:column; }} .pqf-arrow {{ flex-direction:row; gap:6px; transform:rotate(90deg); }} .pqbig {{ flex-direction:column; align-items:flex-start; }} }}
 .preq-pref {{ margin-top:16px; }}
 .cpref {{ display:flex; align-items:center; gap:20px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; padding:16px 18px; flex-wrap:wrap; }}
 .cpref-donut {{ width:110px; height:110px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }}
