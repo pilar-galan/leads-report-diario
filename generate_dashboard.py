@@ -553,8 +553,8 @@ def svg_cumulative(cum, daily, labels, color):
     area = f"{pl},{pt+ph} " + line + f" {X(n-1):.1f},{pt+ph}"
     # ticks de eje Y (0, medio, max)
     yt = "".join(
-        f'<text x="{pl-6}" y="{Y(maxv*f)+4:.0f}" text-anchor="end" fill="#7b76a0" font-size="10">{round(maxv*f)}</text>'
-        f'<line x1="{pl}" y1="{Y(maxv*f):.0f}" x2="{W-pr}" y2="{Y(maxv*f):.0f}" stroke="#2e2a5a" stroke-width="1" opacity=".5"/>'
+        f'<text x="{pl-6}" y="{Y(maxv*f)+4:.0f}" text-anchor="end" fill="#6f8c7e" font-size="10">{round(maxv*f)}</text>'
+        f'<line x1="{pl}" y1="{Y(maxv*f):.0f}" x2="{W-pr}" y2="{Y(maxv*f):.0f}" stroke="#20402f" stroke-width="1" opacity=".5"/>'
         for f in (0, .5, 1))
     # líneas y etiquetas de mes (cambio de mes en labels 'D mmm')
     months = ""
@@ -562,7 +562,7 @@ def svg_cumulative(cum, daily, labels, color):
     for i, lb in enumerate(labels):
         m = lb.split()[-1]
         if m != prev_m:
-            months += (f'<line x1="{X(i):.0f}" y1="{pt}" x2="{X(i):.0f}" y2="{pt+ph}" stroke="#2e2a5a" stroke-width="1" opacity=".55"/>'
+            months += (f'<line x1="{X(i):.0f}" y1="{pt}" x2="{X(i):.0f}" y2="{pt+ph}" stroke="#20402f" stroke-width="1" opacity=".55"/>'
                        f'<text x="{X(i)+3:.0f}" y="{pt+11}" fill="#9a95c0" font-size="10" font-weight="700">{m}</text>')
             prev_m = m
     # top-2 saltos (mayores incrementos diarios) = fechas destacadas
@@ -576,7 +576,7 @@ def svg_cumulative(cum, daily, labels, color):
                      f'font-size="10" font-weight="700">{labels[i].split()[0]} +{daily[i]}</text>')
     # etiquetas de eje X (primero y último)
     xt = "".join(
-        f'<text x="{X(i):.0f}" y="{H-8}" text-anchor="{a}" fill="#7b76a0" font-size="10">{labels[i]}</text>'
+        f'<text x="{X(i):.0f}" y="{H-8}" text-anchor="{a}" fill="#6f8c7e" font-size="10">{labels[i]}</text>'
         for i, a in ((0, "start"), (n-1, "end")))
     return (f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" '
             f'style="display:block">'
@@ -1101,10 +1101,10 @@ def main():
         "cum": cum, "agenda_cum": agenda_cum, "dd": dd, "agenda_day": agenda_day, "calls_day": calls_day,
         "agu_unique": agu_calls["unique"], "agu_attempts": agu_calls["attempts"],
         "meet_names": meet_names,
-        "svg_leads": svg_cumulative(*ch_leads, labels, "#FF6B5B"),
-        "svg_sql": svg_cumulative(*ch_sql, labels, "#f59e0b"),
-        "svg_opp": svg_cumulative(*ch_opp, labels, "#10b981"),
-        "svg_cli": svg_cumulative(*ch_cli, labels, "#22d3ee"),
+        "svg_leads": svg_cumulative(*ch_leads, labels, "#57e08a"),
+        "svg_sql": svg_cumulative(*ch_sql, labels, "#f5b544"),
+        "svg_opp": svg_cumulative(*ch_opp, labels, "#ff6b5b"),
+        "svg_cli": svg_cumulative(*ch_cli, labels, "#5bc8f2"),
         "peak_leads": peak_insight(hist, lambda c: rank(c["lc"]) >= 1),
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
@@ -1153,8 +1153,8 @@ def render(d):
 
     # Acumulativos (casi directos) en tono CLARO · evolutivos (convierten) en tono FUERTE oscuro→claro
     # Ventas: Contactos/Leads/MQL (claro) | SQL/Oportunidad/Cliente (fuerte)
-    sales_pal = ["#FBD5CE", "#F7C0B7", "#F3ABA0",   # acumulativos (salmón claro)
-                 "#B23320", "#E8543F", "#FF8B7D"]   # evolutivos (salmón fuerte oscuro→claro)
+    sales_pal = ["#cdeed9", "#a9e6c2", "#86dcab",   # acumulativos (verde claro)
+                 "#0e5136", "#1f9d5f", "#57e08a"]   # evolutivos (verde fuerte oscuro→claro)
     # Freemium: Contactos/Freemium (claro) | Oportunidad/Cliente (fuerte)
     free_pal  = ["#BFEAF4", "#8FDDEE",                                 # acumulativos (teal claro)
                  "#0E7490", "#22D3EE"]                                 # evolutivos (teal oscuro→claro)
@@ -1180,7 +1180,7 @@ def render(d):
     # ── Flujo del contacto al cliente (proceso + estados + conversión) ──
     sd = d["sql_disp"]
     flow_stages = [
-        ("Contactos", t, "", "Incluye TODO lo que entra (también los Freemium, que suman al total pero no pasan a Lead). Excluye test, empleados @gurusup e importaciones.", "", "#7b76a0"),
+        ("Contactos", t, "", "Incluye TODO lo que entra (también los Freemium, que suman al total pero no pasan a Lead). Excluye test, empleados @gurusup e importaciones.", "", "#6f8c7e"),
         ("Leads", cum["lead"], pct(cum["lead"], t), "Interés real: contenido, formulario o chat. Se han EXCLUIDO los Freemium (no cuentan como Lead).", "del total", "#F3ABA0"),
         ("MQL", cum["mql"], pct(cum["mql"], cum["lead"]), "Cualificados por marketing: encajan con el perfil objetivo.", "de leads", "#EF8A78"),
         ("SQL", cum["sql"], pct(cum["sql"], cum["lead"]), "Piden demo o cualifican por volumen de consultas (>3.000 · <3.000 · «no lo sé»).", "de leads", "#E8543F"),
@@ -1318,11 +1318,11 @@ def render(d):
     ang = round(pll / pt * 360)
     canal_pref_html = (
         '<div class="cpref">'
-        f'<div class="cpref-donut" style="background:conic-gradient(#FF8B7D 0deg {ang}deg,#22D3EE {ang}deg 360deg)">'
+        f'<div class="cpref-donut" style="background:conic-gradient(#ff6b5b 0deg {ang}deg,#22D3EE {ang}deg 360deg)">'
         f'<div class="cpref-hole"><b>{pq["pref_total"]}</b><span>con preferencia</span></div></div>'
         '<div class="cpref-leg">'
         '<div class="cpref-t">Preferencia de canal de contacto <span>(campo del formulario demo)</span></div>'
-        f'<div class="cpref-row"><span class="cpref-dot" style="background:#FF8B7D"></span> 📞 Llamada por teléfono · <b>{pll}</b> ({pct(pll, pt)})</div>'
+        f'<div class="cpref-row"><span class="cpref-dot" style="background:#ff6b5b"></span> 📞 Llamada por teléfono · <b>{pll}</b> ({pct(pll, pt)})</div>'
         f'<div class="cpref-row"><span class="cpref-dot" style="background:#22D3EE"></span> ✉️ Email · <b>{pem}</b> ({pct(pem, pt)})</div>'
         '<div class="cpref-note">Solo cuenta los SQL que han indicado preferencia en el formulario.</div>'
         '</div></div>')
@@ -1362,7 +1362,7 @@ def render(d):
     ld_mx = og["lead_desc_origin"][0][1] if og.get("lead_desc_origin") else 1
     ld_rows = "".join(
         f'<div class="og-row"><div class="og-l">{ORIGIN_ICON.get(name, "•")} {esc(name)}</div>'
-        f'<div class="og-barwrap"><div class="og-bar" style="width:{max(6, round(n/ld_mx*100))}%;background:linear-gradient(90deg,#B23320,#FF8B7D)"></div></div>'
+        f'<div class="og-barwrap"><div class="og-bar" style="width:{max(6, round(n/ld_mx*100))}%;background:linear-gradient(90deg,#e0574a,#ff6b5b)"></div></div>'
         f'<div class="og-n">{n} <span class="og-p">{pct(n, ld_n or 1)}</span></div></div>'
         for name, n in og.get("lead_desc_origin", []))
     leaddesc_block = (
@@ -1398,7 +1398,7 @@ def render(d):
         return f'{s} €' if s else '<span class="pm-pend">pendiente de conectar</span>'
     pcont = ptot["contactos"] or 1
     paid_stages = [
-        ("Contactos", ptot["contactos"], "", "#7b76a0"),
+        ("Contactos", ptot["contactos"], "", "#6f8c7e"),
         ("Leads", ptot["leads"], f'{pct(ptot["leads"], pcont)} de contactos', "#a855f7"),
         ("MQL", ptot["mql"], f'{pct(ptot["mql"], ptot["leads"] or 1)} de leads', "#8b5cf6"),
         ("SQL", ptot["sql"], f'{pct(ptot["sql"], ptot["leads"] or 1)} de leads', "#7c3aed"),
@@ -1691,24 +1691,25 @@ TEMPLATE = r"""<!DOCTYPE html>
 <title>{title}</title>
 <style>
 :root {{
-  --guru-900:#0a0618; --guru-500:#FF6B5B; --guru-400:#E55A4C; --guru-300:#FAE5DC;
-  --surface:#161330; --card:#1e1b42; --border:#2e2a5a;
-  --green:#10b981; --amber:#f59e0b; --red:#ef4444; --blue:#3b82f6; --orange:#f97316;
-  --teal:#22d3ee; --text:#f0edff; --text-2:#c4bfe0; --muted:#7b76a0;
+  --guru-900:#08120e; --guru-500:#57e08a; --guru-400:#1f9d5f; --guru-300:#c7f3d9;
+  --surface:#0f1e18; --card:#132a20; --border:#20402f;
+  --green:#34d399; --amber:#f5b544; --red:#f2647a; --blue:#3b82f6; --orange:#f97316;
+  --teal:#5bc8f2; --text:#eafff4; --text-2:#b3d2c4; --muted:#6f8c7e;
+  --salmon:#ff6b5b; --salmon-dk:#e0574a; --green-bright:#79f2a6; --green-deep:#0e5136;
 }}
 *,*::before,*::after {{ box-sizing:border-box; margin:0; padding:0; }}
 html {{ font-size:15px; }}
 body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif; line-height:1.5; min-height:100vh; }}
-.header {{ position:sticky; top:0; z-index:100; background:rgba(17,14,42,.96); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 24px; }}
+.header {{ position:sticky; top:0; z-index:100; background:rgba(9,20,15,.96); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 24px; }}
 .header-inner {{ display:flex; align-items:center; gap:16px; padding:14px 0 12px; flex-wrap:wrap; }}
-.logo-box {{ width:40px; height:40px; background:linear-gradient(135deg,var(--guru-500),var(--guru-400)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0; box-shadow:0 0 16px rgba(255,107,91,.4); }}
+.logo-box {{ width:40px; height:40px; background:linear-gradient(135deg,var(--guru-500),var(--guru-400)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0; box-shadow:0 0 16px rgba(87,224,138,.4); }}
 .header-title {{ flex:1; min-width:180px; }}
 .header-title h1 {{ font-size:16px; font-weight:700; }}
 .header-title p {{ font-size:12px; color:var(--muted); }}
 .live-badge {{ background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3); color:var(--green); font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; white-space:nowrap; }}
 .live-dot {{ width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }}
 @keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:.3}} }}
-.sync-bar {{ font-size:11px; color:var(--muted); padding:5px 24px 6px; border-top:1px solid rgba(46,42,90,.6); background:rgba(17,14,42,.7); }}
+.sync-bar {{ font-size:11px; color:var(--muted); padding:5px 24px 6px; border-top:1px solid rgba(20,60,45,.6); background:rgba(9,20,15,.7); }}
 .main {{ max-width:1160px; margin:0 auto; padding:24px 20px 60px; }}
 .section-label {{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:32px 0 14px; }}
 .section-label:first-child {{ margin-top:0; }}
@@ -1722,7 +1723,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .gl-grid {{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:6px 0 16px; }}
 @media(max-width:760px){{ .gl-grid {{ grid-template-columns:1fr; }} }}
 .gl-card {{ display:flex; gap:11px; align-items:flex-start; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:9px; padding:11px 13px; }}
-.gl-card.gl-wide {{ grid-column:1 / -1; border-color:rgba(255,107,91,.3); background:rgba(255,107,91,.05); }}
+.gl-card.gl-wide {{ grid-column:1 / -1; border-color:rgba(87,224,138,.3); background:rgba(87,224,138,.05); }}
 .gl-card .gl-e {{ font-size:20px; flex:0 0 auto; line-height:1.2; }}
 .gl-card b {{ display:block; font-size:13px; color:var(--guru-300); margin-bottom:3px; }}
 .gl-card .gl-en {{ font-weight:400; font-size:11px; color:var(--muted); }}
@@ -1746,14 +1747,14 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .flow-sep span {{ font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }}
 .evo-banner {{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
   margin:40px 0 20px; padding:18px 22px; border-radius:14px;
-  background:linear-gradient(100deg, #FF6B5B, #FF8B7D);
-  border:1px solid rgba(255,107,91,.6); box-shadow:0 6px 22px rgba(255,107,91,.28); }}
+  background:linear-gradient(100deg, #1f9d5f, #57e08a);
+  border:1px solid rgba(87,224,138,.5); box-shadow:0 6px 22px rgba(87,224,138,.25); }}
 .evo-l {{ display:flex; align-items:center; gap:14px; }}
 .evo-ico {{ font-size:26px; }}
-.evo-t {{ font-size:16px; font-weight:800; color:#fff; letter-spacing:.01em; }}
-.evo-s {{ font-size:12px; color:rgba(255,255,255,.92); margin-top:2px; }}
+.evo-t {{ font-size:16px; font-weight:800; color:#04160d; letter-spacing:.01em; }}
+.evo-s {{ font-size:12px; color:rgba(4,22,13,.82); margin-top:2px; }}
 .evo-badge {{ font-size:11px; font-weight:800; letter-spacing:.08em; padding:6px 12px; border-radius:20px;
-  background:rgba(255,255,255,.22); color:#fff; white-space:nowrap; border:1px solid rgba(255,255,255,.35); }}
+  background:rgba(4,22,13,.18); color:#04160d; white-space:nowrap; border:1px solid rgba(4,22,13,.28); }}
 @media(max-width:600px){{ .flow-sep span {{ white-space:normal; text-align:center; }} }}
 
 /* Dos embudos */
@@ -1795,7 +1796,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fbs-l {{ font-size:13px; font-weight:700; margin-top:3px; }}
 .fbs-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
 .fb-state small {{ display:block; font-size:11px; color:var(--muted); margin-top:5px; line-height:1.35; }}
-.fb-demo {{ margin-top:14px; background:rgba(255,107,91,.07); border:1px solid rgba(255,107,91,.28); border-radius:9px; padding:11px 13px; font-size:12px; line-height:1.5; color:var(--text-2); }}
+.fb-demo {{ margin-top:14px; background:rgba(87,224,138,.07); border:1px solid rgba(87,224,138,.28); border-radius:9px; padding:11px 13px; font-size:12px; line-height:1.5; color:var(--text-2); }}
 .fb-conv {{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }}
 .fbc {{ flex:1; min-width:200px; border-radius:9px; padding:12px 14px; font-size:13px; }}
 .fbc.ok {{ background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.35); color:#a7f3d0; }}
@@ -1807,7 +1808,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fbr-row {{ display:flex; align-items:center; gap:10px; margin-bottom:7px; }}
 .fbr-l {{ flex:0 0 40%; font-size:12px; color:var(--text-2); line-height:1.3; }}
 .fbr-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:12px; overflow:hidden; }}
-.fbr-bar {{ height:12px; border-radius:5px; background:linear-gradient(90deg,#B23320,#FF8B7D); }}
+.fbr-bar {{ height:12px; border-radius:5px; background:linear-gradient(90deg,#e0574a,#ff6b5b); }}
 .fbr-n {{ flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }}
 .fbr-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
 .fbr-foot {{ font-size:10px; color:var(--muted); margin-top:8px; line-height:1.4; }}
@@ -1876,7 +1877,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .f-c-teal {{ --fc:var(--teal); --fv:var(--teal); }}
 /* Grupo ESTADOS (salmón) vs grupo ACCIONES/EVOLUCIÓN → empresas (teal) */
 .f-c-state {{ --fc:var(--guru-500); --fv:var(--guru-300); }}
-.f-c-state {{ background:rgba(255,107,91,.05); }}
+.f-c-state {{ background:rgba(87,224,138,.05); }}
 .f-c-action {{ --fc:var(--teal); --fv:var(--teal); }}
 .f-c-action {{ background:rgba(34,211,238,.06); }}
 .day-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }}
@@ -1886,12 +1887,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .df-card .fc-value {{ font-size:30px; }}
 .df-card .fc-label {{ font-size:10px; }}
 .df-card .fc-sub {{ font-size:10px; margin-top:4px; }}
-.df-state {{ border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }}
+.df-state {{ border-top-color:var(--guru-500); background:rgba(87,224,138,.05); }}
 .df-action {{ border-top-color:var(--teal); background:rgba(34,211,238,.10); box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 4px 18px rgba(34,211,238,.15); position:relative; }}
 .df-action .fc-value {{ color:var(--teal); }}
 .df-action::before {{ content:"ACCIÓN"; position:absolute; top:-9px; right:10px; font-size:9px; font-weight:800; letter-spacing:.08em; color:#0a2a2f; background:var(--teal); padding:2px 7px; border-radius:10px; }}
 /* Panel destacado del bloque 24h (fondo con degradado en la paleta, más claro que el resto) */
-.hero24 {{ background:linear-gradient(135deg, rgba(255,107,91,.16) 0%, rgba(46,42,90,.28) 50%, rgba(34,211,238,.16) 100%); border:1px solid rgba(255,107,91,.35); border-radius:18px; padding:20px 22px 14px; margin-bottom:30px; box-shadow:0 8px 34px rgba(255,107,91,.12); }}
+.hero24 {{ background:linear-gradient(135deg, rgba(87,224,138,.16) 0%, rgba(20,60,45,.28) 50%, rgba(34,211,238,.16) 100%); border:1px solid rgba(87,224,138,.35); border-radius:18px; padding:20px 22px 14px; margin-bottom:30px; box-shadow:0 8px 34px rgba(87,224,138,.12); }}
 .hero24 .section-label {{ color:var(--guru-300); }}
 .hero24-cap {{ margin-top:14px; }}
 .down-link {{ text-align:left; margin:-10px 0 18px; padding-left:70px; font-size:13px; color:var(--text-2); }}
@@ -1902,9 +1903,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .df-arrow {{ color:var(--guru-300); }}
 /* Árbol de dos ramas (24h) · Contactos = origen de ambas */
 .daytree {{ display:flex; align-items:stretch; gap:14px; flex-wrap:wrap; }}
-.dt-root {{ flex:0 0 auto; min-width:180px; align-self:stretch; display:flex; flex-direction:column; justify-content:center; text-align:center; background:linear-gradient(135deg,rgba(255,107,91,.16),rgba(34,211,238,.12)); border:2px solid rgba(255,107,91,.4); border-radius:16px; padding:14px 18px; box-shadow:0 6px 24px rgba(255,107,91,.18); }}
+.dt-root {{ flex:0 0 auto; min-width:180px; align-self:stretch; display:flex; flex-direction:column; justify-content:center; text-align:center; background:linear-gradient(135deg,rgba(87,224,138,.16),rgba(34,211,238,.12)); border:2px solid rgba(87,224,138,.4); border-radius:16px; padding:14px 18px; box-shadow:0 6px 24px rgba(87,224,138,.18); }}
 .dt-root .fc-label {{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; }}
-.dt-root .fc-value {{ font-size:54px; font-weight:800; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }}
+.dt-root .fc-value {{ font-size:54px; font-weight:800; background:linear-gradient(135deg,#1f9d5f,#57e08a); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }}
 .dt-root .fc-sub {{ font-size:10px; }}
 .dt-branches {{ flex:1; min-width:280px; display:flex; flex-direction:column; gap:10px; }}
 .dt-branch {{ display:flex; align-items:center; gap:10px; }}
@@ -1912,7 +1913,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .dt-arm {{ flex:0 0 auto; font-size:26px; font-weight:800; color:var(--guru-300); }}
 .dt-free .dt-arm {{ color:var(--teal); }}
 .dt-body {{ flex:1; border:1px solid var(--border); border-radius:12px; padding:12px 14px; }}
-.dt-com .dt-body {{ background:rgba(255,107,91,.05); border-color:rgba(255,107,91,.28); }}
+.dt-com .dt-body {{ background:rgba(87,224,138,.05); border-color:rgba(87,224,138,.28); }}
 .dt-free .dt-body {{ background:rgba(34,211,238,.05); border-color:rgba(34,211,238,.28); }}
 .df-free-card {{ flex:0 0 auto; min-width:120px; border-top-color:var(--teal); background:rgba(34,211,238,.08); text-align:center; }}
 .df-free-card .fc-value {{ font-size:34px; color:var(--teal); }}
@@ -1945,12 +1946,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .badge-green {{ background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }}
 .table {{ width:100%; border-collapse:collapse; }}
 .table th {{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 12px 10px 0; text-align:left; border-bottom:1px solid var(--border); }}
-.table td {{ font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(46,42,90,.5); }}
+.table td {{ font-size:13px; color:var(--text-2); padding:10px 12px 10px 0; border-bottom:1px solid rgba(20,60,45,.5); }}
 .table td strong {{ color:var(--text); font-weight:600; }}
 .table tr.stage-divider td {{ background:rgba(255,255,255,.03); font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); padding:6px 0; }}
 .pill {{ display:inline-block; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; }}
 .pill-demo {{ background:rgba(16,185,129,.15); color:var(--green); }}
-.pill-discov {{ background:rgba(255,107,91,.15); color:#F5D5C8; }}
+.pill-discov {{ background:rgba(87,224,138,.15); color:#F5D5C8; }}
 .pill-best {{ background:rgba(245,158,11,.15); color:var(--amber); }}
 .pill-lost {{ background:rgba(239,68,68,.15); color:#fca5a5; }}
 .dt-next {{ font-weight:700; color:var(--guru-300); white-space:nowrap; }}
@@ -1969,7 +1970,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .og-stat span b {{ font-size:11px; font-weight:700; color:inherit; }}
 .og-stat {{ border-top-width:3px; }}
 .og-tag {{ font-size:10px; font-weight:800; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }}
-.og-stat.og-total {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); border-top-color:var(--guru-500); }}
+.og-stat.og-total {{ background:rgba(87,224,138,.08); border-color:rgba(87,224,138,.35); border-top-color:var(--guru-500); }}
 .og-stat.og-total > b {{ color:var(--guru-300); }}
 .og-stat.og-content {{ background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); border-top-color:var(--green); }}
 .og-stat.og-content > b {{ color:#6ee7b7; }}
@@ -1978,9 +1979,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .og-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
 .og-l {{ flex:0 0 40%; font-size:12px; color:var(--text-2); line-height:1.3; }}
 .og-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:13px; overflow:hidden; }}
-.og-bar {{ height:13px; border-radius:5px; background:linear-gradient(90deg,#7b76a0,#a5a1c8); }}
+.og-bar {{ height:13px; border-radius:5px; background:linear-gradient(90deg,#6f8c7e,#a5a1c8); }}
 .og-row.og-content .og-bar {{ background:linear-gradient(90deg,#0E7490,#22D3EE); }}
-.og-row.og-noinfo .og-bar {{ background:linear-gradient(90deg,#5a5680,#7b76a0); }}
+.og-row.og-noinfo .og-bar {{ background:linear-gradient(90deg,#5a5680,#6f8c7e); }}
 .og-n {{ flex:0 0 62px; text-align:right; font-size:13px; font-weight:800; color:var(--guru-300); }}
 .og-p {{ font-size:11px; color:var(--muted); font-weight:600; }}
 @media(max-width:640px){{ .og-l {{ flex-basis:50%; }} }}
@@ -1988,32 +1989,32 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .drz-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
 .drz-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
 .drz-stat span {{ font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }}
-.drz-stat-top {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); }}
+.drz-stat-top {{ background:rgba(87,224,138,.08); border-color:rgba(87,224,138,.35); }}
 .drz-stat-top b {{ color:var(--guru-300); }}
 .drz-row {{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }}
 .drz-rank {{ flex:0 0 22px; height:22px; line-height:22px; text-align:center; font-size:11px; font-weight:800; color:var(--muted); background:rgba(255,255,255,.05); border-radius:6px; }}
 .drz-l {{ flex:0 0 38%; font-size:12px; color:var(--text-2); line-height:1.35; }}
 .drz-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:14px; overflow:hidden; }}
 .drz-bar {{ height:14px; border-radius:5px; background:linear-gradient(90deg,var(--guru-500),var(--guru-400)); }}
-.drz-bar-top {{ background:linear-gradient(90deg,#FF6B5B,#FF8A65); box-shadow:0 0 10px rgba(255,107,91,.35); }}
+.drz-bar-top {{ background:linear-gradient(90deg,#FF6B5B,#FF8A65); box-shadow:0 0 10px rgba(87,224,138,.35); }}
 .drz-n {{ flex:0 0 74px; text-align:right; font-size:14px; font-weight:800; color:var(--guru-300); }}
 .drz-pct {{ font-size:11px; color:var(--muted); font-weight:600; }}
 @media(max-width:600px){{ .drz-l {{ flex-basis:46%; font-size:11px; }} .drz-stat b {{ font-size:22px; }} }}
 /* Flujo de precualificación */
 .preq {{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }}
-.preq-top {{ text-align:center; font-size:15px; font-weight:700; color:var(--text); background:rgba(255,107,91,.12); border:1px solid rgba(255,107,91,.3); border-radius:10px; padding:12px; }}
+.preq-top {{ text-align:center; font-size:15px; font-weight:700; color:var(--text); background:rgba(87,224,138,.12); border:1px solid rgba(87,224,138,.3); border-radius:10px; padding:12px; }}
 .preq-arrow {{ text-align:center; font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.04em; margin:10px 0; }}
 .preq-branches {{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }}
 @media(max-width:640px){{ .preq-branches {{ grid-template-columns:1fr; }} }}
 .preq-card {{ border-radius:12px; padding:16px; border:1px solid var(--border); }}
-.preq-sales {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); }}
+.preq-sales {{ background:rgba(87,224,138,.08); border-color:rgba(87,224,138,.35); }}
 .preq-free {{ background:rgba(34,211,238,.08); border-color:rgba(34,211,238,.3); }}
 .preq-h {{ font-size:13px; font-weight:800; margin-bottom:7px; }}
 .preq-sales .preq-h {{ color:var(--guru-300); }}
 .preq-free .preq-h {{ color:var(--teal); }}
 .preq-b {{ font-size:12px; color:var(--text-2); line-height:1.55; }}
 .preq-tag {{ display:inline-block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:2px 8px; border-radius:20px; margin-bottom:8px; }}
-.preq-sales .preq-tag {{ background:rgba(255,107,91,.2); color:var(--guru-300); }}
+.preq-sales .preq-tag {{ background:rgba(87,224,138,.2); color:var(--guru-300); }}
 .preq-free .preq-tag {{ background:rgba(34,211,238,.18); color:var(--teal); }}
 .pqs {{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }}
 .pqs-item {{ flex:1; min-width:120px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:9px 11px; }}
@@ -2101,19 +2102,19 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   .fc-value {{ font-size:32px; }} .card {{ padding:16px 14px; overflow-x:auto; }} .table {{ min-width:300px; }}
   .section-label {{ font-size:10px; margin-top:26px; }}
 }}
-#gs-gate {{ position:fixed; inset:0; z-index:9999; background:#0a0618; display:flex; align-items:center; justify-content:center; }}
-#gs-gate .box {{ background:#1e1b42; border:1px solid #2e2a5a; border-radius:16px; padding:40px 36px; width:340px; text-align:center; }}
-#gs-gate .logo {{ width:48px; height:48px; border-radius:12px; margin:0 auto 20px; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; }}
-#gs-gate h2 {{ font-size:18px; font-weight:700; margin-bottom:4px; }} #gs-gate p {{ font-size:13px; color:#7b76a0; margin-bottom:24px; }}
-#gs-gate input {{ width:100%; padding:11px 14px; border-radius:8px; border:1px solid #2e2a5a; background:#161330; color:#f0edff; font-size:15px; margin-bottom:12px; outline:none; letter-spacing:.08em; }}
-#gs-gate button {{ width:100%; padding:11px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; font-size:15px; font-weight:700; }}
+#gs-gate {{ position:fixed; inset:0; z-index:9999; background:#08120e; display:flex; align-items:center; justify-content:center; }}
+#gs-gate .box {{ background:#132a20; border:1px solid #20402f; border-radius:16px; padding:40px 36px; width:340px; text-align:center; }}
+#gs-gate .logo {{ width:48px; height:48px; border-radius:12px; margin:0 auto 20px; background:linear-gradient(135deg,#1f9d5f,#57e08a); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; }}
+#gs-gate h2 {{ font-size:18px; font-weight:700; margin-bottom:4px; }} #gs-gate p {{ font-size:13px; color:#6f8c7e; margin-bottom:24px; }}
+#gs-gate input {{ width:100%; padding:11px 14px; border-radius:8px; border:1px solid #20402f; background:#0f1e18; color:#eafff4; font-size:15px; margin-bottom:12px; outline:none; letter-spacing:.08em; }}
+#gs-gate button {{ width:100%; padding:11px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(135deg,#1f9d5f,#57e08a); color:#fff; font-size:15px; font-weight:700; }}
 #gs-gate .err {{ color:#ef4444; font-size:12px; margin-top:8px; display:none; }}
 .refresh-fab {{ position:fixed; right:20px; top:16px; z-index:1000; cursor:pointer;
-  background:linear-gradient(135deg,#ff6b5b,#ff8b7d); color:#fff; border:none; border-radius:30px;
-  padding:10px 16px; font-size:13px; font-weight:700; box-shadow:0 6px 20px rgba(255,107,91,.4); }}
+  background:linear-gradient(135deg,#1f9d5f,#57e08a); color:#fff; border:none; border-radius:30px;
+  padding:10px 16px; font-size:13px; font-weight:700; box-shadow:0 6px 20px rgba(87,224,138,.4); }}
 .refresh-fab:hover {{ filter:brightness(1.05); }}
 .refresh-toast {{ position:fixed; right:20px; top:60px; z-index:1000; max-width:340px;
-  background:#1e1b42; border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  background:#132a20; border:1px solid var(--border); border-radius:12px; padding:14px 16px;
   font-size:12px; color:var(--text-2); line-height:1.5; box-shadow:0 8px 28px rgba(0,0,0,.4);
   opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s; }}
 .refresh-toast.show {{ opacity:1; transform:translateY(0); pointer-events:auto; }}
