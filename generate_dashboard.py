@@ -1338,11 +1338,7 @@ def render(d):
         '<div class="fc-sub">consumió contenido</div></div>'
         '<div class="df-op">+</div>'
         f'<div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">{dd["sql"]}</div>'
-        '<div class="fc-sub">piden demo</div></div>'
-        '<div class="df-op df-arrow">→</div>'
-        f'<div class="df-card df-action"><div class="fc-label">SQL contactados por Agustín</div><div class="fc-value">{d["agu_unique"]}</div>'
-        f'<div class="fc-sub">📞 {d["agu_unique"]} SQL únicos llamados · 🔁 {d["agu_attempts"]} intentos (con reintentos) · 🎥 {video_day} videollamadas</div></div>'
-        f'{opp_step}'
+        '<div class="fc-sub">piden demo → seguimiento de Agustín</div></div>'
         '</div></div></div>'
         # Rama freemium
         '<div class="dt-branch dt-free"><div class="dt-arm">→</div><div class="dt-body">'
@@ -1662,8 +1658,10 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .day-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }}
 @media(max-width:900px){{ .day-kpis {{ grid-template-columns:repeat(3,1fr); }} }}
 @media(max-width:520px){{ .day-kpis {{ grid-template-columns:repeat(2,1fr); }} }}
-.df-card {{ flex:1; min-width:120px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:12px 14px; }}
-.df-card .fc-value {{ font-size:34px; }}
+.df-card {{ flex:1; min-width:110px; background:var(--card); border:1px solid var(--border); border-top:3px solid var(--guru-500); border-radius:10px; padding:9px 12px; }}
+.df-card .fc-value {{ font-size:30px; }}
+.df-card .fc-label {{ font-size:10px; }}
+.df-card .fc-sub {{ font-size:10px; margin-top:4px; }}
 .df-state {{ border-top-color:var(--guru-500); background:rgba(255,107,91,.05); }}
 .df-action {{ border-top-color:var(--teal); background:rgba(34,211,238,.10); box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 4px 18px rgba(34,211,238,.15); position:relative; }}
 .df-action .fc-value {{ color:var(--teal); }}
@@ -1679,12 +1677,13 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .df-arrow {{ color:var(--guru-300); }}
 /* Árbol de dos ramas (24h) · Contactos = origen de ambas */
 .daytree {{ display:flex; align-items:stretch; gap:14px; flex-wrap:wrap; }}
-.dt-root {{ flex:0 0 auto; min-width:190px; align-self:stretch; display:flex; flex-direction:column; justify-content:center; text-align:center; background:linear-gradient(135deg,rgba(255,107,91,.16),rgba(34,211,238,.12)); border:2px solid rgba(255,107,91,.4); border-radius:16px; padding:22px 24px; box-shadow:0 6px 24px rgba(255,107,91,.18); }}
-.dt-root .fc-label {{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; }}
-.dt-root .fc-value {{ font-size:72px; font-weight:800; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }}
-.dt-root .fc-sub {{ font-size:11px; }}
-.dt-branches {{ flex:1; min-width:280px; display:flex; flex-direction:column; gap:12px; }}
+.dt-root {{ flex:0 0 auto; min-width:180px; align-self:stretch; display:flex; flex-direction:column; justify-content:center; text-align:center; background:linear-gradient(135deg,rgba(255,107,91,.16),rgba(34,211,238,.12)); border:2px solid rgba(255,107,91,.4); border-radius:16px; padding:14px 18px; box-shadow:0 6px 24px rgba(255,107,91,.18); }}
+.dt-root .fc-label {{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; }}
+.dt-root .fc-value {{ font-size:54px; font-weight:800; background:linear-gradient(135deg,#ff6b5b,#ff8b7d); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }}
+.dt-root .fc-sub {{ font-size:10px; }}
+.dt-branches {{ flex:1; min-width:280px; display:flex; flex-direction:column; gap:10px; }}
 .dt-branch {{ display:flex; align-items:center; gap:10px; }}
+.dt-body {{ padding:10px 12px; }}
 .dt-arm {{ flex:0 0 auto; font-size:26px; font-weight:800; color:var(--guru-300); }}
 .dt-free .dt-arm {{ color:var(--teal); }}
 .dt-body {{ flex:1; border:1px solid var(--border); border-radius:12px; padding:12px 14px; }}
