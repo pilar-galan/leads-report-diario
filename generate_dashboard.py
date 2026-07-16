@@ -232,6 +232,21 @@ def classify_origin(conv, webinar=""):
     return "Otro formulario"
 
 
+def vol_bucket(num_conv, vol_mes):
+    """Clasifica el volumen de consultas del SQL combinando las dos propiedades del formulario."""
+    n = (num_conv or "").lower()
+    v = (vol_mes or "").lower()
+    if "no lo s" in n:
+        return "nose"
+    if "más de 3000" in n or "mas de 3000" in n:
+        return "ge3000"
+    if any(k in v for k in ("+10.000", "3.000-10.000", "+ 5.000", "+5.000", "2.000-5.000")):
+        return "ge3000"
+    if "menos de 3000" in n or any(k in v for k in ("- 3.000", "-3.000", "500-2.000", "0-500", "<500")):
+        return "lt3000"
+    return "sindato"
+
+
 def leadads_label(conv):
     """Desglose de Lead Ads (paid): fuente (LinkedIn/Facebook) + contenido (ebook, formulario…)."""
     low = (conv or "").lower()
@@ -594,7 +609,7 @@ def main():
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
         "hs_lead_status", "createdate", "recent_conversion_event_name",
         "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto",
-        "razon_descarte_sql"])
+        "razon_descarte_sql", "numero_de_conversaciones__inbound", "volumen_de_consultas_al_mes"])
 
     hist = []
     imports = tests = internal = noinfo = 0
@@ -631,6 +646,8 @@ def main():
             "webinar": p.get("fuente_webinar") or "",
             "canal_pref": p.get("preferencia_canal_de_contacto") or "",
             "razon": p.get("razon_descarte_sql") or "",
+            "num_conv": p.get("numero_de_conversaciones__inbound") or "",
+            "vol_mes": p.get("volumen_de_consultas_al_mes") or "",
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -828,6 +845,12 @@ def main():
     preq["ag_razones"] = sorted(ag_raz.items(), key=lambda x: -x[1])
     preq["ag_descartados"] = sum(1 for c in ag_sql_contacts
                                  if c["lead_state"] in ("UNQUALIFIED", "Mareado") or c["rev"] == "No aplica / Descartado")
+    # Desglose de volumen de consultas de los SQL de Agustín (≥3.000 / no lo sé / <3.000 / sin dato)
+    ag_vol = {"ge3000": 0, "nose": 0, "lt3000": 0, "sindato": 0}
+    for c in ag_sql_contacts:
+        ag_vol[vol_bucket(c["num_conv"], c["vol_mes"])] += 1
+    preq["ag_vol"] = ag_vol
+    preq["ag_total"] = len(ag_sql_contacts)
 
     # Preferencia de canal de contacto (del formulario demo) entre los SQL
     pref_llamada = sum(1 for c in sql_stage_contacts if c["canal_pref"] == "Llamada por teléfono")
@@ -1231,6 +1254,15 @@ def render(d):
         '<div class="pqf-channel">📲 <b>Canal de contacto:</b> '
         f'<span class="pqf-ch-tel">📞 {pq["ag_calls_attempts"]} por teléfono</span> · '
         f'<span class="pqf-ch-vid">💻 {pq["ag_reuniones"]} por videollamada / mail agendado</span></div>')
+    # Desglose por volumen de consultas declarado en el formulario
+    avb = pq.get("ag_vol", {}); avt = pq.get("ag_total", 0) or 1
+    preq_sales_stats += (
+        '<div class="pqvol">'
+        f'<div class="pqvol-item pqvol-ok"><b>{avb.get("ge3000",0)}</b><span>✅ +3.000 consultas/mes<br>(incluye +5k, +10k) · {pct(avb.get("ge3000",0), avt)}</span></div>'
+        f'<div class="pqvol-item"><b>{avb.get("nose",0)}</b><span>🤷 «No lo sé»<br>{pct(avb.get("nose",0), avt)}</span></div>'
+        f'<div class="pqvol-item pqvol-bad"><b>{avb.get("lt3000",0)}</b><span>⚠️ &lt;3.000 (mal cualificados)<br>{pct(avb.get("lt3000",0), avt)}</span></div>'
+        f'<div class="pqvol-item"><b>{avb.get("sindato",0)}</b><span>❔ Sin dato de volumen<br>{pct(avb.get("sindato",0), avt)}</span></div>'
+        '</div>')
     # Mini-desglose: por qué se caen (razones de descarte de los SQL de Agustín)
     if pq.get("ag_razones"):
         ag_raz_mx = pq["ag_razones"][0][1] or 1
@@ -1884,6 +1916,14 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pqf-channel {{ margin-top:10px; font-size:12px; color:var(--text-2); background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; padding:8px 12px; }}
 .pqf-ch-tel {{ color:#6ee7b7; font-weight:700; }}
 .pqf-ch-vid {{ color:#c4b5fd; font-weight:700; }}
+.pqvol {{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }}
+.pqvol-item {{ flex:1; min-width:120px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:9px 11px; }}
+.pqvol-item b {{ display:block; font-size:22px; font-weight:800; color:var(--text); line-height:1; }}
+.pqvol-item span {{ font-size:10px; color:var(--muted); line-height:1.35; }}
+.pqvol-item.pqvol-ok {{ border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.08); }}
+.pqvol-item.pqvol-ok b {{ color:#6ee7b7; }}
+.pqvol-item.pqvol-bad {{ border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.07); }}
+.pqvol-item.pqvol-bad b {{ color:#fca5a5; }}
 .pqbig {{ display:flex; align-items:center; gap:16px; margin-top:12px; }}
 .pqbig-n {{ font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }}
 .pqbig-t {{ font-size:11px; color:var(--text-2); line-height:1.45; }}
