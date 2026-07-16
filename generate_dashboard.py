@@ -815,6 +815,19 @@ def main():
     preq["ag_calls_attempts"] = ag["attempts"]
     preq["ag_reuniones"] = sum(1 for x in deals if x["stage"] in DEMO_PLUS and x["created"] >= AG_START)
     preq["ag_opp"] = len({compkey(c) for c in hist if c["lc"] == "opportunity" and c["created"] >= AG_START})
+    # Razones de descarte de los SQL que fueron a Agustín (por qué se caen)
+    ag_sql_contacts = [c for c in hist if c["lc"] in ("salesqualifiedlead", "1394675094", "1394675096")
+                       and c["created"] >= AG_START]
+    ag_raz = {}
+    for c in ag_sql_contacts:
+        for x in (c["razon"] or "").split(";"):
+            x = x.strip()
+            if x:
+                lbl = UNIFY_DESCARTE.get(x, x)
+                ag_raz[lbl] = ag_raz.get(lbl, 0) + 1
+    preq["ag_razones"] = sorted(ag_raz.items(), key=lambda x: -x[1])
+    preq["ag_descartados"] = sum(1 for c in ag_sql_contacts
+                                 if c["lead_state"] in ("UNQUALIFIED", "Mareado") or c["rev"] == "No aplica / Descartado")
 
     # Preferencia de canal de contacto (del formulario demo) entre los SQL
     pref_llamada = sum(1 for c in sql_stage_contacts if c["canal_pref"] == "Llamada por teléfono")
@@ -1218,6 +1231,21 @@ def render(d):
         '<div class="pqf-channel">📲 <b>Canal de contacto:</b> '
         f'<span class="pqf-ch-tel">📞 {pq["ag_calls_attempts"]} por teléfono</span> · '
         f'<span class="pqf-ch-vid">💻 {pq["ag_reuniones"]} por videollamada / mail agendado</span></div>')
+    # Mini-desglose: por qué se caen (razones de descarte de los SQL de Agustín)
+    if pq.get("ag_razones"):
+        ag_raz_mx = pq["ag_razones"][0][1] or 1
+        ag_raz_tot = sum(n for _, n in pq["ag_razones"])
+        ag_raz_rows = "".join(
+            f'<div class="fbr-row"><div class="fbr-l">{esc(r)}</div>'
+            f'<div class="fbr-barwrap"><div class="fbr-bar" style="width:{max(8, round(n/ag_raz_mx*100))}%"></div></div>'
+            f'<div class="fbr-n">{n} <span class="fbr-p">{pct(n, ag_raz_tot)}</span></div></div>'
+            for r, n in pq["ag_razones"])
+        preq_sales_stats += (
+            '<div class="fb-razbox" style="margin-top:12px">'
+            f'<div class="fb-raz-head">🔴 <b>Por qué se caen</b> · {pq["ag_descartados"]} descartados de los SQL de Agustín · razones registradas:</div>'
+            f'<div class="fbr">{ag_raz_rows}</div>'
+            '<div class="fbr-foot">Razón de descarte SQL registrada. La mayoría suelen ser <b>volumen insuficiente (&lt;3.000)</b>: llegan como SQL pero al precualificar no tienen volumen.</div>'
+            '</div>')
     # Donut · preferencia de canal de contacto (del formulario demo)
     pt = pq["pref_total"] or 1
     pll, pem = pq["pref_llamada"], pq["pref_email"]
