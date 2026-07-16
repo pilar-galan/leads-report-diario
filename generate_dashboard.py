@@ -1905,6 +1905,7 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .kc .emprow .eb{font-size:15px;font-weight:800}
 .trend{font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:3px}
 .trend.up{color:var(--ok)} .trend.down{color:var(--bad)} .trend.flat{color:var(--mut)}
+.kg.rates{grid-template-columns:repeat(auto-fit,minmax(185px,1fr))}
 .kg.rates .kc{background:linear-gradient(165deg,rgba(43,182,115,.16),rgba(19,41,30,.5));border-color:var(--line2)}
 .kg.rates .kc .kv{color:var(--brand)}
 .rates-head{font-size:12px;color:var(--mut);margin:0 0 12px;font-weight:600}
@@ -2059,20 +2060,22 @@ def render_exec(d):
                 f'<div class="kt">{arrow(t)}<span>· {sub}</span></div>'
                 f'<div class="emprow">🏢 <span class="eb tnum">{fmt(emp)}</span> empresas / negocios</div></div>')
     kpi_html = (
-        kpi("Nuevos contactos", cum["total"], tr["contactos"], "todo lo que entra") +
+        kpi("Nuevos contactos", cum["total"], tr["contactos"], "todo lo que entra (incluidos Freemium)") +
         kpi("Leads", cum["lead"], tr["leads"], f'{pv(cum["lead"], cum["total"])} de contactos') +
         kpi("MQL", cum["mql"], tr["mql"], f'{pv(cum["mql"], cum["lead"])} de leads') +
         kpi("SQL", cum["sql"], tr["sql"], f'{pv(cum["sql"], cum["lead"])} de leads') +
         f'<div class="kc"><div class="kl">Reuniones</div><div class="kv tnum">{fmt(reun_total)}</div>'
-        f'<div class="kt">{arrow(reun_tr)}<span>· 🔍 {reun_st.get("Discovery",0)} discovery · 🎬 {reun_st.get("Demo",0)} demo</span></div></div>' +
+        f'<div class="kt">{arrow(reun_tr)}</div>'
+        f'<div class="kt" style="margin-top:5px;color:var(--mut)">🔍 {reun_st.get("Discovery",0)} discovery · 🎬 {reun_st.get("Demo",0)} demo</div></div>' +
         kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], f'{pv(opp_c, cum["sql"])} de SQL · contactos') +
         kpi_emp("Clientes", cli_c, cli_e, tr["cli"], f'{pv(cli_c, opp_c)} de oport. · contactos'))
-    # tasas: sobre contactos (misma variable) · sin Contacto→Lead · + Cliente→Churn
+    # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
-        ("Lead → SQL", pv(cum["sql"], cum["lead"]), "interés real → cualificado"),
+        ("Lead → MQL", pv(cum["mql"], cum["lead"]), "sobre contactos"),
+        ("MQL → SQL", pv(cum["sql"], cum["mql"]), "sobre contactos"),
         ("SQL → Oportunidad", pv(opp_c, cum["sql"]), "sobre contactos"),
         ("Oportunidad → Cliente", pv(cli_c, opp_c), "sobre contactos"),
-        ("Cliente → Churn", "—", "pendiente de conectar churn"),
+        ("Cliente → Churn", "—", "pendiente de conectar"),
     ]
     rate_html = "".join(
         f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{val}</div>'
@@ -2318,7 +2321,7 @@ def render_exec(d):
 <section style="border-top:none">
   <div class="q">01 · ¿Cuánto negocio está entrando?</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd">KPIs del embudo comercial de inbound marketing, con tendencia de los últimos 7 días. En Oportunidades y Clientes, el número grande es <b>volumen de contactos</b> (misma variable que el resto) y debajo el <b>nº de empresas / negocios</b>.</div>
+  <div class="sd wide">KPIs del embudo comercial de inbound marketing, con tendencia de los últimos 7 días. En Oportunidades y Clientes, el número grande es <b>volumen de contactos</b> (misma variable que el resto, para comparar etapa a etapa) y debajo, separado, el <b>nº de empresas / negocios</b> asociados. Nuevos contactos incluye todo lo que entra a día de hoy (también los Freemium).</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
