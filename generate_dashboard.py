@@ -594,13 +594,15 @@ def main():
         "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto"])
 
     hist = []
-    imports = tests = internal = 0
+    imports = tests = internal = noinfo = 0
     for c in hraw:
         p = c["properties"]
         email = p.get("email") or ""
         src = p.get("hs_analytics_source") or ""
         d1 = p.get("hs_analytics_source_data_1") or ""
         lc = p.get("lifecyclestage") or ""
+        conv = p.get("recent_conversion_event_name") or p.get("first_conversion_event_name") or ""
+        webinar = p.get("fuente_webinar") or ""
         if is_internal(email): internal += 1; continue
         # No excluir como test a quien ya ha llegado a Oportunidad/Cliente (son negocios reales)
         if is_test(p.get("revision_ventas"), email) and LC_RANK.get(lc, 0) < 4:
@@ -611,6 +613,9 @@ def main():
         # Altas por la integración de la app = freemium (aunque estén mal cualificadas como opportunity)
         if src == "OFFLINE" and (d1 or "") == "INTEGRATION":
             lc = "1378463825"
+        # Leads/MQL SIN origen identificado (sin evento de conversión ni webinar) = ruido → se excluyen
+        if lc in ("lead", "marketingqualifiedlead") and not conv and not webinar:
+            noinfo += 1; continue
         hist.append({
             "src": src, "d1": d1, "lc": lc,
             "rev": p.get("revision_ventas") or "",
@@ -1024,7 +1029,7 @@ def main():
         "nuevos_ids": nuevos_ids, "nuevos_deals": len(nuevos_ids),
         "demos_pipeline": demos_pipeline, "chan_dist": chan_dist, "descarte": descarte,
         "brain_count": brain_count, "ventas_count": ventas_count,
-        "excl_tests": tests, "excl_internal": internal, "excl_imports": imports,
+        "excl_tests": tests, "excl_internal": internal, "excl_imports": imports, "excl_noinfo": noinfo,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
     }
     html = render(data)
@@ -1152,7 +1157,6 @@ def render(d):
         '<div class="sfv-arrow">↓</div>'
         f'<div class="sfv-step sfv-ok"><b>🎯 {en_oport}</b><span>Oportunidad creada<br>({pct(en_oport, gest or 1)} de los contactados)</span></div>'
         '</div>'
-        f'{ls_block}'
         '</div>')
     # Columna DERECHA · descarte (rojo): razones
     col_desc = (
@@ -1456,7 +1460,7 @@ def render(d):
         brain_count=d["brain_count"], ventas_count=d["ventas_count"], total_pipeline=d["total_pipeline"],
         mql_stage=d["cum"]["mql"],
         chan_dist_txt=chan_dist_txt,
-        excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"],
+        excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"], excl_noinfo=d["excl_noinfo"],
         generado=esc(d["generado"]),
     )
 
@@ -1965,7 +1969,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="card">
     {origin_html}
     <div class="alert alert-muted"><span>💡</span><div><b>TOFU/MOFU/BOFU:</b> los <b>MOFU/BOFU</b> han consumido contenido de valor (consideración/decisión) = <b>MQL de facto</b>; los <b>TOFU</b> están en descubrimiento (menos intención). Clasificado por el formulario/evento de conversión de HubSpot.
-    <br><br>⚠️ <b>¿Por qué aquí hay más «MQL» que en el embudo de arriba?</b> Arriba, «MQL {mql_stage}» es la <b>etapa de ciclo de vida</b> de HubSpot (contactos que ventas/marketing han <b>promocionado</b> a MQL o más). Aquí, «MOFU/BOFU» cuenta a <b>todos los que han consumido contenido</b> (comportamiento), aunque HubSpot los siga marcando como «lead». La diferencia = leads que consumen contenido pero <b>aún no están promocionados</b> a etapa MQL en el CRM (oportunidad de nutrición). Tu nuevo workflow (calculadora → MQL) irá cerrando esa brecha.</div></div>
+    <br><br>⚠️ <b>¿Por qué aquí hay más «MQL» que en el embudo de arriba?</b> Arriba, «MQL {mql_stage}» es la <b>etapa de ciclo de vida</b> de HubSpot (contactos que ventas/marketing han <b>promocionado</b> a MQL o más). Aquí, «MOFU/BOFU» cuenta a <b>todos los que han consumido contenido</b> (comportamiento), aunque HubSpot los siga marcando como «lead». La diferencia = leads que consumen contenido pero <b>aún no están promocionados</b> a etapa MQL en el CRM (oportunidad de nutrición). Tu nuevo workflow (calculadora → MQL) irá cerrando esa brecha.
+    <br><br>🧹 Se han <b>excluido {excl_noinfo} leads/MQL sin origen identificado</b> (sin evento de conversión) de todos los totales (contactos, leads, acumulados) por no aportar dato fiable.</div></div>
   </div>
 
   <div class="section-label">Paid media · gasto y embudo · acumulado desde el 1 de enero</div>
