@@ -1866,9 +1866,9 @@ def render_exec(d):
         f'<div class="kt">{arrow(t)}{("· " + sub) if sub else ""}</div></div>'.replace(",", ".")
         for lab, val, t, sub in kpis)
     rates = [
+        ("Contacto → Lead", pv(cum["lead"], cum["total"])),
         ("Lead → SQL", pv(cum["sql"], cum["lead"])),
-        ("SQL → Reunión", pv(reuni, cum["sql"])),
-        ("Reunión → Oportunidad", pv(cum["opp"], reuni)),
+        ("SQL → Oportunidad", pv(cum["opp"], cum["sql"])),
         ("Oportunidad → Cliente", pv(cum["cli"], cum["opp"])),
     ]
     rate_html = "".join(
@@ -1893,7 +1893,7 @@ def render_exec(d):
 
     # ---------- 3 · FUNNEL ----------
     stages = [("Contactos", cum["total"]), ("Leads", cum["lead"]), ("MQL", cum["mql"]),
-              ("SQL", cum["sql"]), ("Reunión", reuni), ("Oportunidad", cum["opp"]), ("Cliente", cum["cli"])]
+              ("SQL", cum["sql"]), ("Oportunidad", cum["opp"]), ("Cliente", cum["cli"])]
     top = stages[0][1] or 1
     fn_rows = ""
     for i, (lab, val) in enumerate(stages):
@@ -2031,7 +2031,7 @@ def render_exec(d):
   <h2 class="sh">Funnel comercial</h2>
   <div class="sd">Volumen por etapa, conversión respecto a la etapa anterior y peso sobre el total.</div>
   <div class="fn">{fn_rows}</div>
-  <div class="note">Reunión = deals que alcanzaron fase demo o superior (objeto negocio); Oportunidad y Cliente se cuentan por empresa única.</div>
+  <div class="note">Oportunidad y Cliente se cuentan por <b>empresa única</b>; por eso su conversión es sobre SQL/empresas. Las <b>reuniones</b> (deals en fase demo) se siguen como métrica operativa aparte —arriba en KPIs y en la evolución— y no encajan de forma lineal en el embudo de ciclo de vida.</div>
 </section>
 
 <section>
