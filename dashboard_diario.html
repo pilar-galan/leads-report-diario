@@ -209,9 +209,10 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .hero24 { background:linear-gradient(135deg, rgba(255,107,91,.16) 0%, rgba(46,42,90,.28) 50%, rgba(34,211,238,.16) 100%); border:1px solid rgba(255,107,91,.35); border-radius:18px; padding:20px 22px 14px; margin-bottom:30px; box-shadow:0 8px 34px rgba(255,107,91,.12); }
 .hero24 .section-label { color:var(--guru-300); }
 .hero24-cap { margin-top:14px; }
-.down-link { text-align:center; margin:-14px 0 20px; font-size:13px; color:var(--text-2); }
+.down-link { text-align:left; margin:-10px 0 18px; padding-left:70px; font-size:13px; color:var(--text-2); }
 .down-link .dl-arrow { display:block; font-size:22px; color:var(--guru-300); font-weight:800; line-height:1; margin-bottom:2px; }
 .down-link b { color:var(--guru-300); }
+@media(max-width:760px){ .down-link { text-align:center; padding-left:0; } }
 .df-op { align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }
 .df-arrow { color:var(--guru-300); }
 /* Árbol de dos ramas (24h) · Contactos = origen de ambas */
@@ -342,11 +343,17 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 .pqf-step span { font-size:10px; color:var(--muted); line-height:1.3; }
 .pqf-step.pqf-ok { border-color:rgba(16,185,129,.4); background:rgba(16,185,129,.09); }
 .pqf-step.pqf-ok b { color:#6ee7b7; }
-.pqf-arrow { align-self:center; color:var(--muted); font-size:15px; }
-.pqbig { display:flex; align-items:center; gap:14px; margin-top:12px; }
+.pqf-arrow { align-self:center; color:var(--muted); font-size:15px; display:flex; flex-direction:column; align-items:center; }
+.pqf-pct { font-size:11px; font-weight:800; color:var(--guru-300); }
+.pqf-channel { margin-top:10px; font-size:12px; color:var(--text-2); background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; padding:8px 12px; }
+.pqf-ch-tel { color:#6ee7b7; font-weight:700; }
+.pqf-ch-vid { color:#c4b5fd; font-weight:700; }
+.pqbig { display:flex; align-items:center; gap:16px; margin-top:12px; }
 .pqbig-n { font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }
 .pqbig-t { font-size:11px; color:var(--text-2); line-height:1.45; }
-@media(max-width:640px){ .pqflow { flex-direction:column; } .pqf-arrow { transform:rotate(90deg); } }
+.pqbig-ul { margin:0; padding-left:18px; font-size:12px; color:var(--text-2); line-height:1.55; }
+.pqbig-ul li { margin-bottom:3px; }
+@media(max-width:640px){ .pqflow { flex-direction:column; } .pqf-arrow { flex-direction:row; gap:6px; transform:rotate(90deg); } .pqbig { flex-direction:column; align-items:flex-start; } }
 .preq-pref { margin-top:16px; }
 .cpref { display:flex; align-items:center; gap:20px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; padding:16px 18px; flex-wrap:wrap; }
 .cpref-donut { width:110px; height:110px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
@@ -419,8 +426,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
-  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Jueves, 16 de julio de 2026 · 15 jul 09:00 → 16 jul 11:10 (hora España)</p></div></div>
-  <div class="sync-bar">Generado el 16 Jul 2026 · 11:10 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
+  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Jueves, 16 de julio de 2026 · 15 jul 09:00 → 16 jul 11:34 (hora España)</p></div></div>
+  <div class="sync-bar">Generado el 16 Jul 2026 · 11:34 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
 
 <div class="main">
 
@@ -471,13 +478,13 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
         <div class="preq-tag">Precualificación · a Agustín</div>
         <div class="preq-h">➕ +3.000 consultas/mes · o «no conozco el volumen»</div>
         <div class="preq-b">SQL que <strong>sí precualifican</strong>: se genera una <strong>tarea automática a Agustín</strong> para <strong>agendar la demo</strong> y contactar por el <strong>canal indicado en el formulario</strong> (llamada o email). Si no cualifica, se registra la <strong>razón de descarte</strong>.</div>
-        <div class="pqflow"><div class="pqf-step"><b>20</b><span>SQL llegan a Agustín<br>(tarea · desde 9 jul)</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📞 18</b><span>SQL llamados · 23 intentos<br>📞 23 telefónicas · 🎥 5 videollamadas</span></div><div class="pqf-arrow">→</div><div class="pqf-step"><b>📅 5</b><span>reuniones agendadas</span></div><div class="pqf-arrow">→</div><div class="pqf-step pqf-ok"><b>🎯 0</b><span>oportunidades<br>creadas (empresas)</span></div></div>
+        <div class="pqflow"><div class="pqf-step"><b>20</b><span>SQL a Agustín<br>(desde 9 jul) · base 100%</span></div><div class="pqf-arrow"><span class="pqf-pct">90%</span>→</div><div class="pqf-step"><b>📞 18</b><span>SQL contactados<br>90% de los SQL</span></div><div class="pqf-arrow"><span class="pqf-pct">25%</span>→</div><div class="pqf-step"><b>📅 5</b><span>reuniones agendadas<br>25% de los SQL</span></div><div class="pqf-arrow"><span class="pqf-pct">0%</span>→</div><div class="pqf-step pqf-ok"><b>🎯 0</b><span>oportunidades creadas<br>0% de los SQL</span></div></div><div class="pqf-channel">📲 <b>Canal de contacto:</b> <span class="pqf-ch-tel">📞 23 por teléfono</span> · <span class="pqf-ch-vid">💻 5 por videollamada / mail agendado</span></div>
       </div>
       <div class="preq-card preq-free">
         <div class="preq-tag">Descarte inicial · automatizado</div>
         <div class="preq-h">➖ −3.000 consultas/mes</div>
         <div class="preq-b">SQL con <strong>volumen insuficiente</strong> (&lt;3.000 consultas): <strong>descarte inicial automático</strong> — reciben un email de agradecimiento. No pasan a Agustín.</div>
-        <div class="pqbig"><div class="pqbig-n">4</div><div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes (desde 9 jul). Reciben email de agradecimiento; <b>ya no se derivan a Freemium</b>. Quedan identificados en la lista de HubSpot <b>«Descalificación de SQLs · &lt;3.000 consultas/mes»</b> para decidir el siguiente paso.</div></div>
+        <div class="pqbig"><div class="pqbig-n">4</div><ul class="pqbig-ul"><li><b>Descarte inicial automático</b> (desde 9 jul).</li><li>Reciben <b>email de agradecimiento</b>.</li><li>Entran en la lista de HubSpot <b>«Descalificación de SQLs · &lt;3.000»</b> — dinámica, crece con cada descarte.</li><li>Razón de descarte SQL <b>automatizada = «&lt;3.000 consultas»</b> → se verá en el evolutivo.</li></ul></div>
       </div>
     </div>
     <div class="preq-pref"><div class="cpref"><div class="cpref-donut" style="background:conic-gradient(#FF8B7D 0deg 144deg,#22D3EE 144deg 360deg)"><div class="cpref-hole"><b>15</b><span>con preferencia</span></div></div><div class="cpref-leg"><div class="cpref-t">Preferencia de canal de contacto <span>(campo del formulario demo)</span></div><div class="cpref-row"><span class="cpref-dot" style="background:#FF8B7D"></span> 📞 Llamada por teléfono · <b>6</b> (40%)</div><div class="cpref-row"><span class="cpref-dot" style="background:#22D3EE"></span> ✉️ Email · <b>9</b> (60%)</div><div class="cpref-note">Solo cuenta los SQL que han indicado preferencia en el formulario.</div></div></div></div>
@@ -521,7 +528,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
 
   <div class="section-label">Estado de los SQL · gestión, conversión y descarte · acumulado</div>
   <div class="fn-box">
-    <div class="flow-branch nobrd"><div class="fb-head">📌 De los <b>159 SQL</b> totales, ¿cómo evolucionan? <span class="fb-reconc">115 gestionados + 14 pendientes + 29 descartados + 1 excluidos (dup/test) = <b>159 SQL</b></span></div><div class="fb-states"><div class="fb-state ok"><div class="fbs-n">115</div><div class="fbs-l">🟢 Gestionados</div><div class="fbs-p">72% de los SQL</div><small>contactados por Agustín (llamada / email)</small></div><div class="fb-state pend"><div class="fbs-n">14</div><div class="fbs-l">🟡 Pendientes</div><div class="fbs-p">9% de los SQL</div><small>sin contactar / asignar todavía</small></div><div class="fb-state bad"><div class="fbs-n">29</div><div class="fbs-l">🔴 Descartados</div><div class="fbs-p">18% de los SQL</div><small>no cualifican (razones →)</small></div></div><div class="sqlcols"><div class="sqlcol sqlcol-ok"><div class="sqlcol-h">🟢 Gestionados · <b>115</b> <span>(72% de los SQL)</span></div><div class="sqlflow"><div class="sfv-step"><b>115</b><span>📞 Contactados / agendados<br>(llamada o email · Agustín)</span></div><div class="sfv-arrow">↓</div><div class="sfv-step sfv-mid"><b>113</b><span>⏳ En proceso<br>contactados, aún sin convertir</span></div><div class="sfv-arrow">↓</div><div class="sfv-step sfv-ok"><b>🎯 2</b><span>Oportunidad creada<br>(2% de los contactados)</span></div></div></div><div class="sqlcol sqlcol-bad"><div class="sqlcol-h">🔴 Descartados · <b>29</b> <span>(18% de los SQL)</span></div><div class="fb-raz-head">Razones de descarte registradas (36):</div><div class="fbr"><div class="fbr-row"><div class="fbr-l">Volumen insuficiente (&lt;3.000 consultas/mes)</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:100%"></div></div><div class="fbr-n">26 <span class="fbr-p">72%</span></div></div><div class="fbr-row"><div class="fbr-l">Lead accidental / no recuerda</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:12%"></div></div><div class="fbr-n">3 <span class="fbr-p">8%</span></div></div><div class="fbr-row"><div class="fbr-l">Sin autoridad / no cualificado</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">2 <span class="fbr-p">6%</span></div></div><div class="fbr-row"><div class="fbr-l">Caso de uso / no target</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">2 <span class="fbr-p">6%</span></div></div><div class="fbr-row"><div class="fbr-l">Precio / presupuesto</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">1 <span class="fbr-p">3%</span></div></div><div class="fbr-row"><div class="fbr-l">Timing / no es prioridad</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">1 <span class="fbr-p">3%</span></div></div><div class="fbr-row"><div class="fbr-l">Competidor</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">1 <span class="fbr-p">3%</span></div></div></div><div class="fbr-foot">Volumen y % sobre los descartes con motivo. ⚠️ De 29 descartados, solo 36 tienen razón registrada; el resto están sin motivo (ventas no lo rellena).</div></div></div>
+    <div class="flow-branch nobrd"><div class="fb-head">📌 De los <b>159 SQL</b> totales, ¿cómo evolucionan? <span class="fb-reconc">116 gestionados + 13 pendientes + 29 descartados + 1 excluidos (dup/test) = <b>159 SQL</b></span></div><div class="fb-states"><div class="fb-state ok"><div class="fbs-n">116</div><div class="fbs-l">🟢 Gestionados</div><div class="fbs-p">73% de los SQL</div><small>contactados por Agustín (llamada / email)</small></div><div class="fb-state pend"><div class="fbs-n">13</div><div class="fbs-l">🟡 Pendientes</div><div class="fbs-p">8% de los SQL</div><small>sin contactar / asignar todavía</small></div><div class="fb-state bad"><div class="fbs-n">29</div><div class="fbs-l">🔴 Descartados</div><div class="fbs-p">18% de los SQL</div><small>no cualifican (razones →)</small></div></div><div class="sqlcols"><div class="sqlcol sqlcol-ok"><div class="sqlcol-h">🟢 Gestionados · <b>116</b> <span>(73% de los SQL)</span></div><div class="sqlflow"><div class="sfv-step"><b>116</b><span>📞 Contactados / agendados<br>(llamada o email · Agustín)</span></div><div class="sfv-arrow">↓</div><div class="sfv-step sfv-mid"><b>114</b><span>⏳ En proceso<br>contactados, aún sin convertir</span></div><div class="sfv-arrow">↓</div><div class="sfv-step sfv-ok"><b>🎯 2</b><span>Oportunidad creada<br>(2% de los contactados)</span></div></div></div><div class="sqlcol sqlcol-bad"><div class="sqlcol-h">🔴 Descartados · <b>29</b> <span>(18% de los SQL)</span></div><div class="fb-raz-head">Razones de descarte registradas (37):</div><div class="fbr"><div class="fbr-row"><div class="fbr-l">Volumen insuficiente (&lt;3.000 consultas/mes)</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:100%"></div></div><div class="fbr-n">27 <span class="fbr-p">73%</span></div></div><div class="fbr-row"><div class="fbr-l">Lead accidental / no recuerda</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:11%"></div></div><div class="fbr-n">3 <span class="fbr-p">8%</span></div></div><div class="fbr-row"><div class="fbr-l">Sin autoridad / no cualificado</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">2 <span class="fbr-p">5%</span></div></div><div class="fbr-row"><div class="fbr-l">Caso de uso / no target</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">2 <span class="fbr-p">5%</span></div></div><div class="fbr-row"><div class="fbr-l">Precio / presupuesto</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">1 <span class="fbr-p">3%</span></div></div><div class="fbr-row"><div class="fbr-l">Timing / no es prioridad</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">1 <span class="fbr-p">3%</span></div></div><div class="fbr-row"><div class="fbr-l">Competidor</div><div class="fbr-barwrap"><div class="fbr-bar" style="width:8%"></div></div><div class="fbr-n">1 <span class="fbr-p">3%</span></div></div></div><div class="fbr-foot">Volumen y % sobre los descartes con motivo. ⚠️ De 29 descartados, solo 37 tienen razón registrada; el resto están sin motivo (ventas no lo rellena).</div></div></div>
   </div>
 
   <div class="section-label">Evolución anual acumulada · 1 ene 2026 → hoy</div>
@@ -549,7 +556,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 16 Jul 2026 · 11:10 (hora España)
+    GuruSup · Dashboard Diario · generado el 16 Jul 2026 · 11:34 (hora España)
   </div>
 </div>
 
