@@ -1342,10 +1342,10 @@ def render(d):
     origin_html = (
         '<div class="og-head">'
         f'<div class="og-stat og-total"><div class="og-tag">LEADS TOTALES</div><b>{og["total"]}</b><span>acumulado desde el 1 de enero</span></div>'
-        f'<div class="og-stat og-content"><div class="og-tag">📗 MOFU / BOFU · CONTENIDO DE VALOR</div><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
-        '<span>han <b>consumido contenido</b> (ebook · webinar · calculadora · comparativa · newsletter). Consideración/decisión = <b>MQL de facto</b>.</span></div>'
-        f'<div class="og-stat og-noinfo"><div class="og-tag">🔭 TOFU · DESCUBRIMIENTO</div><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
-        '<span>sin rastro de contenido de valor (sin info, blog suelto, formulario demo, otros). Menos intención.</span></div>'
+        f'<div class="og-stat og-content"><div class="og-tag">📗 MQL · CONTENIDO (MOFU/BOFU)</div><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
+        '<span>han <b>consumido contenido</b> (ebook · webinar · calculadora · comparativa · newsletter) → consideración/decisión = <b>MQL de facto</b>.</span></div>'
+        f'<div class="og-stat og-noinfo"><div class="og-tag">🔭 RESTO DE LEADS (TOFU)</div><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
+        '<span>sin rastro de contenido de valor (sin info, blog suelto, formulario demo, otros) → menos intención (descubrimiento).</span></div>'
         '</div>'
         '<div class="og-sub">📗 MOFU/BOFU · leads por tipo de contenido consumido</div>'
         f'<div class="og-bars">{content_rows}</div>'
@@ -1850,14 +1850,15 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .og-pct {{ font-size:14px; font-weight:700; color:var(--muted); }}
 .og-head {{ display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }}
 .og-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
-.og-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
+.og-stat > b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
 .og-stat span {{ font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }}
+.og-stat span b {{ font-size:11px; font-weight:700; color:inherit; }}
 .og-stat {{ border-top-width:3px; }}
 .og-tag {{ font-size:10px; font-weight:800; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }}
 .og-stat.og-total {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); border-top-color:var(--guru-500); }}
-.og-stat.og-total b {{ color:var(--guru-300); }}
+.og-stat.og-total > b {{ color:var(--guru-300); }}
 .og-stat.og-content {{ background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); border-top-color:var(--green); }}
-.og-stat.og-content b {{ color:#6ee7b7; }}
+.og-stat.og-content > b {{ color:#6ee7b7; }}
 .og-stat.og-content .og-tag {{ color:#6ee7b7; }}
 .og-stat.og-noinfo {{ background:rgba(123,118,160,.08); border-color:rgba(123,118,160,.3); border-top-color:var(--muted); }}
 .og-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
