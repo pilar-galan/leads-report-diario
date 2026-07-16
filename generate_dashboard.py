@@ -590,6 +590,48 @@ def svg_cumulative(cum, daily, labels, color):
             f'{dots}{xt}</svg>')
 
 
+def svg_exec_month(cum, daily, labels, color):
+    """Gráfico lineal acumulado (1 ene → hoy) con el TOTAL acumulado marcado al final
+    de cada mes sobre la propia línea. Pensado para el dashboard ejecutivo."""
+    if not cum:
+        return '<div style="color:#6f8c7e;font-size:12px;padding:20px 0">Sin datos</div>'
+    W, H = 720, 210
+    pl, pr, pt, pb = 40, 16, 22, 26
+    n = len(cum)
+    maxv = max(cum) or 1
+    pw, ph = W - pl - pr, H - pt - pb
+    def X(i): return pl + (pw * i / (n - 1 if n > 1 else 1))
+    def Y(v): return pt + ph * (1 - v / maxv)
+    line = " ".join(f"{X(i):.1f},{Y(v):.1f}" for i, v in enumerate(cum))
+    area = f"{pl},{pt+ph} " + line + f" {X(n-1):.1f},{pt+ph}"
+    # baseline grid (solo base y máx, muy tenue)
+    grid = (f'<line x1="{pl}" y1="{Y(0):.0f}" x2="{W-pr}" y2="{Y(0):.0f}" stroke="#2a5442" stroke-width="1" opacity=".5"/>')
+    # último índice de cada mes → marca punto + total acumulado
+    last_idx = {}
+    for i, lb in enumerate(labels):
+        last_idx[lb.split()[-1]] = i
+    marks = ""
+    monthname = {"ene": "Ene", "feb": "Feb", "mar": "Mar", "abr": "Abr", "may": "May", "jun": "Jun",
+                 "jul": "Jul", "ago": "Ago", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dic": "Dic"}
+    for m, i in last_idx.items():
+        x, y, v = X(i), Y(cum[i]), cum[i]
+        up = y - 10 if y > 34 else y + 16
+        marks += (f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{color}"/>'
+                  f'<text x="{x:.0f}" y="{up:.0f}" text-anchor="middle" fill="{color}" '
+                  f'font-size="10.5" font-weight="800">{v}</text>'
+                  f'<text x="{x:.0f}" y="{H-8}" text-anchor="middle" fill="#7a988a" font-size="9.5">{monthname.get(m,m)}</text>')
+    return (f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" '
+            f'style="display:block;height:auto">'
+            f'<defs><linearGradient id="gm{color[1:]}" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="{color}" stop-opacity=".28"/>'
+            f'<stop offset="1" stop-color="{color}" stop-opacity="0"/></linearGradient></defs>'
+            f'{grid}'
+            f'<polygon points="{area}" fill="url(#gm{color[1:]})"/>'
+            f'<polyline points="{line}" fill="none" stroke="{color}" stroke-width="2.5" '
+            f'stroke-linejoin="round" stroke-linecap="round"/>'
+            f'{marks}</svg>')
+
+
 # ─────────────── Main ───────────────
 def main():
     if not TOKEN:
@@ -1019,11 +1061,38 @@ def main():
         last7 = sum(daily_inc[-7:]); prev7 = sum(daily_inc[-14:-7])
         d = last7 - prev7
         return {"dir": "up" if d > 0 else ("down" if d < 0 else "flat"), "delta": d, "last7": last7, "prev7": prev7}
+    ch_free = series(hist_fun, is_free)
     trends = {
         "contactos": trend7(ch_contactos[1]), "leads": trend7(ch_leads[1]),
         "mql": trend7(ch_mql[1]), "sql": trend7(ch_sql[1]), "reuniones": trend7(ch_reun[1]),
-        "opp": trend7(ch_opp[1]), "cli": trend7(ch_cli[1]),
+        "opp": trend7(ch_opp[1]), "cli": trend7(ch_cli[1]), "free": trend7(ch_free[1]),
     }
+    # ── Exec: contactos por etapa (no empresas) + filtrado inbound marketing + reuniones por etapa ──
+    MKT_CH = set(FIXED_CHANNELS.keys())
+    def _chl(c): return classify_channel(c["src"], c["d1"])[0]
+    exec_extra = {
+        "opp_contacts": sum(1 for c in hist_fun if rank(c["lc"]) >= 4),
+        "cli_contacts": sum(1 for c in hist_fun if rank(c["lc"]) >= 5),
+        "opp_contacts_mkt": sum(1 for c in hist_fun if rank(c["lc"]) >= 4 and _chl(c) in MKT_CH),
+        "cli_contacts_mkt": sum(1 for c in hist_fun if rank(c["lc"]) >= 5 and _chl(c) in MKT_CH),
+        "free_last7": trends["free"]["last7"],
+    }
+    REUN_STAGES = {"1107496610": "Discovery", "presentationscheduled": "Demo",
+                   "1033589123": "Best Case", "1119432966": "Cierre"}
+    reun_by_stage = {}
+    for x in deals:
+        if x["stage"] in REUN_STAGES and x["created"] >= fstart:
+            k = REUN_STAGES[x["stage"]]
+            reun_by_stage[k] = reun_by_stage.get(k, 0) + 1
+    ch_reun_all = series(deals, lambda x: x["stage"] in REUN_STAGES)
+    exec_extra["reun_by_stage"] = reun_by_stage
+    exec_extra["reun_total"] = sum(reun_by_stage.values())
+    exec_extra["reun_trend"] = trend7(ch_reun_all[1])
+    # Charts ejecutivos con totales por mes (MQL/SQL/Opp/Cli)
+    exec_extra["svg_mql_m"] = svg_exec_month(*ch_mql, labels, "#57e08a")
+    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql, labels, "#f5b544")
+    exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
+    exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
 
     def peak_insight(items, pred, origin=True):
         """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
@@ -1144,7 +1213,8 @@ def main():
         "svg_contactos": svg_cumulative(*ch_contactos, labels, "#57e08a"),
         "svg_mql": svg_cumulative(*ch_mql, labels, "#34d399"),
         "svg_reun": svg_cumulative(*ch_reun, labels, "#5bc8f2"),
-        "trends": trends,
+        "trends": trends, "exec_extra": exec_extra,
+        "opp_companies": opp_cum, "cli_companies": cli_cum,
         "peak_leads": peak_insight(hist, lambda c: rank(c["lc"]) >= 1),
         "peak_sql": peak_insight(hist, lambda c: rank(c["lc"]) >= 3),
         "peak_opp": peak_insight(hist, lambda c: c["lc"] == "opportunity"),
@@ -1736,190 +1806,262 @@ def render(d):
 EXEC_CSS = """
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#08120e; --bg2:#0b1a14; --card:#10211a; --card2:#0d1d16; --line:#1d3b2e;
-  --ink:#eafff4; --ink2:#a9c7ba; --mut:#6f8c7e;
-  --brand:#57e08a; --brand-d:#1f9d5f; --brand-deep:#0e3d2a;
-  --ok:#34d399; --warn:#f5b544; --bad:#f2647a; --neutral:#5f7f70;
+  --bg:#0c1b15; --bg2:#10251b; --card:#16302340; --card-solid:#183426; --card2:#13291e;
+  --line:#2c5443; --line2:#3a6b54;
+  --ink:#f2fff8; --ink2:#bcdccd; --mut:#83a593;
+  --brand:#6ff0a2; --brand-2:#57e08a; --brand-d:#2bb673; --brand-deep:#134;
+  --brand-deep:#0f4a30;
+  --ok:#57e08a; --warn:#ffca5c; --bad:#ff7189; --sky:#68d1f5; --violet:#c8a6ff;
 }
 html{font-size:15px;-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);line-height:1.55;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-  background-image:radial-gradient(1100px 500px at 82% -10%,rgba(87,224,138,.08),transparent 60%);
+  background-image:
+    radial-gradient(1200px 560px at 80% -12%,rgba(111,240,162,.16),transparent 62%),
+    radial-gradient(900px 500px at 2% 3%,rgba(104,209,245,.08),transparent 55%),
+    linear-gradient(180deg,#0e2019 0%,#0c1b15 40%);
   background-attachment:fixed;}
 .tnum{font-variant-numeric:tabular-nums}
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-h1,h2,h3{line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
 /* header */
-.xhead{padding:56px 0 30px;border-bottom:1px solid var(--line)}
-.xbrand{display:flex;align-items:center;gap:12px;margin-bottom:30px}
-.xbrand .m{font-size:20px;font-weight:800;letter-spacing:-.02em}
-.xbrand .m b{color:var(--brand)} .xbrand .m i{color:var(--brand);font-style:normal}
-.xbrand .tag{margin-left:auto;font-size:11px;color:var(--mut);border:1px solid var(--line);padding:5px 11px;border-radius:999px}
-.xhead h1{font-size:clamp(26px,4.4vw,40px);font-weight:800;margin-bottom:10px}
-.xhead h1 span{color:var(--brand)}
-.xhead p{color:var(--ink2);font-size:14px;max-width:64ch}
+.xhead{padding:52px 0 26px}
+.xtop{display:flex;align-items:center;gap:14px;margin-bottom:34px;flex-wrap:wrap}
+.xbrand{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.xbrand b{color:var(--brand)} .xbrand i{color:var(--brand);font-style:normal}
+.tag{font-size:11px;color:var(--ink2);border:1px solid var(--line2);padding:6px 12px;border-radius:999px;background:rgba(111,240,162,.05)}
+.xhead h1{font-size:clamp(28px,4.6vw,44px);font-weight:800;margin-bottom:12px}
+.xhead h1 span{color:var(--brand);text-shadow:0 0 30px rgba(111,240,162,.35)}
+.xhead p{color:var(--ink2);font-size:14.5px;max-width:66ch}
 .xhead .upd{margin-top:16px;font-size:12px;color:var(--mut)}
 .xhead .upd b{color:var(--ink2)}
+/* diccionario desplegable */
+details.dictx{margin-left:auto;background:rgba(111,240,162,.06);border:1px solid var(--line2);border-radius:12px;overflow:hidden}
+details.dictx>summary{list-style:none;cursor:pointer;padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--brand);display:flex;align-items:center;gap:7px;user-select:none}
+details.dictx>summary::-webkit-details-marker{display:none}
+details.dictx>summary .chev{transition:transform .2s;font-size:10px}
+details.dictx[open]>summary .chev{transform:rotate(90deg)}
+details.dictx .dwrap{padding:6px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;max-width:760px}
+details.dictx .d b{color:var(--brand);font-size:12.5px} details.dictx .d span{display:block;font-size:11.5px;color:var(--ink2);margin-top:3px}
 /* section shell */
-section{padding:54px 0;border-bottom:1px solid var(--line)}
-section:last-of-type{border-bottom:none}
-.q{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-d)}
-.sh{font-size:clamp(20px,3vw,27px);font-weight:800;margin:8px 0 6px}
-.sd{color:var(--ink2);font-size:13.5px;max-width:72ch;margin-bottom:26px}
-/* KPI grid */
-.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kc{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:18px 16px}
-.kc .kl{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--mut)}
-.kc .kv{font-size:clamp(26px,3.6vw,36px);font-weight:800;line-height:1;margin:10px 0 7px;letter-spacing:-.02em}
-.kc .kt{font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+section{padding:50px 0;border-top:1px solid var(--line)}
+.q{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
+.sh{font-size:clamp(21px,3vw,28px);font-weight:800;margin:8px 0 6px}
+.sh .tot{color:var(--brand);font-weight:800}
+.sd{color:var(--ink2);font-size:13.5px;max-width:74ch;margin-bottom:26px}
+/* KPI */
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.kc{background:linear-gradient(165deg,rgba(24,52,38,.9),rgba(19,41,30,.7));border:1px solid var(--line);
+  border-radius:16px;padding:18px 16px;position:relative;overflow:hidden}
+.kc::after{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(111,240,162,.4),transparent)}
+.kc .kl{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:6px}
+.kc .kl .emp{font-size:9px;background:rgba(104,209,245,.14);color:var(--sky);padding:2px 6px;border-radius:5px;letter-spacing:.02em;font-weight:800}
+.kc .kv{font-size:clamp(27px,3.7vw,38px);font-weight:800;line-height:1;margin:11px 0 8px;letter-spacing:-.02em}
+.kc .kt{font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .trend{font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:3px}
 .trend.up{color:var(--ok)} .trend.down{color:var(--bad)} .trend.flat{color:var(--mut)}
+.kg.rates .kc{background:linear-gradient(165deg,rgba(43,182,115,.16),rgba(19,41,30,.5));border-color:var(--line2)}
 .kg.rates .kc .kv{color:var(--brand)}
-/* charts grid */
+.rates-head{font-size:12px;color:var(--mut);margin:0 0 12px;font-weight:600}
+.rates-head b{color:var(--ink2)}
+.fnote{font-size:12px;color:var(--mut);border-left:2px solid var(--line2);padding-left:12px;margin-top:16px;line-height:1.5}
+.fnote b{color:var(--ink2)}
+/* charts */
 .cg{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-.chartc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 12px;overflow:hidden}
-.chartc h3{font-size:13px;font-weight:800;color:var(--ink)}
-.chartc .cn{font-size:11px;color:var(--mut);margin-bottom:6px}
-.chartc .cbig{font-size:22px;font-weight:800;color:var(--brand);float:right;line-height:1}
+.chartc{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px}
+.chartc .chd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
+.chartc h3{font-size:13.5px;font-weight:800;color:var(--ink)}
+.chartc .cbig{font-size:24px;font-weight:800;color:var(--brand);line-height:1}
+.chartc .cn{font-size:11px;color:var(--mut);margin-bottom:8px}
+.chartc svg{width:100%;height:auto;display:block}
+.chartc .cfoot{font-size:10.5px;color:var(--mut);margin-top:8px;line-height:1.5}
+.chartc .cfoot b{color:var(--ink2)}
 /* funnel */
-.fn{display:flex;flex-direction:column;gap:8px}
-.fn .row{display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:center}
+.fnhead{display:flex;justify-content:flex-end;font-size:11px;color:var(--mut);margin-bottom:8px}
+.fnhead b{color:var(--brand)}
+.fn{display:flex;flex-direction:column;gap:9px}
+.fn .row{display:grid;grid-template-columns:128px 1fr;gap:16px;align-items:center}
 .fn .lab{text-align:right} .fn .lab .n{font-size:22px;font-weight:800;line-height:1}
-.fn .lab .t{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:700}
-.fn .track{position:relative;height:42px;display:flex;align-items:center}
-.fn .fill{height:100%;border-radius:9px;min-width:66px;display:flex;align-items:center;padding-left:14px;
-  font-size:12px;font-weight:800;color:#04140c;background:linear-gradient(90deg,var(--brand-deep),var(--brand))}
-.fn .conv{position:absolute;right:0;font-size:11px;color:var(--ink2);background:var(--bg2);
-  border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.fn .lab .t{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:700;margin-top:3px}
+.fn .track{position:relative;height:44px;display:flex;align-items:center}
+.fn .fill{height:100%;border-radius:10px;min-width:70px;display:flex;align-items:center;padding-left:15px;
+  font-size:12px;font-weight:800;color:#052012;
+  background:linear-gradient(90deg,var(--brand-deep),var(--brand-2));box-shadow:0 0 24px rgba(111,240,162,.12)}
+.fn .fill.emp-fill{background:linear-gradient(90deg,#155e7a,var(--sky));color:#031820}
+.fn .conv{position:absolute;right:0;font-size:11px;color:var(--ink2);background:rgba(12,27,21,.85);
+  border:1px solid var(--line2);border-radius:999px;padding:3px 11px;white-space:nowrap}
 .fn .conv b{color:var(--brand)}
+.fn .emp{position:absolute;right:0;transform:translateX(0);font-size:10.5px;color:var(--sky);
+  background:rgba(104,209,245,.12);border:1px solid rgba(104,209,245,.3);border-radius:999px;padding:3px 10px;white-space:nowrap;font-weight:700}
 /* bars */
 .bars{display:flex;flex-direction:column;gap:9px}
-.brow{display:grid;grid-template-columns:150px 1fr 66px;gap:12px;align-items:center;font-size:13px}
+.brow{display:grid;grid-template-columns:170px 1fr 70px;gap:12px;align-items:center;font-size:13px}
+.brow.zero{opacity:.42}
 .brow .bl{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brow .bt{background:rgba(255,255,255,.045);border-radius:6px;height:20px;overflow:hidden}
+.brow .bt{background:rgba(255,255,255,.05);border-radius:6px;height:20px;overflow:hidden}
 .brow .bf{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--brand-d),var(--brand));min-width:3px}
 .brow .bn{text-align:right;font-weight:800} .brow .bn small{color:var(--mut);font-weight:600;font-size:10.5px}
-/* cards row */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-.stat .sv{font-size:26px;font-weight:800;line-height:1} .stat .sl{font-size:11.5px;color:var(--ink2);margin-top:6px}
-.stat.ok{border-color:rgba(52,211,153,.32)} .stat.ok .sv{color:var(--ok)}
-.stat.warn{border-color:rgba(245,181,68,.32)} .stat.warn .sv{color:var(--warn)}
-.stat.bad{border-color:rgba(242,100,122,.32)} .stat.bad .sv{color:var(--bad)}
+/* big number block (24h) */
+.bigblock{display:flex;gap:22px;align-items:center;background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:20px;flex-wrap:wrap}
+.bigblock .bn2{font-size:52px;font-weight:800;color:var(--brand);line-height:1;letter-spacing:-.03em}
+.bigblock .bx{font-size:13px;color:var(--ink2)} .bigblock .bx b{color:var(--ink)}
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px}
+.stat{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:14px;padding:17px}
+.stat .sv{font-size:27px;font-weight:800;line-height:1} .stat .sl{font-size:11.5px;color:var(--ink2);margin-top:6px}
+.stat.ok{border-color:rgba(87,224,138,.4)} .stat.ok .sv{color:var(--ok)}
+.stat.warn{border-color:rgba(255,202,92,.4)} .stat.warn .sv{color:var(--warn)}
+.stat.bad{border-color:rgba(255,113,137,.4)} .stat.bad .sv{color:var(--bad)}
+/* 3-col quality */
+.q3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.qcol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
+.qcol .qi{font-size:22px} .qcol .qv{font-size:30px;font-weight:800;margin:8px 0 2px} .qcol .ql{font-size:12px;color:var(--ink2)}
+.qcol .qp{font-size:11.5px;color:var(--brand);font-weight:700;margin-top:4px}
+/* two-col process (SQL) */
+.p2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
+.pcol.b{border-color:rgba(255,202,92,.3)}
+.pcol h4{font-size:14px;font-weight:800;margin-bottom:4px} .pcol .ph{font-size:11.5px;color:var(--mut);margin-bottom:16px;line-height:1.5}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.fstep{flex:1;min-width:74px;background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center}
+.fstep b{display:block;font-size:24px;font-weight:800;color:var(--ink);line-height:1} .fstep span{font-size:10px;color:var(--mut);display:block;margin-top:5px;line-height:1.3}
+.fstep.ok b{color:var(--brand)}
+.farr{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);font-weight:800;font-size:15px;min-width:40px}
+.farr .fp{font-size:10.5px;color:var(--brand);font-weight:800}
+.mini{margin-top:14px} .mini .mrow{display:grid;grid-template-columns:1fr 44px;gap:8px;font-size:12px;padding:5px 0;border-top:1px solid rgba(44,84,67,.5)}
+.mini .mrow .ml{color:var(--ink2)} .mini .mrow .mn{text-align:right;font-weight:800;color:var(--warn)}
+.emailbox{text-align:center;padding:8px 0}
+.emailbox .eb{font-size:40px;font-weight:800;color:var(--warn);line-height:1}
+.emailbox ul{list-style:none;margin-top:14px;text-align:left;font-size:12px;color:var(--ink2);display:flex;flex-direction:column;gap:8px}
+.emailbox li{padding-left:20px;position:relative} .emailbox li::before{content:"→";position:absolute;left:0;color:var(--warn)}
+/* stage chips */
+.chip{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:6px}
+.chip.discov{background:rgba(104,209,245,.15);color:var(--sky)} .chip.demo{background:rgba(111,240,162,.15);color:var(--brand)}
+.chip.best{background:rgba(200,166,255,.15);color:var(--violet)}
+.pipe-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:16px}
+.pipe-legend b{color:var(--ink)}
 /* table */
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{text-align:right;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line)}
+.tblwrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.tbl th{text-align:right;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line2);white-space:nowrap}
 .tbl th:first-child,.tbl td:first-child{text-align:left}
-.tbl td{padding:11px 10px;border-bottom:1px solid rgba(29,59,46,.5);font-variant-numeric:tabular-nums}
+.tbl td{padding:12px;border-bottom:1px solid rgba(44,84,67,.4);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
 .tbl td.hi{color:var(--brand);font-weight:800}
-/* callout / insights */
-.note{background:linear-gradient(150deg,rgba(87,224,138,.09),rgba(87,224,138,.02));border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);margin-top:18px}
+.tbl td.cv{color:var(--sky);font-weight:800}
+/* note / insights / actions */
+.note{background:linear-gradient(150deg,rgba(111,240,162,.12),rgba(111,240,162,.02));border:1px solid var(--line2);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);margin-top:18px}
 .note b{color:var(--brand)}
 .ins{display:flex;flex-direction:column;gap:10px}
-.ins .i{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.ins .i .dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--brand)}
-.ins .i.warn .dot{background:var(--warn)} .ins .i.bad .dot{background:var(--bad)}
+.ins .i{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.ins .i .dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--brand);box-shadow:0 0 12px var(--brand)}
+.ins .i.warn .dot{background:var(--warn);box-shadow:0 0 12px var(--warn)} .ins .i.bad .dot{background:var(--bad);box-shadow:0 0 12px var(--bad)}
 .ins .i p{font-size:13px;color:var(--ink);margin:0}
-.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.act{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--ink2)}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:13px}
+.act{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:12px;padding:15px 17px;font-size:13px;color:var(--ink2)}
 .act b{color:var(--ink);display:block;margin-bottom:3px;font-size:13.5px}
-/* pending */
-.pend{background:repeating-linear-gradient(135deg,rgba(245,181,68,.05),rgba(245,181,68,.05) 12px,transparent 12px,transparent 24px);
-  border:1px dashed rgba(245,181,68,.4);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--ink2)}
+.pend{background:repeating-linear-gradient(135deg,rgba(255,202,92,.06),rgba(255,202,92,.06) 12px,transparent 12px,transparent 24px);
+  border:1px dashed rgba(255,202,92,.45);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--ink2)}
 .pend b{color:var(--warn)}
-/* dict */
-.dict{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-.dict .d{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.dict .d b{color:var(--brand);font-size:13px} .dict .d span{display:block;font-size:12px;color:var(--ink2);margin-top:4px}
-footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px}
-@media(max-width:820px){ .kg,.cg{grid-template-columns:1fr 1fr} .fn .row{grid-template-columns:92px 1fr}
-  .brow{grid-template-columns:112px 1fr 56px} }
-@media(max-width:520px){ .kg{grid-template-columns:1fr 1fr} .cg{grid-template-columns:1fr} }
+footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;border-top:1px solid var(--line);margin-top:10px}
+@media(max-width:860px){ .kg,.cg{grid-template-columns:1fr 1fr} .p2{grid-template-columns:1fr} .q3{grid-template-columns:1fr} }
+@media(max-width:560px){ .kg{grid-template-columns:1fr 1fr} .cg{grid-template-columns:1fr} .fn .row{grid-template-columns:88px 1fr}
+  .brow{grid-template-columns:120px 1fr 58px} }
 """
 
 
 def render_exec(d):
-    cum, dd = d["cum"], d["dd"]
+    cum = d["cum"]
     tr = d["trends"]
+    ex = d["exec_extra"]
+    def fmt(n):
+        try: return f"{int(n):,}".replace(",", ".")
+        except (TypeError, ValueError): return str(n)
     def pv(a, b):
         return f"{round(a / b * 100)}%" if b else "—"
     def arrow(t):
         s = {"up": "▲", "down": "▼", "flat": "▬"}[t["dir"]]
         dv = t.get("delta", 0)
         sign = f"+{dv}" if dv > 0 else (str(dv) if dv < 0 else "=")
-        return f'<span class="trend {t["dir"]}">{s} {sign} <span style="color:var(--mut);font-weight:600">7d</span></span>'
+        return f'<span class="trend {t["dir"]}">{s} {sign}</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">7d</span>'
 
-    reuni = d.get("agenda_cum", 0)
+    opp_c = ex["opp_contacts"]; cli_c = ex["cli_contacts"]
+    opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
+    reun_total = ex["reun_total"]; reun_st = ex["reun_by_stage"]; reun_tr = ex["reun_trend"]
+    free_total = cum.get("free", 0); free7 = ex["free_last7"]
+
     # ---------- 1 · EXECUTIVE SUMMARY ----------
-    kpis = [
-        ("Nuevos contactos", cum["total"], tr["contactos"], ""),
-        ("Leads", cum["lead"], tr["leads"], pv(cum["lead"], cum["total"]) + " de contactos"),
-        ("MQL", cum["mql"], tr["mql"], pv(cum["mql"], cum["lead"]) + " de leads"),
-        ("SQL", cum["sql"], tr["sql"], pv(cum["sql"], cum["lead"]) + " de leads"),
-        ("Reuniones", reuni, tr["reuniones"], "deals en fase demo+"),
-        ("Oportunidades", cum["opp"], tr["opp"], pv(cum["opp"], cum["sql"]) + " de SQL · empresas"),
-        ("Clientes", cum["cli"], tr["cli"], pv(cum["cli"], cum["opp"]) + " de oport. · empresas"),
-    ]
-    kpi_html = "".join(
-        f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{val:,}</div>'
-        f'<div class="kt">{arrow(t)}{("· " + sub) if sub else ""}</div></div>'.replace(",", ".")
-        for lab, val, t, sub in kpis)
+    def kpi(lab, val, t, sub, emp=None):
+        empchip = f'<span class="emp">empresas</span>' if emp else ""
+        return (f'<div class="kc"><div class="kl">{lab}{empchip}</div><div class="kv tnum">{fmt(val)}</div>'
+                f'<div class="kt">{arrow(t)}<span>· {sub}</span></div></div>')
+    kpi_html = (
+        kpi("Nuevos contactos", cum["total"], tr["contactos"], "todo lo que entra") +
+        kpi("Leads", cum["lead"], tr["leads"], f'{pv(cum["lead"], cum["total"])} de contactos') +
+        kpi("MQL", cum["mql"], tr["mql"], f'{pv(cum["mql"], cum["lead"])} de leads') +
+        kpi("SQL", cum["sql"], tr["sql"], f'{pv(cum["sql"], cum["lead"])} de leads') +
+        f'<div class="kc"><div class="kl">Reuniones</div><div class="kv tnum">{fmt(reun_total)}</div>'
+        f'<div class="kt">{arrow(reun_tr)}<span>· 🔍 {reun_st.get("Discovery",0)} discovery · 🎬 {reun_st.get("Demo",0)} demo</span></div></div>' +
+        kpi("Oportunidades", opp_e, tr["opp"], f'{pv(opp_e, cum["sql"])} de SQL', emp=True) +
+        kpi("Clientes", cli_e, tr["cli"], f'{pv(cli_e, opp_e)} de oportunidades', emp=True))
     rates = [
-        ("Contacto → Lead", pv(cum["lead"], cum["total"])),
-        ("Lead → SQL", pv(cum["sql"], cum["lead"])),
-        ("SQL → Oportunidad", pv(cum["opp"], cum["sql"])),
-        ("Oportunidad → Cliente", pv(cum["cli"], cum["opp"])),
+        ("Contacto → Lead", pv(cum["lead"], cum["total"]), "el resto son Freemium, fuera del embudo"),
+        ("Lead → SQL", pv(cum["sql"], cum["lead"]), "interés real → cualificado por ventas"),
+        ("SQL → Oportunidad", pv(opp_e, cum["sql"]), "sobre empresas con deal"),
+        ("Oportunidad → Cliente", pv(cli_e, opp_e), "cierre de negocio"),
     ]
     rate_html = "".join(
         f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{val}</div>'
-        f'<div class="kt" style="color:var(--mut)">conversión acumulada</div></div>'
-        for lab, val in rates)
+        f'<div class="kt" style="color:var(--mut)">{sub}</div></div>'
+        for lab, val, sub in rates)
 
-    # ---------- 2 · EVOLUCIÓN ACUMULADA ----------
+    # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
     charts = [
-        ("Nuevos contactos", cum["total"], d["svg_contactos"]),
-        ("Leads", cum["lead"], d["svg_leads"]),
-        ("MQL", cum["mql"], d["svg_mql"]),
-        ("SQL", cum["sql"], d["svg_sql"]),
-        ("Reuniones", reuni, d["svg_reun"]),
-        ("Oportunidades", cum["opp"], d["svg_opp"]),
-        ("Clientes", cum["cli"], d["svg_cli"]),
+        ("MQL", cum["mql"], ex["svg_mql_m"]),
+        ("SQL", cum["sql"], ex["svg_sql_m"]),
+        ("Oportunidades", opp_e, ex["svg_opp_m"]),
+        ("Clientes", cli_e, ex["svg_cli_m"]),
     ]
     charts_html = "".join(
-        f'<div class="chartc"><span class="cbig tnum">{val:,}</span><h3>{lab}</h3>'
-        f'<div class="cn">acumulado · 1 ene → hoy</div>{svg}</div>'.replace(",", ".")
+        f'<div class="chartc"><div class="chd"><h3>{lab}</h3><span class="cbig tnum">{fmt(val)}</span></div>'
+        f'<div class="cn">acumulado diario · 1 ene → hoy · el nº sobre la línea es el total al cierre de cada mes</div>{svg}</div>'
         for lab, val, svg in charts)
 
-    # ---------- 3 · FUNNEL ----------
-    stages = [("Contactos", cum["total"]), ("Leads", cum["lead"]), ("MQL", cum["mql"]),
-              ("SQL", cum["sql"]), ("Oportunidad", cum["opp"]), ("Cliente", cum["cli"])]
+    # ---------- 3 · FUNNEL (contactos, con empresas anotadas) ----------
+    stages = [("Contactos", cum["total"], None), ("Leads", cum["lead"], None), ("MQL", cum["mql"], None),
+              ("SQL", cum["sql"], None), ("Oportunidad", opp_c, opp_e), ("Cliente", cli_c, cli_e)]
     top = stages[0][1] or 1
     fn_rows = ""
-    for i, (lab, val) in enumerate(stages):
+    for i, (lab, val, emp) in enumerate(stages):
         w = max(6, round(val / top * 100))
-        conv = "" if i == 0 else f'<span class="conv">{pv(val, stages[i-1][1])} vs {stages[i-1][0].lower()} · <b>{pv(val, top)}</b> del total</span>'
-        fn_rows += (f'<div class="row"><div class="lab"><div class="n tnum">{val:,}</div>'
+        if emp is not None:
+            right = f'<span class="emp">🏢 {fmt(emp)} empresas</span>'
+        elif i == 0:
+            right = ""
+        else:
+            right = f'<span class="conv">{pv(val, stages[i-1][1])} vs {stages[i-1][0].lower()} · <b>{pv(val, top)}</b> del total</span>'
+        fn_rows += (f'<div class="row"><div class="lab"><div class="n tnum">{fmt(val)}</div>'
                     f'<div class="t">{lab}</div></div><div class="track">'
-                    f'<div class="fill" style="width:{w}%"></div>{conv}</div></div>').replace(",", ".")
+                    f'<div class="fill" style="width:{w}%"></div>{right}</div></div>')
 
-    # ---------- 4 · NUEVOS CONTACTOS 24H (por origen) ----------
-    GROUP = {"SEO Orgánico": "Orgánico", "Social orgánico": "Orgánico",
-             "Google Ads": "Paid", "Social Ads": "Paid",
-             "Tráfico directo": "Directo", "Chat web": "Referral",
-             "Eventos / Campañas": "Eventos"}
-    buckets = {}
-    for lbl, e in d["channels"]:
-        g = GROUP.get(lbl, "Otros")
-        buckets[g] = buckets.get(g, 0) + e["n"]
-    buckets = {k: v for k, v in buckets.items() if v > 0}
-    d24_total = sum(buckets.values())
-    bmax = max(buckets.values(), default=0) or 1
-    order = ["Orgánico", "Paid", "Referral", "Directo", "Eventos", "Partners", "Otros"]
+    # ---------- 4 · NUEVOS CONTACTOS 24H (todos los canales inbound) ----------
+    ch24 = sorted(d["channels"], key=lambda x: -x[1]["n"])
+    d24_total = sum(e["n"] for _, e in d["channels"])
+    bmax = max((e["n"] for _, e in d["channels"]), default=0) or 1
     b24 = "".join(
-        f'<div class="brow"><span class="bl">{g}</span><div class="bt"><div class="bf" style="width:{round(buckets[g]/bmax*100)}%"></div></div>'
-        f'<span class="bn tnum">{buckets[g]}<br><small>{pv(buckets[g], d24_total)}</small></span></div>'
-        for g in order if buckets.get(g)) or '<p class="sd">Sin contactos nuevos en las últimas 24h.</p>'
+        f'<div class="brow{"" if e["n"] else " zero"}"><span class="bl">{e.get("icon","•")} {esc(lbl)}</span>'
+        f'<div class="bt"><div class="bf" style="width:{round(e["n"]/bmax*100) if e["n"] else 0}%"></div></div>'
+        f'<span class="bn tnum">{e["n"]}<br><small>{pv(e["n"], d24_total) if d24_total else "—"}</small></span></div>'
+        for lbl, e in ch24)
+
+    # ---------- 6 · LEADS · de dónde vienen (origen/contenido) ----------
+    orig_rows = d["origin"]["sorted"][:8]
+    omax = max((v for _, v in orig_rows), default=0) or 1
+    otot = d["origin"]["total"] or 1
+    leads_html = "".join(
+        f'<div class="brow"><span class="bl">{esc(k)}</span><div class="bt"><div class="bf" style="width:{round(v/omax*100)}%"></div></div>'
+        f'<span class="bn tnum">{fmt(v)}<br><small>{pv(v, otot)}</small></span></div>'
+        for k, v in orig_rows)
 
     # ---------- 7 · MQL · contenido consumido ----------
     CONTENT = d["origin"]["content_set"]
@@ -1929,47 +2071,74 @@ def render_exec(d):
     content_html = "".join(
         f'<div class="brow"><span class="bl">{esc(k)}</span><div class="bt"><div class="bf" style="width:{round(v/cmax*100)}%"></div></div>'
         f'<span class="bn tnum">{v}<br><small>{pv(v, ctot)}</small></span></div>'
-        for k, v in content_rows)
+        for k, v in content_rows) or '<p class="sd">Sin datos de contenido.</p>'
+
+    # ---------- 8 · SQL · dos columnas (Agustín precualifica / <3.000 email) ----------
+    pq = d["preq"]
+    ag_base = pq.get("ag_sql", 0) or 1
+    ag_contact = pq.get("ag_calls_unique", 0) + pq.get("ag_reuniones", 0)
+    raz = pq.get("ag_razones", [])
+    raz_tot = sum(n for _, n in raz) or 1
+    raz_rows = "".join(
+        f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n}</span></div>'
+        for r, n in raz[:6]) or '<div class="mrow"><span class="ml">Sin razones registradas</span><span class="mn">—</span></div>'
 
     # ---------- 9 · MOTIVOS DE DESCARTE ----------
     desc = d["descarte"]
     desc_tot = sum(n for _, n in desc) or 1
     dmax = max((n for _, n in desc), default=0) or 1
     desc_html = "".join(
-        f'<div class="brow"><span class="bl">{esc(r)}</span><div class="bt"><div class="bf" style="width:{round(n/dmax*100)}%;background:linear-gradient(90deg,var(--bad),#ff9aa8)"></div></div>'
+        f'<div class="brow"><span class="bl">{esc(r)}</span><div class="bt"><div class="bf" style="width:{round(n/dmax*100)}%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div>'
         f'<span class="bn tnum">{n}<br><small>{pv(n, desc_tot)}</small></span></div>'
         for r, n in desc[:8])
     desc_interp = ""
     if desc:
         r0, n0 = desc[0]
-        desc_interp = f'<div class="note">El <b>{pv(n0, desc_tot)}</b> de los descartes con motivo son por «{esc(r0)}». Total de descartes con razón registrada: <b>{desc_tot}</b>.</div>'
+        desc_interp = f'<div class="note">El <b>{pv(n0, desc_tot)}</b> de los descartes con motivo son por «{esc(r0)}». Total con razón registrada: <b>{desc_tot}</b>.</div>'
+
+    # ---------- 10 · OPORTUNIDADES por canal + etapa pipeline ----------
+    opp_ch = [(lbl, e.get("opp", 0)) for lbl, e in d["chan_funnel"] if e.get("opp", 0) > 0]
+    opp_ch.sort(key=lambda x: -x[1])
+    opp_ch_tot = sum(n for _, n in opp_ch) or 1
+    omx = max((n for _, n in opp_ch), default=0) or 1
+    opp_ch_html = "".join(
+        f'<div class="brow"><span class="bl">{esc(lbl)}</span><div class="bt"><div class="bf sky" style="width:{round(n/omx*100)}%;background:linear-gradient(90deg,#155e7a,var(--sky))"></div></div>'
+        f'<span class="bn tnum">{n}<br><small>{pv(n, opp_ch_tot)}</small></span></div>'
+        for lbl, n in opp_ch) or '<p class="sd">Sin oportunidades activas por canal.</p>'
+    # etapa pipeline
+    STG = {"1107496610": ("Discovery", "discov"), "presentationscheduled": ("Demo", "demo"), "1033589123": ("Best Case", "best")}
+    stg_count = {}
+    for dl in d.get("mkt_deals", []):
+        nm = STG.get(dl["stage"], ("Otra", ""))
+        stg_count[nm] = stg_count.get(nm, 0) + 1
+    pipe_legend = "".join(
+        f'<span><b>{c}</b> <span class="chip {cls}">{nm}</span></span>'
+        for (nm, cls), c in sorted(stg_count.items(), key=lambda x: -x[1]))
 
     # ---------- 12 · RENDIMIENTO POR CANAL ----------
-    cf = d["chan_funnel"][:6]
+    cf = d["chan_funnel"][:7]
     rows_ch = "".join(
-        f'<tr><td>{esc(lbl)}</td><td class="tnum">{e["contactos"]:,}</td><td class="tnum">{e["leads"]:,}</td>'
-        f'<td class="tnum">{e["mql"]:,}</td><td class="tnum hi">{e["sql"]:,}</td><td class="tnum">{e.get("opp",0)}</td>'
-        f'<td class="tnum">{pv(e["sql"], e["contactos"])}</td></tr>'.replace(",", ".")
+        f'<tr><td>{esc(lbl)}</td><td class="tnum">{fmt(e["contactos"])}</td><td class="tnum">{fmt(e["leads"])}</td>'
+        f'<td class="tnum">{fmt(e["mql"])}</td><td class="tnum">{fmt(e["sql"])}</td><td class="tnum hi">{e.get("opp",0)}</td>'
+        f'<td class="tnum cv">{pv(e.get("opp",0), e["contactos"])}</td></tr>'
         for lbl, e in cf)
 
-    # ---------- 13 · INSIGHTS (solo con dato real) ----------
+    # ---------- 13 · INSIGHTS ----------
     insights = []
     if d["chan_funnel"]:
         tot_sql = sum(e["sql"] for _, e in d["chan_funnel"]) or 1
         lbl0, e0 = d["chan_funnel"][0]
         if e0["sql"] > 0:
             insights.append(("", f'<b>{esc(lbl0)}</b> es el canal que más SQL genera: {e0["sql"]} ({pv(e0["sql"], tot_sql)} del total).'))
-        # mejor conversión contacto→SQL entre canales con volumen relevante
-        conv_ch = [(lbl, e["sql"] / e["contactos"], e) for lbl, e in d["chan_funnel"] if e["contactos"] >= 20]
+        conv_ch = [(lbl, e) for lbl, e in d["chan_funnel"] if e["contactos"] >= 20]
         if conv_ch:
-            lb, cv, e = max(conv_ch, key=lambda x: x[1])
+            lb, e = max(conv_ch, key=lambda x: x[1]["sql"] / x[1]["contactos"])
             insights.append(("", f'<b>{esc(lb)}</b> tiene la mejor tasa contacto→SQL: {pv(e["sql"], e["contactos"])}.'))
     if desc:
         r0, n0 = desc[0]
         insights.append(("warn", f'El motivo principal de descarte es «{esc(r0)}» ({pv(n0, desc_tot)} de los descartes).'))
     if content_rows:
         insights.append(("", f'El contenido que más leads de consideración genera es <b>{esc(content_rows[0][0])}</b> ({content_rows[0][1]}).'))
-    # tendencia destacada
     grow = max(tr.items(), key=lambda x: x[1].get("delta", 0))
     if grow[1].get("delta", 0) > 0:
         insights.append(("", f'Tendencia al alza en <b>{grow[0]}</b>: +{grow[1]["delta"]} en los últimos 7 días vs los 7 previos.'))
@@ -1980,7 +2149,7 @@ def render_exec(d):
     ins_html = "".join(f'<div class="i {c}"><span class="dot"></span><p>{txt}</p></div>' for c, txt in insights) \
         or '<p class="sd">Sin señales suficientes para generar insights hoy.</p>'
 
-    # ---------- 14 · ACCIONES (derivadas de los insights) ----------
+    # ---------- 14 · ACCIONES ----------
     acts = []
     if desc:
         r0 = desc[0][0].lower()
@@ -2003,82 +2172,127 @@ def render_exec(d):
     body = f"""
 <div class="wrap">
 <header class="xhead">
-  <div class="xbrand"><span class="m"><b>guru</b><i>·</i>Sup</span>
-    <span class="tag">Confidencial · Dirección & Comité</span></div>
+  <div class="xtop">
+    <span class="xbrand"><b>guru</b><i>·</i>Sup</span>
+    <span class="tag">Confidencial · Dirección & Comité</span>
+    <details class="dictx"><summary><span class="chev">▶</span>📖 Diccionario</summary>
+      <div class="dwrap">
+        <div class="d"><b>Lead</b><span>Contacto con interés real (contenido, formulario o chat), aún sin cualificar.</span></div>
+        <div class="d"><b>MQL</b><span>Marketing Qualified Lead: ha consumido contenido de valor y encaja con el perfil.</span></div>
+        <div class="d"><b>SQL</b><span>Sales Qualified Lead: pide demo/consultoría. Listo para ventas.</span></div>
+        <div class="d"><b>Oportunidad</b><span>SQL con deal abierto en el pipeline. Se cuenta por empresa.</span></div>
+        <div class="d"><b>Cliente</b><span>Empresa que ha cerrado y ya compra.</span></div>
+        <div class="d"><b>Pipeline</b><span>Oportunidades abiertas y su recorrido hasta cliente.</span></div>
+        <div class="d"><b>Conversión</b><span>% de contactos que pasan de una etapa a la siguiente.</span></div>
+        <div class="d"><b>Owner</b><span>Persona responsable de gestionar el contacto u oportunidad.</span></div>
+      </div>
+    </details>
+  </div>
   <h1>Dashboard <span>ejecutivo</span> de negocio</h1>
   <p>Qué entra, cómo evoluciona, dónde se pierde negocio y qué decidir hoy. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
   <div class="upd">Última actualización: <b>{esc(d["generado"])}</b> (hora España) · se refresca automáticamente</div>
 </header>
 
-<section>
+<section style="border-top:none">
   <div class="q">01 · ¿Cuánto negocio está entrando?</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd">Los KPIs del embudo comercial, con su tendencia de los últimos 7 días.</div>
+  <div class="sd">KPIs del embudo comercial de inbound marketing, con su tendencia de los últimos 7 días. Oportunidades y Clientes se cuentan por empresa.</div>
   <div class="kg">{kpi_html}</div>
-  <div style="height:14px"></div>
+  <div style="height:26px"></div>
+  <div class="rates-head">Tasas de conversión · <b>calculadas sobre contactos</b> (excepto donde se indica empresas)</div>
   <div class="kg rates">{rate_html}</div>
+  <div class="fnote">De contactos a leads no todo es «pérdida»: el resto son <b>Freemium</b> (altas por la app), que <b>ya no entran</b> en el embudo comercial. En los últimos 7 días fueron <b>{free7}</b> altas Freemium (histórico: {fmt(free_total)}), descontadas del funnel.</div>
 </section>
 
 <section>
   <div class="q">02 · ¿Estamos creciendo?</div>
   <h2 class="sh">Evolución acumulada</h2>
-  <div class="sd">Curvas acumuladas desde el 1 de enero para leer tendencia, estacionalidad, picos y caídas.</div>
+  <div class="sd">Crecimiento día a día desde el 1 de enero. Sobre cada línea, el total acumulado al cierre de cada mes.</div>
   <div class="cg">{charts_html}</div>
 </section>
 
 <section>
   <div class="q">03 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Funnel comercial</h2>
-  <div class="sd">Volumen por etapa, conversión respecto a la etapa anterior y peso sobre el total.</div>
+  <div class="sd">Volumen de <b>contactos</b> por etapa (un único flujo comparable). En Oportunidad y Cliente añadimos el nº de <b>empresas</b> (una compañía puede agrupar varios contactos).</div>
+  <div class="fnhead">Conversión mostrada <b>&nbsp;sobre contactos&nbsp;</b></div>
   <div class="fn">{fn_rows}</div>
-  <div class="note">Oportunidad y Cliente se cuentan por <b>empresa única</b>; por eso su conversión es sobre SQL/empresas. Las <b>reuniones</b> (deals en fase demo) se siguen como métrica operativa aparte —arriba en KPIs y en la evolución— y no encajan de forma lineal en el embudo de ciclo de vida.</div>
+  <div class="note">El flujo de barras es siempre <b>volumen de contactos</b> para que sea comparable etapa a etapa. A partir de Oportunidad, el negocio se mide por <b>empresa</b> (chip azul): por eso ese número no baja «en proporción» al de contactos — son unidades distintas.</div>
 </section>
 
 <section>
   <div class="q">04 · ¿Qué ha entrado hoy?</div>
   <h2 class="sh">Nuevos contactos · últimas 24h</h2>
-  <div class="sd">{d24_total} contactos nuevos, por tipo de origen.</div>
+  <div class="sd">Volumen del periodo y su reparto por canal de inbound marketing (se listan todos; hoy algunos pueden estar a 0).</div>
+  <div class="bigblock">
+    <div class="bn2 tnum">{d24_total}</div>
+    <div class="bx">contactos nuevos en las <b>últimas 24h</b><br>desglose por canal de entrada →</div>
+  </div>
   <div class="bars">{b24}</div>
 </section>
 
 <section>
   <div class="q">05 · ¿Qué calidad tiene el dato?</div>
   <h2 class="sh">Calidad de los nuevos contactos</h2>
-  <div class="sd">Completitud del dato (empresa, teléfono, tipo de email) para medir la calidad de captación.</div>
-  <div class="pend">⏳ <b>Pendiente de conectar.</b> Estas propiedades (empresa, teléfono, email corporativo/personal) aún no se están capturando de forma fiable en HubSpot. En cuanto el formulario/CRM las registre, esta sección se rellena sola. No se muestran cifras estimadas.</div>
+  <div class="sd">Completitud del dato sobre el total de contactos: cuántos traen email corporativo, teléfono y empresa asociada.</div>
+  <div class="q3">
+    <div class="qcol"><div class="qi">✉️</div><div class="qv tnum">—</div><div class="ql">Email corporativo</div><div class="qp">pendiente</div></div>
+    <div class="qcol"><div class="qi">📞</div><div class="qv tnum">—</div><div class="ql">Con teléfono</div><div class="qp">pendiente</div></div>
+    <div class="qcol"><div class="qi">🏢</div><div class="qv tnum">—</div><div class="ql">Con empresa / dominio</div><div class="qp">pendiente</div></div>
+  </div>
+  <div class="pend" style="margin-top:16px">⏳ <b>Pendiente de conectar.</b> Estas tres propiedades aún no se capturan de forma fiable en HubSpot. En cuanto el formulario/CRM las registre, las tres columnas se rellenan solas con volumen y % sobre el total. No se muestran cifras estimadas.</div>
 </section>
 
 <section>
   <div class="q">06 · ¿Qué pasa con los leads?</div>
-  <h2 class="sh">Estado de los leads</h2>
-  <div class="sd">Reparto entre leads en proceso y descartados tras el trato de ventas.</div>
-  <div class="cards">
-    <div class="stat"><div class="sv tnum">{d["origin"]["lead_stage"]:,}</div><div class="sl">Leads en etapa «lead»</div></div>
-    <div class="stat bad"><div class="sv tnum">{d["origin"]["lead_desc"]:,}</div><div class="sl">Descartados / fríos ({pv(d["origin"]["lead_desc"], d["origin"]["lead_stage"])})</div></div>
-    <div class="stat ok"><div class="sv tnum">{max(d["origin"]["lead_stage"]-d["origin"]["lead_desc"],0):,}</div><div class="sl">En proceso / activos</div></div>
-  </div>
-  <div class="pend" style="margin-top:14px">⏳ <b>SLA de gestión pendiente</b>: el tiempo medio sin gestionar aún no se calcula (requiere sello temporal de primera acción comercial).</div>
+  <h2 class="sh">Estado de los leads · de dónde vienen</h2>
+  <div class="sd">Por qué origen / contenido han entrado los leads (blog, calculadora, webinar, formulario, app…), acumulado del año.</div>
+  <div class="bars">{leads_html}</div>
 </section>
 
 <section>
   <div class="q">07 · ¿Qué consumen los MQL?</div>
   <h2 class="sh">Estado de los MQL · contenido consumido</h2>
-  <div class="sd">Qué activos de contenido consumen los leads de consideración antes de pasar a SQL.</div>
+  <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars">{content_html}</div>
   <div class="pend" style="margin-top:16px">⏳ <b>Tiempo medio hasta SQL y conversión por tipo de contenido</b>: pendientes (requieren fecha de conversión a SQL por contacto).</div>
 </section>
 
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
-  <h2 class="sh">Estado de los SQL</h2>
-  <div class="sd">Gestión comercial de los SQL una vez cualificados.</div>
-  <div class="cards">
-    <div class="stat ok"><div class="sv tnum">{d["sql_disp"]["gestionado"]:,}</div><div class="sl">Gestionados ({pv(d["sql_disp"]["gestionado"], d["sql_disp"]["total"])})</div></div>
-    <div class="stat warn"><div class="sv tnum">{d["sql_disp"]["pendiente"]:,}</div><div class="sl">Pendientes ({pv(d["sql_disp"]["pendiente"], d["sql_disp"]["total"])})</div></div>
-    <div class="stat bad"><div class="sv tnum">{d["sql_disp"]["descartado"]:,}</div><div class="sl">Descartados ({pv(d["sql_disp"]["descartado"], d["sql_disp"]["total"])})</div></div>
-    <div class="stat"><div class="sv tnum">{cum["opp"]:,}</div><div class="sl">Convertidos a oportunidad</div></div>
+  <h2 class="sh">Estado de los SQL · precualificación</h2>
+  <div class="sd">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen de consultas: con <b>≥3.000 o «no lo sé»</b> pasan a Agustín; con <b>&lt;3.000</b> reciben un email y quedan en lista para revisar más adelante.</div>
+  <div class="p2">
+    <div class="pcol">
+      <h4>🟢 Precualifican · gestión de Agustín</h4>
+      <div class="ph">SQL asignados a Agustín (propietario) que sí cualifican por volumen.</div>
+      <div class="flow">
+        <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL a Agustín<br>(desde {pq.get("ag_start","9 jul")})</span></div>
+        <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
+        <div class="fstep"><b>{ag_contact}</b><span>contactados<br>llamada / reunión</span></div>
+        <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
+        <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidades<br>creadas</span></div>
+      </div>
+      <div class="mini">
+        <div style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Razones de descarte</div>
+        {raz_rows}
+      </div>
+    </div>
+    <div class="pcol b">
+      <h4>🟡 No cualifican · &lt;3.000 consultas</h4>
+      <div class="ph">Descarte inicial automático: reciben email de agradecimiento y entran en una lista dinámica para revisar en el futuro.</div>
+      <div class="emailbox">
+        <div class="eb tnum">{pq.get("ag_lt3000",0)}</div>
+        <div style="font-size:12px;color:var(--ink2);margin-top:4px">SQL con &lt;3.000 consultas/mes (desde 9 jul)</div>
+        <ul>
+          <li>Email automático de agradecimiento</li>
+          <li>Lista HubSpot «Descalificación SQL · &lt;3.000»</li>
+          <li>Razón de descarte registrada para el evolutivo</li>
+          <li>Reactivables si su volumen crece</li>
+        </ul>
+      </div>
+    </div>
   </div>
-  <div class="pend" style="margin-top:14px">⏳ <b>Tiempo medio hasta reunión</b>: pendiente de sello temporal de agendado.</div>
 </section>
 
 <section>
@@ -2091,19 +2305,20 @@ def render_exec(d):
 
 <section>
   <div class="q">10 · ¿Cómo va el pipeline?</div>
-  <h2 class="sh">Oportunidades</h2>
-  <div class="sd">Oportunidades activas de marketing por canal de entrada.</div>
-  <div class="bars">{"".join(f'<div class="brow"><span class="bl">{esc(lbl)}</span><div class="bt"><div class="bf" style="width:{round(e.get("opp",0)/(max((x.get("opp",0) for _,x in d["chan_funnel"]),default=0) or 1)*100)}%"></div></div><span class="bn tnum">{e.get("opp",0)}</span></div>' for lbl,e in d["chan_funnel"] if e.get("opp",0)>0)}</div>
+  <h2 class="sh">Oportunidades <span class="tot">· {fmt(len(d.get("mkt_deals", [])))}</span> activas de marketing</h2>
+  <div class="sd">Reparto por canal de entrada (con % del total) y en qué etapa del pipeline están.</div>
+  <div class="pipe-legend">{pipe_legend or '<span class="mut">Sin etapas registradas</span>'}</div>
+  <div class="bars">{opp_ch_html}</div>
   <div class="pend" style="margin-top:16px">⏳ <b>Valor estimado (€), pipeline y owner</b>: pendientes de conectar el importe de los deals en HubSpot.</div>
 </section>
 
 <section>
   <div class="q">11 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes</h2>
+  <h2 class="sh">Clientes <span class="tot">· {fmt(cli_e)}</span> empresas</h2>
   <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
   <div class="cards">
-    <div class="stat ok"><div class="sv tnum">{cum["cli"]:,}</div><div class="sl">Clientes (empresas)</div></div>
-    <div class="stat"><div class="sv tnum">{pv(cum["cli"], cum["opp"])}</div><div class="sl">Conversión Oportunidad → Cliente</div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(cli_e)}</div><div class="sl">Clientes (empresas)</div></div>
+    <div class="stat"><div class="sv tnum">{pv(cli_e, opp_e)}</div><div class="sl">Conversión Oportunidad → Cliente</div></div>
   </div>
   <div class="pend" style="margin-top:14px">⏳ <b>Canal de adquisición y valor generado (€)</b> por cliente: pendientes de conectar importe/atribución de cierre.</div>
 </section>
@@ -2111,10 +2326,9 @@ def render_exec(d):
 <section>
   <div class="q">12 · ¿Qué canal genera negocio real?</div>
   <h2 class="sh">Rendimiento por canal</h2>
-  <div class="sd">Del contacto al SQL por canal (acumulado). Ordenado por SQL generados.</div>
-  <table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→SQL</th></tr></thead>
-  <tbody>{rows_ch}</tbody></table>
-  <div class="pend" style="margin-top:14px">⏳ Clientes por canal: pendiente de atribución de cierre por empresa.</div>
+  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL generados. La última columna es la conversión <b>contacto → oportunidad</b>.</div>
+  <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
+  <tbody>{rows_ch}</tbody></table></div>
 </section>
 
 <section>
@@ -2129,21 +2343,6 @@ def render_exec(d):
   <h2 class="sh">Acciones recomendadas</h2>
   <div class="sd">Derivadas directamente de los insights anteriores.</div>
   <div class="acts">{acts_html}</div>
-</section>
-
-<section>
-  <div class="q">15 · Referencia</div>
-  <h2 class="sh">Diccionario</h2>
-  <div class="dict">
-    <div class="d"><b>Lead</b><span>Contacto con interés real (contenido, formulario o chat), aún sin cualificar por ventas.</span></div>
-    <div class="d"><b>MQL</b><span>Marketing Qualified Lead: ha consumido contenido de valor y encaja con el perfil objetivo.</span></div>
-    <div class="d"><b>SQL</b><span>Sales Qualified Lead: tiene necesidad real y pide demo/reunión. Listo para ventas.</span></div>
-    <div class="d"><b>Oportunidad</b><span>SQL con negocio (deal) abierto en el pipeline. Se cuenta por empresa.</span></div>
-    <div class="d"><b>Cliente</b><span>Empresa que ha cerrado y ya compra.</span></div>
-    <div class="d"><b>Pipeline</b><span>Conjunto de oportunidades abiertas y su recorrido hasta cliente.</span></div>
-    <div class="d"><b>Conversión</b><span>% de contactos que pasan de una etapa a la siguiente.</span></div>
-    <div class="d"><b>Owner</b><span>Persona responsable de gestionar el contacto u oportunidad.</span></div>
-  </div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
