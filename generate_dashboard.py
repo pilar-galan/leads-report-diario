@@ -681,7 +681,8 @@ def main():
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
         "hs_lead_status", "createdate", "recent_conversion_event_name",
         "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto",
-        "razon_descarte_sql", "numero_de_conversaciones__inbound", "volumen_de_consultas_al_mes"])
+        "razon_descarte_sql", "numero_de_conversaciones__inbound", "volumen_de_consultas_al_mes",
+        "phone", "mobilephone"])
 
     hist = []
     imports = tests = internal = noinfo = 0
@@ -720,6 +721,7 @@ def main():
             "razon": p.get("razon_descarte_sql") or "",
             "num_conv": p.get("numero_de_conversaciones__inbound") or "",
             "vol_mes": p.get("volumen_de_consultas_al_mes") or "",
+            "phone": (p.get("phone") or p.get("mobilephone") or "").strip(),
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -1093,6 +1095,50 @@ def main():
     exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql, labels, "#f5b544")
     exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
     exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
+    # Calidad del dato (sobre contactos desde 1 ene): email corporativo, teléfono, empresa
+    FREE_MAIL = {"gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "yahoo.es", "icloud.com",
+                 "hotmail.es", "live.com", "outlook.es", "protonmail.com", "gmx.com", "aol.com",
+                 "me.com", "msn.com", "ymail.com", "hotmail.fr", "gmail.es"}
+    def has_corp(c):
+        e = (c.get("email") or "").lower()
+        return "@" in e and e.split("@")[-1] not in FREE_MAIL
+    def has_company(c):
+        return bool((c.get("company") or "").strip()) or has_corp(c)
+    q_tot = len(hist_fun) or 1
+    exec_extra["quality"] = {
+        "total": len(hist_fun),
+        "corp": sum(1 for c in hist_fun if has_corp(c)),
+        "phone": sum(1 for c in hist_fun if c.get("phone")),
+        "company": sum(1 for c in hist_fun if has_company(c)),
+    }
+    # Rendimiento por canal EXTENDIDO: contactos + etapas (contactos) + empresas únicas (opp/cli)
+    chan_ext = {}
+    for c in hist_fun:
+        lbl = _chl(c)
+        e = chan_ext.setdefault(lbl, {"contactos": 0, "leads": 0, "mql": 0, "sql": 0,
+                                      "opp_c": 0, "cli_c": 0, "opp_emp": set(), "cli_emp": set()})
+        e["contactos"] += 1
+        r = rank(c["lc"])
+        if r >= 1: e["leads"] += 1
+        if r >= 2: e["mql"] += 1
+        if r >= 3: e["sql"] += 1
+        if r >= 4: e["opp_c"] += 1; e["opp_emp"].add(compkey(c))
+        if r >= 5: e["cli_c"] += 1; e["cli_emp"].add(compkey(c))
+    chan_matrix = []
+    for lbl, e in chan_ext.items():
+        chan_matrix.append((lbl, {"contactos": e["contactos"], "leads": e["leads"], "mql": e["mql"],
+                                  "sql": e["sql"], "opp_c": e["opp_c"], "cli_c": e["cli_c"],
+                                  "opp_emp": len(e["opp_emp"]), "cli_emp": len(e["cli_emp"])}))
+    chan_matrix.sort(key=lambda x: -x[1]["contactos"])
+    exec_extra["chan_matrix"] = chan_matrix
+    # Deals (negocios) por canal para el desglose clicable del pipeline
+    deals_by_chan = {}
+    for dl in open_deals:
+        lbl = dl["channel"].split(" ", 1)[-1].strip()
+        deals_by_chan.setdefault(lbl, []).append(dl.get("name", "—"))
+    exec_extra["deals_by_chan"] = deals_by_chan
+    # Lead Ads por red (Meta/LinkedIn) desde el desglose de origen
+    exec_extra["leadads"] = origin.get("leadads", [])
 
     def peak_insight(items, pred, origin=True):
         """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
@@ -1131,14 +1177,16 @@ def main():
     chan = {}
     for c in daily:
         label, icon, color = classify_channel(c["src"], c["d1"])
-        e = chan.setdefault(label, {"n": 0, "lead": 0, "sql": 0, "free": 0, "icon": icon, "color": color})
+        e = chan.setdefault(label, {"n": 0, "lead": 0, "mql": 0, "sql": 0, "free": 0, "icon": icon, "color": color})
         e["n"] += 1
-        if c["lc"] in SQL_STAGES: e["sql"] += 1
+        r = rank(c["lc"])
+        if r >= 3: e["sql"] += 1
+        elif r == 2: e["mql"] += 1
         elif is_free(c): e["free"] += 1
-        else: e["lead"] += 1
+        elif r >= 1: e["lead"] += 1
     for lbl, fd in FIXED_CHANNELS.items():
         if lbl not in chan:
-            chan[lbl] = {"n": 0, "lead": 0, "sql": 0, "free": 0, "icon": fd["icon"], "color": fd["color"]}
+            chan[lbl] = {"n": 0, "lead": 0, "mql": 0, "sql": 0, "free": 0, "icon": fd["icon"], "color": fd["color"]}
     channels = sorted(chan.items(), key=lambda x: (-x[1]["n"], x[0]))
 
     # ── SQL del día (seguimiento de ventas) · una fila por empresa/contacto (sin repetidos) ──
@@ -1809,8 +1857,7 @@ EXEC_CSS = """
   --bg:#0c1b15; --bg2:#10251b; --card:#16302340; --card-solid:#183426; --card2:#13291e;
   --line:#2c5443; --line2:#3a6b54;
   --ink:#f2fff8; --ink2:#bcdccd; --mut:#83a593;
-  --brand:#6ff0a2; --brand-2:#57e08a; --brand-d:#2bb673; --brand-deep:#134;
-  --brand-deep:#0f4a30;
+  --brand:#6ff0a2; --brand-2:#57e08a; --brand-d:#2bb673; --brand-deep:#0f4a30;
   --ok:#57e08a; --warn:#ffca5c; --bad:#ff7189; --sky:#68d1f5; --violet:#c8a6ff;
 }
 html{font-size:15px;-webkit-text-size-adjust:100%}
@@ -1824,7 +1871,6 @@ body{background:var(--bg);color:var(--ink);line-height:1.55;
 .tnum{font-variant-numeric:tabular-nums}
 .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
-/* header */
 .xhead{padding:52px 0 26px}
 .xtop{display:flex;align-items:center;gap:14px;margin-bottom:34px;flex-wrap:wrap}
 .xbrand{font-size:21px;font-weight:800;letter-spacing:-.02em}
@@ -1835,7 +1881,6 @@ h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
 .xhead p{color:var(--ink2);font-size:14.5px;max-width:66ch}
 .xhead .upd{margin-top:16px;font-size:12px;color:var(--mut)}
 .xhead .upd b{color:var(--ink2)}
-/* diccionario desplegable */
 details.dictx{margin-left:auto;background:rgba(111,240,162,.06);border:1px solid var(--line2);border-radius:12px;overflow:hidden}
 details.dictx>summary{list-style:none;cursor:pointer;padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--brand);display:flex;align-items:center;gap:7px;user-select:none}
 details.dictx>summary::-webkit-details-marker{display:none}
@@ -1843,21 +1888,21 @@ details.dictx>summary .chev{transition:transform .2s;font-size:10px}
 details.dictx[open]>summary .chev{transform:rotate(90deg)}
 details.dictx .dwrap{padding:6px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;max-width:760px}
 details.dictx .d b{color:var(--brand);font-size:12.5px} details.dictx .d span{display:block;font-size:11.5px;color:var(--ink2);margin-top:3px}
-/* section shell */
 section{padding:50px 0;border-top:1px solid var(--line)}
 .q{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
 .sh{font-size:clamp(21px,3vw,28px);font-weight:800;margin:8px 0 6px}
 .sh .tot{color:var(--brand);font-weight:800}
 .sd{color:var(--ink2);font-size:13.5px;max-width:74ch;margin-bottom:26px}
-/* KPI */
+.sd.wide{max-width:none}
 .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
 .kc{background:linear-gradient(165deg,rgba(24,52,38,.9),rgba(19,41,30,.7));border:1px solid var(--line);
   border-radius:16px;padding:18px 16px;position:relative;overflow:hidden}
 .kc::after{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(111,240,162,.4),transparent)}
-.kc .kl{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:6px}
-.kc .kl .emp{font-size:9px;background:rgba(104,209,245,.14);color:var(--sky);padding:2px 6px;border-radius:5px;letter-spacing:.02em;font-weight:800}
+.kc .kl{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--mut)}
 .kc .kv{font-size:clamp(27px,3.7vw,38px);font-weight:800;line-height:1;margin:11px 0 8px;letter-spacing:-.02em}
 .kc .kt{font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.kc .emprow{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2);font-size:11px;color:var(--sky);display:flex;align-items:center;gap:6px;font-weight:700}
+.kc .emprow .eb{font-size:15px;font-weight:800}
 .trend{font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:3px}
 .trend.up{color:var(--ok)} .trend.down{color:var(--bad)} .trend.flat{color:var(--mut)}
 .kg.rates .kc{background:linear-gradient(165deg,rgba(43,182,115,.16),rgba(19,41,30,.5));border-color:var(--line2)}
@@ -1866,7 +1911,6 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .rates-head b{color:var(--ink2)}
 .fnote{font-size:12px;color:var(--mut);border-left:2px solid var(--line2);padding-left:12px;margin-top:16px;line-height:1.5}
 .fnote b{color:var(--ink2)}
-/* charts */
 .cg{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
 .chartc{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px}
 .chartc .chd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
@@ -1874,9 +1918,6 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .chartc .cbig{font-size:24px;font-weight:800;color:var(--brand);line-height:1}
 .chartc .cn{font-size:11px;color:var(--mut);margin-bottom:8px}
 .chartc svg{width:100%;height:auto;display:block}
-.chartc .cfoot{font-size:10.5px;color:var(--mut);margin-top:8px;line-height:1.5}
-.chartc .cfoot b{color:var(--ink2)}
-/* funnel */
 .fnhead{display:flex;justify-content:flex-end;font-size:11px;color:var(--mut);margin-bottom:8px}
 .fnhead b{color:var(--brand)}
 .fn{display:flex;flex-direction:column;gap:9px}
@@ -1887,13 +1928,11 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .fn .fill{height:100%;border-radius:10px;min-width:70px;display:flex;align-items:center;padding-left:15px;
   font-size:12px;font-weight:800;color:#052012;
   background:linear-gradient(90deg,var(--brand-deep),var(--brand-2));box-shadow:0 0 24px rgba(111,240,162,.12)}
-.fn .fill.emp-fill{background:linear-gradient(90deg,#155e7a,var(--sky));color:#031820}
 .fn .conv{position:absolute;right:0;font-size:11px;color:var(--ink2);background:rgba(12,27,21,.85);
   border:1px solid var(--line2);border-radius:999px;padding:3px 11px;white-space:nowrap}
 .fn .conv b{color:var(--brand)}
-.fn .emp{position:absolute;right:0;transform:translateX(0);font-size:10.5px;color:var(--sky);
+.fn .emp{position:absolute;right:0;font-size:10.5px;color:var(--sky);
   background:rgba(104,209,245,.12);border:1px solid rgba(104,209,245,.3);border-radius:999px;padding:3px 10px;white-space:nowrap;font-weight:700}
-/* bars */
 .bars{display:flex;flex-direction:column;gap:9px}
 .brow{display:grid;grid-template-columns:170px 1fr 70px;gap:12px;align-items:center;font-size:13px}
 .brow.zero{opacity:.42}
@@ -1901,24 +1940,39 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .brow .bt{background:rgba(255,255,255,.05);border-radius:6px;height:20px;overflow:hidden}
 .brow .bf{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--brand-d),var(--brand));min-width:3px}
 .brow .bn{text-align:right;font-weight:800} .brow .bn small{color:var(--mut);font-weight:600;font-size:10.5px}
-/* big number block (24h) */
+/* matriz por fuente */
+.mxwrap{overflow-x:auto}
+.matrix{min-width:720px;display:flex;flex-direction:column;gap:7px}
+.mx-head,.mx-row{display:grid;grid-template-columns:1.7fr .8fr .7fr .7fr .8fr .8fr .8fr .9fr;gap:8px;align-items:center}
+.mx-head{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:800;padding:0 12px 4px}
+.mx-head span{text-align:right} .mx-head span:first-child{text-align:left}
+.mx-row{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.mx-row .c1{display:flex;flex-direction:column;gap:5px}
+.mx-row .c1 .nm{font-size:12.5px;color:var(--ink);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-row .c1 .bt{background:rgba(255,255,255,.06);border-radius:5px;height:6px;overflow:hidden}
+.mx-row .c1 .bf{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand))}
+.mx-cell{text-align:right;font-variant-numeric:tabular-nums}
+.mx-cell .v{font-size:15px;font-weight:800;color:var(--ink)}
+.mx-cell .p{font-size:9.5px;color:var(--mut);display:block}
+.mx-cell .emp{font-size:9px;color:var(--sky);display:block;font-weight:700}
+.mx-cell.hi .v{color:var(--brand)} .mx-cell.cv .v{color:var(--sky)}
+.mx-cell.mut .v{color:var(--mut);font-weight:700}
+/* 24h */
 .bigblock{display:flex;gap:22px;align-items:center;background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:20px;flex-wrap:wrap}
 .bigblock .bn2{font-size:52px;font-weight:800;color:var(--brand);line-height:1;letter-spacing:-.03em}
 .bigblock .bx{font-size:13px;color:var(--ink2)} .bigblock .bx b{color:var(--ink)}
-/* cards */
+.brow .sub{font-size:10px;color:var(--mut);font-weight:600;display:block;margin-top:2px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px}
 .stat{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:14px;padding:17px}
 .stat .sv{font-size:27px;font-weight:800;line-height:1} .stat .sl{font-size:11.5px;color:var(--ink2);margin-top:6px}
 .stat.ok{border-color:rgba(87,224,138,.4)} .stat.ok .sv{color:var(--ok)}
 .stat.warn{border-color:rgba(255,202,92,.4)} .stat.warn .sv{color:var(--warn)}
 .stat.bad{border-color:rgba(255,113,137,.4)} .stat.bad .sv{color:var(--bad)}
-/* 3-col quality */
 .q3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.qcol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
-.qcol .qi{font-size:22px} .qcol .qv{font-size:30px;font-weight:800;margin:8px 0 2px} .qcol .ql{font-size:12px;color:var(--ink2)}
-.qcol .qp{font-size:11.5px;color:var(--brand);font-weight:700;margin-top:4px}
-/* two-col process (SQL) */
-.p2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.qcol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
+.qcol .qi{font-size:22px} .qcol .qv{font-size:34px;font-weight:800;margin:8px 0 2px;color:var(--brand)} .qcol .ql{font-size:12px;color:var(--ink2)}
+.qcol .qp{font-size:12px;color:var(--sky);font-weight:800;margin-top:4px}
+.p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
 .pcol.b{border-color:rgba(255,202,92,.3)}
 .pcol h4{font-size:14px;font-weight:800;margin-bottom:4px} .pcol .ph{font-size:11.5px;color:var(--mut);margin-bottom:16px;line-height:1.5}
@@ -1928,28 +1982,34 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .fstep.ok b{color:var(--brand)}
 .farr{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);font-weight:800;font-size:15px;min-width:40px}
 .farr .fp{font-size:10.5px;color:var(--brand);font-weight:800}
-.mini{margin-top:14px} .mini .mrow{display:grid;grid-template-columns:1fr 44px;gap:8px;font-size:12px;padding:5px 0;border-top:1px solid rgba(44,84,67,.5)}
-.mini .mrow .ml{color:var(--ink2)} .mini .mrow .mn{text-align:right;font-weight:800;color:var(--warn)}
+.razbox{margin-top:16px;background:rgba(255,113,137,.06);border:1px solid rgba(255,113,137,.25);border-radius:12px;padding:14px}
+.razbox .rh{font-size:12.5px;font-weight:800;color:var(--bad);margin-bottom:2px}
+.razbox .rs{font-size:11px;color:var(--mut);margin-bottom:10px}
+.mrow{display:grid;grid-template-columns:1fr 78px;gap:8px;font-size:12px;padding:6px 0;border-top:1px solid rgba(255,113,137,.15)}
+.mrow .ml{color:var(--ink2)} .mrow .mn{text-align:right;font-weight:800;color:var(--ink)} .mrow .mn small{color:var(--mut);font-weight:600;font-size:10px}
 .emailbox{text-align:center;padding:8px 0}
-.emailbox .eb{font-size:40px;font-weight:800;color:var(--warn);line-height:1}
+.emailbox .eb{font-size:44px;font-weight:800;color:var(--warn);line-height:1}
 .emailbox ul{list-style:none;margin-top:14px;text-align:left;font-size:12px;color:var(--ink2);display:flex;flex-direction:column;gap:8px}
 .emailbox li{padding-left:20px;position:relative} .emailbox li::before{content:"→";position:absolute;left:0;color:var(--warn)}
-/* stage chips */
 .chip{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:6px}
 .chip.discov{background:rgba(104,209,245,.15);color:var(--sky)} .chip.demo{background:rgba(111,240,162,.15);color:var(--brand)}
 .chip.best{background:rgba(200,166,255,.15);color:var(--violet)}
 .pipe-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:16px}
 .pipe-legend b{color:var(--ink)}
-/* table */
+details.chdeals{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden;background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.3))}
+details.chdeals>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:170px 1fr 70px;gap:12px;align-items:center;padding:9px 12px;font-size:13px}
+details.chdeals>summary::-webkit-details-marker{display:none}
+details.chdeals>summary .bl{color:var(--ink2)} details.chdeals>summary .bl::before{content:"▸ ";color:var(--sky)}
+details.chdeals[open]>summary .bl::before{content:"▾ "}
+details.chdeals .dl{padding:2px 14px 12px 28px;display:flex;flex-wrap:wrap;gap:6px}
+details.chdeals .dl span{font-size:11px;background:rgba(104,209,245,.1);border:1px solid rgba(104,209,245,.25);color:var(--ink2);padding:3px 9px;border-radius:6px}
 .tblwrap{overflow-x:auto}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
 .tbl th{text-align:right;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line2);white-space:nowrap}
 .tbl th:first-child,.tbl td:first-child{text-align:left}
 .tbl td{padding:12px;border-bottom:1px solid rgba(44,84,67,.4);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
-.tbl td.hi{color:var(--brand);font-weight:800}
-.tbl td.cv{color:var(--sky);font-weight:800}
-/* note / insights / actions */
+.tbl td.hi{color:var(--brand);font-weight:800} .tbl td.cv{color:var(--sky);font-weight:800}
 .note{background:linear-gradient(150deg,rgba(111,240,162,.12),rgba(111,240,162,.02));border:1px solid var(--line2);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);margin-top:18px}
 .note b{color:var(--brand)}
 .ins{display:flex;flex-direction:column;gap:10px}
@@ -1991,10 +2051,13 @@ def render_exec(d):
     free_total = cum.get("free", 0); free7 = ex["free_last7"]
 
     # ---------- 1 · EXECUTIVE SUMMARY ----------
-    def kpi(lab, val, t, sub, emp=None):
-        empchip = f'<span class="emp">empresas</span>' if emp else ""
-        return (f'<div class="kc"><div class="kl">{lab}{empchip}</div><div class="kv tnum">{fmt(val)}</div>'
+    def kpi(lab, val, t, sub):
+        return (f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{fmt(val)}</div>'
                 f'<div class="kt">{arrow(t)}<span>· {sub}</span></div></div>')
+    def kpi_emp(lab, val_c, emp, t, sub):
+        return (f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{fmt(val_c)}</div>'
+                f'<div class="kt">{arrow(t)}<span>· {sub}</span></div>'
+                f'<div class="emprow">🏢 <span class="eb tnum">{fmt(emp)}</span> empresas / negocios</div></div>')
     kpi_html = (
         kpi("Nuevos contactos", cum["total"], tr["contactos"], "todo lo que entra") +
         kpi("Leads", cum["lead"], tr["leads"], f'{pv(cum["lead"], cum["total"])} de contactos') +
@@ -2002,13 +2065,14 @@ def render_exec(d):
         kpi("SQL", cum["sql"], tr["sql"], f'{pv(cum["sql"], cum["lead"])} de leads') +
         f'<div class="kc"><div class="kl">Reuniones</div><div class="kv tnum">{fmt(reun_total)}</div>'
         f'<div class="kt">{arrow(reun_tr)}<span>· 🔍 {reun_st.get("Discovery",0)} discovery · 🎬 {reun_st.get("Demo",0)} demo</span></div></div>' +
-        kpi("Oportunidades", opp_e, tr["opp"], f'{pv(opp_e, cum["sql"])} de SQL', emp=True) +
-        kpi("Clientes", cli_e, tr["cli"], f'{pv(cli_e, opp_e)} de oportunidades', emp=True))
+        kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], f'{pv(opp_c, cum["sql"])} de SQL · contactos') +
+        kpi_emp("Clientes", cli_c, cli_e, tr["cli"], f'{pv(cli_c, opp_c)} de oport. · contactos'))
+    # tasas: sobre contactos (misma variable) · sin Contacto→Lead · + Cliente→Churn
     rates = [
-        ("Contacto → Lead", pv(cum["lead"], cum["total"]), "el resto son Freemium, fuera del embudo"),
-        ("Lead → SQL", pv(cum["sql"], cum["lead"]), "interés real → cualificado por ventas"),
-        ("SQL → Oportunidad", pv(opp_e, cum["sql"]), "sobre empresas con deal"),
-        ("Oportunidad → Cliente", pv(cli_e, opp_e), "cierre de negocio"),
+        ("Lead → SQL", pv(cum["sql"], cum["lead"]), "interés real → cualificado"),
+        ("SQL → Oportunidad", pv(opp_c, cum["sql"]), "sobre contactos"),
+        ("Oportunidad → Cliente", pv(cli_c, opp_c), "sobre contactos"),
+        ("Cliente → Churn", "—", "pendiente de conectar churn"),
     ]
     rate_html = "".join(
         f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{val}</div>'
@@ -2027,7 +2091,7 @@ def render_exec(d):
         f'<div class="cn">acumulado diario · 1 ene → hoy · el nº sobre la línea es el total al cierre de cada mes</div>{svg}</div>'
         for lab, val, svg in charts)
 
-    # ---------- 3 · FUNNEL (contactos, con empresas anotadas) ----------
+    # ---------- 3 · FUNNEL ----------
     stages = [("Contactos", cum["total"], None), ("Leads", cum["lead"], None), ("MQL", cum["mql"], None),
               ("SQL", cum["sql"], None), ("Oportunidad", opp_c, opp_e), ("Cliente", cli_c, cli_e)]
     top = stages[0][1] or 1
@@ -2044,46 +2108,98 @@ def render_exec(d):
                     f'<div class="t">{lab}</div></div><div class="track">'
                     f'<div class="fill" style="width:{w}%"></div>{right}</div></div>')
 
-    # ---------- 4 · NUEVOS CONTACTOS 24H (todos los canales inbound) ----------
+    # ---------- CONTACTOS POR FUENTE · matriz acumulada ----------
+    cm = ex["chan_matrix"]
+    cm_tot = sum(e["contactos"] for _, e in cm) or 1
+    cmax = max((e["contactos"] for _, e in cm), default=0) or 1
+    def cell(v, extra="", cls=""):
+        return f'<div class="mx-cell {cls}"><span class="v tnum">{fmt(v)}</span>{extra}</div>'
+    mx_rows = ""
+    for lbl, e in cm:
+        empo = f'<span class="emp">🏢 {e["opp_emp"]}</span>' if e["opp_c"] else '<span class="p">—</span>'
+        empc = f'<span class="emp">🏢 {e["cli_emp"]}</span>' if e["cli_c"] else '<span class="p">—</span>'
+        pct_c = f'<span class="p">{pv(e["contactos"], cm_tot)}</span>'
+        bar_w = round(e["contactos"] / cmax * 100)
+        conv_c = pv(e["sql"], e["contactos"])
+        mx_rows += (
+            '<div class="mx-row">'
+            f'<div class="c1"><span class="nm">{esc(lbl)}</span>'
+            f'<div class="bt"><div class="bf" style="width:{bar_w}%"></div></div></div>'
+            + cell(e["contactos"], pct_c)
+            + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
+            + cell(e["opp_c"], empo) + cell(e["cli_c"], empc)
+            + f'<div class="mx-cell cv"><span class="v tnum">{conv_c}</span><span class="p">SQL/canal</span></div>'
+            + '</div>')
+    matrix_html = (
+        '<div class="mxwrap"><div class="matrix">'
+        '<div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span>'
+        '<span>MQL</span><span>SQL</span><span>Oport.</span><span>Cliente</span><span>Conv. SQL</span></div>'
+        + mx_rows + '</div></div>')
+
+    # ---------- 24H ----------
     ch24 = sorted(d["channels"], key=lambda x: -x[1]["n"])
     d24_total = sum(e["n"] for _, e in d["channels"])
     bmax = max((e["n"] for _, e in d["channels"]), default=0) or 1
+    def sub24(e):
+        parts = []
+        if e.get("lead"): parts.append(f'{e["lead"]} lead')
+        if e.get("mql"): parts.append(f'{e["mql"]} MQL')
+        if e.get("sql"): parts.append(f'{e["sql"]} SQL')
+        return f'<span class="sub">{" · ".join(parts)}</span>' if parts else ''
     b24 = "".join(
         f'<div class="brow{"" if e["n"] else " zero"}"><span class="bl">{e.get("icon","•")} {esc(lbl)}</span>'
         f'<div class="bt"><div class="bf" style="width:{round(e["n"]/bmax*100) if e["n"] else 0}%"></div></div>'
-        f'<span class="bn tnum">{e["n"]}<br><small>{pv(e["n"], d24_total) if d24_total else "—"}</small></span></div>'
+        f'<span class="bn tnum">{e["n"]}{sub24(e)}</span></div>'
         for lbl, e in ch24)
 
-    # ---------- 6 · LEADS · de dónde vienen (origen/contenido) ----------
-    orig_rows = d["origin"]["sorted"][:8]
+    # ---------- 5 · CALIDAD ----------
+    ql = ex["quality"]; qt = ql["total"] or 1
+    qcols = (
+        f'<div class="qcol"><div class="qi">✉️</div><div class="qv tnum">{fmt(ql["corp"])}</div><div class="ql">Email corporativo</div><div class="qp">{pv(ql["corp"], qt)}</div></div>'
+        f'<div class="qcol"><div class="qi">📞</div><div class="qv tnum">{fmt(ql["phone"])}</div><div class="ql">Con teléfono</div><div class="qp">{pv(ql["phone"], qt)}</div></div>'
+        f'<div class="qcol"><div class="qi">🏢</div><div class="qv tnum">{fmt(ql["company"])}</div><div class="ql">Empresa identificada</div><div class="qp">{pv(ql["company"], qt)}</div></div>')
+
+    # ---------- 6 · LEADS por origen (+ lead ads desplegable) ----------
+    orig_rows = [(k, v) for k, v in d["origin"]["sorted"]]
     omax = max((v for _, v in orig_rows), default=0) or 1
     otot = d["origin"]["total"] or 1
-    leads_html = "".join(
-        f'<div class="brow"><span class="bl">{esc(k)}</span><div class="bt"><div class="bf" style="width:{round(v/omax*100)}%"></div></div>'
-        f'<span class="bn tnum">{fmt(v)}<br><small>{pv(v, otot)}</small></span></div>'
-        for k, v in orig_rows)
+    leadads = ex.get("leadads", [])
+    la_tot = sum(v for _, v in leadads)
+    leads_html = ""
+    for k, v in orig_rows[:9]:
+        if k == "Lead Ads (paid)" and leadads:
+            inner = "".join(f'<span>{esc(n)} · <b style="color:var(--sky)">{c}</b></span>' for n, c in leadads)
+            leads_html += (
+                f'<details class="chdeals"><summary><span class="bl">{esc(k)} · paid media</span>'
+                f'<div class="bt"><div class="bf" style="width:{round(v/omax*100)}%;background:linear-gradient(90deg,#155e7a,var(--sky))"></div></div>'
+                f'<span class="bn tnum">{fmt(v)}<br><small>{pv(v, otot)}</small></span></summary>'
+                f'<div class="dl">{inner}</div></details>')
+        else:
+            leads_html += (
+                f'<div class="brow"><span class="bl">{esc(k)}</span><div class="bt"><div class="bf" style="width:{round(v/omax*100)}%"></div></div>'
+                f'<span class="bn tnum">{fmt(v)}<br><small>{pv(v, otot)}</small></span></div>')
 
-    # ---------- 7 · MQL · contenido consumido ----------
+    # ---------- 7 · MQL contenido ----------
     CONTENT = d["origin"]["content_set"]
     content_rows = [(k, v) for k, v in d["origin"]["sorted"] if k in CONTENT]
-    cmax = max((v for _, v in content_rows), default=0) or 1
+    cmx = max((v for _, v in content_rows), default=0) or 1
     ctot = sum(v for _, v in content_rows) or 1
     content_html = "".join(
-        f'<div class="brow"><span class="bl">{esc(k)}</span><div class="bt"><div class="bf" style="width:{round(v/cmax*100)}%"></div></div>'
+        f'<div class="brow"><span class="bl">{esc(k)}</span><div class="bt"><div class="bf" style="width:{round(v/cmx*100)}%"></div></div>'
         f'<span class="bn tnum">{v}<br><small>{pv(v, ctot)}</small></span></div>'
         for k, v in content_rows) or '<p class="sd">Sin datos de contenido.</p>'
 
-    # ---------- 8 · SQL · dos columnas (Agustín precualifica / <3.000 email) ----------
+    # ---------- 8 · SQL 2 columnas ----------
     pq = d["preq"]
     ag_base = pq.get("ag_sql", 0) or 1
     ag_contact = pq.get("ag_calls_unique", 0) + pq.get("ag_reuniones", 0)
     raz = pq.get("ag_razones", [])
     raz_tot = sum(n for _, n in raz) or 1
     raz_rows = "".join(
-        f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n}</span></div>'
+        f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n} <small>{pv(n, raz_tot)}</small></span></div>'
         for r, n in raz[:6]) or '<div class="mrow"><span class="ml">Sin razones registradas</span><span class="mn">—</span></div>'
 
-    # ---------- 9 · MOTIVOS DE DESCARTE ----------
+    # ---------- 9 · MOTIVOS DESCARTE ----------
     desc = d["descarte"]
     desc_tot = sum(n for _, n in desc) or 1
     dmax = max((n for _, n in desc), default=0) or 1
@@ -2096,16 +2212,22 @@ def render_exec(d):
         r0, n0 = desc[0]
         desc_interp = f'<div class="note">El <b>{pv(n0, desc_tot)}</b> de los descartes con motivo son por «{esc(r0)}». Total con razón registrada: <b>{desc_tot}</b>.</div>'
 
-    # ---------- 10 · OPORTUNIDADES por canal + etapa pipeline ----------
+    # ---------- 10 · OPORTUNIDADES por canal (desplegable con negocios) ----------
     opp_ch = [(lbl, e.get("opp", 0)) for lbl, e in d["chan_funnel"] if e.get("opp", 0) > 0]
     opp_ch.sort(key=lambda x: -x[1])
     opp_ch_tot = sum(n for _, n in opp_ch) or 1
     omx = max((n for _, n in opp_ch), default=0) or 1
-    opp_ch_html = "".join(
-        f'<div class="brow"><span class="bl">{esc(lbl)}</span><div class="bt"><div class="bf sky" style="width:{round(n/omx*100)}%;background:linear-gradient(90deg,#155e7a,var(--sky))"></div></div>'
-        f'<span class="bn tnum">{n}<br><small>{pv(n, opp_ch_tot)}</small></span></div>'
-        for lbl, n in opp_ch) or '<p class="sd">Sin oportunidades activas por canal.</p>'
-    # etapa pipeline
+    dbc = ex.get("deals_by_chan", {})
+    opp_ch_html = ""
+    for lbl, n in opp_ch:
+        names = dbc.get(lbl, [])
+        inner = "".join(f'<span>{esc(nm)}</span>' for nm in names) or '<span>Sin negocios listados</span>'
+        opp_ch_html += (
+            f'<details class="chdeals"><summary><span class="bl">{esc(lbl)}</span>'
+            f'<div class="bt"><div class="bf" style="width:{round(n/omx*100)}%;background:linear-gradient(90deg,#155e7a,var(--sky))"></div></div>'
+            f'<span class="bn tnum">{n}<br><small>{pv(n, opp_ch_tot)}</small></span></summary>'
+            f'<div class="dl">{inner}</div></details>')
+    opp_ch_html = opp_ch_html or '<p class="sd">Sin oportunidades activas por canal.</p>'
     STG = {"1107496610": ("Discovery", "discov"), "presentationscheduled": ("Demo", "demo"), "1033589123": ("Best Case", "best")}
     stg_count = {}
     for dl in d.get("mkt_deals", []):
@@ -2115,7 +2237,7 @@ def render_exec(d):
         f'<span><b>{c}</b> <span class="chip {cls}">{nm}</span></span>'
         for (nm, cls), c in sorted(stg_count.items(), key=lambda x: -x[1]))
 
-    # ---------- 12 · RENDIMIENTO POR CANAL ----------
+    # ---------- RENDIMIENTO POR CANAL ----------
     cf = d["chan_funnel"][:7]
     rows_ch = "".join(
         f'<tr><td>{esc(lbl)}</td><td class="tnum">{fmt(e["contactos"])}</td><td class="tnum">{fmt(e["leads"])}</td>'
@@ -2123,7 +2245,7 @@ def render_exec(d):
         f'<td class="tnum cv">{pv(e.get("opp",0), e["contactos"])}</td></tr>'
         for lbl, e in cf)
 
-    # ---------- 13 · INSIGHTS ----------
+    # ---------- INSIGHTS ----------
     insights = []
     if d["chan_funnel"]:
         tot_sql = sum(e["sql"] for _, e in d["chan_funnel"]) or 1
@@ -2149,7 +2271,7 @@ def render_exec(d):
     ins_html = "".join(f'<div class="i {c}"><span class="dot"></span><p>{txt}</p></div>' for c, txt in insights) \
         or '<p class="sd">Sin señales suficientes para generar insights hoy.</p>'
 
-    # ---------- 14 · ACCIONES ----------
+    # ---------- ACCIONES ----------
     acts = []
     if desc:
         r0 = desc[0][0].lower()
@@ -2182,9 +2304,9 @@ def render_exec(d):
         <div class="d"><b>SQL</b><span>Sales Qualified Lead: pide demo/consultoría. Listo para ventas.</span></div>
         <div class="d"><b>Oportunidad</b><span>SQL con deal abierto en el pipeline. Se cuenta por empresa.</span></div>
         <div class="d"><b>Cliente</b><span>Empresa que ha cerrado y ya compra.</span></div>
+        <div class="d"><b>Churn</b><span>Cliente que se da de baja en el periodo.</span></div>
         <div class="d"><b>Pipeline</b><span>Oportunidades abiertas y su recorrido hasta cliente.</span></div>
         <div class="d"><b>Conversión</b><span>% de contactos que pasan de una etapa a la siguiente.</span></div>
-        <div class="d"><b>Owner</b><span>Persona responsable de gestionar el contacto u oportunidad.</span></div>
       </div>
     </details>
   </div>
@@ -2196,12 +2318,12 @@ def render_exec(d):
 <section style="border-top:none">
   <div class="q">01 · ¿Cuánto negocio está entrando?</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd">KPIs del embudo comercial de inbound marketing, con su tendencia de los últimos 7 días. Oportunidades y Clientes se cuentan por empresa.</div>
+  <div class="sd">KPIs del embudo comercial de inbound marketing, con tendencia de los últimos 7 días. En Oportunidades y Clientes, el número grande es <b>volumen de contactos</b> (misma variable que el resto) y debajo el <b>nº de empresas / negocios</b>.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
-  <div class="rates-head">Tasas de conversión · <b>calculadas sobre contactos</b> (excepto donde se indica empresas)</div>
+  <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
   <div class="kg rates">{rate_html}</div>
-  <div class="fnote">De contactos a leads no todo es «pérdida»: el resto son <b>Freemium</b> (altas por la app), que <b>ya no entran</b> en el embudo comercial. En los últimos 7 días fueron <b>{free7}</b> altas Freemium (histórico: {fmt(free_total)}), descontadas del funnel.</div>
+  <div class="fnote">Nota: la conversión Contacto→Lead se retira temporalmente — el hueco actual son altas <b>Freemium</b> (por la app), que van a dejar de entrar. Últimos 7 días: <b>{free7}</b> altas Freemium. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
 
 <section>
@@ -2214,16 +2336,23 @@ def render_exec(d):
 <section>
   <div class="q">03 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Funnel comercial</h2>
-  <div class="sd">Volumen de <b>contactos</b> por etapa (un único flujo comparable). En Oportunidad y Cliente añadimos el nº de <b>empresas</b> (una compañía puede agrupar varios contactos).</div>
+  <div class="sd">Volumen de <b>contactos</b> por etapa (un único flujo comparable). En Oportunidad y Cliente añadimos el nº de <b>empresas</b>.</div>
   <div class="fnhead">Conversión mostrada <b>&nbsp;sobre contactos&nbsp;</b></div>
   <div class="fn">{fn_rows}</div>
-  <div class="note">El flujo de barras es siempre <b>volumen de contactos</b> para que sea comparable etapa a etapa. A partir de Oportunidad, el negocio se mide por <b>empresa</b> (chip azul): por eso ese número no baja «en proporción» al de contactos — son unidades distintas.</div>
+  <div class="note">El flujo de barras es siempre <b>volumen de contactos</b> para que sea comparable. A partir de Oportunidad, el negocio se mide por <b>empresa</b> (chip azul): son unidades distintas, por eso no bajan «en proporción».</div>
 </section>
 
 <section>
-  <div class="q">04 · ¿Qué ha entrado hoy?</div>
+  <div class="q">04 · ¿De qué fuentes entra el negocio?</div>
+  <h2 class="sh">Contactos por fuente <span class="tot">· {fmt(cm_tot)}</span> · acumulado 1 ene</h2>
+  <div class="sd">Volumen de contactos por canal de inbound marketing y cómo avanzan por el embudo. Todo son <b>contactos</b>; en Oportunidad y Cliente el chip 🏢 es el nº de empresas. Última columna: <b>conversión a SQL</b> del propio canal.</div>
+  {matrix_html}
+</section>
+
+<section>
+  <div class="q">05 · ¿Qué ha entrado hoy?</div>
   <h2 class="sh">Nuevos contactos · últimas 24h</h2>
-  <div class="sd">Volumen del periodo y su reparto por canal de inbound marketing (se listan todos; hoy algunos pueden estar a 0).</div>
+  <div class="sd">Volumen del periodo y su reparto por canal (se listan todos los canales inbound; hoy algunos pueden estar a 0). Bajo cada volumen, el desglose lead / MQL / SQL.</div>
   <div class="bigblock">
     <div class="bn2 tnum">{d24_total}</div>
     <div class="bx">contactos nuevos en las <b>últimas 24h</b><br>desglose por canal de entrada →</div>
@@ -2232,40 +2361,35 @@ def render_exec(d):
 </section>
 
 <section>
-  <div class="q">05 · ¿Qué calidad tiene el dato?</div>
+  <div class="q">06 · ¿Qué calidad tiene el dato?</div>
   <h2 class="sh">Calidad de los nuevos contactos</h2>
-  <div class="sd">Completitud del dato sobre el total de contactos: cuántos traen email corporativo, teléfono y empresa asociada.</div>
-  <div class="q3">
-    <div class="qcol"><div class="qi">✉️</div><div class="qv tnum">—</div><div class="ql">Email corporativo</div><div class="qp">pendiente</div></div>
-    <div class="qcol"><div class="qi">📞</div><div class="qv tnum">—</div><div class="ql">Con teléfono</div><div class="qp">pendiente</div></div>
-    <div class="qcol"><div class="qi">🏢</div><div class="qv tnum">—</div><div class="ql">Con empresa / dominio</div><div class="qp">pendiente</div></div>
-  </div>
-  <div class="pend" style="margin-top:16px">⏳ <b>Pendiente de conectar.</b> Estas tres propiedades aún no se capturan de forma fiable en HubSpot. En cuanto el formulario/CRM las registre, las tres columnas se rellenan solas con volumen y % sobre el total. No se muestran cifras estimadas.</div>
+  <div class="sd">Sobre el total de contactos desde el 1 de enero: cuántos traen email corporativo, teléfono y empresa identificada (por dominio o nombre).</div>
+  <div class="q3">{qcols}</div>
 </section>
 
 <section>
-  <div class="q">06 · ¿Qué pasa con los leads?</div>
-  <h2 class="sh">Estado de los leads · de dónde vienen</h2>
-  <div class="sd">Por qué origen / contenido han entrado los leads (blog, calculadora, webinar, formulario, app…), acumulado del año.</div>
+  <div class="q">07 · ¿Qué pasa con los contactos en etapa lead?</div>
+  <h2 class="sh">Estado de los contactos · etapa lead <span class="tot">· {fmt(d["origin"]["total"])}</span></h2>
+  <div class="sd">Por qué origen / contenido han entrado (blog, calculadora, webinar, formulario, app…), con % sobre el total. «Lead Ads (paid)» es desplegable por red.</div>
   <div class="bars">{leads_html}</div>
 </section>
 
 <section>
-  <div class="q">07 · ¿Qué consumen los MQL?</div>
-  <h2 class="sh">Estado de los MQL · contenido consumido</h2>
+  <div class="q">08 · ¿Qué consumen los MQL?</div>
+  <h2 class="sh">Estado de los MQL <span class="tot">· {fmt(ctot)}</span> · contenido consumido</h2>
   <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars">{content_html}</div>
   <div class="pend" style="margin-top:16px">⏳ <b>Tiempo medio hasta SQL y conversión por tipo de contenido</b>: pendientes (requieren fecha de conversión a SQL por contacto).</div>
 </section>
 
 <section>
-  <div class="q">08 · ¿Qué ocurre con los SQL?</div>
-  <h2 class="sh">Estado de los SQL · precualificación</h2>
-  <div class="sd">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen de consultas: con <b>≥3.000 o «no lo sé»</b> pasan a Agustín; con <b>&lt;3.000</b> reciben un email y quedan en lista para revisar más adelante.</div>
+  <div class="q">09 · ¿Qué ocurre con los SQL?</div>
+  <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span> · precualificación</h2>
+  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen de consultas: con <b>≥3.000 o «no lo sé»</b> se asignan a Agustín como propietario y los gestiona; con <b>&lt;3.000</b> reciben un email automático y quedan en una lista dinámica para revisar más adelante.</div>
   <div class="p2">
     <div class="pcol">
       <h4>🟢 Precualifican · gestión de Agustín</h4>
-      <div class="ph">SQL asignados a Agustín (propietario) que sí cualifican por volumen.</div>
+      <div class="ph">SQL asignados a Agustín que cualifican por volumen.</div>
       <div class="flow">
         <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL a Agustín<br>(desde {pq.get("ag_start","9 jul")})</span></div>
         <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
@@ -2273,14 +2397,15 @@ def render_exec(d):
         <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
         <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidades<br>creadas</span></div>
       </div>
-      <div class="mini">
-        <div style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Razones de descarte</div>
+      <div class="razbox">
+        <div class="rh">🔴 Razones de descarte · {raz_tot} descartados</div>
+        <div class="rs">% sobre el total de SQL descartados de Agustín</div>
         {raz_rows}
       </div>
     </div>
     <div class="pcol b">
       <h4>🟡 No cualifican · &lt;3.000 consultas</h4>
-      <div class="ph">Descarte inicial automático: reciben email de agradecimiento y entran en una lista dinámica para revisar en el futuro.</div>
+      <div class="ph">Descarte inicial automático: email de agradecimiento y lista dinámica para revisar en el futuro.</div>
       <div class="emailbox">
         <div class="eb tnum">{pq.get("ag_lt3000",0)}</div>
         <div style="font-size:12px;color:var(--ink2);margin-top:4px">SQL con &lt;3.000 consultas/mes (desde 9 jul)</div>
@@ -2296,50 +2421,50 @@ def render_exec(d):
 </section>
 
 <section>
-  <div class="q">09 · ¿Dónde perdemos negocio?</div>
-  <h2 class="sh">Motivos de descarte</h2>
-  <div class="sd">Por qué se caen los contactos cualificados. Este bloque señala dónde actuar.</div>
+  <div class="q">10 · ¿Dónde perdemos negocio?</div>
+  <h2 class="sh">Motivos de descarte · SQL <span class="tot">· {fmt(desc_tot)}</span></h2>
+  <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), no solo de un paso. Aquí se ve dónde actuar.</div>
   <div class="bars">{desc_html}</div>
   {desc_interp}
 </section>
 
 <section>
-  <div class="q">10 · ¿Cómo va el pipeline?</div>
+  <div class="q">11 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· {fmt(len(d.get("mkt_deals", [])))}</span> activas de marketing</h2>
-  <div class="sd">Reparto por canal de entrada (con % del total) y en qué etapa del pipeline están.</div>
-  <div class="pipe-legend">{pipe_legend or '<span class="mut">Sin etapas registradas</span>'}</div>
-  <div class="bars">{opp_ch_html}</div>
-  <div class="pend" style="margin-top:16px">⏳ <b>Valor estimado (€), pipeline y owner</b>: pendientes de conectar el importe de los deals en HubSpot.</div>
-</section>
-
-<section>
-  <div class="q">11 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· {fmt(cli_e)}</span> empresas</h2>
-  <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
-  <div class="cards">
-    <div class="stat ok"><div class="sv tnum">{fmt(cli_e)}</div><div class="sl">Clientes (empresas)</div></div>
-    <div class="stat"><div class="sv tnum">{pv(cli_e, opp_e)}</div><div class="sl">Conversión Oportunidad → Cliente</div></div>
-  </div>
-  <div class="pend" style="margin-top:14px">⏳ <b>Canal de adquisición y valor generado (€)</b> por cliente: pendientes de conectar importe/atribución de cierre.</div>
+  <div class="sd">Reparto por canal de entrada (con % del total). <b>Pulsa un canal</b> para ver los negocios asociados. Debajo, en qué etapa del pipeline están.</div>
+  <div class="pipe-legend">{pipe_legend or '<span>Sin etapas registradas</span>'}</div>
+  {opp_ch_html}
+  <div class="pend" style="margin-top:16px">⏳ <b>Valor estimado (€) y owner</b>: pendientes de conectar el importe de los deals en HubSpot.</div>
 </section>
 
 <section>
   <div class="q">12 · ¿Qué canal genera negocio real?</div>
   <h2 class="sh">Rendimiento por canal</h2>
-  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL generados. La última columna es la conversión <b>contacto → oportunidad</b>.</div>
+  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL. Última columna: conversión <b>contacto → oportunidad</b>.</div>
   <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
   <tbody>{rows_ch}</tbody></table></div>
 </section>
 
 <section>
-  <div class="q">13 · ¿Qué nos dicen los datos?</div>
+  <div class="q">13 · ¿Cerramos?</div>
+  <h2 class="sh">Clientes <span class="tot">· {fmt(cli_e)}</span> empresas</h2>
+  <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
+  <div class="cards">
+    <div class="stat ok"><div class="sv tnum">{fmt(cli_e)}</div><div class="sl">Clientes (empresas)</div></div>
+    <div class="stat"><div class="sv tnum">{pv(cli_c, opp_c)}</div><div class="sl">Conversión Oportunidad → Cliente (contactos)</div></div>
+    <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="q">14 · ¿Qué nos dicen los datos?</div>
   <h2 class="sh">Insights automáticos</h2>
   <div class="sd">Observaciones generadas hoy a partir de los datos reales (nunca estimadas).</div>
   <div class="ins">{ins_html}</div>
 </section>
 
 <section>
-  <div class="q">14 · ¿Qué hacemos hoy?</div>
+  <div class="q">15 · ¿Qué hacemos hoy?</div>
   <h2 class="sh">Acciones recomendadas</h2>
   <div class="sd">Derivadas directamente de los insights anteriores.</div>
   <div class="acts">{acts_html}</div>
