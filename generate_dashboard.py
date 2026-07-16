@@ -1241,22 +1241,19 @@ def render(d):
 
     # ── Contadores de las ramas del workflow de precualificación ──
     pq = d["preq"]
-    # Rama Agustín: estado/evolución de cada SQL DESDE EL 9 JUL (llegan → llamadas → reuniones → oportunidades)
+    # Rama Agustín: SQL → contactados (llamadas + videollamadas) → oportunidades
     ag_base = pq["ag_sql"] or 1
+    ag_contactos = pq["ag_calls_unique"] + pq["ag_reuniones"]   # total precualificación (tel + video)
     preq_sales_stats = (
         '<div class="pqf-sub">① Evolución · del SQL a la oportunidad</div>'
         '<div class="pqflow">'
         f'<div class="pqf-step"><b>{pq["ag_sql"]}</b><span>SQL a Agustín<br>(desde {pq["ag_start"]}) · base 100%</span></div>'
-        f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_calls_unique"], ag_base)}</span>→</div>'
-        f'<div class="pqf-step"><b>📞 {pq["ag_calls_unique"]}</b><span>SQL contactados<br>{pct(pq["ag_calls_unique"], ag_base)} de los SQL</span></div>'
-        f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_reuniones"], ag_base)}</span>→</div>'
-        f'<div class="pqf-step"><b>📅 {pq["ag_reuniones"]}</b><span>reuniones agendadas<br>{pct(pq["ag_reuniones"], ag_base)} de los SQL</span></div>'
+        f'<div class="pqf-arrow"><span class="pqf-pct">{pct(ag_contactos, ag_base)}</span>→</div>'
+        f'<div class="pqf-step"><b>{ag_contactos}</b><span>contactos de precualificación<br>{pct(ag_contactos, ag_base)} de los SQL · '
+        f'<span class="pqf-ch-tel">📞 {pq["ag_calls_unique"]} tel.</span> · <span class="pqf-ch-vid">🎥 {pq["ag_reuniones"]} videoll.</span></span></div>'
         f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_opp"], ag_base)}</span>→</div>'
         f'<div class="pqf-step pqf-ok"><b>🎯 {pq["ag_opp"]}</b><span>oportunidades creadas<br>{pct(pq["ag_opp"], ag_base)} de los SQL</span></div>'
-        '</div>'
-        '<div class="pqf-channel">📲 <b>Canal de contacto:</b> '
-        f'<span class="pqf-ch-tel">📞 {pq["ag_calls_attempts"]} por teléfono</span> · '
-        f'<span class="pqf-ch-vid">💻 {pq["ag_reuniones"]} por videollamada / mail agendado</span></div>')
+        '</div>')
     # Desglose por volumen de consultas declarado en el formulario
     avb = pq.get("ag_vol", {}); avt = pq.get("ag_total", 0) or 1
     preq_sales_stats += (
@@ -1265,8 +1262,9 @@ def render(d):
         f'<div class="pqvol-item pqvol-ok"><b>{avb.get("ge3000",0)}</b><span>✅ +3.000 consultas/mes<br>(incluye +5k, +10k) · {pct(avb.get("ge3000",0), avt)}</span></div>'
         f'<div class="pqvol-item"><b>{avb.get("nose",0)}</b><span>🤷 «No lo sé»<br>{pct(avb.get("nose",0), avt)}</span></div>'
         f'<div class="pqvol-item pqvol-bad"><b>{avb.get("lt3000",0)}</b><span>⚠️ &lt;3.000 (mal cualificados)<br>{pct(avb.get("lt3000",0), avt)}</span></div>'
-        f'<div class="pqvol-item"><b>{avb.get("sindato",0)}</b><span>❔ Sin dato de volumen<br>{pct(avb.get("sindato",0), avt)}</span></div>'
-        '</div>')
+        f'<div class="pqvol-item"><b>{avb.get("sindato",0)}</b><span>❔ Sin dato de volumen *<br>{pct(avb.get("sindato",0), avt)}</span></div>'
+        '</div>'
+        f'<div class="pqvol-note">* El campo de volumen no era obligatorio → sin él no se puede cualificar. Al precualificar, Agus vio que <b>7 de {avb.get("sindato",0)}</b> tenían &lt;3.000. Por eso ya es <b>campo obligatorio</b>.</div>')
     # Mini-desglose: por qué se caen (razones de descarte de los SQL de Agustín)
     if pq.get("ag_razones"):
         ag_raz_mx = pq["ag_razones"][0][1] or 1
@@ -1930,6 +1928,8 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pqvol-item.pqvol-ok b {{ color:#6ee7b7; }}
 .pqvol-item.pqvol-bad {{ border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.07); }}
 .pqvol-item.pqvol-bad b {{ color:#fca5a5; }}
+.pqvol-note {{ width:100%; margin-top:8px; font-size:10.5px; line-height:1.45; color:var(--guru-300); background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.28); border-radius:8px; padding:8px 11px; }}
+.pqvol-note b {{ color:#fcd34d; font-weight:800; }}
 .pqf-sub {{ font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--guru-300); margin:16px 0 8px; }}
 .pqbig {{ display:flex; align-items:center; gap:16px; margin-top:12px; }}
 .pqbig-n {{ font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }}
