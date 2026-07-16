@@ -1242,6 +1242,7 @@ def render(d):
     # Rama Agustín: estado/evolución de cada SQL DESDE EL 9 JUL (llegan → llamadas → reuniones → oportunidades)
     ag_base = pq["ag_sql"] or 1
     preq_sales_stats = (
+        '<div class="pqf-sub">① Evolución · del SQL a la oportunidad</div>'
         '<div class="pqflow">'
         f'<div class="pqf-step"><b>{pq["ag_sql"]}</b><span>SQL a Agustín<br>(desde {pq["ag_start"]}) · base 100%</span></div>'
         f'<div class="pqf-arrow"><span class="pqf-pct">{pct(pq["ag_calls_unique"], ag_base)}</span>→</div>'
@@ -1257,6 +1258,7 @@ def render(d):
     # Desglose por volumen de consultas declarado en el formulario
     avb = pq.get("ag_vol", {}); avt = pq.get("ag_total", 0) or 1
     preq_sales_stats += (
+        '<div class="pqf-sub">② Calidad de entrada · volumen de consultas declarado en el formulario</div>'
         '<div class="pqvol">'
         f'<div class="pqvol-item pqvol-ok"><b>{avb.get("ge3000",0)}</b><span>✅ +3.000 consultas/mes<br>(incluye +5k, +10k) · {pct(avb.get("ge3000",0), avt)}</span></div>'
         f'<div class="pqvol-item"><b>{avb.get("nose",0)}</b><span>🤷 «No lo sé»<br>{pct(avb.get("nose",0), avt)}</span></div>'
@@ -1273,8 +1275,9 @@ def render(d):
             f'<div class="fbr-n">{n} <span class="fbr-p">{pct(n, ag_raz_tot)}</span></div></div>'
             for r, n in pq["ag_razones"])
         preq_sales_stats += (
-            '<div class="fb-razbox" style="margin-top:12px">'
-            f'<div class="fb-raz-head">🔴 <b>Por qué se caen</b> · {pq["ag_descartados"]} descartados de los SQL de Agustín · razones registradas:</div>'
+            '<div class="pqf-sub">③ Descartados · cuántos y por qué se caen</div>'
+            '<div class="fb-razbox" style="margin-top:0">'
+            f'<div class="fb-raz-head">🔴 <b>{pq["ag_descartados"]} descartados</b> de los {pq["ag_total"]} SQL de Agustín · razones registradas:</div>'
             f'<div class="fbr">{ag_raz_rows}</div>'
             '<div class="fbr-foot">Razón de descarte SQL registrada. La mayoría suelen ser <b>volumen insuficiente (&lt;3.000)</b>: llegan como SQL pero al precualificar no tienen volumen.</div>'
             '</div>')
@@ -1924,6 +1927,7 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pqvol-item.pqvol-ok b {{ color:#6ee7b7; }}
 .pqvol-item.pqvol-bad {{ border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.07); }}
 .pqvol-item.pqvol-bad b {{ color:#fca5a5; }}
+.pqf-sub {{ font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--guru-300); margin:16px 0 8px; }}
 .pqbig {{ display:flex; align-items:center; gap:16px; margin-top:12px; }}
 .pqbig-n {{ font-size:46px; font-weight:800; color:#fca5a5; line-height:1; flex:0 0 auto; }}
 .pqbig-t {{ font-size:11px; color:var(--text-2); line-height:1.45; }}
