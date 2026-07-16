@@ -773,6 +773,18 @@ def main():
         "emails_cum": count_sdr_emails(funnel_iso, end_iso),
         "reuniones_cum": reunion_cum,
     }
+    # ── Flujo de Agustín desde el 9 de julio (inicio de su seguimiento inbound) ──
+    AG_START = "2026-07-09"
+    ag_iso = iso(datetime.fromisoformat(AG_START + "T00:00:00").replace(tzinfo=tz))
+    ag = agustin_sql_calls(ag_iso, end_iso)   # {unique, attempts} de Agustín desde 9 jul
+    preq["ag_start"] = "9 jul"
+    preq["ag_sql"] = sum(1 for c in hist if c["lc"] in SQL_STAGES and c["lc"] != "1394675095" and c["created"] >= AG_START)
+    preq["ag_lt3000"] = sum(1 for c in hist if c["lc"] == "1394675095" and c["created"] >= AG_START)
+    preq["ag_calls_unique"] = ag["unique"]
+    preq["ag_calls_attempts"] = ag["attempts"]
+    preq["ag_reuniones"] = sum(1 for x in deals if x["stage"] in DEMO_PLUS and x["created"] >= AG_START)
+    preq["ag_opp"] = len({compkey(c) for c in hist if c["lc"] == "opportunity" and c["created"] >= AG_START})
+
     # Preferencia de canal de contacto (del formulario demo) entre los SQL
     pref_llamada = sum(1 for c in sql_stage_contacts if c["canal_pref"] == "Llamada por teléfono")
     pref_email   = sum(1 for c in sql_stage_contacts if c["canal_pref"] == "Email")
@@ -1050,7 +1062,7 @@ def render(d):
     sd = d["sql_disp"]
     flow_stages = [
         ("Contactos", t, "", "Incluye TODO lo que entra (también los Freemium, que suman al total pero no pasan a Lead). Excluye test, empleados @gurusup e importaciones.", "", "#7b76a0"),
-        ("Leads", cum["lead"], pct(cum["lead"], t), "Muestran interés real: descargan contenido, rellenan formulario o escriben por el chat.", "del total", "#F3ABA0"),
+        ("Leads", cum["lead"], pct(cum["lead"], t), "Interés real: contenido, formulario o chat. Se han EXCLUIDO los Freemium (no cuentan como Lead).", "del total", "#F3ABA0"),
         ("MQL", cum["mql"], pct(cum["mql"], cum["lead"]), "Cualificados por marketing: encajan con el perfil objetivo.", "de leads", "#EF8A78"),
         ("SQL", cum["sql"], pct(cum["sql"], cum["lead"]), "Piden demo o cualifican por volumen de consultas (>3.000 · <3.000 · «no lo sé»).", "de leads", "#E8543F"),
         ("Oportunidad", cum["opp"], pct(cum["opp"], cum["sql"]), "Empresas con un deal activo en el pipeline de ventas.", "de SQL · empresas", "#C0392B"),
@@ -1131,19 +1143,17 @@ def render(d):
 
     # ── Contadores de las ramas del workflow de precualificación ──
     pq = d["preq"]
-    # Rama Agustín: evolución del flujo (llegan → contacto → reunión → oportunidad)
-    email_step = (f'<div class="pqf-step"><b>✉️ {pq["emails_cum"]}</b><span>emails enviados<br>(desde su cuenta)</span></div>'
-                  if pq["emails_cum"] > 0 else "")
+    # Rama Agustín: estado/evolución de cada SQL DESDE EL 9 JUL (llegan → llamadas → reuniones → oportunidades)
     preq_sales_stats = (
         '<div class="pqflow">'
-        f'<div class="pqf-step"><b>{pq["agustin"]}</b><span>SQL llegan a Agustín<br>(tarea de contacto)</span></div>'
+        f'<div class="pqf-step"><b>{pq["ag_sql"]}</b><span>SQL llegan a Agustín<br>(tarea · desde {pq["ag_start"]})</span></div>'
         '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step"><b>📞 {pq["calls_cum"]}</b><span>llamadas hechas</span></div>'
-        f'{email_step}'
+        f'<div class="pqf-step"><b>📞 {pq["ag_calls_unique"]}</b><span>SQL llamados · {pq["ag_calls_attempts"]} intentos<br>'
+        f'📞 {pq["ag_calls_attempts"]} telefónicas · 🎥 {pq["ag_reuniones"]} videollamadas</span></div>'
         '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step"><b>📅 {pq["reuniones_cum"]}</b><span>reuniones agendadas</span></div>'
+        f'<div class="pqf-step"><b>📅 {pq["ag_reuniones"]}</b><span>reuniones agendadas</span></div>'
         '<div class="pqf-arrow">→</div>'
-        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["opp"]}</b><span>oportunidades en<br>pipeline (empresas)</span></div>'
+        f'<div class="pqf-step pqf-ok"><b>🎯 {pq["ag_opp"]}</b><span>oportunidades<br>creadas (empresas)</span></div>'
         '</div>')
     # Donut · preferencia de canal de contacto (del formulario demo)
     pt = pq["pref_total"] or 1
@@ -1181,11 +1191,11 @@ def render(d):
     content_rows = content_rows or '<div class="fbr-foot">Sin leads de contenido todavía.</div>'
     origin_html = (
         '<div class="og-head">'
-        f'<div class="og-stat"><b>{og["total"]}</b><span>leads totales<br>(acumulado desde 1 ene)</span></div>'
-        f'<div class="og-stat og-content"><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
-        '<span>MQL · han consumido <b>contenido de marketing</b><br>(ebook · blog · webinar · herramienta · newsletter)</span></div>'
-        f'<div class="og-stat og-noinfo"><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
-        '<span>resto de leads<br>(sin información + demo + lead ads + otros)</span></div>'
+        f'<div class="og-stat og-total"><div class="og-tag">LEADS TOTALES</div><b>{og["total"]}</b><span>acumulado desde el 1 de enero</span></div>'
+        f'<div class="og-stat og-content"><div class="og-tag">MQL · CONTENIDO</div><b>{og["content"]} <span class="og-pct">{pct(og["content"], og_tot)}</span></b>'
+        '<span>han consumido <b>contenido de marketing</b> (ebook · blog · webinar · herramienta · newsletter)</span></div>'
+        f'<div class="og-stat og-noinfo"><div class="og-tag">RESTO DE LEADS</div><b>{resto} <span class="og-pct">{pct(resto, og_tot)}</span></b>'
+        '<span>sin información + demo + lead ads + otros</span></div>'
         '</div>'
         '<div class="og-sub">📘 MQL · leads por tipo de contenido consumido</div>'
         f'<div class="og-bars">{content_rows}</div>'
@@ -1245,8 +1255,8 @@ def render(d):
     # Rama <3.000: número grande + explicación pequeña
     preq_free_stats = (
         '<div class="pqbig">'
-        f'<div class="pqbig-n">{pq["lt3000"]}</div>'
-        '<div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes. Reciben email de agradecimiento; '
+        f'<div class="pqbig-n">{pq["ag_lt3000"]}</div>'
+        '<div class="pqbig-t">contactos <b>descalificados</b> por &lt;3.000 consultas/mes (desde 9 jul). Reciben email de agradecimiento; '
         '<b>ya no se derivan a Freemium</b>. Quedan identificados en la lista de HubSpot '
         '<b>«Descalificación de SQLs · &lt;3.000 consultas/mes»</b> para decidir el siguiente paso.</div>'
         '</div>')
@@ -1594,6 +1604,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .hero24 {{ background:linear-gradient(135deg, rgba(255,107,91,.16) 0%, rgba(46,42,90,.28) 50%, rgba(34,211,238,.16) 100%); border:1px solid rgba(255,107,91,.35); border-radius:18px; padding:20px 22px 14px; margin-bottom:30px; box-shadow:0 8px 34px rgba(255,107,91,.12); }}
 .hero24 .section-label {{ color:var(--guru-300); }}
 .hero24-cap {{ margin-top:14px; }}
+.down-link {{ text-align:center; margin:-14px 0 20px; font-size:13px; color:var(--text-2); }}
+.down-link .dl-arrow {{ display:block; font-size:22px; color:var(--guru-300); font-weight:800; line-height:1; margin-bottom:2px; }}
+.down-link b {{ color:var(--guru-300); }}
 .df-op {{ align-self:center; font-size:22px; font-weight:800; color:var(--muted); flex:0 0 auto; }}
 .df-arrow {{ color:var(--guru-300); }}
 /* Árbol de dos ramas (24h) · Contactos = origen de ambas */
@@ -1661,9 +1674,14 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .og-stat {{ flex:1; min-width:150px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }}
 .og-stat b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1.1; }}
 .og-stat span {{ font-size:11px; color:var(--muted); line-height:1.35; display:block; margin-top:4px; }}
-.og-stat.og-content {{ background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); }}
+.og-stat {{ border-top-width:3px; }}
+.og-tag {{ font-size:10px; font-weight:800; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }}
+.og-stat.og-total {{ background:rgba(255,107,91,.08); border-color:rgba(255,107,91,.35); border-top-color:var(--guru-500); }}
+.og-stat.og-total b {{ color:var(--guru-300); }}
+.og-stat.og-content {{ background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.35); border-top-color:var(--green); }}
 .og-stat.og-content b {{ color:#6ee7b7; }}
-.og-stat.og-noinfo {{ background:rgba(123,118,160,.08); border-color:rgba(123,118,160,.3); }}
+.og-stat.og-content .og-tag {{ color:#6ee7b7; }}
+.og-stat.og-noinfo {{ background:rgba(123,118,160,.08); border-color:rgba(123,118,160,.3); border-top-color:var(--muted); }}
 .og-row {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
 .og-l {{ flex:0 0 40%; font-size:12px; color:var(--text-2); line-height:1.3; }}
 .og-barwrap {{ flex:1; background:rgba(255,255,255,.05); border-radius:5px; height:13px; overflow:hidden; }}
@@ -1823,10 +1841,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
     <div class="caption hero24-cap">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: {meet_names}</div>
   </div>
 
+  <div class="down-link"><span class="dl-arrow">↓</span> Y estos contactos, <b>¿de qué canales vienen?</b></div>
+
   <div class="section-label">Canales de adquisición · últimas 24h</div>
   <div class="channels-grid">{ch_cards}</div>
 
-  <div class="section-label">Flujo de precualificación de nuevos contactos · acumulado</div>
+  <div class="section-label">Flujo de precualificación de nuevos contactos · seguimiento de Agustín desde el 9 de julio</div>
   <div class="preq">
     <div class="preq-top">📩 Nuevo contacto pide <strong>demo</strong> (formulario web ES/EN de HubSpot) → se evalúa su <strong>volumen de consultas/mes</strong></div>
     <div class="preq-arrow">▼ ▼ ▼</div>
