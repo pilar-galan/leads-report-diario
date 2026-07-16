@@ -1119,10 +1119,9 @@ def render(d):
                          f'<div class="fbr-barwrap"><div class="fbr-bar" style="width:{w}%"></div></div>'
                          f'<div class="fbr-n">{n} <span class="fbr-p">{pct(n, drz_tot)}</span></div></div>')
         raz_block = (
-            f'<div class="fb-raz-head">🔴 <b>{sd["descartado"]} SQL descartados</b> · '
-            f'{pct(sd["descartado"], st)} del total de SQL · razones registradas ({drz_tot}):</div>'
+            f'<div class="fb-raz-head">Razones de descarte registradas ({drz_tot}):</div>'
             f'<div class="fbr">{raz_rows}</div>'
-            '<div class="fbr-foot">Volumen y % de cada razón sobre el total de descartes con motivo registrado. Detalle acumulado más abajo.</div>')
+            f'<div class="fbr-foot">Volumen y % sobre los descartes con motivo. ⚠️ De {sd["descartado"]} descartados, solo {drz_tot} tienen razón registrada; el resto están sin motivo (ventas no lo rellena).</div>')
     else:
         raz_block = '<div class="fb-raz-head">Sin razones de descarte registradas todavía.</div>'
     # Temperatura del lead sobre el TOTAL de SQL (suma = total de SQL)
@@ -1140,30 +1139,42 @@ def render(d):
         '<div class="fbr-foot">🟢 avanzando (deal abierto/cliente) · 🟡 en proceso/contactados · 🔴 fríos, mareados, prueba gratuita o sin trabajar. '
         'Es la razón por la que los que están «en medio» aún no pasan a oportunidad.</div>'
         '</div>')
-    # Paso intermedio: de los contactados, cuántos → oportunidad y cuántos «en medio»
-    conv_block = (
-        '<div class="fb-mid">'
-        f'<div class="fb-mid-step"><b>{sd["gestionado"]}</b><span>📞 contactados / agendados<br>(llamada o email · {pct(sd["gestionado"], st)} de los SQL)</span></div>'
-        '<div class="pqf-arrow">→</div>'
-        f'<div class="fb-mid-step fb-mid-ok"><b>{sd.get("en_oport",0)}</b><span>🎯 han pasado a<br>Oportunidad ({pct(sd.get("en_oport",0), sd["gestionado"] or 1)} de contactados)</span></div>'
-        '<div class="pqf-arrow">→</div>'
-        f'<div class="fb-mid-step fb-mid-mid"><b>{sd.get("en_medio",0)}</b><span>⏳ en medio: contactados<br>sin convertir aún (ver temperatura y descartes)</span></div>'
+    gest = sd["gestionado"]; pend = sd["pendiente"]; desc = sd["descartado"]; excl = sd.get("excluido", 0)
+    en_oport = sd.get("en_oport", 0); en_medio = sd.get("en_medio", 0)
+    # Columna IZQUIERDA · flujo de gestión (verde): Contactados → En proceso → Oportunidad
+    col_gest = (
+        '<div class="sqlcol sqlcol-ok">'
+        f'<div class="sqlcol-h">🟢 Gestionados · <b>{gest}</b> <span>({pct(gest, st)} de los SQL)</span></div>'
+        '<div class="sqlflow">'
+        f'<div class="sfv-step"><b>{gest}</b><span>📞 Contactados / agendados<br>(llamada o email · Agustín)</span></div>'
+        '<div class="sfv-arrow">↓</div>'
+        f'<div class="sfv-step sfv-mid"><b>{en_medio}</b><span>⏳ En proceso<br>contactados, aún sin convertir</span></div>'
+        '<div class="sfv-arrow">↓</div>'
+        f'<div class="sfv-step sfv-ok"><b>🎯 {en_oport}</b><span>Oportunidad creada<br>({pct(en_oport, gest or 1)} de los contactados)</span></div>'
+        '</div>'
+        f'{ls_block}'
         '</div>')
+    # Columna DERECHA · descarte (rojo): razones
+    col_desc = (
+        '<div class="sqlcol sqlcol-bad">'
+        f'<div class="sqlcol-h">🔴 Descartados · <b>{desc}</b> <span>({pct(desc, st)} de los SQL)</span></div>'
+        f'{raz_block}'
+        '</div>')
+    reconc = f'{gest} gestionados + {pend} pendientes + {desc} descartados' + (f' + {excl} excluidos (dup/test)' if excl else '') + f' = <b>{sd["total"]} SQL</b>'
     flow_branch = (
         '<div class="flow-branch nobrd">'
-        f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b>, ¿en qué punto están?</div>'
-        f'{ls_block}'
+        f'<div class="fb-head">📌 De los <b>{sd["total"]} SQL</b> totales, ¿cómo evolucionan? '
+        f'<span class="fb-reconc">{reconc}</span></div>'
         '<div class="fb-states">'
-        f'<div class="fb-state ok"><div class="fbs-n">{sd["gestionado"]}</div><div class="fbs-l">🟢 Contactados / gestionados</div>'
-        f'<div class="fbs-p">{pct(sd["gestionado"], st)} de los SQL</div><small>se les ha llamado o agendado (Agustín)</small></div>'
-        f'<div class="fb-state pend"><div class="fbs-n">{sd["pendiente"]}</div><div class="fbs-l">🟡 Sin contactar / pendientes</div>'
-        f'<div class="fbs-p">{pct(sd["pendiente"], st)} de los SQL</div><small>aún sin revisar / asignar</small></div>'
-        f'<div class="fb-state bad"><div class="fbs-n">{sd["descartado"]}</div><div class="fbs-l">🔴 Descartados</div>'
-        f'<div class="fbs-p">{pct(sd["descartado"], st)} de los SQL</div><small>no cualifican (ver razones)</small></div>'
+        f'<div class="fb-state ok"><div class="fbs-n">{gest}</div><div class="fbs-l">🟢 Gestionados</div>'
+        f'<div class="fbs-p">{pct(gest, st)} de los SQL</div><small>contactados por Agustín (llamada / email)</small></div>'
+        f'<div class="fb-state pend"><div class="fbs-n">{pend}</div><div class="fbs-l">🟡 Pendientes</div>'
+        f'<div class="fbs-p">{pct(pend, st)} de los SQL</div><small>sin contactar / asignar todavía</small></div>'
+        f'<div class="fb-state bad"><div class="fbs-n">{desc}</div><div class="fbs-l">🔴 Descartados</div>'
+        f'<div class="fbs-p">{pct(desc, st)} de los SQL</div><small>no cualifican (razones →)</small></div>'
         '</div>'
-        '<div class="fb-demo">📅 <b>Agendar demo:</b> los SQL contactados se citan por 📞 <b>llamada</b> o ✉️ <b>email que agenda en calendario</b> (<b>Agustín</b>) → si cualifican pasan a <b>Oportunidad</b>.</div>'
-        f'{conv_block}'
-        f'<div class="fb-razbox">{raz_block}</div>'
+        '<div class="sqlcols">'
+        f'{col_gest}{col_desc}'
         '</div>')
     # Se separan: el embudo (flow_html) y la rama de estado de SQL (flow_branch) para intercalar Paid media
     flow_full = flow_html
@@ -1589,6 +1600,25 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .fb-mid-step.fb-mid-mid {{ border-color:rgba(245,158,11,.4); background:rgba(245,158,11,.08); }}
 .fb-mid-step.fb-mid-mid b {{ color:#fcd34d; }}
 @media(max-width:640px){{ .fb-mid {{ flex-direction:column; }} }}
+.fb-reconc {{ display:block; font-size:11px; font-weight:600; color:var(--muted); margin-top:4px; }}
+.fb-reconc b {{ color:var(--text); }}
+.sqlcols {{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }}
+@media(max-width:760px){{ .sqlcols {{ grid-template-columns:1fr; }} }}
+.sqlcol {{ border:1px solid var(--border); border-radius:12px; padding:14px; }}
+.sqlcol-ok {{ background:rgba(16,185,129,.05); border-color:rgba(16,185,129,.3); }}
+.sqlcol-bad {{ background:rgba(239,68,68,.05); border-color:rgba(239,68,68,.3); }}
+.sqlcol-h {{ font-size:13px; font-weight:700; margin-bottom:12px; }}
+.sqlcol-h b {{ font-size:16px; }}
+.sqlcol-h span {{ font-size:11px; color:var(--muted); font-weight:600; }}
+.sqlflow {{ display:flex; flex-direction:column; align-items:center; gap:4px; }}
+.sfv-step {{ width:100%; text-align:center; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:9px; padding:10px 12px; }}
+.sfv-step b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1; }}
+.sfv-step span {{ font-size:11px; color:var(--muted); line-height:1.35; }}
+.sfv-step.sfv-mid {{ border-color:rgba(245,158,11,.4); background:rgba(245,158,11,.08); }}
+.sfv-step.sfv-mid b {{ color:#fcd34d; }}
+.sfv-step.sfv-ok {{ border-color:rgba(16,185,129,.45); background:rgba(16,185,129,.1); }}
+.sfv-step.sfv-ok b {{ color:#6ee7b7; }}
+.sfv-arrow {{ font-size:18px; color:var(--muted); font-weight:800; }}
 .fb-lsbox {{ margin-top:14px; border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:10px; padding:13px 14px; }}
 .fb-ls-head {{ font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.4; }}
 .ls-list {{ display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; }}
@@ -1955,9 +1985,9 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
     <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
-      <span class="badge badge-green">{total_pipeline} negocios en pipeline (total)</span></div>
+      <span class="badge badge-green">{mkt_total} oportunidades de marketing</span></div>
     <div style="font-size:12px;color:var(--text-2);margin:-6px 0 14px;line-height:1.5;">
-      De ese total, <strong style="color:var(--guru-300)">{mkt_total}</strong> son <strong>oportunidades de marketing</strong> (inbound real; se excluyen deals heredados/comercial mal atribuidos como Xtrim o Plenergy) ·
+      Oportunidades inbound reales (se excluyen deals heredados/comercial mal atribuidos como Xtrim o Plenergy) ·
       🧠 <strong style="color:var(--guru-300)">{brain_count}</strong> en Pipeline <strong>Brain</strong> ·
       💼 <strong style="color:var(--guru-300)">{ventas_count}</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
