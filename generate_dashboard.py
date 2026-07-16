@@ -618,13 +618,13 @@ def svg_exec_month(cum, daily, labels, color):
         x, y, v = X(i), Y(cum[i]), cum[i]
         delta = v - prev_cum          # generados en ESE mes
         prev_cum = v
-        ty = y - 24 if y > 48 else y + 14   # total (grande)
-        dy = ty + 11                        # +generados (pequeño), debajo del total
+        ty = y - 27 if y > 52 else y + 15   # total (grande)
+        dy = ty + 13                        # +generados, debajo del total
         marks += (f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{color}"/>'
                   f'<text x="{x:.0f}" y="{ty:.0f}" text-anchor="middle" fill="{color}" '
-                  f'font-size="12" font-weight="800">{v}</text>'
-                  f'<text x="{x:.0f}" y="{dy:.0f}" text-anchor="middle" fill="#9fc4b3" '
-                  f'font-size="8.5" font-weight="700">+{delta}</text>'
+                  f'font-size="13" font-weight="800">{v}</text>'
+                  f'<text x="{x:.0f}" y="{dy:.0f}" text-anchor="middle" fill="#cdeede" '
+                  f'font-size="10.5" font-weight="700">+{delta}</text>'
                   f'<text x="{x:.0f}" y="{H-8}" text-anchor="middle" fill="#7a988a" font-size="9.5">{monthname.get(m,m)}</text>')
     return (f'<svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" '
             f'style="display:block;height:auto">'
@@ -2404,7 +2404,7 @@ def render_exec(d):
 <section style="border-top:none">
   <div class="q">01 · ¿Cuánto negocio está entrando?</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd wide">KPIs del embudo comercial de inbound marketing, con tendencia de los últimos 7 días. En Oportunidades y Clientes, el número grande es <b>volumen de contactos</b> (misma variable que el resto, para comparar etapa a etapa) y debajo, separado, el <b>nº de empresas / negocios</b> asociados. Nuevos contactos incluye todo lo que entra a día de hoy (también los Freemium).</div>
+  <div class="sd wide">KPIs del embudo comercial de inbound marketing, con tendencia de los últimos 7 días. En Oportunidades y Clientes, el número grande es <b>volumen de contactos</b> (misma variable que el resto, para comparar etapa a etapa) y debajo, separado, el <b>nº de empresas / negocios</b> asociados.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
@@ -2415,7 +2415,7 @@ def render_exec(d):
 <section>
   <div class="q">02 · ¿Estamos creciendo?</div>
   <h2 class="sh">Evolución acumulada</h2>
-  <div class="sd">Crecimiento día a día desde el 1 de enero. Sobre cada línea, el total acumulado al cierre de cada mes.</div>
+  <div class="sd">Crecimiento día a día <b style="color:var(--brand)">desde el 1 de enero</b>. Sobre cada línea, el total acumulado al cierre de cada mes y, más pequeño, lo generado ese mes.</div>
   <div class="cg">{charts_html}</div>
 </section>
 
