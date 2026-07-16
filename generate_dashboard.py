@@ -752,13 +752,19 @@ def main():
     try:
         pdefs = api_get("/crm/v3/pipelines/deals").get("results", [])
         PL_LABEL = {p["id"]: (p.get("label") or "") for p in pdefs}
+        STAGE_ID_LABEL = {s["id"]: (s.get("label") or "")
+                          for p in pdefs for s in p.get("stages", [])}
+        # etapas que representan cierre ganado / cliente (no son oportunidad abierta)
+        STAGE_WON = {s["id"] for p in pdefs for s in p.get("stages", [])
+                     if (s.get("metadata", {}) or {}).get("isClosed") == "true"
+                     and (s.get("metadata", {}) or {}).get("probability") == "1.0"}
     except Exception as e:
-        print(f"  pipelines error: {e}"); PL_LABEL = {}
+        print(f"  pipelines error: {e}"); PL_LABEL = {}; STAGE_ID_LABEL = {}; STAGE_WON = set()
     def is_brain_pl(pid):
         return "brain" in PL_LABEL.get(pid, "").lower()
     all_deals = fetch_all("deals", [
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
-    ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed",
+    ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed", "amount",
         "hs_analytics_source", "hs_analytics_source_data_1"])
 
     def valid_deal(n):
@@ -787,8 +793,14 @@ def main():
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
             elif not is_brain_pl(pid): ventas_count += 1
             icon = classify_channel(src, d1)[1]; label = classify_channel(src, d1)[0]
+            try:
+                amount = float(p.get("amount") or 0)
+            except (TypeError, ValueError):
+                amount = 0.0
             open_deals.append({"id": dl["id"], "name": name,
-                               "stage": stage, "created": created, "channel": f"{icon} {label}",
+                               "stage": stage, "stage_label": STAGE_ID_LABEL.get(stage, "Otra etapa"),
+                               "is_won": stage in STAGE_WON, "amount": amount,
+                               "created": created, "channel": f"{icon} {label}",
                                "brain": is_brain_pl(pid)})
 
     # Deals PERDIDOS (closed-lost) de marketing → sección de perdidos inbound
@@ -1110,39 +1122,53 @@ def main():
         return "@" in e and e.split("@")[-1] not in FREE_MAIL
     def has_company(c):
         return bool((c.get("company") or "").strip()) or has_corp(c)
-    q_tot = len(hist_fun) or 1
+    # SIN Freemium: el total de contactos y agregados del ejecutivo excluyen etapa Freemium
+    hist_nf = [c for c in hist_fun if not is_free(c)]
+    exec_extra["total_contactos"] = len(hist_nf)
+    q_tot = len(hist_nf) or 1
     exec_extra["quality"] = {
-        "total": len(hist_fun),
-        "corp": sum(1 for c in hist_fun if has_corp(c)),
-        "phone": sum(1 for c in hist_fun if c.get("phone")),
-        "company": sum(1 for c in hist_fun if has_company(c)),
+        "total": len(hist_nf),
+        "corp": sum(1 for c in hist_nf if has_corp(c)),
+        "phone": sum(1 for c in hist_nf if c.get("phone")),
+        "company": sum(1 for c in hist_nf if has_company(c)),
     }
-    # Rendimiento por canal EXTENDIDO: contactos + etapas (contactos) + empresas únicas (opp/cli)
+    # Volumen de consultas declarado en el formulario (≥3.000 / no lo sé / <3.000 / sin dato)
+    volq = {"ge3000": 0, "nose": 0, "lt3000": 0, "sindato": 0}
+    for c in hist_nf:
+        volq[vol_bucket(c["num_conv"], c["vol_mes"])] += 1
+    exec_extra["volq"] = volq
+    # Preferencia de canal de contacto (teléfono / email) declarada en el formulario
+    pref_tel = sum(1 for c in hist_nf if c["canal_pref"] == "Llamada por teléfono")
+    pref_mail = sum(1 for c in hist_nf if c["canal_pref"] == "Email")
+    exec_extra["pref"] = {"tel": pref_tel, "mail": pref_mail, "total": pref_tel + pref_mail}
+    # Rendimiento por canal EXTENDIDO (sin Freemium): contactos + etapas
     chan_ext = {}
-    for c in hist_fun:
+    for c in hist_nf:
         lbl = _chl(c)
-        e = chan_ext.setdefault(lbl, {"contactos": 0, "leads": 0, "mql": 0, "sql": 0,
-                                      "opp_c": 0, "cli_c": 0, "opp_emp": set(), "cli_emp": set()})
+        e = chan_ext.setdefault(lbl, {"contactos": 0, "leads": 0, "mql": 0, "sql": 0, "opp_c": 0, "cli_c": 0})
         e["contactos"] += 1
         r = rank(c["lc"])
         if r >= 1: e["leads"] += 1
         if r >= 2: e["mql"] += 1
         if r >= 3: e["sql"] += 1
-        if r >= 4: e["opp_c"] += 1; e["opp_emp"].add(compkey(c))
-        if r >= 5: e["cli_c"] += 1; e["cli_emp"].add(compkey(c))
-    chan_matrix = []
-    for lbl, e in chan_ext.items():
-        chan_matrix.append((lbl, {"contactos": e["contactos"], "leads": e["leads"], "mql": e["mql"],
-                                  "sql": e["sql"], "opp_c": e["opp_c"], "cli_c": e["cli_c"],
-                                  "opp_emp": len(e["opp_emp"]), "cli_emp": len(e["cli_emp"])}))
-    chan_matrix.sort(key=lambda x: -x[1]["contactos"])
+        if r >= 4: e["opp_c"] += 1
+        if r >= 5: e["cli_c"] += 1
+    chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
     exec_extra["chan_matrix"] = chan_matrix
-    # Deals (negocios) por canal para el desglose clicable del pipeline
+    # ── Pipeline de ventas: SOLO oportunidades abiertas (no clientes/ganados) de inbound ──
+    opp_deals = [dl for dl in open_deals if not dl.get("is_won")]
+    exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in opp_deals)
+    exec_extra["pipeline_count"] = len(opp_deals)
+    exec_extra["pipeline_value_known"] = sum(1 for dl in opp_deals if dl.get("amount", 0) > 0)
     deals_by_chan = {}
-    for dl in open_deals:
+    for dl in opp_deals:
         lbl = dl["channel"].split(" ", 1)[-1].strip()
-        deals_by_chan.setdefault(lbl, []).append(dl.get("name", "—"))
+        deals_by_chan.setdefault(lbl, []).append((dl.get("name", "—"), dl.get("stage_label", "—")))
     exec_extra["deals_by_chan"] = deals_by_chan
+    stage_dist = {}
+    for dl in opp_deals:
+        stage_dist[dl.get("stage_label", "Otra")] = stage_dist.get(dl.get("stage_label", "Otra"), 0) + 1
+    exec_extra["stage_dist"] = sorted(stage_dist.items(), key=lambda x: -x[1])
     # Lead Ads por red (Meta/LinkedIn) desde el desglose de origen
     exec_extra["leadads"] = origin.get("leadads", [])
 
@@ -1975,10 +2001,25 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .stat.ok{border-color:rgba(87,224,138,.4)} .stat.ok .sv{color:var(--ok)}
 .stat.warn{border-color:rgba(255,202,92,.4)} .stat.warn .sv{color:var(--warn)}
 .stat.bad{border-color:rgba(255,113,137,.4)} .stat.bad .sv{color:var(--bad)}
-.q3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.qcol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
-.qcol .qi{font-size:22px} .qcol .qv{font-size:34px;font-weight:800;margin:8px 0 2px;color:var(--brand)} .qcol .ql{font-size:12px;color:var(--ink2)}
+.q3{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.qcol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
+.qcol .qi{font-size:22px} .qcol .qv{font-size:32px;font-weight:800;margin:8px 0 2px;color:var(--brand)} .qcol .ql{font-size:12px;color:var(--ink2)}
 .qcol .qp{font-size:12px;color:var(--sky);font-weight:800;margin-top:4px}
+.qcol .qsplit{font-size:11px;color:var(--ink2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line2);font-weight:700}
+.qcol .qsplit small{color:var(--mut);font-weight:600}
+.brow.big24 .bn{font-size:19px} .brow.big24 .bn .sub{font-size:10px}
+.bf.ok{background:linear-gradient(90deg,var(--brand-d),var(--brand))!important}
+.bf.bad{background:linear-gradient(90deg,#b23b4e,var(--bad))!important}
+.bf.mut{background:linear-gradient(90deg,#2c5443,#4a7a63)!important}
+.razd{margin-top:16px;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:rgba(12,27,21,.4)}
+.razd>summary{list-style:none;cursor:pointer;padding:11px 14px;font-size:12.5px;font-weight:800;color:var(--bad);display:flex;align-items:center;gap:8px;user-select:none}
+.razd>summary::-webkit-details-marker{display:none}
+.razd .chev{font-size:9px;transition:transform .2s;color:var(--mut)}
+.razd[open] .chev{transform:rotate(90deg)}
+.razd .razbox{margin:0;border:none;border-top:1px solid var(--line2);border-radius:0}
+.elist{list-style:none;text-align:left;font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:9px}
+.elist li{padding-left:20px;position:relative} .elist li::before{content:"→";position:absolute;left:0;color:var(--warn)}
+.fstep.bad2 b{color:var(--bad)}
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
 .pcol.b{border-color:rgba(255,202,92,.3)}
@@ -2031,7 +2072,7 @@ details.chdeals .dl span{font-size:11px;background:rgba(104,209,245,.1);border:1
   border:1px dashed rgba(255,202,92,.45);border-radius:14px;padding:18px 20px;font-size:13px;color:var(--ink2)}
 .pend b{color:var(--warn)}
 footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;border-top:1px solid var(--line);margin-top:10px}
-@media(max-width:860px){ .kg,.cg{grid-template-columns:1fr 1fr} .p2{grid-template-columns:1fr} .q3{grid-template-columns:1fr} }
+@media(max-width:860px){ .kg,.cg{grid-template-columns:1fr 1fr} .p2{grid-template-columns:1fr} .q3{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:560px){ .kg{grid-template-columns:1fr 1fr} .cg{grid-template-columns:1fr} .fn .row{grid-template-columns:88px 1fr}
   .brow{grid-template-columns:120px 1fr 58px} }
 """
@@ -2060,6 +2101,10 @@ def render_exec(d):
     opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
     reun_total = ex["reun_total"]; reun_st = ex["reun_by_stage"]; reun_tr = ex["reun_trend"]
     free_total = cum.get("free", 0); free7 = ex["free_last7"]
+    # MQL = de facto (contenido consumido); SQL = de consultoría gestionable (los que cuadran)
+    mql_d = d["origin"].get("content", cum["mql"])
+    sql_d = d["sql_disp"].get("total", cum["sql"])
+    total_nf = ex.get("total_contactos", cum["total"])   # contactos SIN Freemium
 
     # ---------- 1 · EXECUTIVE SUMMARY ----------
     def kpi(lab, val, t, sub):
@@ -2070,21 +2115,21 @@ def render_exec(d):
                 f'<div class="kt">{arrow(t)}<span>· {sub}</span></div>'
                 f'<div class="emprow">🏢 <span class="eb tnum">{fmt(emp)}</span> empresas / negocios</div></div>')
     kpi_html = (
-        kpi("Nuevos contactos", cum["total"], tr["contactos"], "todo lo que entra (incluidos Freemium)") +
-        kpi("Leads", cum["lead"], tr["leads"], f'{pv(cum["lead"], cum["total"])} de contactos') +
-        kpi("MQL", cum["mql"], tr["mql"], f'{pv(cum["mql"], cum["lead"])} de leads') +
-        kpi("SQL", cum["sql"], tr["sql"], f'{pv(cum["sql"], cum["lead"])} de leads') +
+        kpi("Nuevos contactos", total_nf, tr["contactos"], "sin Freemium (solo embudo comercial)") +
+        kpi("Leads", cum["lead"], tr["leads"], f'{pv(cum["lead"], total_nf)} de contactos') +
+        kpi("MQL", mql_d, tr["mql"], f'{pv(mql_d, cum["lead"])} de leads · contenido') +
+        kpi("SQL", sql_d, tr["sql"], f'{pv(sql_d, cum["lead"])} de leads · consultoría') +
         f'<div class="kc"><div class="kl">Reuniones</div><div class="kv tnum">{fmt(reun_total)}</div>'
         f'<div class="kt">{arrow(reun_tr)}</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--mut)">🔍 {reun_st.get("Discovery",0)} discovery · 🎬 {reun_st.get("Demo",0)} demo</div></div>' +
-        kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], f'{pv(opp_c, cum["sql"])} de SQL · contactos') +
+        kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], f'{pv(opp_c, sql_d)} de SQL · contactos') +
         kpi_emp("Clientes", cli_c, cli_e, tr["cli"], f'{pv(cli_c, opp_c)} de oport. · contactos'))
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
-        ("Lead → MQL", pv(cum["mql"], cum["lead"]), "sobre contactos"),
-        ("MQL → SQL", pv(cum["sql"], cum["mql"]), "sobre contactos"),
-        ("SQL → Oportunidad", pv(opp_c, cum["sql"]), "sobre contactos"),
-        ("Oportunidad → Cliente", pv(cli_c, opp_c), "sobre contactos"),
+        ("Lead → MQL", pv(mql_d, cum["lead"]), "sobre contactos"),
+        ("MQL → SQL", pv(sql_d, mql_d), "sobre contactos"),
+        ("SQL → Oportunidad", pvf(opp_c, sql_d), "sobre contactos"),
+        ("Oportunidad → Cliente", pvf(cli_c, opp_c), "sobre contactos"),
         ("Cliente → Churn", "—", "pendiente de conectar"),
     ]
     rate_html = "".join(
@@ -2105,8 +2150,8 @@ def render_exec(d):
         for lab, val, svg in charts)
 
     # ---------- 3 · FUNNEL ----------
-    stages = [("Contactos", cum["total"], None), ("Leads", cum["lead"], None), ("MQL", cum["mql"], None),
-              ("SQL", cum["sql"], None), ("Oportunidad", opp_c, opp_e), ("Cliente", cli_c, cli_e)]
+    stages = [("Contactos", total_nf, None), ("Leads", cum["lead"], None), ("MQL", mql_d, None),
+              ("SQL", sql_d, None), ("Oportunidad", opp_c, opp_e), ("Cliente", cli_c, cli_e)]
     top = stages[0][1] or 1
     fn_rows = ""
     for i, (lab, val, emp) in enumerate(stages):
@@ -2146,10 +2191,11 @@ def render_exec(d):
         '<span>MQL</span><span>SQL</span><span>Oport. (negocios)</span><span>Contacto→Op.</span></div>'
         + mx_rows + '</div></div>')
 
-    # ---------- 24H ----------
-    ch24 = sorted(d["channels"], key=lambda x: -x[1]["n"])
-    d24_total = sum(e["n"] for _, e in d["channels"])
-    bmax = max((e["n"] for _, e in d["channels"]), default=0) or 1
+    # ---------- 24H (sin Freemium: volumen = lead+MQL+SQL) ----------
+    def nn(e): return e.get("lead", 0) + e.get("mql", 0) + e.get("sql", 0)
+    ch24 = sorted(d["channels"], key=lambda x: -nn(x[1]))
+    d24_total = sum(nn(e) for _, e in d["channels"])
+    bmax = max((nn(e) for _, e in d["channels"]), default=0) or 1
     def sub24(e):
         parts = []
         if e.get("lead"): parts.append(f'{e["lead"]} lead')
@@ -2157,17 +2203,31 @@ def render_exec(d):
         if e.get("sql"): parts.append(f'{e["sql"]} SQL')
         return f'<span class="sub">{" · ".join(parts)}</span>' if parts else ''
     b24 = "".join(
-        f'<div class="brow{"" if e["n"] else " zero"}"><span class="bl">{e.get("icon","•")} {esc(lbl)}</span>'
-        f'<div class="bt"><div class="bf" style="width:{round(e["n"]/bmax*100) if e["n"] else 0}%"></div></div>'
-        f'<span class="bn tnum">{e["n"]}{sub24(e)}</span></div>'
+        f'<div class="brow big24{"" if nn(e) else " zero"}"><span class="bl">{e.get("icon","•")} {esc(lbl)}</span>'
+        f'<div class="bt"><div class="bf" style="width:{round(nn(e)/bmax*100) if nn(e) else 0}%"></div></div>'
+        f'<span class="bn tnum">{nn(e)}{sub24(e)}</span></div>'
         for lbl, e in ch24)
 
-    # ---------- 5 · CALIDAD ----------
+    # ---------- 5 · CALIDAD (4 bloques) + volumen de consultas ----------
     ql = ex["quality"]; qt = ql["total"] or 1
+    pr = ex.get("pref", {"tel": 0, "mail": 0, "total": 0}); pr_t = pr["total"] or 1
     qcols = (
         f'<div class="qcol"><div class="qi">✉️</div><div class="qv tnum">{fmt(ql["corp"])}</div><div class="ql">Email corporativo</div><div class="qp">{pv(ql["corp"], qt)}</div></div>'
         f'<div class="qcol"><div class="qi">📞</div><div class="qv tnum">{fmt(ql["phone"])}</div><div class="ql">Con teléfono</div><div class="qp">{pv(ql["phone"], qt)}</div></div>'
-        f'<div class="qcol"><div class="qi">🏢</div><div class="qv tnum">{fmt(ql["company"])}</div><div class="ql">Empresa identificada</div><div class="qp">{pv(ql["company"], qt)}</div></div>')
+        f'<div class="qcol"><div class="qi">🏢</div><div class="qv tnum">{fmt(ql["company"])}</div><div class="ql">Empresa identificada</div><div class="qp">{pv(ql["company"], qt)}</div></div>'
+        f'<div class="qcol"><div class="qi">🗣️</div><div class="qv tnum">{fmt(pr["total"])}</div><div class="ql">Preferencia de contacto</div>'
+        f'<div class="qp">{pv(pr["total"], qt)} lo indican</div>'
+        f'<div class="qsplit">📞 {pr["tel"]} <small>({pv(pr["tel"], pr_t)})</small> · ✉️ {pr["mail"]} <small>({pv(pr["mail"], pr_t)})</small></div></div>')
+    vq = ex.get("volq", {}); vq_t = sum(vq.values()) or 1
+    VOLROWS = [("✅ ≥ 3.000 consultas/mes", vq.get("ge3000", 0), "ok"),
+               ("🤷 «No lo sé»", vq.get("nose", 0), ""),
+               ("⚠️ < 3.000 consultas/mes", vq.get("lt3000", 0), "bad"),
+               ("❔ Sin dato declarado", vq.get("sindato", 0), "mut")]
+    vqmax = max((n for _, n, _ in VOLROWS), default=0) or 1
+    volq_html = "".join(
+        f'<div class="brow"><span class="bl">{lbl}</span><div class="bt"><div class="bf {c}" style="width:{round(n/vqmax*100)}%"></div></div>'
+        f'<span class="bn tnum">{fmt(n)}<br><small>{pv(n, vq_t)}</small></span></div>'
+        for lbl, n, c in VOLROWS)
 
     # ---------- 6 · LEADS por origen (+ lead ads desplegable) ----------
     orig_rows = [(k, v) for k, v in d["origin"]["sorted"]]
@@ -2222,30 +2282,30 @@ def render_exec(d):
         r0, n0 = desc[0]
         desc_interp = f'<div class="note">El <b>{pv(n0, desc_tot)}</b> de los descartes con motivo son por «{esc(r0)}». Total con razón registrada: <b>{desc_tot}</b>.</div>'
 
-    # ---------- 10 · OPORTUNIDADES por canal (desplegable con negocios) ----------
-    opp_ch = [(lbl, e.get("opp", 0)) for lbl, e in d["chan_funnel"] if e.get("opp", 0) > 0]
-    opp_ch.sort(key=lambda x: -x[1])
-    opp_ch_tot = sum(n for _, n in opp_ch) or 1
-    omx = max((n for _, n in opp_ch), default=0) or 1
-    dbc = ex.get("deals_by_chan", {})
+    # ---------- 10 · OPORTUNIDADES abiertas (pipeline real, sin clientes) ----------
+    dbc = ex.get("deals_by_chan", {})   # {canal: [(nombre, etapa), ...]} solo abiertas inbound
+    opp_ch = sorted(((lbl, items) for lbl, items in dbc.items()), key=lambda x: -len(x[1]))
+    opp_ch_tot = sum(len(items) for _, items in opp_ch) or 1
+    omx = max((len(items) for _, items in opp_ch), default=0) or 1
+    def _stgchip(sl):
+        s = (sl or "").lower()
+        c = "discov" if "discov" in s else ("demo" if ("demo" in s or "reuni" in s) else ("best" if "best" in s else ""))
+        return f'<span class="chip {c}">{esc(sl)}</span>' if sl else ""
     opp_ch_html = ""
-    for lbl, n in opp_ch:
-        names = dbc.get(lbl, [])
-        inner = "".join(f'<span>{esc(nm)}</span>' for nm in names) or '<span>Sin negocios listados</span>'
+    for lbl, items in opp_ch:
+        inner = "".join(f'<span>{esc(nm)} {_stgchip(sl)}</span>' for nm, sl in items) or '<span>Sin negocios listados</span>'
+        n = len(items)
         opp_ch_html += (
             f'<details class="chdeals"><summary><span class="bl">{esc(lbl)}</span>'
             f'<div class="bt"><div class="bf" style="width:{round(n/omx*100)}%;background:linear-gradient(90deg,#155e7a,var(--sky))"></div></div>'
             f'<span class="bn tnum">{n}<br><small>{pv(n, opp_ch_tot)}</small></span></summary>'
             f'<div class="dl">{inner}</div></details>')
-    opp_ch_html = opp_ch_html or '<p class="sd">Sin oportunidades activas por canal.</p>'
-    STG = {"1107496610": ("Discovery", "discov"), "presentationscheduled": ("Demo", "demo"), "1033589123": ("Best Case", "best")}
-    stg_count = {}
-    for dl in d.get("mkt_deals", []):
-        nm = STG.get(dl["stage"], ("Otra", ""))
-        stg_count[nm] = stg_count.get(nm, 0) + 1
+    opp_ch_html = opp_ch_html or '<p class="sd">Sin oportunidades abiertas por canal.</p>'
     pipe_legend = "".join(
-        f'<span><b>{c}</b> <span class="chip {cls}">{nm}</span></span>'
-        for (nm, cls), c in sorted(stg_count.items(), key=lambda x: -x[1]))
+        f'<span><b>{c}</b> {_stgchip(nm)}</span>' for nm, c in ex.get("stage_dist", []))
+    pipe_val = ex.get("pipeline_value", 0)
+    pipe_cnt = ex.get("pipeline_count", opp_ch_tot)
+    pipe_known = ex.get("pipeline_value_known", 0)
 
     # ---------- RENDIMIENTO POR CANAL ----------
     cf = d["chan_funnel"][:7]
@@ -2333,7 +2393,7 @@ def render_exec(d):
   <div style="height:26px"></div>
   <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
   <div class="kg rates">{rate_html}</div>
-  <div class="fnote">Nota: la conversión Contacto→Lead se retira temporalmente — el hueco actual son altas <b>Freemium</b> (por la app), que van a dejar de entrar. Últimos 7 días: <b>{free7}</b> altas Freemium. El churn se mostrará en cuanto se conecte su fuente.</div>
+  <div class="fnote">Los <b>Freemium</b> (altas por la app) quedan <b>excluidos</b> del volumen de contactos y de todo el embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
 
 <section>
@@ -2373,8 +2433,11 @@ def render_exec(d):
 <section>
   <div class="q">06 · ¿Qué calidad tiene el dato?</div>
   <h2 class="sh">Calidad de los nuevos contactos</h2>
-  <div class="sd">Sobre el total de contactos desde el 1 de enero: cuántos traen email corporativo, teléfono y empresa identificada (por dominio o nombre).</div>
+  <div class="sd">Sobre el total de contactos desde el 1 de enero: completitud del dato (email corporativo, teléfono, empresa) y preferencia de contacto declarada.</div>
   <div class="q3">{qcols}</div>
+  <h3 style="font-size:14px;font-weight:800;margin:26px 0 6px">Volumen de consultas declarado <span style="color:var(--brand)">· {fmt(vq_t)}</span></h3>
+  <div class="sd" style="margin-bottom:14px">Campo del formulario que elige el usuario: es lo que determina si <b>cualifica</b> (≥3.000 o «no lo sé») o no (&lt;3.000).</div>
+  <div class="bars">{volq_html}</div>
 </section>
 
 <section>
@@ -2401,31 +2464,40 @@ def render_exec(d):
       <h4>🟢 Precualifican · gestión de Agustín</h4>
       <div class="ph">SQL asignados a Agustín que cualifican por volumen.</div>
       <div class="flow">
-        <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL a Agustín<br>(desde {pq.get("ag_start","9 jul")})</span></div>
+        <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL totales<br>a Agustín</span></div>
         <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
-        <div class="fstep"><b>{ag_contact}</b><span>contactados<br>llamada / reunión</span></div>
+        <div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>
+        <div class="farr"><span class="fp">{pv(pq.get("ag_descartados",raz_tot), ag_base)}</span>→</div>
+        <div class="fstep bad2"><b>{pq.get("ag_descartados",raz_tot)}</b><span>descartados</span></div>
         <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
-        <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidades<br>creadas</span></div>
+        <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
       </div>
-      <div class="razbox">
-        <div class="rh">🔴 Razones de descarte · {raz_tot} descartados</div>
-        <div class="rs">% sobre el total de SQL descartados de Agustín</div>
-        {raz_rows}
-      </div>
+      <details class="razd">
+        <summary><span class="chev">▶</span> 🔴 Ver razones de descarte · {raz_tot} en esta acción</summary>
+        <div class="razbox">
+          <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre el total descartado</div>
+          {raz_rows}
+        </div>
+      </details>
     </div>
     <div class="pcol b">
       <h4>🟡 No cualifican · &lt;3.000 consultas</h4>
-      <div class="ph">Descarte inicial automático: email de agradecimiento y lista dinámica para revisar en el futuro.</div>
+      <div class="ph">Descarte inicial automático por volumen insuficiente.</div>
       <div class="emailbox">
         <div class="eb tnum">{pq.get("ag_lt3000",0)}</div>
         <div style="font-size:12px;color:var(--ink2);margin-top:4px">SQL con &lt;3.000 consultas/mes (desde 9 jul)</div>
-        <ul>
-          <li>Email automático de agradecimiento</li>
-          <li>Lista HubSpot «Descalificación SQL · &lt;3.000»</li>
-          <li>Razón de descarte registrada para el evolutivo</li>
-          <li>Reactivables si su volumen crece</li>
-        </ul>
       </div>
+      <details class="razd" style="margin-top:14px">
+        <summary><span class="chev">▶</span> Ver qué les pasa y a dónde van</summary>
+        <div class="razbox" style="background:rgba(255,202,92,.06);border-color:rgba(255,202,92,.25)">
+          <ul class="elist">
+            <li>Email automático de agradecimiento</li>
+            <li>Lista HubSpot «Descalificación SQL · &lt;3.000»</li>
+            <li>Razón de descarte registrada para el evolutivo</li>
+            <li>Reactivables si su volumen crece</li>
+          </ul>
+        </div>
+      </details>
     </div>
   </div>
 </section>
@@ -2440,11 +2512,14 @@ def render_exec(d):
 
 <section>
   <div class="q">11 · ¿Cómo va el pipeline?</div>
-  <h2 class="sh">Oportunidades <span class="tot">· {fmt(len(d.get("mkt_deals", [])))}</span> activas de marketing</h2>
-  <div class="sd">Reparto por canal de entrada (con % del total). <b>Pulsa un canal</b> para ver los negocios asociados. Debajo, en qué etapa del pipeline están.</div>
-  <div class="pipe-legend">{pipe_legend or '<span>Sin etapas registradas</span>'}</div>
+  <h2 class="sh">Oportunidades <span class="tot">· {fmt(pipe_cnt)}</span> abiertas de inbound</h2>
+  <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa.</div>
+  <div class="cards" style="margin-bottom:18px">
+    <div class="stat ok"><div class="sv tnum">{("€"+fmt(round(pipe_val))) if pipe_val else "—"}</div><div class="sl">Valor estimado del pipeline abierto{("" if pipe_val else " · importes no cargados en los deals")}</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(pipe_cnt)}</div><div class="sl">Negocios abiertos ({pipe_known} con importe)</div></div>
+  </div>
+  <div class="pipe-legend">Etapas: {pipe_legend or '<span>Sin etapas registradas</span>'}</div>
   {opp_ch_html}
-  <div class="pend" style="margin-top:16px">⏳ <b>Valor estimado (€) y owner</b>: pendientes de conectar el importe de los deals en HubSpot.</div>
 </section>
 
 <section>
@@ -2464,20 +2539,6 @@ def render_exec(d):
     <div class="stat"><div class="sv tnum">{pv(cli_c, opp_c)}</div><div class="sl">Conversión Oportunidad → Cliente (contactos)</div></div>
     <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
   </div>
-</section>
-
-<section>
-  <div class="q">14 · ¿Qué nos dicen los datos?</div>
-  <h2 class="sh">Insights automáticos</h2>
-  <div class="sd">Observaciones generadas hoy a partir de los datos reales (nunca estimadas).</div>
-  <div class="ins">{ins_html}</div>
-</section>
-
-<section>
-  <div class="q">15 · ¿Qué hacemos hoy?</div>
-  <h2 class="sh">Acciones recomendadas</h2>
-  <div class="sd">Derivadas directamente de los insights anteriores.</div>
-  <div class="acts">{acts_html}</div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
