@@ -1161,7 +1161,10 @@ def main():
     chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
     exec_extra["chan_matrix"] = chan_matrix
     # ── Pipeline de ventas: SOLO oportunidades abiertas del pipeline de VENTAS (no clientes/onboarding/freemium/ganados) ──
-    opp_deals = [dl for dl in open_deals if dl.get("is_sales") and not dl.get("is_won")]
+    _EXC_STG = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post-onboarding", "daily")
+    opp_deals = [dl for dl in open_deals
+                 if dl.get("is_sales") and not dl.get("is_won")
+                 and not any(x in (dl.get("stage_label") or "").lower() for x in _EXC_STG)]
     exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in opp_deals)
     exec_extra["pipeline_count"] = len(opp_deals)
     exec_extra["pipeline_value_known"] = sum(1 for dl in opp_deals if dl.get("amount", 0) > 0)
