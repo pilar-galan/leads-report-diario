@@ -22,6 +22,11 @@ from datetime import datetime, timedelta, timezone, date
 TOKEN = os.environ.get("HUBSPOT_TOKEN", "")
 BASE  = "https://api.hubapi.com"
 
+# Paid Leads Tracker (pipeline de ventas de inbound de paid · Agustín) · datos desde 1 jul
+PAID_TRACKER_KEY  = os.environ.get("PAID_TRACKER_API_KEY", "")
+PAID_TRACKER_BASE = "https://pipe-de-agustin.vercel.app"
+PAID_TRACKER_FROM = "2026-07-01"
+
 MESES = ["enero","febrero","marzo","abril","mayo","junio","julio",
          "agosto","septiembre","octubre","noviembre","diciembre"]
 MESES3 = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
@@ -135,6 +140,31 @@ def api_get(path):
     req = urllib.request.Request(BASE + path,
         headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}, method="GET")
     return _open(req)
+
+
+def fetch_paid_tracker():
+    """Llama al Paid Leads Tracker (pipeline de Agustín) y devuelve el report ya calculado
+    desde el 1 jul. Devuelve None si no hay key o si falla la llamada (el dashboard sigue
+    generándose sin esta sección)."""
+    if not PAID_TRACKER_KEY:
+        return None
+    url = f"{PAID_TRACKER_BASE}/api/report?range=custom&from={PAID_TRACKER_FROM}"
+    req = urllib.request.Request(url, headers={"X-API-Key": PAID_TRACKER_KEY}, method="GET")
+    for a in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and a < 3:
+                time.sleep(min(2 ** a, 8)); continue
+            print(f"[paid-tracker] HTTP {e.code}: {e.reason}", file=sys.stderr)
+            return None
+        except (urllib.error.URLError, ValueError) as e:
+            if a < 3:
+                time.sleep(min(2 ** a, 8)); continue
+            print(f"[paid-tracker] error: {e}", file=sys.stderr)
+            return None
+    return None
 
 
 def fetch_all(obj_type, filters, properties):
@@ -1087,6 +1117,7 @@ def main():
         "brain_count": brain_count, "ventas_count": ventas_count,
         "excl_tests": tests, "excl_internal": internal, "excl_imports": imports, "excl_noinfo": noinfo,
         "generado": es_now.strftime("%d %b %Y · %H:%M"),
+        "paid_tracker": fetch_paid_tracker(),
     }
     html = render(data)
     with open(out_file, "w", encoding="utf-8") as f:
@@ -1404,6 +1435,84 @@ def render(d):
         + '</tbody></table>')
     paid_html = pm_head + pm_track + pm_table
 
+    # ── Pipeline Paid (Agustín) · desde 1 jul · datos en vivo del Paid Leads Tracker ──
+    pt = d.get("paid_tracker")
+    if not pt:
+        paidtracker_html = (
+            '<div class="pt-empty">⏳ Pendiente de conectar el <b>Paid Leads Tracker</b>. '
+            'En cuanto esté disponible el acceso, esta sección se rellena sola en cada refresco '
+            '(datos desde el 1 de julio).</div>')
+    else:
+        st = pt.get("stats", {}) or {}
+        def _n(v):
+            try: return int(v)
+            except (TypeError, ValueError): return 0
+        def _pct(a, b):
+            b = b or 0
+            return f"{round(a / b * 100)}%" if b else "—"
+        pt_total = _n(st.get("total"))
+        base = pt_total or 1
+        # KPIs
+        kpi_defs = [
+            ("total", "Leads paid", st.get("total")),
+            ("qualified", "Cualificados", st.get("qualified")),
+            ("open", "En proceso", st.get("open")),
+            ("won", "Ganados", st.get("won")),
+            ("lost", "Perdidos", st.get("lost")),
+            ("uncontacted", "Sin contactar", st.get("uncontacted")),
+        ]
+        pt_kpis = "".join(
+            f'<div class="pt-kpi pt-{k}"><b>{_n(v)}</b><span>{lab}'
+            + (f'<br>{_pct(_n(v), base)} del total</span>' if k not in ("total",) else '</span>')
+            + '</div>'
+            for k, lab, v in kpi_defs)
+        afc = st.get("avg_first_contact_days")
+        pt_afc = ""
+        if afc is not None:
+            try:
+                pt_afc = (f'<div class="pt-afc">⏱️ Tiempo medio hasta primer contacto: '
+                          f'<b>{round(float(afc), 1)} días</b></div>')
+            except (TypeError, ValueError):
+                pt_afc = ""
+        # Embudo por etapa
+        by_stage = st.get("by_stage") or []
+        st_mx = max((_n(s.get("count")) for s in by_stage), default=0) or 1
+        stage_rows = "".join(
+            f'<div class="fbr-row"><div class="fbr-l">{esc(str(s.get("label") or s.get("stage") or ""))}</div>'
+            f'<div class="fbr-barwrap"><div class="fbr-bar" style="width:{max(6, round(_n(s.get("count"))/st_mx*100))}%"></div></div>'
+            f'<div class="fbr-n">{_n(s.get("count"))}</div></div>'
+            for s in by_stage)
+        stage_block = (f'<div class="pt-col"><h4 class="pt-h">Embudo por etapa</h4>'
+                       f'<div class="fbr">{stage_rows}</div></div>') if by_stage else ""
+        # Por canal
+        ch_stats = st.get("channel_stats") or []
+        ch_mx = max((_n(c.get("count")) for c in ch_stats), default=0) or 1
+        def _chan_ico(name):
+            return FIXED_CHANNELS.get(name, {}).get("icon", "•")
+        chan_rows = "".join(
+            f'<div class="fbr-row"><div class="fbr-l">{_chan_ico(c.get("channel"))} {esc(str(c.get("channel") or "—"))}</div>'
+            f'<div class="fbr-barwrap"><div class="fbr-bar pt-bar2" style="width:{max(6, round(_n(c.get("count"))/ch_mx*100))}%"></div></div>'
+            f'<div class="fbr-n">{_n(c.get("count"))} <span class="fbr-p">{_n(c.get("qualified"))} cual.</span></div></div>'
+            for c in ch_stats)
+        chan_block = (f'<div class="pt-col"><h4 class="pt-h">Por canal</h4>'
+                      f'<div class="fbr">{chan_rows}</div></div>') if ch_stats else ""
+        # Motivos de pérdida
+        loss = st.get("loss_reasons") or []
+        loss_tot = sum(_n(l.get("count")) for l in loss) or 1
+        loss_mx = max((_n(l.get("count")) for l in loss), default=0) or 1
+        loss_rows = "".join(
+            f'<div class="fbr-row"><div class="fbr-l">{esc(str(l.get("reason") or "—"))}</div>'
+            f'<div class="fbr-barwrap"><div class="fbr-bar pt-bar3" style="width:{max(6, round(_n(l.get("count"))/loss_mx*100))}%"></div></div>'
+            f'<div class="fbr-n">{_n(l.get("count"))} <span class="fbr-p">{_pct(_n(l.get("count")), loss_tot)}</span></div></div>'
+            for l in loss)
+        loss_block = (f'<div class="pt-col"><h4 class="pt-h">Motivos de pérdida</h4>'
+                      f'<div class="fbr">{loss_rows}</div></div>') if loss else ""
+        cols = stage_block + chan_block + loss_block
+        paidtracker_html = (
+            f'<div class="pt-kpis">{pt_kpis}</div>'
+            f'{pt_afc}'
+            f'<div class="pt-cols">{cols}</div>')
+
     # Rama <3.000: número grande + bullets
     preq_free_stats = (
         '<div class="pqbig">'
@@ -1566,6 +1675,7 @@ def render(d):
         chan_dist_txt=chan_dist_txt,
         excl_tests=d["excl_tests"], excl_internal=d["excl_internal"], excl_imports=d["excl_imports"], excl_noinfo=d["excl_noinfo"],
         generado=esc(d["generado"]),
+        paidtracker_html=paidtracker_html,
     )
 
 
@@ -1960,6 +2070,25 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
 .pm-pend {{ font-size:13px; color:var(--muted); font-weight:600; }}
 .pm-table {{ margin-top:16px; }}
 .pm-table td {{ font-variant-numeric:tabular-nums; }}
+/* Pipeline Paid (Agustín) · Paid Leads Tracker */
+.pt-empty {{ font-size:13px; color:var(--muted); line-height:1.5; padding:6px 0; }}
+.pt-kpis {{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }}
+.pt-kpi {{ background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 12px; }}
+.pt-kpi b {{ display:block; font-size:26px; font-weight:800; color:var(--text); line-height:1; font-variant-numeric:tabular-nums; }}
+.pt-kpi span {{ font-size:10px; color:var(--muted); line-height:1.3; display:block; margin-top:5px; }}
+.pt-kpi.pt-qualified b {{ color:#6ee7b7; }}
+.pt-kpi.pt-won {{ background:rgba(16,185,129,.09); border-color:rgba(16,185,129,.35); }}
+.pt-kpi.pt-won b {{ color:#6ee7b7; }}
+.pt-kpi.pt-lost {{ background:rgba(239,68,68,.07); border-color:rgba(239,68,68,.3); }}
+.pt-kpi.pt-lost b {{ color:#fca5a5; }}
+.pt-kpi.pt-uncontacted b {{ color:#fcd34d; }}
+.pt-afc {{ font-size:12px; color:var(--text-2); margin:12px 0 2px; }}
+.pt-afc b {{ color:var(--guru-300); }}
+.pt-cols {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; margin-top:16px; }}
+.pt-h {{ font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--guru-300); margin-bottom:10px; }}
+.fbr-bar.pt-bar2 {{ background:linear-gradient(90deg,#1f6feb,#5bc8f2); }}
+.fbr-bar.pt-bar3 {{ background:linear-gradient(90deg,#7a3b1f,#f59e0b); }}
+@media(max-width:720px){{ .pt-kpis {{ grid-template-columns:repeat(3,1fr); }} }}
 
 @media(max-width:600px){{
   .header {{ padding:0 14px; }} .header-title h1 {{ font-size:14px; }} .header-title p {{ font-size:10px; }}
@@ -2100,6 +2229,12 @@ body {{ background:var(--guru-900); color:var(--text); font-family:-apple-system
   <div class="card">
     {paid_html}
     <div class="alert alert-muted"><span>💰</span><div>Embudo de los canales de <strong>pago</strong> (Google Ads + Social Ads) desde el 1 de enero: contactos → leads → MQL → SQL → oportunidades (empresas), con % de conversión. El <strong>gasto</strong> aún no está conectado (lo estamos trabajando); en cuanto se cargue, se calculan CPL, coste por SQL y por oportunidad automáticamente.</div></div>
+  </div>
+
+  <div class="section-label">Pipeline Paid (Agustín) · seguimiento de inbound de paid · <span style="color:var(--guru-300)">desde el 1 de julio</span></div>
+  <div class="card">
+    {paidtracker_html}
+    <div class="alert alert-muted"><span>⚡</span><div>Pipeline de ventas donde se trabajan los <strong>inbound de paid media</strong> (Google Ads + Social Ads), sincronizado en vivo desde el <strong>Paid Leads Tracker</strong>. Datos <strong>desde el 1 de julio</strong> (el resto del informe viene de HubSpot). Se refresca en cada actualización del dashboard.</div></div>
   </div>
 
   <div class="section-label">Estado de los SQL · gestión, conversión y descarte · acumulado</div>

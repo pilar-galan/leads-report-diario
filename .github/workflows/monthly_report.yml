@@ -41,6 +41,7 @@ jobs:
       - name: Generar informe mensual con datos de HubSpot
         env:
           HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+          PAID_TRACKER_API_KEY: ${{ secrets.PAID_TRACKER_API_KEY }}
           GEN_START:  ${{ inputs.start }}
           GEN_END:    ${{ inputs.end }}
           GEN_OUTPUT: ${{ inputs.output }}

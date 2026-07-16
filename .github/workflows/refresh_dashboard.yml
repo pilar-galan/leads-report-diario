@@ -35,6 +35,7 @@ jobs:
       - name: Regenerar dashboard con datos reales de HubSpot
         env:
           HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+          PAID_TRACKER_API_KEY: ${{ secrets.PAID_TRACKER_API_KEY }}
           GEN_PAID_SPEND: ${{ vars.GEN_PAID_SPEND }}
           GEN_PAID_SPEND_GOOGLE: ${{ vars.GEN_PAID_SPEND_GOOGLE }}
           GEN_PAID_SPEND_SOCIAL: ${{ vars.GEN_PAID_SPEND_SOCIAL }}
