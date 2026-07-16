@@ -2006,6 +2006,8 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .mx-cell .emp{font-size:9px;color:var(--sky);display:block;font-weight:700}
 .mx-cell.hi .v{color:var(--brand)} .mx-cell.cv .v{color:var(--sky)}
 .mx-cell.mut .v{color:var(--mut);font-weight:700}
+.mx-row.mx-tot{background:rgba(111,240,162,.08);border-color:var(--line2)}
+.mx-row.mx-tot .c1 .nm{color:var(--brand);font-weight:800}
 /* 24h */
 .bigblock{display:flex;gap:22px;align-items:center;background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:20px;flex-wrap:wrap}
 .bigblock .bn2{font-size:52px;font-weight:800;color:var(--brand);line-height:1;letter-spacing:-.03em}
@@ -2111,10 +2113,12 @@ def render_exec(d):
         r = a / b * 100
         return "<1%" if 0 < r < 1 else f"{round(r)}%"
     def arrow(t):
-        s = {"up": "▲", "down": "▼", "flat": "▬"}[t["dir"]]
-        dv = t.get("delta", 0)
-        sign = f"+{dv}" if dv > 0 else (str(dv) if dv < 0 else "=")
-        return f'<span class="trend {t["dir"]}">{s} {sign}</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">7d</span>'
+        # +X = nuevos en los últimos 7 días · flecha verde si crece vs la semana anterior, roja si baja
+        last7 = t.get("last7", 0); prev7 = t.get("prev7", 0)
+        up = last7 >= prev7
+        s = "▲" if up else "▼"; cls = "up" if up else "down"
+        return (f'<span class="trend {cls}">{s} +{last7}</span>'
+                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">últ. 7d</span>')
 
     opp_c = ex["opp_contacts"]; cli_c = ex["cli_contacts"]
     opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
@@ -2204,11 +2208,21 @@ def render_exec(d):
             + cell(opp_deals, empo)
             + f'<div class="mx-cell cv"><span class="v tnum">{conv_o}</span><span class="p">contacto→op.</span></div>'
             + '</div>')
+    # fila TOTAL (suma = total de contactos)
+    t_c = sum(e["contactos"] for _, e in cm); t_l = sum(e["leads"] for _, e in cm)
+    t_m = sum(e["mql"] for _, e in cm); t_s = sum(e["sql"] for _, e in cm)
+    t_o = sum(len(v) for v in dbc_m.values())
+    mx_total = (
+        '<div class="mx-row mx-tot">'
+        '<div class="c1"><span class="nm">TOTAL</span></div>'
+        + cell(t_c) + cell(t_l) + cell(t_m) + cell(t_s, cls="hi") + cell(t_o)
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o, t_c)}</span></div>'
+        + '</div>')
     matrix_html = (
         '<div class="mxwrap"><div class="matrix">'
         '<div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span>'
         '<span>MQL</span><span>SQL</span><span>Oport. (negocios)</span><span>Contacto→Op.</span></div>'
-        + mx_rows + '</div></div>')
+        + mx_rows + mx_total + '</div></div>')
 
     # ---------- 24H (sin Freemium: volumen = lead+MQL+SQL) ----------
     def nn(e): return e.get("lead", 0) + e.get("mql", 0) + e.get("sql", 0)
@@ -2394,8 +2408,7 @@ def render_exec(d):
 <div class="wrap">
 <header class="xhead">
   <div class="xtop">
-    <span class="xbrand"><b>guru</b><i>·</i>Sup</span>
-    <span class="tag">Confidencial · Dirección & Comité</span>
+    <span class="xbrand"><b>gurus</b><i>•</i><b>up</b></span>
     <details class="dictx"><summary><span class="chev">▶</span>📖 Diccionario</summary>
       <div class="dwrap">
         <div class="d"><b>Lead</b><span>Contacto con interés real (contenido, formulario o chat), aún sin cualificar.</span></div>
@@ -2410,14 +2423,14 @@ def render_exec(d):
     </details>
   </div>
   <h1>Dashboard <span>ejecutivo</span> de negocio</h1>
-  <p>Qué entra, cómo evoluciona, dónde se pierde negocio y qué decidir hoy. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
+  <p>Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
   <div class="upd">Última actualización: <b>{esc(d["generado"])}</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="border-top:none">
   <div class="q">01 · ¿Cuánto negocio está entrando?</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd wide">KPIs del embudo comercial de inbound marketing, con tendencia de los últimos 7 días. En Oportunidades y Clientes, el número grande es <b>volumen de contactos</b> (misma variable que el resto, para comparar etapa a etapa) y debajo, separado, el <b>nº de empresas / negocios</b> asociados.</div>
+  <div class="sd wide">El número grande es el <b>total acumulado desde el 1 de enero</b>, repartido por su estado en el embudo a día de hoy. Debajo, <b style="color:var(--brand)">+X</b> = contactos nuevos en los <b>últimos 7 días</b>, con flecha <b style="color:var(--ok)">verde</b> si esta semana crece respecto a la anterior o <b style="color:var(--bad)">roja</b> si baja. En Oportunidades y Clientes el número grande es volumen de contactos y debajo se separa el nº de <b>empresas / negocios</b>.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
@@ -2442,9 +2455,9 @@ def render_exec(d):
 </section>
 
 <section>
-  <div class="q">04 · ¿De qué fuentes entra el negocio?</div>
-  <h2 class="sh">Contactos por fuente <span class="tot">· {fmt(cm_tot)}</span> · acumulado 1 ene</h2>
-  <div class="sd">Volumen de contactos por canal de inbound marketing y cómo avanzan por el embudo. Todo son <b>contactos</b>; en Oportunidad contamos solo los que tienen un <b>negocio asociado en el pipeline</b> (no toda la etapa de ciclo de vida). Última columna: <b>conversión contacto → oportunidad</b> del canal.</div>
+  <div class="q">04 · ¿Qué canal genera negocio real?</div>
+  <h2 class="sh">Rendimiento por canal <span class="tot">· {fmt(cm_tot)}</span> contactos</h2>
+  <div class="sd">Cómo rinde cada canal de inbound marketing del contacto al negocio (acumulado desde el 1 de enero, sin Freemium). Todo son <b>contactos</b>; en Oportunidad solo los que tienen un <b>negocio asociado en el pipeline</b>. Última columna: <b>conversión contacto → oportunidad</b>. La fila TOTAL suma al total de contactos.</div>
   {matrix_html}
 </section>
 
@@ -2553,14 +2566,6 @@ def render_exec(d):
     <div class="stat"><div class="sv tnum">{pv(cli_c, opp_c)}</div><div class="sl">Conversión Oportunidad → Cliente (contactos)</div></div>
     <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
   </div>
-</section>
-
-<section>
-  <div class="q">12 · ¿Qué canal genera negocio real?</div>
-  <h2 class="sh">Rendimiento por canal</h2>
-  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL. Última columna: conversión <b>contacto → oportunidad</b>.</div>
-  <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
-  <tbody>{rows_ch}</tbody></table></div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
