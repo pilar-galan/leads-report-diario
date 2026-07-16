@@ -2033,6 +2033,8 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .elist{list-style:none;text-align:left;font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:9px}
 .elist li{padding-left:20px;position:relative} .elist li::before{content:"→";position:absolute;left:0;color:var(--warn)}
 .fstep.bad2 b{color:var(--bad)}
+.part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
+.part.part-bad{color:var(--bad)}
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
 .pcol.b{border-color:rgba(255,202,92,.3)}
@@ -2468,8 +2470,10 @@ def render_exec(d):
 
 <section>
   <div class="q">09 · ¿Qué ocurre con los SQL?</div>
-  <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span> · precualificación</h2>
-  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen de consultas: con <b>≥3.000 o «no lo sé»</b> se asignan a Agustín como propietario y los gestiona; con <b>&lt;3.000</b> reciben un email automático y quedan en una lista dinámica para revisar más adelante.</div>
+  <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
+  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). Una automatización precualifica por volumen: con <b>≥3.000 o «no lo sé»</b> se asignan a Agustín y los gestiona; con <b>&lt;3.000</b> reciben un email automático. Esta sección se divide en dos partes: los <b>tratados</b> y los <b>descartados</b>.</div>
+
+  <div class="part">① SQL tratados · subflujo y feedback</div>
   <div class="p2">
     <div class="pcol">
       <h4>🟢 Precualifican · gestión de Agustín</h4>
@@ -2478,15 +2482,13 @@ def render_exec(d):
         <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL totales<br>a Agustín</span></div>
         <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
         <div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>
-        <div class="farr"><span class="fp">{pv(pq.get("ag_descartados",raz_tot), ag_base)}</span>→</div>
-        <div class="fstep bad2"><b>{pq.get("ag_descartados",raz_tot)}</b><span>descartados</span></div>
         <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
         <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
       </div>
       <details class="razd">
-        <summary><span class="chev">▶</span> 🔴 Ver razones de descarte · {raz_tot} en esta acción</summary>
+        <summary><span class="chev">▶</span> 🔴 Ver descartados de Agustín · {pq.get("ag_descartados",raz_tot)} · razones</summary>
         <div class="razbox">
-          <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre el total descartado</div>
+          <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre sus descartados</div>
           {raz_rows}
         </div>
       </details>
@@ -2511,18 +2513,15 @@ def render_exec(d):
       </details>
     </div>
   </div>
-</section>
 
-<section>
-  <div class="q">10 · ¿Dónde perdemos negocio?</div>
-  <h2 class="sh">Motivos de descarte · SQL <span class="tot">· {fmt(desc_tot)}</span></h2>
-  <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), no solo de un paso. Aquí se ve dónde actuar.</div>
+  <div class="part part-bad" style="margin-top:30px">② SQL descartados · {fmt(desc_tot)} · dónde perdemos negocio</div>
+  <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
   <div class="bars">{desc_html}</div>
   {desc_interp}
 </section>
 
 <section>
-  <div class="q">11 · ¿Cómo va el pipeline?</div>
+  <div class="q">10 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· {fmt(pipe_cnt)}</span> abiertas de inbound</h2>
   <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa.</div>
   <div class="cards" style="margin-bottom:18px">
@@ -2534,15 +2533,7 @@ def render_exec(d):
 </section>
 
 <section>
-  <div class="q">12 · ¿Qué canal genera negocio real?</div>
-  <h2 class="sh">Rendimiento por canal</h2>
-  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL. Última columna: conversión <b>contacto → oportunidad</b>.</div>
-  <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
-  <tbody>{rows_ch}</tbody></table></div>
-</section>
-
-<section>
-  <div class="q">13 · ¿Cerramos?</div>
+  <div class="q">11 · ¿Cerramos?</div>
   <h2 class="sh">Clientes <span class="tot">· {fmt(cli_e)}</span> empresas</h2>
   <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
   <div class="cards">
@@ -2550,6 +2541,14 @@ def render_exec(d):
     <div class="stat"><div class="sv tnum">{pv(cli_c, opp_c)}</div><div class="sl">Conversión Oportunidad → Cliente (contactos)</div></div>
     <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
   </div>
+</section>
+
+<section>
+  <div class="q">12 · ¿Qué canal genera negocio real?</div>
+  <h2 class="sh">Rendimiento por canal</h2>
+  <div class="sd">Del contacto a la oportunidad por canal (acumulado). Ordenado por SQL. Última columna: conversión <b>contacto → oportunidad</b>.</div>
+  <div class="tblwrap"><table class="tbl"><thead><tr><th>Canal</th><th>Contactos</th><th>Leads</th><th>MQL</th><th>SQL</th><th>Oport.</th><th>Contacto→Oport.</th></tr></thead>
+  <tbody>{rows_ch}</tbody></table></div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
