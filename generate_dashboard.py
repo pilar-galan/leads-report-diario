@@ -1487,8 +1487,12 @@ def render(d):
         # Por canal
         ch_stats = st.get("channel_stats") or []
         ch_mx = max((_n(c.get("count")) for c in ch_stats), default=0) or 1
+        _PT_ICO = {"Meta Ads": "📣", "Facebook Ads": "📣", "Instagram Ads": "📣",
+                   "LinkedIn Ads": "🔗", "TikTok Ads": "🎵"}
         def _chan_ico(name):
-            return FIXED_CHANNELS.get(name, {}).get("icon", "•")
+            if name in FIXED_CHANNELS:
+                return FIXED_CHANNELS[name]["icon"]
+            return _PT_ICO.get(name, "•")
         chan_rows = "".join(
             f'<div class="fbr-row"><div class="fbr-l">{_chan_ico(c.get("channel"))} {esc(str(c.get("channel") or "—"))}</div>'
             f'<div class="fbr-barwrap"><div class="fbr-bar pt-bar2" style="width:{max(6, round(_n(c.get("count"))/ch_mx*100))}%"></div></div>'
