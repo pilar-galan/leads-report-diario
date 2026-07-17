@@ -2459,7 +2459,9 @@ def render_exec(d):
     brain_ct = ex.get("brain_open", 0)
     g_contactos = total_nf + ob["contactos"] + brain_ct
     g_lead = cum["lead"] + ob["lead"]
-    g_mql = mql_d + ob["mql"]; g_sql = sql_d + ob["sql"]
+    # SQL inbound coherente con la matriz/embudo (sin freemium): usa el total por canal
+    mx_in_sql = sum(e["sql"] for _, e in ex.get("chan_matrix", [])) or sql_d
+    g_mql = mql_d + ob["mql"]; g_sql = mx_in_sql + ob["sql"]
     g_opp = opp_ci + ob["opp"]; g_cli = cli_ci + ob["cli"]
     g_opp_e = opp_ei + ob["opp_emp"]; g_cli_e = cli_ei + ob["cli_emp"]
     # ── Oportunidades REALES = negocios con deal asociado (no el lifecycle "opportunity" inflado por
@@ -2512,7 +2514,7 @@ def render_exec(d):
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(total_nf)} · out {fmt(ob["contactos"])} · 🧠 brain {fmt(brain_ct)}</span></div></div>' +
         kpi_io("Leads", g_lead, tr["leads"], cum["lead"], ob["lead"]) +
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
-        kpi_io("SQL", g_sql, tr["sql"], sql_d, ob["sql"]) +
+        kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]) +
         # ── 2ª fila ──
         f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
         f'<div class="kv tnum">{fmt(opp_real)}</div>'
@@ -2553,7 +2555,7 @@ def render_exec(d):
                      f'<div class="mf-bar"><div class="mf-fill" style="width:{w}%"></div></div>{conv}</div>')
         return rows
     # Oportunidad = negocios reales con deal (por vía); Cliente = cuentas de cliente por fuente
-    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", sql_d), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
+    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", mx_in_sql), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
     out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", ob["sql"]), ("Oportunidad (negocio)", opp_out_real), ("Cliente", ex.get("cli_split",{}).get("outbound",0))]
     inb_fn = mini_funnel(inb_st); out_fn = mini_funnel(out_st)
 
