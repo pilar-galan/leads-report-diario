@@ -784,6 +784,7 @@ def main():
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
+    brain_names = []     # nombres de negocios Brain (para contar empresas únicas)
     out_value = 0.0      # valor de oportunidades outbound (ventas, no-inbound)
 
     def valid_deal(n):
@@ -829,6 +830,7 @@ def main():
         # Brain: oportunidades abiertas y su valor
         if _brain and _stg_ok:
             brain_open += 1
+            brain_names.append(name)
             try: brain_value += float(p.get("amount") or 0)
             except (TypeError, ValueError): pass
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
@@ -1284,6 +1286,13 @@ def main():
         deals_by_chan_out.setdefault(dl.get("channel", "Sin asignar"), []).append(
             (dl.get("name", "—"), dl.get("stage_label", "—")))
     exec_extra["deals_by_chan_out"] = deals_by_chan_out
+    # Empresas únicas con negocio (oportunidades reales): dedupe por nombre de negocio
+    exec_extra["opp_emp_inb"] = len({dl.get("name") for dl in exec_opp})
+    exec_extra["opp_emp_out"] = len({dl.get("name") for dl in exec_opp_out})
+    exec_extra["opp_emp_brain"] = len(set(brain_names))
+    exec_extra["opp_emp_total"] = len({dl.get("name") for dl in exec_opp}
+                                      | {dl.get("name") for dl in exec_opp_out}
+                                      | set(brain_names))
     # ── Pipeline de ventas · oportunidades abiertas de INBOUND (exec_opp, sin filtro de fecha) ──
     exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in exec_opp)
     exec_extra["pipeline_count"] = len(exec_opp)
@@ -2455,7 +2464,8 @@ def render_exec(d):
         + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">reales · con negocio</span></div>'
         f'<div class="kv tnum">{fmt(opp_real)}</div>'
         f'<div class="kt"><span style="color:var(--mut)">negocios abiertos con deal · excluye lifecycle sin deal</span></div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div></div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_emp_total",0))}</span> empresas únicas con negocio</div></div>'
         + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>'
@@ -2527,8 +2537,14 @@ def render_exec(d):
     def cell(v, extra="", cls=""):
         return f'<div class="mx-cell {cls}"><span class="v tnum">{fmt(v)}</span>{extra}</div>'
     dbc_m = ex.get("deals_by_chan", {})
+    # Unir canales con contactos + canales que SOLO tienen negocio (para que las oportunidades por fila sumen el total)
+    _cmd = {lbl: dict(e) for lbl, e in cm}
+    for lbl in dbc_m:
+        if lbl not in _cmd:
+            _cmd[lbl] = {"contactos": 0, "leads": 0, "mql": 0, "sql": 0, "opp_c": 0, "cli_c": 0}
+    cm_merged = sorted(_cmd.items(), key=lambda x: (-x[1]["contactos"], -len(dbc_m.get(x[0], []))))
     mx_rows = ""
-    for lbl, e in cm:
+    for lbl, e in cm_merged:
         items = dbc_m.get(lbl, [])
         opp_deals = len(items)   # oportunidades REALES = negocios asociados en pipeline
         pct_c = f'<span class="p">{pv(e["contactos"], cm_tot)}</span>'
@@ -2562,8 +2578,14 @@ def render_exec(d):
     # OUTBOUND rows + total outbound + total global
     cmo = ex.get("chan_matrix_out", [])
     dbco_m = ex.get("deals_by_chan_out", {})
+    # Unir fuentes con contactos + fuentes que SOLO tienen negocio (para que las filas sumen el total outbound)
+    _cmod = {lbl: dict(e) for lbl, e in cmo}
+    for lbl in dbco_m:
+        if lbl not in _cmod:
+            _cmod[lbl] = {"contactos": 0, "leads": 0, "mql": 0, "sql": 0}
+    cmo_merged = sorted(_cmod.items(), key=lambda x: (-x[1]["contactos"], -len(dbco_m.get(x[0], []))))
     mx_rows_out = ""
-    for lbl, e in cmo:
+    for lbl, e in cmo_merged:
         items = dbco_m.get(lbl, [])
         opp_deals = len(items)   # oportunidades OUTBOUND = negocios asociados en pipeline
         conv_o = pvf(opp_deals, e["contactos"])
@@ -2588,9 +2610,9 @@ def render_exec(d):
         '<div class="c1"><span class="nm">Total outbound</span></div>'
         + cell(oc_c) + cell(oc_l) + cell(oc_m) + cell(oc_s, cls="hi") + cell(oc_o)
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o, oc_c)}</span></div>'
-        + '</div>') if cmo else ''
+        + '</div>') if cmo_merged else ''
     sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
-    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (importaciones · offline · integración · sin asignar)</div>' if cmo else ''
+    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (importaciones · offline · integración · sin asignar)</div>' if cmo_merged else ''
     # BRAIN · oportunidades de relaciones estratégicas (sin embudo de contactos conectado)
     brain_o = ex.get("brain_open", 0)
     sep_brain = '<div class="mx-sep br">🧠 Brain · relaciones estratégicas (solo oportunidades)</div>' if brain_o else ''
