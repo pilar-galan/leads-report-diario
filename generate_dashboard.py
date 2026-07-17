@@ -2018,8 +2018,15 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .chartc .cfoot b{color:var(--ink2)}
 /* banner de tasas de conversión (claro, corta visualmente) */
 .ratesbanner{background:linear-gradient(135deg,#eefff7 0%,#d6f7e6 55%,#c3f0dd 100%);border-radius:18px;padding:22px 26px;margin:2px 0;box-shadow:0 8px 40px rgba(87,224,138,.14)}
-.ratesbanner .rb-head{color:#0d5136;font-weight:800;font-size:12.5px;margin-bottom:16px;letter-spacing:.01em}
-.ratesbanner .rb-head b{color:#0a3d28}
+.divbanner{display:flex;gap:18px;align-items:center;margin:12px 0;padding:22px 26px;border-radius:18px;
+  background:linear-gradient(120deg,#123a2a 0%,#0e2f26 60%,#0d2733 100%);border:1px solid var(--brand-d);
+  box-shadow:0 10px 40px rgba(87,224,138,.16)}
+.divbanner .db-l{font-size:34px}
+.divbanner .db-t{font-size:clamp(18px,2.6vw,24px);font-weight:800;color:var(--ink)}
+.divbanner .db-t span{color:var(--brand)}
+.divbanner .db-s{font-size:13px;color:var(--ink2);margin-top:4px;max-width:80ch}
+.rb-title{font-size:13px;font-weight:800;color:var(--brand);margin:4px 0 10px;letter-spacing:.01em}
+.rb-title span{color:var(--mut);font-weight:600}
 .rb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 .rbc{text-align:center;padding:6px 8px;position:relative}
 .rbc:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:44%;color:#7bc9a1;font-weight:800;font-size:14px}
@@ -2107,6 +2114,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .elist{list-style:none;text-align:left;font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:9px}
 .elist li{padding-left:20px;position:relative} .elist li::before{content:"→";position:absolute;left:0;color:var(--warn)}
 .fstep.bad2 b{color:var(--bad)}
+.sqlintro{list-style:none;margin:0 0 20px;display:flex;flex-direction:column;gap:10px}
+.sqlintro li{font-size:13px;line-height:1.55;color:var(--ink2);padding:12px 15px;background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:10px}
+.sqlintro li b{color:var(--ink)}
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
@@ -2147,10 +2157,10 @@ details.chdeals .dl span{font-size:11px;background:rgba(104,209,245,.1);border:1
 .tbl td{padding:12px;border-bottom:1px solid rgba(44,84,67,.4);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
 .tbl td.hi{color:var(--brand);font-weight:800} .tbl td.cv{color:var(--sky);font-weight:800}
-.strat{display:flex;gap:16px;align-items:center;margin-top:20px;padding:18px 22px;border-radius:16px;
-  background:linear-gradient(135deg,rgba(111,240,162,.16),rgba(104,209,245,.08));border:1px solid var(--line2);
-  box-shadow:0 6px 30px rgba(87,224,138,.10);font-size:13.5px;line-height:1.55;color:var(--ink)}
-.strat .strat-i{font-size:30px;flex:0 0 auto}
+.strat{display:flex;gap:18px;align-items:center;margin-top:20px;padding:20px 24px;border-radius:16px;
+  background:linear-gradient(135deg,#123a2a,#0f2f32);border:1px solid var(--brand-d);border-left:4px solid var(--brand);
+  box-shadow:0 8px 34px rgba(87,224,138,.18);font-size:14px;line-height:1.6;color:#eafff4}
+.strat .strat-i{font-size:34px;flex:0 0 auto}
 .strat b{color:var(--brand)}
 .note{background:linear-gradient(150deg,rgba(111,240,162,.12),rgba(111,240,162,.02));border:1px solid var(--line2);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);margin-top:18px}
 .note b{color:var(--brand)}
@@ -2537,8 +2547,8 @@ def render_exec(d):
   <div class="sd wide"><b>Volumen total de contactos y sus etapas desde el 1 de enero.</b> En pequeño, los <b style="color:var(--brand)">nuevos de esta última semana</b> con flecha <b style="color:var(--ok)">verde</b> o <b style="color:var(--bad)">roja</b> según crezca o no frente a la semana anterior. En Oportunidades y Clientes se separa además el nº de <b>empresas / negocios</b>.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
+  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa</span></div>
   <div class="ratesbanner">
-    <div class="rb-head">📊 Tasas de conversión del embudo · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
     <div class="rb-grid">{rate_html}</div>
   </div>
   <div class="fnote">Los <b>Freemium</b> (altas por la app) quedan <b>excluidos</b> del volumen de contactos y de todo el embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
@@ -2567,26 +2577,21 @@ def render_exec(d):
   {matrix_html}
 </section>
 
-<section>
-  <div class="q">05 · ¿Qué ha entrado hoy?</div>
-  <h2 class="sh">Nuevos contactos · últimas 24h</h2>
-  <div class="sd">Volumen del periodo y su reparto por canal (se listan todos los canales inbound; hoy algunos pueden estar a 0). Bajo cada volumen, el desglose lead / MQL / SQL.</div>
-  <div class="bigblock">
-    <div class="bn2 tnum">{d24_total}</div>
-    <div class="bx">contactos nuevos en las <b>últimas 24h</b><br>desglose por canal de entrada →</div>
-  </div>
-  <div class="bars">{b24}</div>
-</section>
+<div class="divbanner">
+  <div class="db-l">🔎</div>
+  <div><div class="db-t">Estado y desglose de contactos · <span>Inbound</span></div>
+  <div class="db-s">A partir de aquí, el detalle del embudo de inbound marketing: calidad del dato, origen, contenido, SQL, pipeline y cierre.</div></div>
+</div>
 
 <section>
-  <div class="q">06 · ¿Qué calidad tiene el dato?</div>
+  <div class="q">05 · ¿Qué calidad tiene el dato?</div>
   <h2 class="sh">Calidad de los nuevos contactos</h2>
   <div class="sd">Sobre el total de contactos desde el 1 de enero: completitud del dato (email corporativo, teléfono, empresa) y preferencia de contacto declarada.</div>
   <div class="q3">{qcols}</div>
 </section>
 
 <section>
-  <div class="q">07 · ¿Qué pasa con los contactos en etapa lead?</div>
+  <div class="q">06 · ¿Qué pasa con los contactos en etapa lead?</div>
   <h2 class="sh">Estado de los contactos · etapa lead <span class="tot">· {fmt(d["origin"]["total"])}</span></h2>
   <div class="sd">Por qué origen / contenido han entrado (blog, calculadora, webinar, formulario, app…), con % sobre el total. «Lead Ads (paid)» es desplegable por red.</div>
   <div class="bars">{leads_html}</div>
@@ -2597,18 +2602,22 @@ def render_exec(d):
 </section>
 
 <section>
-  <div class="q">08 · ¿Qué consumen los MQL?</div>
+  <div class="q">07 · ¿Qué consumen los MQL?</div>
   <h2 class="sh">Estado de los MQL <span class="tot">· {fmt(ctot)}</span> · contenido consumido</h2>
   <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars">{content_html}</div>
 </section>
 
 <section>
-  <div class="q">09 · ¿Qué ocurre con los SQL?</div>
+  <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). La precualificación automática asigna a <b>Agustín</b> los de <b>≥3.000 consultas o «no lo sé»</b>: él llama o agenda <b>según la preferencia del contacto</b>, detecta si cualifican para <b>generar oportunidad</b> en el pipeline o los descarta <b>anotando la razón</b> —así aprendemos y optimizamos el proceso—. Los de <b>&lt;3.000</b> reciben un email automático. Abajo, las dos partes: <b>tratados</b> y <b>descartados</b>.</div>
+  <div class="sd wide">Tras analizar las razones de descarte y una reunión de pricing con el equipo, decidimos <b>pasar a ventas solo los SQL con &gt;3.000 consultas/mes</b> (muchos descartes eran de &lt;500). Se divide en dos:</div>
+  <ul class="sqlintro">
+    <li><b>① Desde el 9 jul · automatizado:</b> los de <b>≥3.000 o «no lo sé»</b> llegan a <b>Agustín</b>, que llama/agenda según preferencia y <b>cualifica → oportunidad</b> o descarta; los <b>&lt;3.000</b> van a una lista (revisable a futuro). Proceso más ágil.</li>
+    <li><b>② SQL previos:</b> los que ya estaban antes de esta decisión, tratados de otra forma y descartados por las razones que motivaron el cambio.</li>
+  </ul>
 
-  <div class="part">① SQL tratados · subflujo y feedback</div>
+  <div class="part">① SQL tratados · flujo automatizado (desde 9 jul)</div>
   <div class="p2">
     <div class="pcol">
       <h4>🟢 Precualifican · gestión de Agustín</h4>
@@ -2649,14 +2658,14 @@ def render_exec(d):
     </div>
   </div>
 
-  <div class="part part-bad" style="margin-top:30px">② SQL descartados · {fmt(desc_tot)} · dónde perdemos negocio</div>
+  <div class="part part-bad" style="margin-top:30px">② SQL previos · descartados · {fmt(desc_tot)} · razones que motivaron el cambio</div>
   <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
   <div class="bars">{desc_html}</div>
   {desc_interp}
 </section>
 
 <section>
-  <div class="q">10 · ¿Cómo va el pipeline?</div>
+  <div class="q">09 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· {fmt(pipe_cnt)}</span> abiertas de inbound</h2>
   <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa.</div>
   <div class="cards" style="margin-bottom:18px">
@@ -2668,7 +2677,7 @@ def render_exec(d):
 </section>
 
 <section>
-  <div class="q">11 · ¿Cerramos?</div>
+  <div class="q">10 · ¿Cerramos?</div>
   <h2 class="sh">Clientes <span class="tot">· {fmt(cli_e)}</span> empresas</h2>
   <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
   <div class="cards">
