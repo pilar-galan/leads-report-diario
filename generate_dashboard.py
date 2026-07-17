@@ -2660,7 +2660,7 @@ def render_exec(d):
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o, oc_c)}</span></div>'
         + '</div>') if cmo_merged else ''
     sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
-    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (comercial/prospección · importaciones · offline · integración). «Comercial/prospección» = cuentas enterprise creadas a mano por ventas (Wingo, PC Componentes, Telefónica, Publicis…), sin fuente de marketing.</div>' if cmo_merged else ''
+    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound</div>' if cmo_merged else ''
     # BRAIN · oportunidades de relaciones estratégicas (sin embudo de contactos conectado)
     brain_o = ex.get("brain_open", 0)
     sep_brain = '<div class="mx-sep br">🧠 Brain · relaciones estratégicas (solo oportunidades)</div>' if brain_o else ''
