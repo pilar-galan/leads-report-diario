@@ -1952,7 +1952,7 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .kc .emprow{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2);font-size:11px;color:var(--sky);display:flex;align-items:center;gap:6px;font-weight:700}
 .kc .emprow .eb{font-size:15px;font-weight:800}
 .trend{font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:3px}
-.trend.up{color:var(--ok)} .trend.down{color:var(--bad)} .trend.flat{color:var(--mut)}
+.trend.up{color:var(--ok)} .trend.down{color:var(--bad)} .trend.flat{color:var(--mut)} .trend.zero{color:var(--ink)}
 .kg.rates{grid-template-columns:repeat(auto-fit,minmax(185px,1fr))}
 .kg.rates .kc{background:linear-gradient(165deg,rgba(43,182,115,.16),rgba(19,41,30,.5));border-color:var(--line2)}
 .kg.rates .kc .kv{color:var(--brand)}
@@ -2113,12 +2113,15 @@ def render_exec(d):
         r = a / b * 100
         return "<1%" if 0 < r < 1 else f"{round(r)}%"
     def arrow(t):
-        # +X = nuevos en los últimos 7 días · flecha verde si crece vs la semana anterior, roja si baja
+        # % variación vs los 7 días previos (flecha+color) · +N nuevos de esta semana (color por crecimiento)
         last7 = t.get("last7", 0); prev7 = t.get("prev7", 0)
         up = last7 >= prev7
-        s = "▲" if up else "▼"; cls = "up" if up else "down"
-        return (f'<span class="trend {cls}">{s} +{last7}</span>'
-                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">últ. 7d</span>')
+        sym = "▲" if up else "▼"; cls = "up" if up else "down"
+        pct_txt = f"{(last7 - prev7) / prev7 * 100:+.0f}%" if prev7 > 0 else "nuevo"
+        numcls = "zero" if last7 == 0 else ("up" if up else "down")
+        return (f'<span class="trend {cls}">{sym} {pct_txt}</span>'
+                f'<span class="trend {numcls}">+{last7}</span>'
+                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span>')
 
     opp_c = ex["opp_contacts"]; cli_c = ex["cli_contacts"]
     opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
