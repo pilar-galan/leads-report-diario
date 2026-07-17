@@ -319,7 +319,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>17 Jul 2026 · 12:47</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>17 Jul 2026 · 12:51</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -332,7 +332,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
   <div class="ratesbanner">
-    <div class="rb-grid"><div class="rbc"><div class="rbl">Lead → MQL</div><div class="rbv tnum">35%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">MQL → SQL</div><div class="rbv tnum">32%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">SQL → Oportunidad</div><div class="rbv tnum">91%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">36%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">Cliente → Churn</div><div class="rbv tnum">—</div><div class="rbs">pendiente de conectar</div></div></div>
+    <div class="rb-grid"><div class="rbc"><div class="rbl">Lead → MQL</div><div class="rbv tnum">35%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">MQL → SQL</div><div class="rbv tnum">32%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">SQL → Oportunidad</div><div class="rbv tnum">91%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">36%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">Cliente → Churn</div><div class="rbv tnum">42%</div><div class="rbs">% de los que fueron cliente</div></div></div>
   </div>
   <div class="fnote">* <b>¿Qué contactos no pasan a Lead?</b> Se excluyen del embudo la etapa «otros»: <b>0 internos (@gurusup)</b> y <b>178 pruebas/test</b>. Además, hay contactos que se crearon y luego se <b>eliminaron</b> (pruebas): tienen fecha de creación pero ya no existen en el CRM, por eso no se contabilizan. Los <b>Freemium</b> (altas por la app) también quedan fuera del embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
@@ -486,12 +486,21 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
     <div class="stat"><div class="sv tnum">57</div><div class="sl">Empresas cliente · 69 contactos</div></div>
     <div class="stat ok"><div class="sv tnum">41</div><div class="sl">🟢 Inbound · 35 empresas</div></div>
     <div class="stat warn"><div class="sv tnum">28</div><div class="sl">🟠 Outbound · 26 empresas</div></div>
-    <div class="stat bad"><div class="sv tnum">49</div><div class="sl">🔻 Churn · contactos que fueron cliente y ya no lo son<br><span style="color:var(--mut)">30 empresas asociadas</span></div></div>
   </div>
-  <div class="note">Los clientes provienen de <b>ambas vías</b>: inbound (embudo web/marketing) y outbound (prospección / importaciones / offline). Se cuentan por <b>empresa</b> (varios contactos pueden pertenecer al mismo negocio de cliente).
-  <br><br>🔻 <b>Churn:</b> la etapa «Churn» del ciclo de vida no se usa, así que lo derivamos de <b>quién pasó por la etapa «cliente» y ya no está en ella</b> (49 contactos · 30 empresas). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
+  <div class="note">Los clientes provienen de <b>ambas vías</b>: inbound (embudo web/marketing) y outbound (prospección / importaciones / offline). Se cuentan por <b>empresa</b> (varios contactos pueden pertenecer al mismo negocio de cliente).</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 12:47 (hora España) · documento confidencial</footer>
+<section>
+  <div class="q">11 · ¿Perdemos clientes?</div>
+  <h2 class="sh">Churn <span class="tot">· 49 contactos</span></h2>
+  <div class="sd"><b>Clientes que ya no lo son</b>: contactos que han estado en la etapa de ciclo de vida <b>cliente</b> (o han tenido un cliente asignado) y <b>ya no están en ella</b>.</div>
+  <div class="cards">
+    <div class="stat bad"><div class="sv tnum">49</div><div class="sl">🔻 Churn · contactos<br><span style="color:var(--mut)">30 empresas asociadas</span></div></div>
+    <div class="stat"><div class="sv tnum">42%</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">% de los que fueron cliente</span></div></div>
+  </div>
+  <div class="note">La etapa «Churn» del ciclo de vida no se usa en el CRM, así que el churn se <b>deriva</b> de quién pasó por la etapa «cliente» y ya no está en ella. La <b>tasa de churn</b> = churn / (churn + clientes actuales). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
+</section>
+
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 12:51 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
