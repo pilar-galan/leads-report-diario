@@ -1205,9 +1205,9 @@ def main():
         mes = MESES[int(mo_max[5:7]) - 1]
         if n >= max(med * 1.5, med + 3):
             ch, cn = mchan[mo_max].most_common(1)[0]
-            return (f'* Pico en <b>{mes}</b> (+{n}, ~{round(n/med,1)}× la media mensual), sobre todo por '
+            return (f'📈 <b>Pico en {mes}</b> (+{n}, ~{round(n/med,1)}× la media mensual), sobre todo por '
                     f'<b>{esc(ch)}</b> ({round(cn/n*100)}%): volumen no lineal, de una acción/estacional.')
-        return "* Crecimiento sostenido, sin picos estacionales marcados."
+        return "📈 Crecimiento sostenido, sin picos estacionales marcados."
     exec_extra["note_mql"] = spike_note(lambda c: not is_free(c) and rank(c["lc"]) >= 1
                                         and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
     exec_extra["note_sql"] = spike_note(lambda c: c["lc"] in SQL_STAGES)
@@ -2070,8 +2070,10 @@ details.dictx>summary{list-style:none;cursor:pointer;padding:8px 14px;font-size:
 details.dictx>summary::-webkit-details-marker{display:none}
 details.dictx>summary .chev{transition:transform .2s;font-size:10px}
 details.dictx[open]>summary .chev{transform:rotate(90deg)}
-details.dictx .dwrap{padding:6px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;max-width:760px}
+details.dictx .dwrap{padding:6px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;max-width:900px}
 details.dictx .d b{color:var(--brand);font-size:12.5px} details.dictx .d span{display:block;font-size:11.5px;color:var(--ink2);margin-top:3px}
+details.dictx .d span b{color:var(--ink);font-size:11.5px}
+details.dictx .dhdr{grid-column:1/-1;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin-top:6px;padding-bottom:2px;border-bottom:1px solid var(--line2)}
 section{padding:34px 0;border-top:1px solid var(--line)}
 .q{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
 .sh{font-size:clamp(21px,3vw,28px);font-weight:800;margin:7px 0 5px}
@@ -2115,7 +2117,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .divbanner .db-t span{color:#0a3d28}
 .divbanner .db-s{font-size:13px;color:#0d3d29;margin-top:4px;max-width:80ch;font-weight:500}
 /* inbound vs outbound dos columnas */
-.io3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:22px}
+.io3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:22px;position:relative;left:50%;transform:translateX(-50%);width:min(1280px,calc(100vw - 32px))}
 .iocol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:18px}
 .iocol.out{background:linear-gradient(165deg,rgba(52,42,24,.5),rgba(41,30,19,.4));border-color:#5a4a2a}
 .iocol.brain{background:linear-gradient(165deg,rgba(40,30,55,.5),rgba(25,20,40,.4));border-color:#3f3560}
@@ -2124,8 +2126,8 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .io-h .io-tot{margin-left:auto;color:var(--brand);font-size:20px}
 .iocol.out .io-h .io-tot{color:var(--warn)}
 .mf{display:flex;flex-direction:column;gap:7px}
-.mf-row{display:grid;grid-template-columns:1fr 90px 40px;gap:10px;align-items:center;font-size:12px}
-.mf-l{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .mf-l b{color:var(--ink);font-size:14px}
+.mf-row{display:grid;grid-template-columns:minmax(150px,1fr) 1fr 48px;gap:14px;align-items:center;font-size:12.5px}
+.mf-l{color:var(--ink2);white-space:nowrap} .mf-l b{color:var(--ink);font-size:15px}
 .mf-bar{background:rgba(255,255,255,.05);border-radius:5px;height:12px;overflow:hidden}
 .mf-fill{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand))}
 .iocol.out .mf-fill{background:linear-gradient(90deg,#a5741f,var(--warn))}
@@ -2242,10 +2244,12 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
-.sqlvl{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.sqlvl3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
 .lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
 .lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
-.lvl.lvl3{margin-top:16px;background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
+.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
+.lvl .ph{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
+.lvl-subh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin:16px 0 4px}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -2266,7 +2270,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .ptr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(148,163,184,.12);font-size:12.5px}
 .ptr:last-child{border-bottom:none} .ptr-l{color:var(--ink2)} .ptr-n{font-weight:800;color:var(--ink)} .ptr-n small{color:var(--mut);font-weight:600;font-size:10.5px}
 .paid3-foot{margin-top:11px;font-size:11px;color:var(--mut);line-height:1.5}
-@media(max-width:860px){ .sqlvl{grid-template-columns:1fr} .lvl3-grid{grid-template-columns:1fr} }
+@media(max-width:860px){ .sqlvl3{grid-template-columns:1fr} .lvl3-grid{grid-template-columns:1fr} }
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
 .pcol.b{border-color:rgba(255,202,92,.3)}
@@ -2650,56 +2654,87 @@ def render_exec(d):
         r0, n0 = desc[0]
         desc_interp = f'<div class="note">El <b>{pv(n0, desc_tot)}</b> de los descartes con motivo son por «{esc(r0)}». Total con razón registrada: <b>{desc_tot}</b>.</div>'
 
-    # ---------- 8·③ · SQL RESTANTES (ni descartados ni en el proceso de Agustín) ----------
+    # ---------- 8 · SQL en 3 niveles ----------
     sd_ = d["sql_disp"]
-    rest_n = sd_.get("pendiente", 0)   # revisión pendiente / sin asignar = fuera de descarte y del flujo de Agustín
-    # ¿Dónde están? → estado del lead (hs_lead_status) de los SQL (temperatura)
-    ls_base = sd_.get("ls_base", 0) or 1
-    rest_rows_html = "".join(
-        f'<div class="brow"><span class="bl">{esc(lbl)}</span>'
-        f'<div class="bt"><div class="bf {("bf-cold" if grp=="cold" else "bf-warm" if grp=="warm" else "bf-adv")}" '
-        f'style="width:{round(n/ (sd_["lead_status"][0][1] or 1) *100)}%"></div></div>'
-        f'<span class="bn tnum">{fmt(n)}<br><small>{pv(n, ls_base)}</small></span></div>'
-        for lbl, n, grp in sd_.get("lead_status", [])[:8]) or '<p class="sd">Sin datos.</p>'
-    # Estado de los leads de PAID (informe de Agustín · Paid Leads Tracker)
+    sql_total = sd_.get("total", 0)
+    # NIVEL 1 · Seguimiento de SQLs de pay (informe de Agustín · Paid Leads Tracker)
+    #   La fuente se llama "Paid Leads Tracker" pero aquí lo tratamos como SQLs de pay.
     pt3 = d.get("paid_tracker")
+    def _pn(v):
+        try: return int(v)
+        except (TypeError, ValueError): return 0
     if pt3 and pt3.get("stats"):
         s3 = pt3["stats"]
-        def _pn(v):
-            try: return int(v)
-            except (TypeError, ValueError): return 0
-        pt3_tot = _pn(s3.get("total")) or 1
-        pt3_defs = [("🟢", "Cualificados", s3.get("qualified"), "adv"),
-                    ("🔵", "En proceso", s3.get("open"), "warm"),
-                    ("⚪", "Sin contactar", s3.get("uncontacted"), "cold"),
-                    ("✅", "Ganados", s3.get("won"), "adv"),
-                    ("🔴", "Perdidos", s3.get("lost"), "cold")]
+        n1 = _pn(s3.get("total"))
+        pt3_tot = n1 or 1
+        pt3_defs = [("🟢", "Cualificados", s3.get("qualified")),
+                    ("🔵", "En proceso", s3.get("open")),
+                    ("⚪", "Sin contactar", s3.get("uncontacted")),
+                    ("✅", "Ganados", s3.get("won")),
+                    ("🔴", "Perdidos", s3.get("lost"))]
         pt3_rows = "".join(
             f'<div class="ptr"><span class="ptr-l">{ic} {lab}</span>'
             f'<span class="ptr-n tnum">{_pn(v)} <small>{pv(_pn(v), pt3_tot)}</small></span></div>'
-            for ic, lab, v, _g in pt3_defs)
-        paid3_html = (
-            f'<div class="paid3"><div class="paid3-h">📣 Leads de PAID · estado en vivo '
-            f'<span>(informe de Agustín · Paid Leads Tracker · desde 1 jul)</span></div>'
-            f'<div class="paid3-tot"><b>{_pn(s3.get("total"))}</b> leads de paid gestionados</div>'
-            f'<div class="ptr-box">{pt3_rows}</div>'
-            + (f'<div class="paid3-foot">⚪ Los <b>{_pn(s3.get("uncontacted"))} sin contactar</b> son el foco: '
-               f'leads de paid que aún no han entrado en gestión.</div>' if _pn(s3.get("uncontacted")) else '')
-            + '</div>')
+            for ic, lab, v in pt3_defs if _pn(v) or lab in ("Cualificados", "En proceso"))
+        afc = s3.get("avg_first_contact_days")
+        afc_html = ""
+        if afc is not None:
+            try: afc_html = f'<div class="paid3-foot">⏱️ Primer contacto medio: <b>{round(float(afc),1)} días</b></div>'
+            except (TypeError, ValueError): afc_html = ""
+        agustin_html = (
+            f'<div class="paid3"><div class="paid3-h">Estado de los SQLs de pay · en vivo '
+            f'<span>(informe de Agustín · desde 1 jul)</span></div>'
+            f'<div class="ptr-box">{pt3_rows}</div>{afc_html}</div>')
     else:
-        paid3_html = ('<div class="paid3 paid3-empty">📣 <b>Leads de PAID:</b> pendiente de conectar el Paid Leads '
-                      'Tracker de Agustín. Al conectarlo, este bloque muestra en vivo cuántos leads de paid están '
-                      'sin contactar, en proceso, ganados o perdidos.</div>')
+        n1 = pq.get("ag_sql", 0)
+        agustin_html = ('<div class="paid3 paid3-empty">Pendiente de conectar el informe de Agustín '
+                        '(seguimiento de SQLs de pay). Al conectarlo, se muestra en vivo el estado: '
+                        'cualificados, en proceso, sin contactar, ganados y perdidos.</div>')
+    # Flujo de precualificación de Agustín (SQL → agendados → oportunidad)
+    agustin_flow_html = (
+        '<div class="flow" style="margin-top:14px">'
+        f'<div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL<br>precualificados</span></div>'
+        f'<div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>'
+        f'<div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>'
+        f'<div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>'
+        f'<div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>'
+        '</div>')
+    # NIVEL 2 · Descartados / descualificados (desc_tot, desc_html ya calculados arriba)
+    n2 = desc_tot
+    # NIVEL 3 · Los que quedan (sin identificar) · a precualificar por mail
+    n3 = max(0, sql_total - n1 - n2)
+    email_flow_html = (
+        '<div class="emailbox">'
+        f'<div class="eb tnum">{fmt(n3)}</div>'
+        '<div style="font-size:12px;color:var(--ink2);margin-top:6px">SQL sin fuente identificada · pasan al circuito de mail</div>'
+        '</div>'
+        '<ul class="elist" style="margin-top:14px">'
+        '<li>Email automático que pregunta/confirma el volumen de consultas</li>'
+        '<li>Los de <b>≥3.000</b> consultas → se cualifican y pasan a Agustín</li>'
+        '<li>Los de <b>&lt;3.000</b> → lista HubSpot «Descalificación SQL» (reactivables si crecen)</li>'
+        '<li>Razón de descarte registrada para el evolutivo</li>'
+        '</ul>')
 
     # ---------- 10 · OPORTUNIDADES abiertas (pipeline real, sin clientes) ----------
     dbc = ex.get("deals_by_chan", {})   # {canal: [(nombre, etapa), ...]} solo abiertas inbound
     opp_ch = sorted(((lbl, items) for lbl, items in dbc.items()), key=lambda x: -len(x[1]))
     opp_ch_tot = sum(len(items) for _, items in opp_ch) or 1
     omx = max((len(items) for _, items in opp_ch), default=0) or 1
+    def _stgnice(sl):
+        s = (sl or "").lower()
+        # El pipeline de ventas no tiene una etapa "Demo" separada: la demo/reunión ocurre
+        # dentro de «Needs Validation & Solution Alignment» (id presentationscheduled).
+        if "discov" in s: return "Discovery"
+        if "needs validation" in s or "solution align" in s or "demo" in s or "reuni" in s:
+            return "Demo / Validación"
+        if "best" in s: return "Best Case"
+        if "close won" in s or "ganad" in s: return "Cierre ganado"
+        return sl or ""
     def _stgchip(sl):
         s = (sl or "").lower()
-        c = "discov" if "discov" in s else ("demo" if ("demo" in s or "reuni" in s) else ("best" if "best" in s else ""))
-        return f'<span class="chip {c}">{esc(sl)}</span>' if sl else ""
+        c = "discov" if "discov" in s else ("demo" if ("needs validation" in s or "solution align" in s or "demo" in s or "reuni" in s) else ("best" if "best" in s else ""))
+        nice = _stgnice(sl)
+        return f'<span class="chip {c}">{esc(nice)}</span>' if sl else ""
     opp_ch_html = ""
     for lbl, items in opp_ch:
         inner = "".join(f'<span>{esc(nm)} {_stgchip(sl)}</span>' for nm, sl in items) or '<span>Sin negocios listados</span>'
@@ -2786,11 +2821,14 @@ def render_exec(d):
     <span class="xbrand"><b>gurus</b><i>•</i><b>up</b></span>
     <details class="dictx"><summary><span class="chev">▶</span>📖 Diccionario</summary>
       <div class="dwrap">
-        <div class="d"><b>Lead</b><span>Contacto con interés real (contenido, formulario o chat), aún sin cualificar.</span></div>
-        <div class="d"><b>MQL</b><span>Marketing Qualified Lead: ha consumido contenido de valor y encaja con el perfil.</span></div>
-        <div class="d"><b>SQL</b><span>Sales Qualified Lead: pide demo/consultoría. Listo para ventas.</span></div>
-        <div class="d"><b>Oportunidad</b><span>SQL con deal abierto en el pipeline. Se cuenta por empresa.</span></div>
-        <div class="d"><b>Cliente</b><span>Empresa que ha cerrado y ya compra.</span></div>
+        <div class="dhdr">Etapas del ciclo de vida del contacto (en orden)</div>
+        <div class="d"><b>Lead</b><span>Etapa del ciclo de vida: ha entrado con algo de interés, pero aún no sabemos si nos encaja.</span></div>
+        <div class="d"><b>MQL</b><span>Etapa del ciclo de vida: el contacto ha consumido contenido de valor (ebook, webinar…). Interés medio.</span></div>
+        <div class="d"><b>SQL</b><span>Etapa del ciclo de vida: tiene una necesidad real y pide demo/consultoría. Listo para ventas.</span></div>
+        <div class="d"><b>Oportunidad</b><span>Etapa del ciclo de vida de un contacto que ya tiene un <b>negocio (deal) asociado</b>. Varios contactos pueden compartir el mismo negocio, pero es un único deal.</span></div>
+        <div class="d"><b>Cliente</b><span>Etapa del ciclo de vida: contacto con negocio asociado que <b>ya ha convertido y compra</b>. Varios contactos pueden pertenecer al mismo negocio de cliente.</span></div>
+        <div class="d"><b>Otros</b><span>Etapa del ciclo de vida fuera del proceso comercial: correos <b>@gurusup.com</b>, proveedores, gente externa o quien pide trabajar con nosotros. Incluye también algunas pruebas/test (para no crear más etapas).</span></div>
+        <div class="dhdr">Otros conceptos</div>
         <div class="d"><b>Churn</b><span>Cliente que se da de baja en el periodo.</span></div>
         <div class="d"><b>Pipeline</b><span>Oportunidades abiertas y su recorrido hasta cliente.</span></div>
         <div class="d"><b>Conversión</b><span>% de contactos que pasan de una etapa a la siguiente.</span></div>
@@ -2893,100 +2931,63 @@ def render_exec(d):
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Tras analizar las razones de descarte y una reunión de pricing con el equipo, decidimos <b>pasar a ventas solo los SQL con &gt;3.000 consultas/mes</b> (muchos descartes eran de &lt;500). Cada SQL cae en uno de <b>tres estados</b> · <i>pulsa cada nivel para desplegarlo</i>:</div>
+  <div class="sd wide">De los <b>{fmt(sql_total)} SQL</b>, cada uno cae en uno de <b>tres estados</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
 
-  <div class="sqlvl">
-    <details class="lvl" open>
+  <div class="sqlvl3">
+    <details class="lvl">
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
-        <span class="lvl-tit">En proceso · flujo automatizado <small>(desde 9 jul)</small></span>
-        <span class="lvl-n">{fmt(pq.get("ag_sql",0) + pq.get("ag_lt3000",0))}</span>
+        <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de pay</small></span>
+        <span class="lvl-n">{fmt(n1)}</span>
         <span class="chev">▶</span>
       </summary>
       <div class="lvl-body">
-        <div class="p2">
-          <div class="pcol">
-            <h4>🟢 Precualifican · gestión de Agustín</h4>
-            <div class="ph">SQL de <b>≥3.000 o «no lo sé»</b> → Agustín llama/agenda y cualifica.</div>
-            <div class="flow">
-              <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL totales<br>a Agustín</span></div>
-              <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
-              <div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>
-              <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
-              <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
-            </div>
-            <details class="razd">
-              <summary><span class="chev">▶</span> 🔴 Ver descartados de Agustín · {pq.get("ag_descartados",raz_tot)} · razones</summary>
-              <div class="razbox">
-                <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre sus descartados</div>
-                {raz_rows}
-              </div>
-            </details>
-          </div>
-          <div class="pcol b">
-            <h4>🟡 No cualifican · &lt;3.000 consultas</h4>
-            <div class="ph">Descarte inicial automático por volumen insuficiente → email + lista.</div>
-            <div class="emailbox">
-              <div class="eb tnum">{pq.get("ag_lt3000",0)}</div>
-              <div style="font-size:12px;color:var(--ink2);margin-top:4px">SQL con &lt;3.000 consultas/mes (desde 9 jul)</div>
-            </div>
-            <details class="razd" style="margin-top:14px">
-              <summary><span class="chev">▶</span> Ver qué les pasa y a dónde van</summary>
-              <div class="razbox" style="background:rgba(255,202,92,.06);border-color:rgba(255,202,92,.25)">
-                <ul class="elist">
-                  <li>Email automático de agradecimiento</li>
-                  <li>Lista HubSpot «Descalificación SQL · &lt;3.000»</li>
-                  <li>Razón de descarte registrada para el evolutivo</li>
-                  <li>Reactivables si su volumen crece</li>
-                </ul>
-              </div>
-            </details>
-          </div>
-        </div>
+        <div class="ph">SQLs de <b>pay</b> que gestiona Agustín (su informe en vivo). Así están repartidos:</div>
+        {agustin_html}
+        <div class="lvl-subh">Precualificación · del SQL a la oportunidad</div>
+        {agustin_flow_html}
       </div>
     </details>
 
     <details class="lvl lvl-bad">
       <summary class="lvl-sum">
         <span class="lvl-badge b2">②</span>
-        <span class="lvl-tit">Descartados · SQL previos <small>(razones que motivaron el cambio)</small></span>
-        <span class="lvl-n">{fmt(desc_tot)}</span>
+        <span class="lvl-tit">Descartados <small>· descualificados + razón</small></span>
+        <span class="lvl-n">{fmt(n2)}</span>
         <span class="chev">▶</span>
       </summary>
       <div class="lvl-body">
-        <div class="sd" style="margin-top:0">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
+        <div class="ph">SQL ya <b>descartados / descualificados</b>, con el motivo registrado:</div>
         <div class="bars">{desc_html}</div>
         {desc_interp}
       </div>
     </details>
-  </div>
 
-  <details class="lvl lvl3">
-    <summary class="lvl-sum">
-      <span class="lvl-badge b3">③</span>
-      <span class="lvl-tit">Los que quedan · ni descartados ni en el flujo de Agustín <small>· ¿dónde están?</small></span>
-      <span class="lvl-n">{fmt(rest_n)}</span>
-      <span class="chev">▶</span>
-    </summary>
-    <div class="lvl-body">
-      <div class="sd" style="margin-top:0"><b>{fmt(rest_n)} SQL sin gestionar todavía</b> (revisión pendiente / sin asignar): no se han descartado y no están en el flujo automatizado de Agustín. Por estado del lead, así es como están repartidos:</div>
-      <div class="lvl3-grid">
-        <div class="lvl3-col">
-          <div class="lvl3-h">📍 Dónde están · por estado del lead</div>
-          <div class="bars">{rest_rows_html}</div>
-        </div>
-        <div class="lvl3-col">
-          {paid3_html}
-        </div>
+    <details class="lvl lvl3">
+      <summary class="lvl-sum">
+        <span class="lvl-badge b3">③</span>
+        <span class="lvl-tit">Los que quedan <small>· sin identificar → a mail</small></span>
+        <span class="lvl-n">{fmt(n3)}</span>
+        <span class="chev">▶</span>
+      </summary>
+      <div class="lvl-body">
+        <div class="ph">Restantes tras sumar los de pay (①) y los descartados (②): <b>{fmt(n3)} SQL sin fuente identificada</b>.</div>
+        <div class="sd" style="margin-top:0;font-size:12px">No significa que no sean de pay: pueden ser <b>orgánicos, tráfico directo u otra vía</b> que no se identificó, pero que <b>sí tienen ≥3.000 consultas</b>. Desde el <b>9 jul</b> se decidió <b>precualificar automáticamente</b> para que solo lleguen los identificados; el motivo de descarte era el <b>volumen de consultas</b>, así que estos ahora <b>se tratan por mail</b>.</div>
+        <details class="razd" style="margin-top:14px">
+          <summary><span class="chev">▶</span> ✉️ Ver el circuito de mail y sus datos</summary>
+          <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
+            {email_flow_html}
+          </div>
+        </details>
       </div>
-    </div>
-  </details>
+    </details>
+  </div>
 </section>
 
 <section>
   <div class="q">09 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· {fmt(pipe_cnt)}</span> abiertas de inbound</h2>
-  <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa.</div>
+  <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa. El pipeline tiene <b>3 etapas</b>: <b>Discovery → Demo/Validación → Best Case</b> (no hay una etapa «Demo» aparte: la <b>demo/reunión ocurre dentro de «Needs Validation & Solution Alignment»</b>).</div>
   <div class="cards" style="margin-bottom:18px">
     <div class="stat ok"><div class="sv tnum">{("€"+fmt(round(pipe_val))) if pipe_val else "—"}</div><div class="sl">Valor estimado del pipeline abierto{("" if pipe_val else " · importes no cargados en los deals")}</div></div>
     <div class="stat"><div class="sv tnum">{fmt(pipe_cnt)}</div><div class="sl">Negocios abiertos ({pipe_known} con importe)</div></div>
