@@ -218,6 +218,11 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
 .lvl .ph{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 .lvl-subh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin:16px 0 4px}
+.vflow{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.vstep{background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;align-items:baseline;gap:10px}
+.vstep b{font-size:22px;font-weight:800;color:var(--ink);line-height:1} .vstep span{font-size:11.5px;color:var(--mut)}
+.vstep.ok b{color:var(--brand)} .vstep.bad b{color:var(--bad)}
+.varr{text-align:center;color:var(--mut);font-size:13px;line-height:1} .varr span{color:var(--brand);font-weight:800;font-size:11px;margin-left:4px}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -322,7 +327,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>17 Jul 2026 · 14:21</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>17 Jul 2026 · 14:50</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -331,7 +336,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b>, incluye:
     <span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span><span class="src-chip cx">💬 Atención al cliente (CX)</span><span class="src-chip br">🧠 Brain</span>.
     El número grande es el total de contactos; debajo, <b>inb</b> (inbound) y <b>out</b> (outbound). En Oportunidades el número grande es <b>volumen de contactos</b> y el nº de <b>empresas / negocios</b> va debajo; en Clientes se muestran las <b>cuentas activas</b> del pipeline «Clientes».</div>
-  <div class="kg"><div class="kc"><div class="kl">Nuevos contactos</div><div class="kv tnum">1.946</div><div class="kt"><span class="trend down">▼ -25%</span><span class="trend down">+52</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 1.533 · out 413</span></div></div><div class="kc"><div class="kl">Leads</div><div class="kv tnum">1.881</div><div class="kt"><span class="trend down">▼ -44%</span><span class="trend down">+31</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 1.483 · out 398</span></div></div><div class="kc"><div class="kl">MQL</div><div class="kv tnum">651</div><div class="kt"><span class="trend down">▼ -57%</span><span class="trend down">+6</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 604 · out 47</span></div></div><div class="kc"><div class="kl">SQL</div><div class="kv tnum">210</div><div class="kt"><span class="trend down">▼ -37%</span><span class="trend down">+22</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 165 · out 45</span></div></div><div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">23</div><div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div><div class="kt" style="margin-top:5px;color:var(--ink2)">📞 18 teléfono · 📅 5 agenda</div></div><div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos · con negocio</span></div><div class="kv tnum">86</div><div class="kt"><span style="color:var(--mut)">contactos en etapa oportunidad con deal asociado</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb 13 · out 36 · 🧠 brain 59</span></div><div class="emprow">🏢 <span class="eb tnum">67</span> empresas / negocios</div></div><div class="kc"><div class="kl">Clientes</div><div class="kv tnum">147</div><div class="kt" style="color:var(--mut)">contactos de la cartera real · pipeline «Clientes»</div><div class="emprow">🏢 <span class="eb tnum">37</span> empresas cliente activas</div></div><div class="kc"><div class="kl">Churn</div><div class="kv tnum">17</div><div class="kt" style="color:var(--mut)">han sido cliente desde el 1 ene y hoy ya no lo son</div><div class="emprow">🏢 <span class="eb tnum">5</span> empresas (Churned / Dormidos)</div></div></div>
+  <div class="kg"><div class="kc"><div class="kl">Nuevos contactos</div><div class="kv tnum">1.946</div><div class="kt"><span class="trend down">▼ -25%</span><span class="trend down">+52</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 1.533 · out 413</span></div></div><div class="kc"><div class="kl">Leads</div><div class="kv tnum">1.881</div><div class="kt"><span class="trend down">▼ -44%</span><span class="trend down">+31</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 1.483 · out 398</span></div></div><div class="kc"><div class="kl">MQL</div><div class="kv tnum">651</div><div class="kt"><span class="trend down">▼ -57%</span><span class="trend down">+6</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 604 · out 47</span></div></div><div class="kc"><div class="kl">SQL</div><div class="kv tnum">210</div><div class="kt"><span class="trend down">▼ -37%</span><span class="trend down">+22</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 165 · out 45</span></div></div><div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">23</div><div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div><div class="kt" style="margin-top:5px;color:var(--ink2)">📞 18 teléfono · 📅 5 agenda</div></div><div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div><div class="kv tnum">86</div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb 13 · out 36 · 🧠 brain 59</span></div><div class="emprow">🏢 <span class="eb tnum">67</span> empresas / negocios</div></div><div class="kc"><div class="kl">Clientes</div><div class="kv tnum">147</div><div class="kt" style="color:var(--mut)">contactos de la cartera real · pipeline «Clientes»</div><div class="emprow">🏢 <span class="eb tnum">37</span> empresas cliente activas</div></div><div class="kc"><div class="kl">Churn</div><div class="kv tnum">17</div><div class="kt" style="color:var(--mut)">han sido cliente desde el 1 ene y hoy ya no lo son</div><div class="emprow">🏢 <span class="eb tnum">5</span> empresas (Churned / Dormidos)</div></div></div>
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
   <div class="ratesbanner">
@@ -456,14 +461,23 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
       <div class="lvl-body">
         <div class="ph"><b>Flujo automatizado desde el 9 jul</b> (para quitar fricción tras decidir que solo cualifican ≥3.000 consultas): quien entra por el <b>formulario de contacto web</b> con <b>≥3.000</b> → email a <b>Agustín</b>; con <b>&lt;3.000</b> → email automático de descarte.</div>
         <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
-        <div class="flow" style="margin-top:14px"><div class="fstep"><b>25</b><span>SQL<br>precualificados</span></div><div class="farr"><span class="fp">92%</span>→</div><div class="fstep"><b>23</b><span>agendados /<br>llamados</span></div><div class="farr"><span class="fp">8%</span>→</div><div class="fstep ok"><b>🎯 2</b><span>oportunidad</span></div></div>
-        <div class="sd" style="margin-top:8px;font-size:12px">Han entrado <b>25</b> por esta vía; <b>9</b> se descartaron (no pasaron a ventas) y <b>2</b> se convirtieron en oportunidad.</div>
+        <div class="vflow">
+          <div class="vstep"><b>25</b><span>SQL precualificados</span></div>
+          <div class="varr">↓ <span>92%</span></div>
+          <div class="vstep"><b>23</b><span>agendados / llamados</span></div>
+          <div class="varr">↓</div>
+          <div class="vstep bad"><b>9</b><span>descartados · no pasaron a ventas</span></div>
+          <div class="varr">↓ <span>8%</span></div>
+          <div class="vstep ok"><b>🎯 2</b><span>oportunidad</span></div>
+        </div>
         <details class="razd" style="margin-top:14px">
           <summary><span class="chev">▶</span> ✉️ &lt;3.000 consultas · circuito de mail de descarte</summary>
           <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
             <div class="emailbox"><div class="eb tnum">57</div><div style="font-size:12px;color:var(--ink2);margin-top:6px">SQL sin fuente identificada · pasan al circuito de mail</div></div><ul class="elist" style="margin-top:14px"><li>Email automático que pregunta/confirma el volumen de consultas</li><li>Los de <b>≥3.000</b> consultas → se cualifican y pasan a Agustín</li><li>Los de <b>&lt;3.000</b> → lista HubSpot «Descalificación SQL» (reactivables si crecen)</li><li>Razón de descarte registrada para el evolutivo</li></ul>
           </div>
         </details>
+        <div class="lvl-subh">Razones de descarte</div>
+        <div class="razbox"><div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">12 <small>75%</small></span></div><div class="mrow"><span class="ml">Lead accidental / no recuerda</span><span class="mn">2 <small>12%</small></span></div><div class="mrow"><span class="ml">Caso de uso / no target</span><span class="mn">1 <small>6%</small></span></div><div class="mrow"><span class="ml">Datos Falsos</span><span class="mn">1 <small>6%</small></span></div></div>
       </div>
     </details>
   </div>
@@ -504,6 +518,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 14:21 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 14:50 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
