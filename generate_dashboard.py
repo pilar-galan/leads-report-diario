@@ -1117,6 +1117,8 @@ def main():
         "cli_contacts": sum(1 for c in hist_fun if rank(c["lc"]) >= 5),
         "opp_contacts_mkt": sum(1 for c in hist_fun if rank(c["lc"]) >= 4 and _chl(c) in MKT_CH),
         "cli_contacts_mkt": sum(1 for c in hist_fun if rank(c["lc"]) >= 5 and _chl(c) in MKT_CH),
+        "opp_emp_mkt": len({compkey(c) for c in hist_fun if rank(c["lc"]) >= 4 and _chl(c) in MKT_CH}),
+        "cli_emp_mkt": len({compkey(c) for c in hist_fun if rank(c["lc"]) >= 5 and _chl(c) in MKT_CH}),
         "free_last7": trends["free"]["last7"],
     }
     REUN_STAGES = {"1107496610": "Discovery", "presentationscheduled": "Demo",
@@ -2196,6 +2198,9 @@ def render_exec(d):
 
     opp_c = ex["opp_contacts"]; cli_c = ex["cli_contacts"]
     opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
+    # KPIs principales de Oportunidades/Clientes → SOLO inbound
+    opp_ci = ex.get("opp_contacts_mkt", opp_c); cli_ci = ex.get("cli_contacts_mkt", cli_c)
+    opp_ei = ex.get("opp_emp_mkt", opp_e); cli_ei = ex.get("cli_emp_mkt", cli_e)
     reun_total = ex["reun_total"]; reun_st = ex["reun_by_stage"]; reun_tr = ex["reun_trend"]
     free_total = cum.get("free", 0); free7 = ex["free_last7"]
     # MQL = de facto (contenido consumido); SQL = de consultoría gestionable (los que cuadran)
@@ -2237,8 +2242,8 @@ def render_exec(d):
         + f'<div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">{fmt(reun_pipe_tot)}</div>'
         f'<div class="kt" style="color:var(--mut)">oportunidades vivas de inbound · por etapa</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div></div>'
-        + kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], "en pipeline")
-        + kpi_emp("Clientes", cli_c, cli_e, tr["cli"], "cerrados"))
+        + kpi_emp("Oportunidades", opp_ci, opp_ei, tr["opp"], f'{pvf(opp_ci, sql_d)} de SQL · inbound')
+        + kpi_emp("Clientes", cli_ci, cli_ei, tr["cli"], f'{pvf(cli_ci, opp_ci)} de oport. · inbound'))
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
         ("Lead → MQL", pv(mql_d, cum["lead"]), "sobre contactos"),
