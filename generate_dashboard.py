@@ -1302,7 +1302,9 @@ def main():
         r = rank(c["lc"])
         if r >= 1: e["leads"] += 1
         if r >= 2: e["mql"] += 1
-        if c["lc"] in SQL_STAGES: e["sql"] += 1
+        # Outbound (importaciones/comercial) no pasa por la etapa de consultoría (SQL_STAGES):
+        # su SQL se mide por etapa alcanzada (rank>=3), igual que el embudo por vía
+        if r >= 3: e["sql"] += 1
     # Orgánico y social SON canales de inbound: se mueven de outbound → inbound
     for _inb_lbl in ("SEO Orgánico", "Social orgánico"):
         if _inb_lbl in chan_ext_out:
