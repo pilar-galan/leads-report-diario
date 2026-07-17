@@ -2332,7 +2332,7 @@ def render_exec(d):
         rows = ""
         for i, (lab, val) in enumerate(st):
             w = max(5, round(val / top * 100))
-            conv = "" if i == 0 else f'<span class="mf-c">{pv(val, st[i-1][1])}</span>'
+            conv = "" if i == 0 else f'<span class="mf-c">{pv(val, top)}</span>'
             rows += (f'<div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(val)}</b> {lab}</div>'
                      f'<div class="mf-bar"><div class="mf-fill" style="width:{w}%"></div></div>{conv}</div>')
         return rows
@@ -2360,7 +2360,7 @@ def render_exec(d):
     fn_rows = ""
     for i, (lab, val, emp) in enumerate(stages):
         w = max(6, round(val / top * 100))
-        lconv = "" if i == 0 else f'<div class="lconv">↳ {pv(val, stages[i-1][1])} vs {stages[i-1][0].lower()}</div>'
+        lconv = "" if i == 0 else f'<div class="lconv">↳ {pv(val, top)} del total de contactos</div>'
         empcell = f'<div class="empc">🏢 {fmt(emp)}<span>empresas</span></div>' if emp is not None else '<div class="empc"></div>'
         fn_rows += (f'<div class="row"><div class="lab"><div class="n tnum">{fmt(val)}</div>'
                     f'<div class="t">{lab}</div>{lconv}</div><div class="track">'
@@ -2631,7 +2631,7 @@ def render_exec(d):
   <div class="q">02 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Funnel comercial <span class="tot">· global</span></h2>
   <div class="sd">Volumen <b>global</b> de contactos por etapa (inbound + outbound), con la <b>conversión</b> desde la etapa anterior. Debajo, el desglose por vía: <b>Inbound (Agustín)</b>, <b>Outbound (Juanma)</b> y <b>Brain (Alex)</b>.</div>
-  <div class="fnhead2"><span>📊 Volumen de contactos · conversión paso a paso (mismo dato comparable)</span><span class="rr">🏢 Empresas / negocios</span></div>
+  <div class="fnhead2"><span>📊 Volumen de contactos · % sobre el total de contactos</span><span class="rr">🏢 Empresas / negocios</span></div>
   <div class="fn">{fn_rows}</div>
   <div class="note">El flujo de barras es siempre <b>volumen de contactos</b> para que sea comparable. A partir de Oportunidad, el negocio se mide por <b>empresa</b> (chip azul): son unidades distintas, por eso no bajan «en proporción».</div>
 
