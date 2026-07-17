@@ -794,21 +794,19 @@ def main():
         created = (p.get("createdate") or "")[:10]
         src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         deals.append({"stage": stage, "created": created})
-        # Reuniones en pipeline HOY: deals abiertos del pipeline de ventas en etapas que convierten (no descarte)
-        if pid in SALES_PL and stage not in STAGE_WON:
-            _sl = STAGE_ID_LABEL.get(stage, "Otra")
-            if not any(x in _sl.lower() for x in _EXC_STG_PIPE):
-                reun_pipe[_sl] = reun_pipe.get(_sl, 0) + 1
+        # Estos deals YA son abiertos (hs_is_closed=false), así que no hace falta excluir por "won":
+        # solo dejamos fuera etapas Freemium/descarte por su etiqueta.
+        _sl = STAGE_ID_LABEL.get(stage, "Otra")
+        _stg_ok = not any(x in _sl.lower() for x in _EXC_STG_PIPE)
+        if pid in SALES_PL and _stg_ok:
+            reun_pipe[_sl] = reun_pipe.get(_sl, 0) + 1
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
-        # Pipeline EJECUTIVO: oportunidad abierta de inbound en el pipeline de VENTAS (SIN filtro de fecha:
-        # un deal abierto sigue vivo aunque se creara antes del 1 ene)
-        if (pid in SALES_PL and stage not in STAGE_WON and is_marketing(src, d1) and not excluded):
-            _sl2 = STAGE_ID_LABEL.get(stage, "Otra")
-            if not any(x in _sl2.lower() for x in _EXC_STG_PIPE):
-                try: _amt = float(p.get("amount") or 0)
-                except (TypeError, ValueError): _amt = 0.0
-                _ic, _lb = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
-                exec_opp.append({"name": name, "stage_label": _sl2, "amount": _amt, "channel": _lb, "icon": _ic})
+        # Pipeline EJECUTIVO: oportunidad abierta de inbound en el pipeline de VENTAS (sin filtro de fecha)
+        if pid in SALES_PL and _stg_ok and is_marketing(src, d1) and not excluded:
+            try: _amt = float(p.get("amount") or 0)
+            except (TypeError, ValueError): _amt = 0.0
+            _ic, _lb = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
+            exec_opp.append({"name": name, "stage_label": _sl, "amount": _amt, "channel": _lb, "icon": _ic})
         if is_marketing(src, d1) and created >= fstart and not excluded:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
