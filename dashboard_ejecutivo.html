@@ -95,6 +95,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mf-fill{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand))}
 .iocol.out .mf-fill{background:linear-gradient(90deg,#a5741f,var(--warn))}
 .mf-c{font-size:10.5px;color:var(--mut);font-weight:700;text-align:right}
+.io-val{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2);font-size:11.5px;color:var(--mut);font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.io-val span{font-size:17px;font-weight:800;color:var(--brand)}
+.iocol.out .io-val span{color:var(--warn)} .iocol.brain .io-val span{color:var(--violet)}
 @media(max-width:820px){.io3{grid-template-columns:1fr}}
 .src-chip{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin:2px 4px 2px 0}
 .src-chip.in{background:rgba(111,240,162,.16);color:var(--brand);border:1px solid var(--brand-d)}
@@ -278,7 +281,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>17 Jul 2026 · 11:38</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>17 Jul 2026 · 11:44</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -289,11 +292,11 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
     El número grande es el total de contactos; debajo, <b>in</b> (inbound · Agustín) y <b>out</b> (outbound · Juanma). En Oportunidades y Clientes el número grande es <b>volumen de contactos</b>; el nº de <b>empresas / negocios</b> va debajo para poder hacer match al buscarlos.</div>
   <div class="kg"><div class="kc"><div class="kl">Nuevos contactos</div><div class="kv tnum">1.946</div><div class="kt"><span class="trend down">▼ -25%</span><span class="trend down">+52</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 1.533 · out 413</span></div></div><div class="kc"><div class="kl">Leads</div><div class="kv tnum">1.881</div><div class="kt"><span class="trend down">▼ -44%</span><span class="trend down">+31</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 1.483 · out 398</span></div></div><div class="kc"><div class="kl">MQL</div><div class="kv tnum">651</div><div class="kt"><span class="trend down">▼ -57%</span><span class="trend down">+6</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 604 · out 47</span></div></div><div class="kc"><div class="kl">SQL</div><div class="kv tnum">210</div><div class="kt"><span class="trend down">▼ -37%</span><span class="trend down">+22</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 165 · out 45</span></div></div><div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">23</div><div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div><div class="kt" style="margin-top:5px;color:var(--ink2)">📞 18 teléfono · 📅 5 agenda</div></div><div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">107</div><div class="kt" style="color:var(--mut)">negocios vivos · ventas + Brain</div><div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">54 Sin asignar · 16 Juanma · 14 Álvaro · 12 Alex</div></div><div class="kc"><div class="kl">Oportunidades</div><div class="kv tnum">191</div><div class="kt"><span class="trend down">▼ -100%</span><span class="trend zero">+0</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span style="color:var(--mut)">· 91% de SQL</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 146 · out 45</span></div><div class="emprow">🏢 <span class="eb tnum">107</span> empresas / negocios</div></div><div class="kc"><div class="kl">Clientes</div><div class="kv tnum">69</div><div class="kt"><span class="trend up">▲ nuevo</span><span class="trend zero">+0</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span style="color:var(--mut)">· 36% de oport.</span></div><div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb 41 · out 28</span></div><div class="emprow">🏢 <span class="eb tnum">61</span> empresas / negocios</div></div></div>
   <div style="height:26px"></div>
-  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa</span></div>
+  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
   <div class="ratesbanner">
     <div class="rb-grid"><div class="rbc"><div class="rbl">Lead → MQL</div><div class="rbv tnum">35%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">MQL → SQL</div><div class="rbv tnum">32%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">SQL → Oportunidad</div><div class="rbv tnum">91%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">36%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">Cliente → Churn</div><div class="rbv tnum">—</div><div class="rbs">pendiente de conectar</div></div></div>
   </div>
-  <div class="fnote">Los <b>Freemium</b> (altas por la app) quedan <b>excluidos</b> del volumen de contactos y de todo el embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
+  <div class="fnote">* <b>¿Qué contactos no pasan a Lead?</b> Se excluyen del embudo la etapa «otros»: <b>0 internos (@gurusup)</b> y <b>178 pruebas/test</b>. Además, hay contactos que se crearon y luego se <b>eliminaron</b> (pruebas): tienen fecha de creación pero ya no existen en el CRM, por eso no se contabilizan. Los <b>Freemium</b> (altas por la app) también quedan fuera del embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
 
 <section>
@@ -304,18 +307,20 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
     <div class="iocol in">
       <div class="io-h">🟢 Inbound · <b>Agustín</b> <span class="io-tot tnum">1.533</span></div>
       <div class="mf"><div class="mf-row"><div class="mf-l"><b class="tnum">1.533</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div></div><div class="mf-row"><div class="mf-l"><b class="tnum">1.483</b> Leads</div><div class="mf-bar"><div class="mf-fill" style="width:97%"></div></div><span class="mf-c">97%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">604</b> MQL</div><div class="mf-bar"><div class="mf-fill" style="width:39%"></div></div><span class="mf-c">39%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">165</b> SQL</div><div class="mf-bar"><div class="mf-fill" style="width:11%"></div></div><span class="mf-c">11%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">146</b> Oportunidad</div><div class="mf-bar"><div class="mf-fill" style="width:10%"></div></div><span class="mf-c">10%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">41</b> Cliente</div><div class="mf-bar"><div class="mf-fill" style="width:5%"></div></div><span class="mf-c">3%</span></div></div>
+      <div class="io-val">💰 Valor estimado pipeline<span>€3.000</span></div>
     </div>
     <div class="iocol out">
       <div class="io-h">🟠 Outbound · <b>Juanma</b> <span class="io-tot tnum">413</span></div>
       <div class="mf"><div class="mf-row"><div class="mf-l"><b class="tnum">413</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div></div><div class="mf-row"><div class="mf-l"><b class="tnum">398</b> Leads</div><div class="mf-bar"><div class="mf-fill" style="width:96%"></div></div><span class="mf-c">96%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">47</b> MQL</div><div class="mf-bar"><div class="mf-fill" style="width:11%"></div></div><span class="mf-c">11%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">45</b> SQL</div><div class="mf-bar"><div class="mf-fill" style="width:11%"></div></div><span class="mf-c">11%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">45</b> Oportunidad</div><div class="mf-bar"><div class="mf-fill" style="width:11%"></div></div><span class="mf-c">11%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">28</b> Cliente</div><div class="mf-bar"><div class="mf-fill" style="width:7%"></div></div><span class="mf-c">7%</span></div></div>
+      <div class="io-val">💰 Valor estimado pipeline<span>€68.191</span></div>
     </div>
     <div class="iocol brain">
       <div class="io-h">🧠 Brain · <b>Alex</b> <span class="io-tot tnum">59</span></div>
       <div class="mf">
         <div class="mf-row"><div class="mf-l"><b class="tnum">59</b> Oportunidades abiertas</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
-        <div class="mf-row"><div class="mf-l"><b class="tnum">€115.000</b> Valor pipeline</div><div class="mf-bar"></div><span class="mf-c"></span></div>
       </div>
-      <div class="pend" style="margin-top:12px">⏳ Embudo completo de contactos <b>Brain / CX</b> (lead→cliente) pendiente de conectar; por ahora, oportunidades y valor del pipeline Brain.</div>
+      <div class="pend" style="margin-top:12px">⏳ Embudo completo de contactos <b>Brain / CX</b> (lead→cliente) pendiente de conectar.</div>
+      <div class="io-val">💰 Valor estimado pipeline<span>€115.000</span></div>
     </div>
   </div>
 </section>
@@ -435,16 +440,17 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 
 <section>
   <div class="q">10 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· inbound</span></h2>
-  <div class="sd">Clientes de <b>inbound</b> y su conversión desde oportunidad (mismo criterio que el KPI de arriba).</div>
+  <h2 class="sh">Clientes <span class="tot">· 69</span> · de dónde vienen</h2>
+  <div class="sd">Contactos en etapa <b>cliente</b>, separados por origen. La mayoría son <b>heredados</b> (cartera previa / comercial, fuente offline) que <b>aún no han entrado en el nuevo proceso</b> inbound/outbound; se irán incorporando.</div>
   <div class="cards">
-    <div class="stat ok"><div class="sv tnum">41</div><div class="sl">Clientes inbound (contactos)</div></div>
-    <div class="stat"><div class="sv tnum">35</div><div class="sl">Empresas / negocios inbound</div></div>
-    <div class="stat"><div class="sv tnum">28%</div><div class="sl">Conversión Oportunidad → Cliente (inbound)</div></div>
+    <div class="stat"><div class="sv tnum">69</div><div class="sl">Clientes totales (contactos)</div></div>
+    <div class="stat ok"><div class="sv tnum">41</div><div class="sl">🟢 Inbound (fuente identificada) · 35 empresas</div></div>
+    <div class="stat warn"><div class="sv tnum">28</div><div class="sl">🗂️ Heredados / comercial (offline) · 26 empresas</div></div>
     <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
   </div>
+  <div class="note">Los <b>heredados</b> son clientes de la cartera previa (fuente <i>offline</i>), no atribuibles al embudo inbound/outbound actual. Se mantienen aparte para no distorsionar la conversión del proceso nuevo; se irán migrando al proceso.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 11:38 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 11:44 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
