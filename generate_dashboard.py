@@ -781,6 +781,15 @@ def main():
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
     ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed", "amount",
         "hs_analytics_source", "hs_analytics_source_data_1", "hubspot_owner_id"])
+    # Churn REAL = cuentas del pipeline "Clientes" en etapa Churned/Dormidos (incluye cerradas)
+    try:
+        _churn_client_deals = fetch_all("deals", [
+            {"propertyName": "pipeline", "operator": "EQ", "value": "724590933"},
+            {"propertyName": "dealstage", "operator": "IN", "values": ["1367778337", "1177859668"]},
+        ], ["dealname", "dealstage"])
+    except Exception as e:
+        print(f"[churn] error: {e}", file=sys.stderr); _churn_client_deals = []
+    cli_churn_n = len(_churn_client_deals)
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
@@ -802,11 +811,17 @@ def main():
     _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
     brain_count = ventas_count = 0
     clientes_activos = 0   # cuentas de cliente activas = negocios abiertos en el pipeline "Clientes"
+    cli_inb_src = 0; cli_out_src = 0   # de dónde vienen los clientes activos (fuente real del negocio)
     CLIENTES_PL = "724590933"
+    CLI_CHURN_STAGES = ("1367778337", "1177859668")   # Churned · Dormidos/Inactivos
     for dl in all_deals:
         p = dl["properties"]
-        if p.get("pipeline") == CLIENTES_PL:
+        if p.get("pipeline") == CLIENTES_PL and p.get("dealstage") not in CLI_CHURN_STAGES:
             clientes_activos += 1
+            if is_marketing(p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""):
+                cli_inb_src += 1
+            else:
+                cli_out_src += 1
         name = clean_deal(p.get("dealname", "—")) or "—"
         if not valid_deal(p.get("dealname", "")):
             continue
@@ -1325,30 +1340,14 @@ def main():
     exec_extra["brain_value"] = brain_value
     exec_extra["inb_value"] = exec_extra.get("pipeline_value", 0)
     exec_extra["out_value"] = out_value
-    # ── Clientes: de dónde vienen · inbound + outbound (los clientes vienen de ambas vías) ──
-    cli_inb = [c for c in hist_fun if rank(c["lc"]) >= 5]      # inbound (embudo web/marketing)
-    cli_out = [c for c in hist_out_fun if rank(c["lc"]) >= 5]  # outbound (imports / sin origen / offline)
-    cli_all = cli_inb + cli_out
+    # ── Clientes: cuentas ACTIVAS del pipeline "Clientes" y de dónde vienen (fuente real del negocio) ──
     exec_extra["cli_split"] = {
-        "total": len(cli_all), "total_emp": len({compkey(c) for c in cli_all}),
-        "inbound": len(cli_inb), "inbound_emp": len({compkey(c) for c in cli_inb}),
-        "outbound": len(cli_out), "outbound_emp": len({compkey(c) for c in cli_out}),
+        "total": clientes_activos,
+        "inbound": cli_inb_src,
+        "outbound": cli_out_src,
     }
-    # ── Churn: contactos que ALGUNA VEZ fueron cliente y ya no lo son ──
-    # (etapa "Churn" del ciclo de vida no se usa; lo derivamos de quién pasó por "customer")
-    # Sin filtro de fecha: un cliente perdido puede ser anterior a la ventana del embudo.
-    try:
-        churn_raw = fetch_all("contacts", [
-            {"propertyName": "hs_v2_date_entered_customer", "operator": "HAS_PROPERTY"},
-            {"propertyName": "lifecyclestage", "operator": "NOT_IN", "values": ["customer", "evangelist"]},
-            {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
-        ], ["email", "associatedcompanyid", "company", "lifecyclestage"])
-    except Exception as e:
-        print(f"[churn] error: {e}", file=sys.stderr); churn_raw = []
-    churn_contacts = [c for c in churn_raw if not is_test(None, c["properties"].get("email") or "")]
-    churn_comps = {c["properties"].get("associatedcompanyid") for c in churn_contacts
-                   if c["properties"].get("associatedcompanyid")}
-    exec_extra["churn"] = {"contactos": len(churn_contacts), "empresas": len(churn_comps)}
+    # ── Churn REAL = cuentas de cliente que ya no lo son (etapa Churned/Dormidos del pipeline Clientes) ──
+    exec_extra["churn"] = {"empresas": cli_churn_n}
     exec_extra["clientes_activos"] = clientes_activos
 
     def peak_insight(items, pred, origin=True):
@@ -2469,11 +2468,11 @@ def render_exec(d):
         + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>'
-        + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">contactos que fueron cliente y ya no lo son</div>'
-        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</span> empresas asociadas</div></div>')
-    # tasa de churn = clientes perdidos / (clientes que han sido cliente alguna vez), en contactos
-    _churn_c = ex.get("churn", {}).get("contactos", 0)
+        + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">cuentas que fueron cliente y ya no lo son</div>'
+        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 pipeline Clientes · etapa Churned / Dormidos</div></div>')
+    # tasa de churn = cuentas perdidas / (cuentas que han sido cliente) — por cuenta/empresa
+    _churn_c = ex.get("churn", {}).get("empresas", 0)
     _cli_now = ex.get("cli_split", {}).get("total", 0)
     _churn_pct = pvf(_churn_c, _churn_c + _cli_now)
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
@@ -3022,8 +3021,6 @@ def render_exec(d):
       <div class="lvl-body">
         <div class="ph">SQLs de <b>paid media</b> (campañas de pago) que gestiona Agustín (su informe en vivo). Así están repartidos:</div>
         {agustin_html}
-        <div class="lvl-subh">Precualificación · del SQL a la oportunidad</div>
-        {agustin_flow_html}
       </div>
     </details>
 
@@ -3049,10 +3046,12 @@ def render_exec(d):
         <span class="chev">▶</span>
       </summary>
       <div class="lvl-body">
-        <div class="ph">Restantes tras sumar los de paid media (①) y los descartados (②): <b>{fmt(n3)} SQL sin fuente identificada</b>.</div>
-        <div class="sd" style="margin-top:0;font-size:12px">No significa que no sean de paid media: pueden ser <b>orgánicos, tráfico directo u otra vía</b> que no se identificó, pero que <b>sí tienen ≥3.000 consultas</b>. Desde el <b>9 jul</b> se decidió <b>precualificar automáticamente</b> para que solo lleguen los identificados; el motivo de descarte era el <b>volumen de consultas</b>, así que estos ahora <b>se tratan por mail</b>.</div>
+        <div class="ph"><b>Flujo automatizado desde el 9 jul</b> (para quitar fricción tras decidir que solo cualifican ≥3.000 consultas): quien entra por el <b>formulario de contacto web</b> con <b>≥3.000</b> → email a <b>Agustín</b>; con <b>&lt;3.000</b> → email automático de descarte.</div>
+        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
+        {agustin_flow_html}
+        <div class="sd" style="margin-top:8px;font-size:12px">Han entrado <b>{pq.get("ag_sql",0)}</b> por esta vía; <b>{pq.get("ag_descartados",0)}</b> se descartaron (no pasaron a ventas) y <b>{pq.get("ag_opp",0)}</b> se convirtieron en oportunidad.</div>
         <details class="razd" style="margin-top:14px">
-          <summary><span class="chev">▶</span> ✉️ Ver el circuito de mail y sus datos</summary>
+          <summary><span class="chev">▶</span> ✉️ &lt;3.000 consultas · circuito de mail de descarte</summary>
           <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
             {email_flow_html}
           </div>
@@ -3076,25 +3075,25 @@ def render_exec(d):
 
 <section>
   <div class="q">10 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("total_emp",0))} empresas</span> · de dónde vienen</h2>
-  <div class="sd">Contactos en etapa de ciclo de vida <b>cliente</b> ({fmt(ex.get("cli_split",{}).get("total",0))} contactos · {fmt(ex.get("cli_split",{}).get("total_emp",0))} empresas), separados por vía de origen. Los clientes vienen tanto de <b>inbound</b> como de <b>outbound</b>.</div>
+  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("total",0))} cuentas</span> · de dónde vienen</h2>
+  <div class="sd"><b>Cuentas de cliente activas</b> del pipeline «Clientes» (mismo dato que el KPI de arriba; excluye las que están en Churn/Dormidos). Fuente real del negocio (clasificada por <code>hs_analytics_source</code>): el total es la <b>suma de inbound + outbound</b>.</div>
   <div class="cards">
-    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total_emp",0))}</div><div class="sl">Empresas cliente · {fmt(ex.get("cli_split",{}).get("total",0))} contactos</div></div>
-    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · {fmt(ex.get("cli_split",{}).get("inbound_emp",0))} empresas</div></div>
-    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound · {fmt(ex.get("cli_split",{}).get("outbound_emp",0))} empresas</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Cuentas de cliente activas</div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · orgánico / paid / social</div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound / otros · offline · importación · integración · tráfico directo</div></div>
   </div>
-  <div class="note">Los clientes provienen de <b>ambas vías</b>: inbound (embudo web/marketing) y outbound (prospección / importaciones / offline). Se cuentan por <b>empresa</b> (varios contactos pueden pertenecer al mismo negocio de cliente).</div>
+  <div class="note">Dato real del pipeline «Clientes» ({fmt(ex.get("cli_split",{}).get("total",0))} cuentas). La mayoría entran por <b>outbound / offline / importación / integración de la app</b>; muy pocas por canales de <b>inbound</b> de marketing. Se cuenta por <b>cuenta/empresa</b> (los contactos con ciclo de vida «cliente» incluyen altas freemium de la app y no reflejan la cartera real).</div>
 </section>
 
 <section>
   <div class="q">11 · ¿Perdemos clientes?</div>
-  <h2 class="sh">Churn <span class="tot">· {fmt(ex.get("churn",{}).get("contactos",0))} contactos</span></h2>
-  <div class="sd"><b>Clientes que ya no lo son</b>: contactos que han estado en la etapa de ciclo de vida <b>cliente</b> (o han tenido un cliente asignado) y <b>ya no están en ella</b>.</div>
+  <h2 class="sh">Churn <span class="tot">· {fmt(ex.get("churn",{}).get("empresas",0))} cuentas</span></h2>
+  <div class="sd"><b>Clientes que ya no lo son</b>: cuentas del pipeline «Clientes» que han pasado a etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>.</div>
   <div class="cards">
-    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas asociadas</span></div></div>
-    <div class="stat"><div class="sv tnum">{_churn_pct}</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">% de los que fueron cliente</span></div></div>
+    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</div><div class="sl">🔻 Churn · cuentas de cliente perdidas<br><span style="color:var(--mut)">etapa Churned / Dormidos</span></div></div>
+    <div class="stat"><div class="sv tnum">{_churn_pct}</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">churn / (churn + clientes activos)</span></div></div>
   </div>
-  <div class="note">La etapa «Churn» del ciclo de vida no se usa en el CRM, así que el churn se <b>deriva</b> de quién pasó por la etapa «cliente» y ya no está en ella. La <b>tasa de churn</b> = churn / (churn + clientes actuales). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
+  <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
