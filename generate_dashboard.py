@@ -780,7 +780,10 @@ def main():
     all_deals = fetch_all("deals", [
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
     ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed", "amount",
-        "hs_analytics_source", "hs_analytics_source_data_1"])
+        "hs_analytics_source", "hs_analytics_source_data_1", "hubspot_owner_id"])
+    OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex"}
+    reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
+    brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
 
     def valid_deal(n):
         n = (n or "").lower()
@@ -809,8 +812,18 @@ def main():
         # solo dejamos fuera etapas Freemium/descarte por su etiqueta.
         _sl = STAGE_ID_LABEL.get((pid, stage), "Otra")
         _stg_ok = not any(x in _sl.lower() for x in _EXC_STG_PIPE)
+        _own = OWNER_NAME.get(str(p.get("hubspot_owner_id") or ""), "Otros")
+        _brain = is_brain_pl(pid)
         if pid in SALES_PL and _stg_ok:
             reun_pipe[_sl] = reun_pipe.get(_sl, 0) + 1
+        # Reuniones/negocios vivos en pipeline (ventas + brain), por persona
+        if (pid in SALES_PL or _brain) and _stg_ok:
+            reun_owner[_own] = reun_owner.get(_own, 0) + 1
+        # Brain: oportunidades abiertas y su valor
+        if _brain and _stg_ok:
+            brain_open += 1
+            try: brain_value += float(p.get("amount") or 0)
+            except (TypeError, ValueError): pass
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
         # Pipeline EJECUTIVO: oportunidad abierta de inbound en el pipeline de VENTAS (sin filtro de fecha)
         if pid in SALES_PL and _stg_ok and is_marketing(src, d1) and not excluded:
@@ -1152,7 +1165,7 @@ def main():
     trends["mql"] = trend7(ch_mqlc[1])
     trends["sql"] = trend7(ch_sqls[1])
     exec_extra["svg_mql_m"] = svg_exec_month(*ch_mqlc, labels, "#57e08a")
-    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sqls, labels, "#f5b544")
+    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql, labels, "#f5b544")   # SQL alcanzados (rank>=3) · crece todo el año
     exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
     exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
     # Nota de pico estacional: si un mes supera claramente la mediana, ¿de qué canal vino?
@@ -1197,6 +1210,7 @@ def main():
         return bool((c.get("company") or "").strip()) or has_corp(c)
     # SIN Freemium: el total de contactos y agregados del ejecutivo excluyen etapa Freemium
     hist_nf = [c for c in hist_fun if not is_free(c)]
+    hist_out_fun = [c for c in hist_out if c["created_full"] >= funnel_iso and not is_free(c)]
     exec_extra["total_contactos"] = len(hist_nf)
     q_tot = len(hist_nf) or 1
     exec_extra["quality"] = {
@@ -1229,6 +1243,23 @@ def main():
         if r >= 5: e["cli_c"] += 1
     chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
     exec_extra["chan_matrix"] = chan_matrix
+    # Rendimiento por canal · OUTBOUND (contactos de fuentes no-inbound)
+    def _ochl(c):
+        s = (c.get("src") or "").upper()
+        if is_import(c.get("src"), c.get("d1")): return "Importaciones"
+        if s == "OFFLINE": return "Offline / manual"
+        if not s: return "Sin asignar"
+        return classify_channel(c.get("src"), c.get("d1"))[0]
+    chan_ext_out = {}
+    for c in hist_out_fun:
+        lbl = _ochl(c)
+        e = chan_ext_out.setdefault(lbl, {"contactos": 0, "leads": 0, "mql": 0, "sql": 0})
+        e["contactos"] += 1
+        r = rank(c["lc"])
+        if r >= 1: e["leads"] += 1
+        if r >= 2: e["mql"] += 1
+        if c["lc"] in SQL_STAGES: e["sql"] += 1
+    exec_extra["chan_matrix_out"] = sorted(chan_ext_out.items(), key=lambda x: -x[1]["contactos"])
     # ── Pipeline de ventas · oportunidades abiertas de INBOUND (exec_opp, sin filtro de fecha) ──
     exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in exec_opp)
     exec_extra["pipeline_count"] = len(exec_opp)
@@ -1244,7 +1275,6 @@ def main():
     # Lead Ads por red (Meta/LinkedIn) desde el desglose de origen
     exec_extra["leadads"] = origin.get("leadads", [])
     # ── OUTBOUND (Juanma) · embudo de contactos de fuentes no-inbound (imports / sin origen) ──
-    hist_out_fun = [c for c in hist_out if c["created_full"] >= funnel_iso and not is_free(c)]
     def _of(pred): return sum(1 for c in hist_out_fun if pred(c))
     exec_extra["out"] = {
         "contactos": len(hist_out_fun),
@@ -1256,6 +1286,10 @@ def main():
         "opp_emp": len({compkey(c) for c in hist_out_fun if rank(c["lc"]) >= 4}),
         "cli_emp": len({compkey(c) for c in hist_out_fun if rank(c["lc"]) >= 5}),
     }
+    exec_extra["reun_owner"] = sorted(reun_owner.items(), key=lambda x: -x[1])
+    exec_extra["reun_owner_total"] = sum(reun_owner.values())
+    exec_extra["brain_open"] = brain_open
+    exec_extra["brain_value"] = brain_value
 
     def peak_insight(items, pred, origin=True):
         """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
@@ -2043,12 +2077,12 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 /* banner de tasas de conversión (claro, corta visualmente) */
 .ratesbanner{background:linear-gradient(135deg,#eefff7 0%,#d6f7e6 55%,#c3f0dd 100%);border-radius:18px;padding:22px 26px;margin:2px 0;box-shadow:0 8px 40px rgba(87,224,138,.14)}
 .divbanner{display:flex;gap:18px;align-items:center;margin:12px 0;padding:22px 26px;border-radius:18px;
-  background:linear-gradient(120deg,#123a2a 0%,#0e2f26 60%,#0d2733 100%);border:1px solid var(--brand-d);
-  box-shadow:0 10px 40px rgba(87,224,138,.16)}
+  background:linear-gradient(120deg,#6ff0a2 0%,#57e08a 55%,#34d399 100%);border:1px solid #8ff7bb;
+  box-shadow:0 12px 44px rgba(87,224,138,.35)}
 .divbanner .db-l{font-size:34px}
-.divbanner .db-t{font-size:clamp(18px,2.6vw,24px);font-weight:800;color:var(--ink)}
-.divbanner .db-t span{color:var(--brand)}
-.divbanner .db-s{font-size:13px;color:var(--ink2);margin-top:4px;max-width:80ch}
+.divbanner .db-t{font-size:clamp(18px,2.6vw,24px);font-weight:800;color:#052012}
+.divbanner .db-t span{color:#0a3d28}
+.divbanner .db-s{font-size:13px;color:#0d3d29;margin-top:4px;max-width:80ch;font-weight:500}
 /* inbound vs outbound dos columnas */
 .io3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:22px}
 .iocol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:18px}
@@ -2066,6 +2100,11 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .iocol.out .mf-fill{background:linear-gradient(90deg,#a5741f,var(--warn))}
 .mf-c{font-size:10.5px;color:var(--mut);font-weight:700;text-align:right}
 @media(max-width:820px){.io3{grid-template-columns:1fr}}
+.src-chip{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin:2px 4px 2px 0}
+.src-chip.in{background:rgba(111,240,162,.16);color:var(--brand);border:1px solid var(--brand-d)}
+.src-chip.out{background:rgba(255,202,92,.16);color:var(--warn);border:1px solid #a5741f}
+.src-chip.cx{background:rgba(104,209,245,.16);color:var(--sky);border:1px solid #1f7f96}
+.src-chip.br{background:rgba(200,166,255,.16);color:var(--violet);border:1px solid #6a4fa0}
 .rb-title{font-size:13px;font-weight:800;color:var(--brand);margin:4px 0 10px;letter-spacing:.01em}
 .rb-title span{color:var(--mut);font-weight:600}
 .rb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -2117,6 +2156,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mx-cell.mut .v{color:var(--mut);font-weight:700}
 .mx-row.mx-tot{background:rgba(111,240,162,.08);border-color:var(--line2)}
 .mx-row.mx-tot .c1 .nm{color:var(--brand);font-weight:800}
+.mx-sep{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px 4px;color:var(--brand)}
+.mx-sep.out{color:var(--warn)}
+.mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
 .mxd{background:transparent;border:none;padding:0}
 .mxd>summary{list-style:none;cursor:pointer} .mxd>summary::-webkit-details-marker{display:none}
 .mx-cell.op-clk{cursor:pointer} .mx-cell.op-clk .emp{color:var(--sky)}
@@ -2276,9 +2318,9 @@ def render_exec(d):
         if "contest" in s: return "contestado"
         if "align" in s: return "alineación"
         return (s[:12] or "otra")
-    # Reuniones en pipeline que aportan valor y son de INBOUND = oportunidades abiertas inbound por etapa
-    reun_pipe_break = " · ".join(f'{c} {_short_stage(l)}' for l, c in ex.get("stage_dist", [])[:5]) or "—"
-    reun_pipe_tot = ex.get("pipeline_count", 0)
+    # Reuniones en pipeline = negocios vivos (ventas + brain) por persona
+    reun_pipe_break = " · ".join(f'{c} {esc(o)}' for o, c in ex.get("reun_owner", [])[:4]) or "—"
+    reun_pipe_tot = ex.get("reun_owner_total", ex.get("pipeline_count", 0))
 
     # ---------- 1 · EXECUTIVE SUMMARY ----------
     def kpi(lab, val, t, sub):
@@ -2309,7 +2351,7 @@ def render_exec(d):
         f'<div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
         + f'<div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">{fmt(reun_pipe_tot)}</div>'
-        f'<div class="kt" style="color:var(--mut)">oportunidades vivas de inbound · por etapa</div>'
+        f'<div class="kt" style="color:var(--mut)">negocios vivos · ventas + Brain</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div></div>'
         + kpi_emp_io("Oportunidades", g_opp, g_opp_e, tr["opp"], opp_ci, ob["opp"], f'{pvf(g_opp, g_sql)} de SQL')
         + kpi_emp_io("Clientes", g_cli, g_cli_e, tr["cli"], cli_ci, ob["cli"], f'{pvf(g_cli, g_opp)} de oport.'))
@@ -2343,7 +2385,7 @@ def render_exec(d):
     # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
     charts = [
         ("MQL", mql_d, ex["svg_mql_m"], ex.get("note_mql", "")),
-        ("SQL", sql_d, ex["svg_sql_m"], ex.get("note_sql", "")),
+        ("SQL alcanzados", cum["sql"], ex["svg_sql_m"], ex.get("note_sql", "")),
         ("Oportunidades", opp_e, ex["svg_opp_m"], ex.get("note_opp", "")),
         ("Clientes", cli_e, ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
@@ -2401,15 +2443,38 @@ def render_exec(d):
     t_o = sum(len(v) for v in dbc_m.values())
     mx_total = (
         '<div class="mx-row mx-tot">'
-        '<div class="c1"><span class="nm">TOTAL</span></div>'
+        '<div class="c1"><span class="nm">Total inbound</span></div>'
         + cell(t_c) + cell(t_l) + cell(t_m) + cell(t_s, cls="hi") + cell(t_o)
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o, t_c)}</span></div>'
+        + '</div>')
+    # OUTBOUND rows + total global
+    cmo = ex.get("chan_matrix_out", [])
+    mx_rows_out = ""
+    for lbl, e in cmo:
+        mx_rows_out += (
+            '<div class="mx-row mx-ob">'
+            f'<div class="c1"><span class="nm">{esc(lbl)}</span></div>'
+            + cell(e["contactos"]) + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
+            + '<div class="mx-cell mut"><span class="v">—</span></div>'
+            + '<div class="mx-cell"><span class="p">outbound</span></div>'
+            + '</div>')
+    oc_c = sum(e["contactos"] for _, e in cmo); oc_l = sum(e["leads"] for _, e in cmo)
+    oc_m = sum(e["mql"] for _, e in cmo); oc_s = sum(e["sql"] for _, e in cmo)
+    sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
+    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (Juanma)</div>' if cmo else ''
+    g_total = (
+        '<div class="mx-row mx-tot">'
+        '<div class="c1"><span class="nm">TOTAL GLOBAL</span></div>'
+        + cell(t_c + oc_c) + cell(t_l + oc_l) + cell(t_m + oc_m) + cell(t_s + oc_s, cls="hi") + cell(t_o)
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o, t_c + oc_c)}</span></div>'
         + '</div>')
     matrix_html = (
         '<div class="mxwrap"><div class="matrix">'
         '<div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span>'
         '<span>MQL</span><span>SQL</span><span>Oport. (negocios)</span><span>Contacto→Op.</span></div>'
-        + mx_rows + mx_total + '</div></div>')
+        + sep_in + mx_rows + mx_total
+        + sep_out + mx_rows_out
+        + g_total + '</div></div>')
 
     # ---------- 24H (sin Freemium: volumen = lead+MQL+SQL) ----------
     def nn(e): return e.get("lead", 0) + e.get("mql", 0) + e.get("sql", 0)
@@ -2617,7 +2682,9 @@ def render_exec(d):
 <section style="padding-top:30px;margin-top:16px">
   <div class="q">01 · ¿Cuánto negocio está entrando? · GLOBAL</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b> — incluye <b>inbound, outbound, atención al cliente (CX) y Brain</b>. El número grande es el total de contactos; debajo, <b>in</b> (inbound · Agustín) y <b>out</b> (outbound · Juanma). En Oportunidades y Clientes el número grande es <b>volumen de contactos</b>; el nº de <b>empresas / negocios</b> va debajo para poder hacer match al buscarlos.</div>
+  <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b>, incluye:
+    <span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span><span class="src-chip cx">💬 Atención al cliente (CX)</span><span class="src-chip br">🧠 Brain</span>.
+    El número grande es el total de contactos; debajo, <b>in</b> (inbound · Agustín) y <b>out</b> (outbound · Juanma). En Oportunidades y Clientes el número grande es <b>volumen de contactos</b>; el nº de <b>empresas / negocios</b> va debajo para poder hacer match al buscarlos.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa</span></div>
@@ -2629,12 +2696,8 @@ def render_exec(d):
 
 <section>
   <div class="q">02 · ¿Dónde está cada contacto?</div>
-  <h2 class="sh">Funnel comercial <span class="tot">· global</span></h2>
-  <div class="sd">Volumen <b>global</b> de contactos por etapa (inbound + outbound), con la <b>conversión</b> desde la etapa anterior. Debajo, el desglose por vía: <b>Inbound (Agustín)</b>, <b>Outbound (Juanma)</b> y <b>Brain (Alex)</b>.</div>
-  <div class="fnhead2"><span>📊 Volumen de contactos · % sobre el total de contactos</span><span class="rr">🏢 Empresas / negocios</span></div>
-  <div class="fn">{fn_rows}</div>
-  <div class="note">El flujo de barras es siempre <b>volumen de contactos</b> para que sea comparable. A partir de Oportunidad, el negocio se mide por <b>empresa</b> (chip azul): son unidades distintas, por eso no bajan «en proporción».</div>
-
+  <h2 class="sh">Embudos por vía <span class="tot">· Inbound · Outbound · Brain</span></h2>
+  <div class="sd">Desglose del embudo por vía. Cada columna es su volumen de <b>contactos</b> por etapa y el % <b>sobre su total de contactos</b>. <b>Inbound → Agustín</b> · <b>Outbound → Juanma</b> · <b>Brain → Alex</b>.</div>
   <div class="io3">
     <div class="iocol in">
       <div class="io-h">🟢 Inbound · <b>Agustín</b> <span class="io-tot tnum">{fmt(total_nf)}</span></div>
@@ -2645,11 +2708,14 @@ def render_exec(d):
       <div class="mf">{out_fn}</div>
     </div>
     <div class="iocol brain">
-      <div class="io-h">🧠 Brain · <b>Alex</b> <span class="io-tot tnum">{fmt(d.get("brain_count", 0))}</span></div>
-      <div class="pend" style="margin:0">⏳ Embudo de <b>Brain / CX</b> (contactos → cliente y % de conversión) <b>pendiente de conectar</b>. Por ahora: {fmt(d.get("brain_count", 0))} oportunidades en el pipeline Brain.</div>
+      <div class="io-h">🧠 Brain · <b>Alex</b> <span class="io-tot tnum">{fmt(ex.get("brain_open", 0))}</span></div>
+      <div class="mf">
+        <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidades abiertas</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
+        <div class="mf-row"><div class="mf-l"><b class="tnum">{("€"+fmt(round(ex.get("brain_value",0)))) if ex.get("brain_value") else "—"}</b> Valor pipeline</div><div class="mf-bar"></div><span class="mf-c"></span></div>
+      </div>
+      <div class="pend" style="margin-top:12px">⏳ Embudo completo de contactos <b>Brain / CX</b> (lead→cliente) pendiente de conectar; por ahora, oportunidades y valor del pipeline Brain.</div>
     </div>
   </div>
-  <div class="note">Inbound = contactos que entran por un canal de adquisición identificado (los trabaja Agustín). Outbound = fuentes no-inbound (offline/importaciones/integraciones, sin origen), los trabaja Juanma. El % es la conversión de cada etapa a la anterior dentro de su vía.</div>
 </section>
 
 <section>
@@ -2661,8 +2727,8 @@ def render_exec(d):
 
 <section>
   <div class="q">04 · ¿Qué canal genera negocio real?</div>
-  <h2 class="sh">Rendimiento por canal <span class="tot">· {fmt(cm_tot)}</span> contactos</h2>
-  <div class="sd">Cómo rinde cada canal de inbound marketing del contacto al negocio (acumulado desde el 1 de enero, sin Freemium). Todo son <b>contactos</b>; en Oportunidad solo los que tienen un <b>negocio asociado en el pipeline</b>. Última columna: <b>conversión contacto → oportunidad</b>. La fila TOTAL suma al total de contactos.</div>
+  <h2 class="sh">Rendimiento por canal <span class="tot">· global</span></h2>
+  <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b> y <b style="color:var(--warn)">🟠 Outbound</b>, con su total y el <b>TOTAL GLOBAL</b> al final. En Oportunidad solo los que tienen negocio asociado; última columna: <b>conversión contacto → oportunidad</b>.</div>
   {matrix_html}
 </section>
 
@@ -2767,11 +2833,12 @@ def render_exec(d):
 
 <section>
   <div class="q">10 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· {fmt(cli_e)}</span> empresas</h2>
-  <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
+  <h2 class="sh">Clientes <span class="tot">· inbound</span></h2>
+  <div class="sd">Clientes de <b>inbound</b> y su conversión desde oportunidad (mismo criterio que el KPI de arriba).</div>
   <div class="cards">
-    <div class="stat ok"><div class="sv tnum">{fmt(cli_e)}</div><div class="sl">Clientes (empresas)</div></div>
-    <div class="stat"><div class="sv tnum">{pv(cli_c, opp_c)}</div><div class="sl">Conversión Oportunidad → Cliente (contactos)</div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(cli_ci)}</div><div class="sl">Clientes inbound (contactos)</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(cli_ei)}</div><div class="sl">Empresas / negocios inbound</div></div>
+    <div class="stat"><div class="sv tnum">{pvf(cli_ci, opp_ci)}</div><div class="sl">Conversión Oportunidad → Cliente (inbound)</div></div>
     <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
   </div>
 </section>
