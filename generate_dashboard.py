@@ -871,7 +871,7 @@ def main():
                 if is_import(src, d1):        _olb = "Importaciones"
                 elif _os == "OFFLINE":        _olb = "Offline / manual"
                 elif _os == "INTEGRATION":    _olb = "Integración de la app"
-                elif not _os:                 _olb = "Sin asignar"
+                elif not _os:                 _olb = "Comercial / prospección"
                 else:                          _olb = classify_channel(src, d1)[0]
                 exec_opp_out.append({"name": name, "stage_label": _sl, "channel": _olb})
         if is_marketing(src, d1) and created >= fstart and not excluded:
@@ -1289,7 +1289,7 @@ def main():
         s = (c.get("src") or "").upper()
         if is_import(c.get("src"), c.get("d1")): return "Importaciones"
         if s == "OFFLINE": return "Offline / manual"
-        if not s: return "Sin asignar"
+        if not s: return "Comercial / prospección"
         return classify_channel(c.get("src"), c.get("d1"))[0]
     chan_ext_out = {}
     for c in hist_out_fun:
@@ -1313,7 +1313,7 @@ def main():
     # Oportunidades OUTBOUND con negocio asociado, por fuente
     deals_by_chan_out = {}
     for dl in exec_opp_out:
-        deals_by_chan_out.setdefault(dl.get("channel", "Sin asignar"), []).append(
+        deals_by_chan_out.setdefault(dl.get("channel", "Comercial / prospección"), []).append(
             (dl.get("name", "—"), dl.get("stage_label", "—")))
     exec_extra["deals_by_chan_out"] = deals_by_chan_out
     # Empresas únicas con negocio (oportunidades reales): dedupe por nombre de negocio
@@ -2643,7 +2643,7 @@ def render_exec(d):
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o, oc_c)}</span></div>'
         + '</div>') if cmo_merged else ''
     sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
-    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (importaciones · offline · integración · sin asignar)</div>' if cmo_merged else ''
+    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (comercial/prospección · importaciones · offline · integración). «Comercial/prospección» = cuentas enterprise creadas a mano por ventas (Wingo, PC Componentes, Telefónica, Publicis…), sin fuente de marketing.</div>' if cmo_merged else ''
     # BRAIN · oportunidades de relaciones estratégicas (sin embudo de contactos conectado)
     brain_o = ex.get("brain_open", 0)
     sep_brain = '<div class="mx-sep br">🧠 Brain · relaciones estratégicas (solo oportunidades)</div>' if brain_o else ''
