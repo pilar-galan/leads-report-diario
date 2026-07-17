@@ -2614,7 +2614,7 @@ def render_exec(d):
   <div class="upd">Última actualización: <b>{esc(d["generado"])}</b> (hora España) · se refresca automáticamente</div>
 </header>
 
-<section style="border-top:none;padding-top:6px">
+<section style="padding-top:30px;margin-top:16px">
   <div class="q">01 · ¿Cuánto negocio está entrando? · GLOBAL</div>
   <h2 class="sh">Executive summary</h2>
   <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b> — incluye <b>inbound, outbound, atención al cliente (CX) y Brain</b>. El número grande es el total de contactos; debajo, <b>in</b> (inbound · Agustín) y <b>out</b> (outbound · Juanma). En Oportunidades y Clientes el número grande es <b>volumen de contactos</b>; el nº de <b>empresas / negocios</b> va debajo para poder hacer match al buscarlos.</div>
