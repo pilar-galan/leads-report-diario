@@ -2509,9 +2509,9 @@ def render_exec(d):
         f'<div class="kv tnum">{fmt(opp_real)}</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
         f'<div class="emprow">👤 <span class="eb tnum">{fmt(ex.get("opp_contactos",0))}</span> contactos con negocio asociado</div></div>'
-        + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">contactos de la cartera real · pipeline «Clientes»</div>'
-        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("clientes_activos",0))}</span> empresas cliente activas</div></div>'
+        + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">activos</span></div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">cuentas activas · pipeline «Clientes» (excl. churn/dormidos)</div>'
+        f'<div class="emprow">👤 <span class="eb tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</span> contactos asociados</div></div>'
         + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">han sido cliente desde el 1 ene y hoy ya no lo son</div>'
         f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</span> empresas (Churned / Dormidos)</div></div>')
@@ -2525,7 +2525,7 @@ def render_exec(d):
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
         ("SQL → Oportunidad", pvf(opp_real, g_sql), "negocios / SQL"),
-        ("Oportunidad → Cliente", pvf(ex.get("clientes_activos",0), opp_real), "clientes / negocios"),
+        ("Oportunidad → Cliente", pvf(ex.get("clientes_activos",0), opp_real), "empresas cliente / oportunidades"),
         ("Cliente → Churn", _churn_pct, "contactos · desde 1 ene"),
     ]
     rate_html = "".join(
@@ -2827,18 +2827,19 @@ def render_exec(d):
         '</div>')
     # NIVEL 2 · Descartados / descualificados (desc_tot, desc_html ya calculados arriba)
     n2 = desc_tot
-    # NIVEL 3 · Los que quedan (sin identificar) · a precualificar por mail
-    n3 = max(0, sql_total - n1 - n2)
+    # NIVEL 3 · Precualificación automatizada desde el 9 jul (formulario de contacto)
+    #   ≥3.000 consultas → Agustín (ag_sql) · <3.000 → mail de descalificación + listas (ag_lt3000)
+    ag_lt3000 = pq.get("ag_lt3000", 0)
+    n3 = pq.get("ag_sql", 0) + ag_lt3000
     email_flow_html = (
         '<div class="emailbox">'
-        f'<div class="eb tnum">{fmt(n3)}</div>'
-        '<div style="font-size:12px;color:var(--ink2);margin-top:6px">SQL sin fuente identificada · pasan al circuito de mail</div>'
+        f'<div class="eb tnum">{fmt(ag_lt3000)}</div>'
+        '<div style="font-size:12px;color:var(--ink2);margin-top:6px">contactos con &lt;3.000 consultas/mes (desde 9 jul)</div>'
         '</div>'
         '<ul class="elist" style="margin-top:14px">'
-        '<li>Email automático que pregunta/confirma el volumen de consultas</li>'
-        '<li>Los de <b>≥3.000</b> consultas → se cualifican y pasan a Agustín</li>'
-        '<li>Los de <b>&lt;3.000</b> → lista HubSpot «Descalificación SQL» (reactivables si crecen)</li>'
-        '<li>Razón de descarte registrada para el evolutivo</li>'
+        '<li>Mail automático de <b>descalificación</b></li>'
+        '<li>Se añaden a <b>listas de HubSpot</b> para reevaluar</li>'
+        '<li>Reactivables si su volumen de consultas crece</li>'
         '</ul>')
 
     # ---------- 10 · OPORTUNIDADES abiertas (pipeline real, sin clientes) ----------
@@ -3058,7 +3059,7 @@ def render_exec(d):
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">De los <b>{fmt(sql_total)} SQL</b>, cada uno cae en uno de <b>tres estados</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
+  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> en tres bloques: ① los de <b>paid media</b> (Agustín), ② los <b>descartados</b> y ③ la <b>precualificación automatizada desde el 9 jul</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
 
   <div class="sqlvl3">
     <details class="lvl">
@@ -3091,15 +3092,15 @@ def render_exec(d):
     <details class="lvl lvl3">
       <summary class="lvl-sum">
         <span class="lvl-badge b3">③</span>
-        <span class="lvl-tit">Los que quedan <small>· sin identificar → a mail</small></span>
+        <span class="lvl-tit">Precualificación auto <small>· desde 9 jul</small></span>
         <span class="lvl-n">{fmt(n3)}</span>
         <span class="chev">▶</span>
       </summary>
       <div class="lvl-body">
-        <div class="ph"><b>Flujo automatizado desde el 9 jul</b> (para quitar fricción tras decidir que solo cualifican ≥3.000 consultas): quien entra por el <b>formulario de contacto web</b> con <b>≥3.000</b> → email a <b>Agustín</b>; con <b>&lt;3.000</b> → email automático de descarte.</div>
+        <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
         <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
         <div class="vflow">
-          <div class="vstep"><b>{pq.get("ag_sql",0)}</b><span>SQL precualificados</span></div>
+          <div class="vstep"><b>{pq.get("ag_sql",0)}</b><span>precualificados</span></div>
           <div class="varr">↓ <span>{pv(ag_contact, ag_base)}</span></div>
           <div class="vstep"><b>{ag_contact}</b><span>agendados / llamados</span></div>
           <div class="varr">↓</div>
@@ -3107,14 +3108,14 @@ def render_exec(d):
           <div class="varr">↓ <span>{pv(pq.get("ag_opp",0), ag_base)}</span></div>
           <div class="vstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
         </div>
-        <details class="razd" style="margin-top:14px">
-          <summary><span class="chev">▶</span> ✉️ &lt;3.000 consultas · circuito de mail de descarte</summary>
-          <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
-            {email_flow_html}
-          </div>
+        <details class="razd" style="margin-top:12px">
+          <summary><span class="chev">▶</span> 🔴 {pq.get("ag_descartados",0)} descartados · ver razones</summary>
+          <div class="razbox">{raz_rows}</div>
         </details>
-        <div class="lvl-subh">Razones de descarte</div>
-        <div class="razbox">{raz_rows}</div>
+        <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
+        <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
+          {email_flow_html}
+        </div>
       </div>
     </details>
   </div>
