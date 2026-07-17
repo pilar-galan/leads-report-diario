@@ -2313,6 +2313,11 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
 .lvl .ph{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 .lvl-subh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin:16px 0 4px}
+.vflow{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.vstep{background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;align-items:baseline;gap:10px}
+.vstep b{font-size:22px;font-weight:800;color:var(--ink);line-height:1} .vstep span{font-size:11.5px;color:var(--mut)}
+.vstep.ok b{color:var(--brand)} .vstep.bad b{color:var(--bad)}
+.varr{text-align:center;color:var(--mut);font-size:13px;line-height:1} .varr span{color:var(--brand);font-weight:800;font-size:11px;margin-left:4px}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -2492,9 +2497,8 @@ def render_exec(d):
         f'<div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">{fmt(ag_contact)}</div>'
         f'<div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
-        + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos · con negocio</span></div>'
+        + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
         f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
-        f'<div class="kt"><span style="color:var(--mut)">contactos en etapa oportunidad con deal asociado</span></div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
         f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_empresas",0) or opp_real)}</span> empresas / negocios</div></div>'
         + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
@@ -3085,14 +3089,23 @@ def render_exec(d):
       <div class="lvl-body">
         <div class="ph"><b>Flujo automatizado desde el 9 jul</b> (para quitar fricción tras decidir que solo cualifican ≥3.000 consultas): quien entra por el <b>formulario de contacto web</b> con <b>≥3.000</b> → email a <b>Agustín</b>; con <b>&lt;3.000</b> → email automático de descarte.</div>
         <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
-        {agustin_flow_html}
-        <div class="sd" style="margin-top:8px;font-size:12px">Han entrado <b>{pq.get("ag_sql",0)}</b> por esta vía; <b>{pq.get("ag_descartados",0)}</b> se descartaron (no pasaron a ventas) y <b>{pq.get("ag_opp",0)}</b> se convirtieron en oportunidad.</div>
+        <div class="vflow">
+          <div class="vstep"><b>{pq.get("ag_sql",0)}</b><span>SQL precualificados</span></div>
+          <div class="varr">↓ <span>{pv(ag_contact, ag_base)}</span></div>
+          <div class="vstep"><b>{ag_contact}</b><span>agendados / llamados</span></div>
+          <div class="varr">↓</div>
+          <div class="vstep bad"><b>{pq.get("ag_descartados",0)}</b><span>descartados · no pasaron a ventas</span></div>
+          <div class="varr">↓ <span>{pv(pq.get("ag_opp",0), ag_base)}</span></div>
+          <div class="vstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
+        </div>
         <details class="razd" style="margin-top:14px">
           <summary><span class="chev">▶</span> ✉️ &lt;3.000 consultas · circuito de mail de descarte</summary>
           <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
             {email_flow_html}
           </div>
         </details>
+        <div class="lvl-subh">Razones de descarte</div>
+        <div class="razbox">{raz_rows}</div>
       </div>
     </details>
   </div>
