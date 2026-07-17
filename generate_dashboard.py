@@ -752,7 +752,9 @@ def main():
     try:
         pdefs = api_get("/crm/v3/pipelines/deals").get("results", [])
         PL_LABEL = {p["id"]: (p.get("label") or "") for p in pdefs}
-        STAGE_ID_LABEL = {s["id"]: (s.get("label") or "")
+        # etiqueta por (pipeline, etapa) — la id 'presentationscheduled' se reutiliza en varios
+        # pipelines con etiquetas distintas, así que NO se puede indexar solo por id de etapa
+        STAGE_ID_LABEL = {(p["id"], s["id"]): (s.get("label") or "")
                           for p in pdefs for s in p.get("stages", [])}
         # etapas que representan cierre ganado / cliente (no son oportunidad abierta)
         STAGE_WON = {s["id"] for p in pdefs for s in p.get("stages", [])
@@ -796,7 +798,7 @@ def main():
         deals.append({"stage": stage, "created": created})
         # Estos deals YA son abiertos (hs_is_closed=false), así que no hace falta excluir por "won":
         # solo dejamos fuera etapas Freemium/descarte por su etiqueta.
-        _sl = STAGE_ID_LABEL.get(stage, "Otra")
+        _sl = STAGE_ID_LABEL.get((pid, stage), "Otra")
         _stg_ok = not any(x in _sl.lower() for x in _EXC_STG_PIPE)
         if pid in SALES_PL and _stg_ok:
             reun_pipe[_sl] = reun_pipe.get(_sl, 0) + 1
@@ -817,7 +819,7 @@ def main():
             except (TypeError, ValueError):
                 amount = 0.0
             open_deals.append({"id": dl["id"], "name": name,
-                               "stage": stage, "stage_label": STAGE_ID_LABEL.get(stage, "Otra etapa"),
+                               "stage": stage, "stage_label": STAGE_ID_LABEL.get((pid, stage), "Otra etapa"),
                                "is_won": stage in STAGE_WON, "amount": amount, "pid": pid,
                                "is_sales": pid in SALES_PL,
                                "created": created, "channel": f"{icon} {label}",
