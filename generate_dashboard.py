@@ -819,18 +819,20 @@ def main():
     clientes_activos = 0   # cuentas de cliente activas = negocios abiertos en el pipeline "Clientes"
     cli_inb_src = 0; cli_out_src = 0   # de dónde vienen los clientes activos (fuente real del negocio)
     cli_contactos = 0      # volumen de contactos de la cartera real (contactos asociados a esas cuentas)
+    cli_inb_ct = 0; cli_out_ct = 0     # contactos de cliente por vía (inbound / outbound)
     CLIENTES_PL = "724590933"
     CLI_CHURN_STAGES = ("1367778337", "1177859668")   # Churned · Dormidos/Inactivos
     for dl in all_deals:
         p = dl["properties"]
         if p.get("pipeline") == CLIENTES_PL and p.get("dealstage") not in CLI_CHURN_STAGES:
             clientes_activos += 1
-            try: cli_contactos += int(p.get("num_associated_contacts") or 0)
-            except (TypeError, ValueError): pass
+            try: _nc = int(p.get("num_associated_contacts") or 0)
+            except (TypeError, ValueError): _nc = 0
+            cli_contactos += _nc
             if is_marketing(p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""):
-                cli_inb_src += 1
+                cli_inb_src += 1; cli_inb_ct += _nc
             else:
-                cli_out_src += 1
+                cli_out_src += 1; cli_out_ct += _nc
         name = clean_deal(p.get("dealname", "—")) or "—"
         if not valid_deal(p.get("dealname", "")):
             continue
@@ -1384,8 +1386,8 @@ def main():
     # ── Clientes: cuentas ACTIVAS del pipeline "Clientes" y de dónde vienen (fuente real del negocio) ──
     exec_extra["cli_split"] = {
         "total": clientes_activos, "contactos": cli_contactos,
-        "inbound": cli_inb_src,
-        "outbound": cli_out_src,
+        "inbound": cli_inb_src, "outbound": cli_out_src,
+        "inbound_ct": cli_inb_ct, "outbound_ct": cli_out_ct,
     }
     # ── Churn REAL = cuentas de cliente que ya no lo son (etapa Churned/Dormidos del pipeline Clientes) ──
     exec_extra["churn"] = {"empresas": cli_churn_n, "contactos": churn_contactos}
@@ -2516,13 +2518,15 @@ def render_exec(d):
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
         kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]) +
         # ── 2ª fila ──
-        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
-        f'<div class="kv tnum">{fmt(opp_real)}</div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
-        f'<div class="emprow">👤 <span class="eb tnum">{fmt(ex.get("opp_contactos",0))}</span> contactos con negocio asociado</div></div>'
-        + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">activos</span></div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">cuentas activas · pipeline «Clientes» (excl. churn/dormidos)</div>'
-        f'<div class="emprow">👤 <span class="eb tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</span> contactos asociados</div></div>'
+        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
+        f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos con deal asociado · ventas o Brain</div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(opp_real)}</span> empresas / negocios</div></div>'
+        + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">por contactos</span></div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos de la cartera real (excl. churn/dormidos)</div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("cli_split",{}).get("inbound_ct",0))} · out {fmt(ex.get("cli_split",{}).get("outbound_ct",0))} · 🧠 brain 0</span></div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("clientes_activos",0))}</span> empresas cliente</div></div>'
         + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">han sido cliente desde el 1 ene y hoy ya no lo son</div>'
         f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</span> empresas (Churned / Dormidos)</div></div>')
