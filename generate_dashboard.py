@@ -1134,6 +1134,37 @@ def main():
     exec_extra["svg_sql_m"] = svg_exec_month(*ch_sqls, labels, "#f5b544")
     exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
     exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
+    # Nota de pico estacional: si un mes supera claramente la mediana, ¿de qué canal vino?
+    from collections import Counter as _Ctr
+    def spike_note(pred, keyf=None):
+        mtot, mchan, seen = {}, {}, set()
+        for it in hist:
+            if it["created"] in idx and pred(it):
+                if keyf:
+                    k = keyf(it)
+                    if k in seen: continue
+                    seen.add(k)
+                mo = it["created"][:7]
+                mtot[mo] = mtot.get(mo, 0) + 1
+                mchan.setdefault(mo, _Ctr())[classify_channel(it["src"], it["d1"])[0]] += 1
+            elif keyf:  # asegurar dedupe global aunque el pred filtre
+                pass
+        if len(mtot) < 2:
+            return "* Aún sin histórico suficiente para detectar estacionalidad."
+        vals = sorted(mtot.values())
+        med = vals[len(vals) // 2] or 1
+        mo_max = max(mtot, key=lambda m: mtot[m]); n = mtot[mo_max]
+        mes = MESES[int(mo_max[5:7]) - 1]
+        if n >= max(med * 1.5, med + 3):
+            ch, cn = mchan[mo_max].most_common(1)[0]
+            return (f'* Pico en <b>{mes}</b> (+{n}, ~{round(n/med,1)}× la media mensual), sobre todo por '
+                    f'<b>{esc(ch)}</b> ({round(cn/n*100)}%): volumen no lineal, de una acción/estacional.')
+        return "* Crecimiento sostenido, sin picos estacionales marcados."
+    exec_extra["note_mql"] = spike_note(lambda c: not is_free(c) and rank(c["lc"]) >= 1
+                                        and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
+    exec_extra["note_sql"] = spike_note(lambda c: c["lc"] in SQL_STAGES)
+    exec_extra["note_opp"] = spike_note(lambda c: c["lc"] == "opportunity", compkey)
+    exec_extra["note_cli"] = spike_note(lambda c: c["lc"] == "customer", compkey)
     # Calidad del dato (sobre contactos desde 1 ene): email corporativo, teléfono, empresa
     FREE_MAIL = {"gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "yahoo.es", "icloud.com",
                  "hotmail.es", "live.com", "outlook.es", "protonmail.com", "gmx.com", "aol.com",
@@ -1935,7 +1966,7 @@ h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
 .tag{font-size:11px;color:var(--ink2);border:1px solid var(--line2);padding:6px 12px;border-radius:999px;background:rgba(111,240,162,.05)}
 .xhead h1{font-size:clamp(28px,4.6vw,44px);font-weight:800;margin-bottom:12px}
 .xhead h1 span{color:var(--brand);text-shadow:0 0 30px rgba(111,240,162,.35)}
-.xhead p{color:var(--ink2);font-size:14.5px;max-width:66ch}
+.xhead p{color:var(--ink2);font-size:15.5px;line-height:1.6;max-width:900px;text-wrap:pretty}
 .xhead .upd{margin-top:16px;font-size:12px;color:var(--mut)}
 .xhead .upd b{color:var(--ink2)}
 details.dictx{margin-left:auto;background:rgba(111,240,162,.06);border:1px solid var(--line2);border-radius:12px;overflow:hidden}
@@ -1976,6 +2007,19 @@ section{padding:50px 0;border-top:1px solid var(--line)}
 .chartc .cbig{font-size:32px;font-weight:800;color:var(--brand);line-height:1;letter-spacing:-.02em}
 .chartc .cn{font-size:11px;color:var(--mut);margin-bottom:8px}
 .chartc svg{width:100%;height:auto;display:block}
+.chartc .cfoot{font-size:11px;line-height:1.5;color:var(--mut);margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+.chartc .cfoot b{color:var(--ink2)}
+/* banner de tasas de conversión (claro, corta visualmente) */
+.ratesbanner{background:linear-gradient(135deg,#eefff7 0%,#d6f7e6 55%,#c3f0dd 100%);border-radius:18px;padding:22px 26px;margin:2px 0;box-shadow:0 8px 40px rgba(87,224,138,.14)}
+.ratesbanner .rb-head{color:#0d5136;font-weight:800;font-size:12.5px;margin-bottom:16px;letter-spacing:.01em}
+.ratesbanner .rb-head b{color:#0a3d28}
+.rb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.rbc{text-align:center;padding:6px 8px;position:relative}
+.rbc:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:44%;color:#7bc9a1;font-weight:800;font-size:14px}
+.rbc .rbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:#1f7a4d}
+.rbc .rbv{font-size:34px;font-weight:800;color:#0e3d2a;line-height:1;margin:8px 0 3px;letter-spacing:-.02em}
+.rbc .rbs{font-size:10px;color:#3a6b54}
+@media(max-width:560px){.rbc:not(:last-child)::after{display:none}}
 .fnhead2{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--mut);margin-bottom:10px;font-weight:700}
 .fnhead2 .rr{color:var(--sky)}
 .fn{display:flex;flex-direction:column;gap:9px}
@@ -2184,21 +2228,22 @@ def render_exec(d):
         ("Cliente → Churn", "—", "pendiente de conectar"),
     ]
     rate_html = "".join(
-        f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{val}</div>'
-        f'<div class="kt" style="color:var(--mut)">{sub}</div></div>'
+        f'<div class="rbc"><div class="rbl">{lab}</div><div class="rbv tnum">{val}</div>'
+        f'<div class="rbs">{sub}</div></div>'
         for lab, val, sub in rates)
 
     # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
     charts = [
-        ("MQL", mql_d, ex["svg_mql_m"]),
-        ("SQL", sql_d, ex["svg_sql_m"]),
-        ("Oportunidades", opp_e, ex["svg_opp_m"]),
-        ("Clientes", cli_e, ex["svg_cli_m"]),
+        ("MQL", mql_d, ex["svg_mql_m"], ex.get("note_mql", "")),
+        ("SQL", sql_d, ex["svg_sql_m"], ex.get("note_sql", "")),
+        ("Oportunidades", opp_e, ex["svg_opp_m"], ex.get("note_opp", "")),
+        ("Clientes", cli_e, ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
     charts_html = "".join(
         f'<div class="chartc"><div class="chd"><h3>{lab}</h3><span class="cbig tnum">{fmt(val)}</span></div>'
-        f'<div class="cn">acumulado diario · 1 ene → hoy · el nº sobre la línea es el total al cierre de cada mes</div>{svg}</div>'
-        for lab, val, svg in charts)
+        f'<div class="cn">acumulado diario · 1 ene → hoy · el nº sobre la línea es el total al cierre de cada mes</div>{svg}'
+        f'<div class="cfoot">{note}</div></div>'
+        for lab, val, svg, note in charts)
 
     # ---------- 3 · FUNNEL ----------
     stages = [("Contactos", total_nf, None), ("Leads", cum["lead"], None), ("MQL", mql_d, None),
@@ -2461,8 +2506,10 @@ def render_exec(d):
   <div class="sd wide"><b>Volumen total de contactos y sus etapas desde el 1 de enero.</b> En pequeño, los <b style="color:var(--brand)">nuevos de esta última semana</b> con flecha <b style="color:var(--ok)">verde</b> o <b style="color:var(--bad)">roja</b> según crezca o no frente a la semana anterior. En Oportunidades y Clientes se separa además el nº de <b>empresas / negocios</b>.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
-  <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
-  <div class="kg rates">{rate_html}</div>
+  <div class="ratesbanner">
+    <div class="rb-head">📊 Tasas de conversión del embudo · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
+    <div class="rb-grid">{rate_html}</div>
+  </div>
   <div class="fnote">Los <b>Freemium</b> (altas por la app) quedan <b>excluidos</b> del volumen de contactos y de todo el embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
 
