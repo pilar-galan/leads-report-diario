@@ -780,6 +780,8 @@ def main():
     deals = []            # todos los deals válidos abiertos (para reunión)
     open_deals = []       # abiertos marketing (para tabla pipeline)
     total_pipeline = 0    # volumen total de negocios abiertos en el pipeline
+    reun_pipe = {}        # reuniones VIVAS en el pipeline de ventas, por etapa (a día de hoy, cualquier fuente)
+    _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
     brain_count = ventas_count = 0
     for dl in all_deals:
         p = dl["properties"]
@@ -791,6 +793,11 @@ def main():
         created = (p.get("createdate") or "")[:10]
         src, d1 = p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""
         deals.append({"stage": stage, "created": created})
+        # Reuniones en pipeline HOY: deals abiertos del pipeline de ventas en etapas que convierten (no descarte)
+        if pid in SALES_PL and stage not in STAGE_WON:
+            _sl = STAGE_ID_LABEL.get(stage, "Otra")
+            if not any(x in _sl.lower() for x in _EXC_STG_PIPE):
+                reun_pipe[_sl] = reun_pipe.get(_sl, 0) + 1
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
         if is_marketing(src, d1) and created >= fstart and not excluded:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
@@ -1113,6 +1120,8 @@ def main():
     exec_extra["reun_by_stage"] = reun_by_stage
     exec_extra["reun_total"] = sum(reun_by_stage.values())
     exec_extra["reun_trend"] = trend7(ch_reun_all[1])
+    exec_extra["reun_pipe"] = sorted(reun_pipe.items(), key=lambda x: -x[1])
+    exec_extra["reun_pipe_total"] = sum(reun_pipe.values())
     # Charts ejecutivos con totales por mes · series que CUADRAN con los KPIs:
     #   MQL = de facto (leads con contenido consumido) ~604 · SQL = etapa SQL-consultoría ~161
     ch_mqlc = series(hist, lambda c: not is_free(c) and rank(c["lc"]) >= 1
@@ -2131,6 +2140,18 @@ def render_exec(d):
     mql_d = d["origin"].get("content", cum["mql"])
     sql_d = d["sql_disp"].get("total", cum["sql"])
     total_nf = ex.get("total_contactos", cum["total"])   # contactos SIN Freemium
+    pq = d["preq"]
+    ag_contact = pq.get("ag_calls_unique", 0) + pq.get("ag_reuniones", 0)   # llamadas + agendas de Agustín
+    def _short_stage(s):
+        s = (s or "").lower()
+        if "discov" in s: return "discovery"
+        if "demo" in s or "reuni" in s: return "demo"
+        if "needs" in s or "valid" in s: return "needs valid."
+        if "best" in s: return "best case"
+        if "contest" in s: return "contestado"
+        if "align" in s: return "alineación"
+        return (s[:12] or "otra")
+    reun_pipe_break = " · ".join(f'{c} {_short_stage(l)}' for l, c in ex.get("reun_pipe", [])[:5]) or "—"
 
     # ---------- 1 · EXECUTIVE SUMMARY ----------
     def kpi(lab, val, t, sub):
@@ -2145,11 +2166,15 @@ def render_exec(d):
         kpi("Leads", cum["lead"], tr["leads"], f'{pv(cum["lead"], total_nf)} de contactos') +
         kpi("MQL", mql_d, tr["mql"], f'{pv(mql_d, cum["lead"])} de leads · contenido') +
         kpi("SQL", sql_d, tr["sql"], f'{pv(sql_d, cum["lead"])} de leads · consultoría') +
-        f'<div class="kc"><div class="kl">Reuniones</div><div class="kv tnum">{fmt(reun_total)}</div>'
-        f'<div class="kt">{arrow(reun_tr)}</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--mut)">🔍 {reun_st.get("Discovery",0)} discovery · 🎬 {reun_st.get("Demo",0)} demo</div></div>' +
-        kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], f'{pv(opp_c, sql_d)} de SQL · contactos') +
-        kpi_emp("Clientes", cli_c, cli_e, tr["cli"], f'{pv(cli_c, opp_c)} de oport. · contactos'))
+        # ── 2ª fila ──
+        f'<div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">{fmt(ag_contact)}</div>'
+        f'<div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div>'
+        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
+        + f'<div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">{fmt(ex.get("reun_pipe_total",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">negocios vivos hoy · etapas que convierten</div>'
+        f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div></div>'
+        + kpi_emp("Oportunidades", opp_c, opp_e, tr["opp"], f'{pvf(opp_c, sql_d)} de SQL · contactos')
+        + kpi_emp("Clientes", cli_c, cli_e, tr["cli"], f'{pvf(cli_c, opp_c)} de oport. · contactos'))
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
         ("Lead → MQL", pv(mql_d, cum["lead"]), "sobre contactos"),
