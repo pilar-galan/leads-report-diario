@@ -2633,11 +2633,13 @@ def render_exec(d):
     t_c = sum(e["contactos"] for _, e in cm); t_l = sum(e["leads"] for _, e in cm)
     t_m = sum(e["mql"] for _, e in cm); t_s = sum(e["sql"] for _, e in cm)
     t_o = sum(len(v) for v in dbc_m.values())
+    # Conversión contacto→op.: solo negocios que provienen de contactos (excluye fuentes sin contactos)
+    t_o_wc = sum(len(dbc_m.get(lbl, [])) for lbl, e in cm_merged if e["contactos"] > 0)
     mx_total = (
         '<div class="mx-row mx-tot">'
         '<div class="c1"><span class="nm">Total inbound</span></div>'
         + cell(t_c) + cell(t_l) + cell(t_m) + cell(t_s, cls="hi") + cell(t_o)
-        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o, t_c)}</span></div>'
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o_wc, t_c)}</span></div>'
         + '</div>')
     # OUTBOUND rows + total outbound + total global
     cmo = ex.get("chan_matrix_out", [])
@@ -2669,11 +2671,12 @@ def render_exec(d):
     oc_c = sum(e["contactos"] for _, e in cmo); oc_l = sum(e["leads"] for _, e in cmo)
     oc_m = sum(e["mql"] for _, e in cmo); oc_s = sum(e["sql"] for _, e in cmo)
     oc_o = sum(len(v) for v in dbco_m.values())   # TODAS las oportunidades outbound con negocio (cuadra con el KPI)
+    oc_o_wc = sum(len(dbco_m.get(lbl, [])) for lbl, e in cmo_merged if e["contactos"] > 0)
     mx_total_out = (
         '<div class="mx-row mx-tot">'
         '<div class="c1"><span class="nm">Total outbound</span></div>'
         + cell(oc_c) + cell(oc_l) + cell(oc_m) + cell(oc_s, cls="hi") + cell(oc_o)
-        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o, oc_c)}</span></div>'
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o_wc, oc_c)}</span></div>'
         + '</div>') if cmo_merged else ''
     sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
     sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound</div>' if cmo_merged else ''
@@ -2692,7 +2695,7 @@ def render_exec(d):
         '<div class="mx-row mx-gtot">'
         '<div class="c1"><span class="nm">TOTAL GLOBAL</span><span class="gsub">inbound + outbound + brain</span></div>'
         + cell(t_c + oc_c) + cell(t_l + oc_l) + cell(t_m + oc_m) + cell(t_s + oc_s, cls="hi") + cell(g_opp_all)
-        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o + oc_o, t_c + oc_c)}</span></div>'
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o_wc + oc_o_wc, t_c + oc_c)}</span></div>'
         + '</div>')
     matrix_html = (
         '<div class="mxwrap"><div class="matrix">'
