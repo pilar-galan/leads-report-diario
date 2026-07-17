@@ -2451,13 +2451,17 @@ def render_exec(d):
         + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>')
+    # tasa de churn = clientes perdidos / (clientes que han sido cliente alguna vez), en contactos
+    _churn_c = ex.get("churn", {}).get("contactos", 0)
+    _cli_now = ex.get("cli_split", {}).get("total", 0)
+    _churn_pct = pvf(_churn_c, _churn_c + _cli_now)
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
         ("SQL → Oportunidad", pvf(g_opp, g_sql), "global · sobre contactos"),
         ("Oportunidad → Cliente", pvf(g_cli, g_opp), "global · sobre contactos"),
-        ("Cliente → Churn", "—", "pendiente de conectar"),
+        ("Cliente → Churn", _churn_pct, "% de los que fueron cliente"),
     ]
     rate_html = "".join(
         f'<div class="rbc"><div class="rbl">{lab}</div><div class="rbv tnum">{val}</div>'
@@ -3032,10 +3036,19 @@ def render_exec(d):
     <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total_emp",0))}</div><div class="sl">Empresas cliente · {fmt(ex.get("cli_split",{}).get("total",0))} contactos</div></div>
     <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · {fmt(ex.get("cli_split",{}).get("inbound_emp",0))} empresas</div></div>
     <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound · {fmt(ex.get("cli_split",{}).get("outbound_emp",0))} empresas</div></div>
-    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos que fueron cliente y ya no lo son<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas asociadas</span></div></div>
   </div>
-  <div class="note">Los clientes provienen de <b>ambas vías</b>: inbound (embudo web/marketing) y outbound (prospección / importaciones / offline). Se cuentan por <b>empresa</b> (varios contactos pueden pertenecer al mismo negocio de cliente).
-  <br><br>🔻 <b>Churn:</b> la etapa «Churn» del ciclo de vida no se usa, así que lo derivamos de <b>quién pasó por la etapa «cliente» y ya no está en ella</b> ({fmt(ex.get("churn",{}).get("contactos",0))} contactos · {fmt(ex.get("churn",{}).get("empresas",0))} empresas). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
+  <div class="note">Los clientes provienen de <b>ambas vías</b>: inbound (embudo web/marketing) y outbound (prospección / importaciones / offline). Se cuentan por <b>empresa</b> (varios contactos pueden pertenecer al mismo negocio de cliente).</div>
+</section>
+
+<section>
+  <div class="q">11 · ¿Perdemos clientes?</div>
+  <h2 class="sh">Churn <span class="tot">· {fmt(ex.get("churn",{}).get("contactos",0))} contactos</span></h2>
+  <div class="sd"><b>Clientes que ya no lo son</b>: contactos que han estado en la etapa de ciclo de vida <b>cliente</b> (o han tenido un cliente asignado) y <b>ya no están en ella</b>.</div>
+  <div class="cards">
+    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas asociadas</span></div></div>
+    <div class="stat"><div class="sv tnum">{_churn_pct}</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">% de los que fueron cliente</span></div></div>
+  </div>
+  <div class="note">La etapa «Churn» del ciclo de vida no se usa en el CRM, así que el churn se <b>deriva</b> de quién pasó por la etapa «cliente» y ya no está en ella. La <b>tasa de churn</b> = churn / (churn + clientes actuales). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
