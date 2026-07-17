@@ -70,8 +70,15 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .chartc .cfoot b{color:var(--ink2)}
 /* banner de tasas de conversión (claro, corta visualmente) */
 .ratesbanner{background:linear-gradient(135deg,#eefff7 0%,#d6f7e6 55%,#c3f0dd 100%);border-radius:18px;padding:22px 26px;margin:2px 0;box-shadow:0 8px 40px rgba(87,224,138,.14)}
-.ratesbanner .rb-head{color:#0d5136;font-weight:800;font-size:12.5px;margin-bottom:16px;letter-spacing:.01em}
-.ratesbanner .rb-head b{color:#0a3d28}
+.divbanner{display:flex;gap:18px;align-items:center;margin:12px 0;padding:22px 26px;border-radius:18px;
+  background:linear-gradient(120deg,#123a2a 0%,#0e2f26 60%,#0d2733 100%);border:1px solid var(--brand-d);
+  box-shadow:0 10px 40px rgba(87,224,138,.16)}
+.divbanner .db-l{font-size:34px}
+.divbanner .db-t{font-size:clamp(18px,2.6vw,24px);font-weight:800;color:var(--ink)}
+.divbanner .db-t span{color:var(--brand)}
+.divbanner .db-s{font-size:13px;color:var(--ink2);margin-top:4px;max-width:80ch}
+.rb-title{font-size:13px;font-weight:800;color:var(--brand);margin:4px 0 10px;letter-spacing:.01em}
+.rb-title span{color:var(--mut);font-weight:600}
 .rb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 .rbc{text-align:center;padding:6px 8px;position:relative}
 .rbc:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:44%;color:#7bc9a1;font-weight:800;font-size:14px}
@@ -159,6 +166,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .elist{list-style:none;text-align:left;font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:9px}
 .elist li{padding-left:20px;position:relative} .elist li::before{content:"→";position:absolute;left:0;color:var(--warn)}
 .fstep.bad2 b{color:var(--bad)}
+.sqlintro{list-style:none;margin:0 0 20px;display:flex;flex-direction:column;gap:10px}
+.sqlintro li{font-size:13px;line-height:1.55;color:var(--ink2);padding:12px 15px;background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:10px}
+.sqlintro li b{color:var(--ink)}
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
@@ -199,10 +209,10 @@ details.chdeals .dl span{font-size:11px;background:rgba(104,209,245,.1);border:1
 .tbl td{padding:12px;border-bottom:1px solid rgba(44,84,67,.4);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
 .tbl td.hi{color:var(--brand);font-weight:800} .tbl td.cv{color:var(--sky);font-weight:800}
-.strat{display:flex;gap:16px;align-items:center;margin-top:20px;padding:18px 22px;border-radius:16px;
-  background:linear-gradient(135deg,rgba(111,240,162,.16),rgba(104,209,245,.08));border:1px solid var(--line2);
-  box-shadow:0 6px 30px rgba(87,224,138,.10);font-size:13.5px;line-height:1.55;color:var(--ink)}
-.strat .strat-i{font-size:30px;flex:0 0 auto}
+.strat{display:flex;gap:18px;align-items:center;margin-top:20px;padding:20px 24px;border-radius:16px;
+  background:linear-gradient(135deg,#123a2a,#0f2f32);border:1px solid var(--brand-d);border-left:4px solid var(--brand);
+  box-shadow:0 8px 34px rgba(87,224,138,.18);font-size:14px;line-height:1.6;color:#eafff4}
+.strat .strat-i{font-size:34px;flex:0 0 auto}
 .strat b{color:var(--brand)}
 .note{background:linear-gradient(150deg,rgba(111,240,162,.12),rgba(111,240,162,.02));border:1px solid var(--line2);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);margin-top:18px}
 .note b{color:var(--brand)}
@@ -241,7 +251,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> de negocio</h1>
   <p>Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>17 Jul 2026 · 09:13</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>17 Jul 2026 · 09:29</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="border-top:none;padding-top:6px">
@@ -250,8 +260,8 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="sd wide"><b>Volumen total de contactos y sus etapas desde el 1 de enero.</b> En pequeño, los <b style="color:var(--brand)">nuevos de esta última semana</b> con flecha <b style="color:var(--ok)">verde</b> o <b style="color:var(--bad)">roja</b> según crezca o no frente a la semana anterior. En Oportunidades y Clientes se separa además el nº de <b>empresas / negocios</b>.</div>
   <div class="kg"><div class="kc"><div class="kl">Nuevos contactos</div><div class="kv tnum">1.533</div><div class="kt"><span class="trend down">▼ -25%</span><span class="trend down">+52</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span>· sin Freemium (solo embudo comercial)</span></div></div><div class="kc"><div class="kl">Leads</div><div class="kv tnum">1.483</div><div class="kt"><span class="trend down">▼ -44%</span><span class="trend down">+31</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span>· interés real</span></div></div><div class="kc"><div class="kl">MQL</div><div class="kv tnum">604</div><div class="kt"><span class="trend down">▼ -57%</span><span class="trend down">+6</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span>· contenido consumido</span></div></div><div class="kc"><div class="kl">SQL</div><div class="kv tnum">165</div><div class="kt"><span class="trend down">▼ -37%</span><span class="trend down">+22</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span>· consultoría</span></div></div><div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">23</div><div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div><div class="kt" style="margin-top:5px;color:var(--ink2)">📞 18 teléfono · 📅 5 agenda</div></div><div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">11</div><div class="kt" style="color:var(--mut)">oportunidades vivas de inbound · por etapa</div><div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">8 needs valid. · 3 discovery</div></div><div class="kc"><div class="kl">Oportunidades</div><div class="kv tnum">146</div><div class="kt"><span class="trend down">▼ -100%</span><span class="trend zero">+0</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span>· 88% de SQL · inbound</span></div><div class="emprow">🏢 <span class="eb tnum">139</span> empresas / negocios</div></div><div class="kc"><div class="kl">Clientes</div><div class="kv tnum">41</div><div class="kt"><span class="trend up">▲ nuevo</span><span class="trend zero">+0</span><span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span><span>· 28% de oport. · inbound</span></div><div class="emprow">🏢 <span class="eb tnum">35</span> empresas / negocios</div></div></div>
   <div style="height:26px"></div>
+  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa</span></div>
   <div class="ratesbanner">
-    <div class="rb-head">📊 Tasas de conversión del embudo · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
     <div class="rb-grid"><div class="rbc"><div class="rbl">Lead → MQL</div><div class="rbv tnum">41%</div><div class="rbs">sobre contactos</div></div><div class="rbc"><div class="rbl">MQL → SQL</div><div class="rbv tnum">27%</div><div class="rbs">sobre contactos</div></div><div class="rbc"><div class="rbl">SQL → Oportunidad</div><div class="rbv tnum">92%</div><div class="rbs">sobre contactos</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">27%</div><div class="rbs">sobre contactos</div></div><div class="rbc"><div class="rbl">Cliente → Churn</div><div class="rbv tnum">—</div><div class="rbs">pendiente de conectar</div></div></div>
   </div>
   <div class="fnote">Los <b>Freemium</b> (altas por la app) quedan <b>excluidos</b> del volumen de contactos y de todo el embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
@@ -280,26 +290,21 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="mxwrap"><div class="matrix"><div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span><span>MQL</span><span>SQL</span><span>Oport. (negocios)</span><span>Contacto→Op.</span></div><details class="mxd"><summary class="mx-row"><div class="c1"><span class="nm">Tráfico directo</span><div class="bt"><div class="bf" style="width:100%"></div></div></div><div class="mx-cell "><span class="v tnum">809</span><span class="p">53%</span></div><div class="mx-cell "><span class="v tnum">781</span></div><div class="mx-cell "><span class="v tnum">146</span></div><div class="mx-cell hi"><span class="v tnum">25</span></div><div class="mx-cell op-clk"><span class="v tnum">3</span><span class="emp">🏢 ver ▾</span></div><div class="mx-cell cv"><span class="v tnum"><1%</span><span class="p">contacto→op.</span></div></summary><div class="mx-deals"><b>Oportunidades de Tráfico directo:</b> <span>Som Mobilitat · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span><span>COS Global Services · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span><span>Grupo Asesban · DISCOVERY &amp; LEAD QUALIFICATION</span></div></details><details class="mxd"><summary class="mx-row"><div class="c1"><span class="nm">SEO Orgánico</span><div class="bt"><div class="bf" style="width:40%"></div></div></div><div class="mx-cell "><span class="v tnum">324</span><span class="p">21%</span></div><div class="mx-cell "><span class="v tnum">302</span></div><div class="mx-cell "><span class="v tnum">247</span></div><div class="mx-cell hi"><span class="v tnum">40</span></div><div class="mx-cell op-clk"><span class="v tnum">1</span><span class="emp">🏢 ver ▾</span></div><div class="mx-cell cv"><span class="v tnum"><1%</span><span class="p">contacto→op.</span></div></summary><div class="mx-deals"><b>Oportunidades de SEO Orgánico:</b> <span>BEINETTI · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span></div></details><div class="mx-row"><div class="c1"><span class="nm">Otros</span><div class="bt"><div class="bf" style="width:14%"></div></div></div><div class="mx-cell "><span class="v tnum">114</span><span class="p">7%</span></div><div class="mx-cell "><span class="v tnum">113</span></div><div class="mx-cell "><span class="v tnum">108</span></div><div class="mx-cell hi"><span class="v tnum">0</span></div><div class="mx-cell "><span class="v tnum">0</span><span class="p">—</span></div><div class="mx-cell cv"><span class="v tnum">0%</span><span class="p">contacto→op.</span></div></div><details class="mxd"><summary class="mx-row"><div class="c1"><span class="nm">Google Ads</span><div class="bt"><div class="bf" style="width:14%"></div></div></div><div class="mx-cell "><span class="v tnum">113</span><span class="p">7%</span></div><div class="mx-cell "><span class="v tnum">111</span></div><div class="mx-cell "><span class="v tnum">30</span></div><div class="mx-cell hi"><span class="v tnum">69</span></div><div class="mx-cell op-clk"><span class="v tnum">3</span><span class="emp">🏢 ver ▾</span></div><div class="mx-cell cv"><span class="v tnum">3%</span><span class="p">contacto→op.</span></div></summary><div class="mx-deals"><b>Oportunidades de Google Ads:</b> <span>Netberry · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span><span>Centro Médico Lámar · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span><span>Skydive Spain · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span></div></details><details class="mxd"><summary class="mx-row"><div class="c1"><span class="nm">Social Ads</span><div class="bt"><div class="bf" style="width:13%"></div></div></div><div class="mx-cell "><span class="v tnum">105</span><span class="p">7%</span></div><div class="mx-cell "><span class="v tnum">105</span></div><div class="mx-cell "><span class="v tnum">39</span></div><div class="mx-cell hi"><span class="v tnum">19</span></div><div class="mx-cell op-clk"><span class="v tnum">2</span><span class="emp">🏢 ver ▾</span></div><div class="mx-cell cv"><span class="v tnum">2%</span><span class="p">contacto→op.</span></div></summary><div class="mx-deals"><b>Oportunidades de Social Ads:</b> <span>CréditoPorTuCoche · DISCOVERY &amp; LEAD QUALIFICATION</span><span>Youtax · DISCOVERY &amp; LEAD QUALIFICATION</span></div></details><div class="mx-row"><div class="c1"><span class="nm">Chat web</span><div class="bt"><div class="bf" style="width:4%"></div></div></div><div class="mx-cell "><span class="v tnum">30</span><span class="p">2%</span></div><div class="mx-cell "><span class="v tnum">28</span></div><div class="mx-cell "><span class="v tnum">11</span></div><div class="mx-cell hi"><span class="v tnum">0</span></div><div class="mx-cell "><span class="v tnum">0</span><span class="p">—</span></div><div class="mx-cell cv"><span class="v tnum">0%</span><span class="p">contacto→op.</span></div></div><div class="mx-row"><div class="c1"><span class="nm">Social orgánico</span><div class="bt"><div class="bf" style="width:2%"></div></div></div><div class="mx-cell "><span class="v tnum">20</span><span class="p">1%</span></div><div class="mx-cell "><span class="v tnum">19</span></div><div class="mx-cell "><span class="v tnum">16</span></div><div class="mx-cell hi"><span class="v tnum">0</span></div><div class="mx-cell "><span class="v tnum">0</span><span class="p">—</span></div><div class="mx-cell cv"><span class="v tnum">0%</span><span class="p">contacto→op.</span></div></div><details class="mxd"><summary class="mx-row"><div class="c1"><span class="nm">Eventos / Campañas</span><div class="bt"><div class="bf" style="width:1%"></div></div></div><div class="mx-cell "><span class="v tnum">11</span><span class="p">1%</span></div><div class="mx-cell "><span class="v tnum">11</span></div><div class="mx-cell "><span class="v tnum">3</span></div><div class="mx-cell hi"><span class="v tnum">3</span></div><div class="mx-cell op-clk"><span class="v tnum">2</span><span class="emp">🏢 ver ▾</span></div><div class="mx-cell cv"><span class="v tnum">18%</span><span class="p">contacto→op.</span></div></summary><div class="mx-deals"><b>Oportunidades de Eventos / Campañas:</b> <span>Weekendesk · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span><span>DVD DENTAL SOLUTION · NEEDS VALIDATION &amp; SOLUTION ALIGNMENT</span></div></details><div class="mx-row"><div class="c1"><span class="nm">Referido</span><div class="bt"><div class="bf" style="width:1%"></div></div></div><div class="mx-cell "><span class="v tnum">7</span><span class="p">0%</span></div><div class="mx-cell "><span class="v tnum">6</span></div><div class="mx-cell "><span class="v tnum">4</span></div><div class="mx-cell hi"><span class="v tnum">2</span></div><div class="mx-cell "><span class="v tnum">0</span><span class="p">—</span></div><div class="mx-cell cv"><span class="v tnum">0%</span><span class="p">contacto→op.</span></div></div><div class="mx-row mx-tot"><div class="c1"><span class="nm">TOTAL</span></div><div class="mx-cell "><span class="v tnum">1.533</span></div><div class="mx-cell "><span class="v tnum">1.476</span></div><div class="mx-cell "><span class="v tnum">604</span></div><div class="mx-cell hi"><span class="v tnum">158</span></div><div class="mx-cell "><span class="v tnum">11</span></div><div class="mx-cell cv"><span class="v tnum"><1%</span></div></div></div></div>
 </section>
 
-<section>
-  <div class="q">05 · ¿Qué ha entrado hoy?</div>
-  <h2 class="sh">Nuevos contactos · últimas 24h</h2>
-  <div class="sd">Volumen del periodo y su reparto por canal (se listan todos los canales inbound; hoy algunos pueden estar a 0). Bajo cada volumen, el desglose lead / MQL / SQL.</div>
-  <div class="bigblock">
-    <div class="bn2 tnum">6</div>
-    <div class="bx">contactos nuevos en las <b>últimas 24h</b><br>desglose por canal de entrada →</div>
-  </div>
-  <div class="bars"><div class="brow big24"><span class="bl">🌿 SEO Orgánico</span><div class="bt"><div class="bf" style="width:100%"></div></div><span class="bn tnum">3<span class="sub">3 SQL</span></span></div><div class="brow big24"><span class="bl">🔗 Tráfico directo</span><div class="bt"><div class="bf" style="width:67%"></div></div><span class="bn tnum">2<span class="sub">2 SQL</span></span></div><div class="brow big24"><span class="bl">📣 Social Ads</span><div class="bt"><div class="bf" style="width:33%"></div></div><span class="bn tnum">1<span class="sub">1 SQL</span></span></div><div class="brow big24 zero"><span class="bl">💬 Chat web</span><div class="bt"><div class="bf" style="width:0%"></div></div><span class="bn tnum">0</span></div><div class="brow big24 zero"><span class="bl">🎪 Eventos / Campañas</span><div class="bt"><div class="bf" style="width:0%"></div></div><span class="bn tnum">0</span></div><div class="brow big24 zero"><span class="bl">🔍 Google Ads</span><div class="bt"><div class="bf" style="width:0%"></div></div><span class="bn tnum">0</span></div><div class="brow big24 zero"><span class="bl">🌱 Social orgánico</span><div class="bt"><div class="bf" style="width:0%"></div></div><span class="bn tnum">0</span></div></div>
-</section>
+<div class="divbanner">
+  <div class="db-l">🔎</div>
+  <div><div class="db-t">Estado y desglose de contactos · <span>Inbound</span></div>
+  <div class="db-s">A partir de aquí, el detalle del embudo de inbound marketing: calidad del dato, origen, contenido, SQL, pipeline y cierre.</div></div>
+</div>
 
 <section>
-  <div class="q">06 · ¿Qué calidad tiene el dato?</div>
+  <div class="q">05 · ¿Qué calidad tiene el dato?</div>
   <h2 class="sh">Calidad de los nuevos contactos</h2>
   <div class="sd">Sobre el total de contactos desde el 1 de enero: completitud del dato (email corporativo, teléfono, empresa) y preferencia de contacto declarada.</div>
   <div class="q3"><div class="qcol"><div class="qi">✉️</div><div class="qv tnum">763</div><div class="ql">Email corporativo</div><div class="qp">50%</div></div><div class="qcol"><div class="qi">📞</div><div class="qv tnum">715</div><div class="ql">Con teléfono</div><div class="qp">47%</div></div><div class="qcol"><div class="qi">🏢</div><div class="qv tnum">1.034</div><div class="ql">Empresa identificada</div><div class="qp">67%</div></div><div class="qcol"><div class="qi">🗣️</div><div class="qv tnum">20</div><div class="ql">Preferencia de contacto</div><div class="qp">1% lo indican</div><div class="qsplit">📞 8 <small>(40%)</small> · ✉️ 12 <small>(60%)</small></div><div class="qnote">campo del formulario desde el 9 jul</div></div></div>
 </section>
 
 <section>
-  <div class="q">07 · ¿Qué pasa con los contactos en etapa lead?</div>
+  <div class="q">06 · ¿Qué pasa con los contactos en etapa lead?</div>
   <h2 class="sh">Estado de los contactos · etapa lead <span class="tot">· 1.476</span></h2>
   <div class="sd">Por qué origen / contenido han entrado (blog, calculadora, webinar, formulario, app…), con % sobre el total. «Lead Ads (paid)» es desplegable por red.</div>
   <div class="bars"><div class="brow"><span class="bl">Formulario de demo</span><div class="bt"><div class="bf" style="width:100%"></div></div><span class="bn tnum">779<br><small>53%</small></span></div><div class="brow"><span class="bl">Blog / artículo</span><div class="bt"><div class="bf" style="width:51%"></div></div><span class="bn tnum">395<br><small>27%</small></span></div><div class="brow"><span class="bl">Webinar</span><div class="bt"><div class="bf" style="width:12%"></div></div><span class="bn tnum">96<br><small>7%</small></span></div><div class="brow"><span class="bl">Herramienta / calculadora</span><div class="bt"><div class="bf" style="width:9%"></div></div><span class="bn tnum">73<br><small>5%</small></span></div><details class="chdeals"><summary><span class="bl">Lead Ads (paid) · paid media</span><div class="bt"><div class="bf" style="width:7%;background:linear-gradient(90deg,#155e7a,var(--sky))"></div></div><span class="bn tnum">54<br><small>4%</small></span></summary><div class="dl"><span>Facebook · Ebook (contenido) · <b style="color:var(--sky)">44</b></span><span>LinkedIn · Formulario CG · <b style="color:var(--sky)">7</b></span><span>Lead Ad · Formulario genérico · <b style="color:var(--sky)">3</b></span></div></details><div class="brow"><span class="bl">Ebook / descargable</span><div class="bt"><div class="bf" style="width:5%"></div></div><span class="bn tnum">40<br><small>3%</small></span></div><div class="brow"><span class="bl">Sin información</span><div class="bt"><div class="bf" style="width:2%"></div></div><span class="bn tnum">15<br><small>1%</small></span></div><div class="brow"><span class="bl">Otro formulario</span><div class="bt"><div class="bf" style="width:2%"></div></div><span class="bn tnum">14<br><small>1%</small></span></div><div class="brow"><span class="bl">GuruSup Brain</span><div class="bt"><div class="bf" style="width:1%"></div></div><span class="bn tnum">6<br><small>0%</small></span></div></div>
@@ -310,18 +315,22 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 </section>
 
 <section>
-  <div class="q">08 · ¿Qué consumen los MQL?</div>
+  <div class="q">07 · ¿Qué consumen los MQL?</div>
   <h2 class="sh">Estado de los MQL <span class="tot">· 604</span> · contenido consumido</h2>
   <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars"><div class="brow"><span class="bl">Blog / artículo</span><div class="bt"><div class="bf" style="width:100%"></div></div><span class="bn tnum">395<br><small>65%</small></span></div><div class="brow"><span class="bl">Webinar</span><div class="bt"><div class="bf" style="width:24%"></div></div><span class="bn tnum">96<br><small>16%</small></span></div><div class="brow"><span class="bl">Herramienta / calculadora</span><div class="bt"><div class="bf" style="width:18%"></div></div><span class="bn tnum">73<br><small>12%</small></span></div><div class="brow"><span class="bl">Ebook / descargable</span><div class="bt"><div class="bf" style="width:10%"></div></div><span class="bn tnum">40<br><small>7%</small></span></div></div>
 </section>
 
 <section>
-  <div class="q">09 · ¿Qué ocurre con los SQL?</div>
+  <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· 165</span></h2>
-  <div class="sd wide">Desde el <b>9 de julio</b>, quien pide demo/consultoría en el formulario ya es SQL (tiene intención). La precualificación automática asigna a <b>Agustín</b> los de <b>≥3.000 consultas o «no lo sé»</b>: él llama o agenda <b>según la preferencia del contacto</b>, detecta si cualifican para <b>generar oportunidad</b> en el pipeline o los descarta <b>anotando la razón</b> —así aprendemos y optimizamos el proceso—. Los de <b>&lt;3.000</b> reciben un email automático. Abajo, las dos partes: <b>tratados</b> y <b>descartados</b>.</div>
+  <div class="sd wide">Tras analizar las razones de descarte y una reunión de pricing con el equipo, decidimos <b>pasar a ventas solo los SQL con &gt;3.000 consultas/mes</b> (muchos descartes eran de &lt;500). Se divide en dos:</div>
+  <ul class="sqlintro">
+    <li><b>① Desde el 9 jul · automatizado:</b> los de <b>≥3.000 o «no lo sé»</b> llegan a <b>Agustín</b>, que llama/agenda según preferencia y <b>cualifica → oportunidad</b> o descarta; los <b>&lt;3.000</b> van a una lista (revisable a futuro). Proceso más ágil.</li>
+    <li><b>② SQL previos:</b> los que ya estaban antes de esta decisión, tratados de otra forma y descartados por las razones que motivaron el cambio.</li>
+  </ul>
 
-  <div class="part">① SQL tratados · subflujo y feedback</div>
+  <div class="part">① SQL tratados · flujo automatizado (desde 9 jul)</div>
   <div class="p2">
     <div class="pcol">
       <h4>🟢 Precualifican · gestión de Agustín</h4>
@@ -362,14 +371,14 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
     </div>
   </div>
 
-  <div class="part part-bad" style="margin-top:30px">② SQL descartados · 44 · dónde perdemos negocio</div>
+  <div class="part part-bad" style="margin-top:30px">② SQL previos · descartados · 44 · razones que motivaron el cambio</div>
   <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
   <div class="bars"><div class="brow"><span class="bl">Volumen insuficiente (&lt;3.000 consultas/mes)</span><div class="bt"><div class="bf" style="width:100%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">31<br><small>70%</small></span></div><div class="brow"><span class="bl">Lead accidental / no recuerda</span><div class="bt"><div class="bf" style="width:16%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">5<br><small>11%</small></span></div><div class="brow"><span class="bl">Sin autoridad / no cualificado</span><div class="bt"><div class="bf" style="width:6%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">2<br><small>5%</small></span></div><div class="brow"><span class="bl">Caso de uso / no target</span><div class="bt"><div class="bf" style="width:6%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">2<br><small>5%</small></span></div><div class="brow"><span class="bl">Precio / presupuesto</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div><div class="brow"><span class="bl">Timing / no es prioridad</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div><div class="brow"><span class="bl">Competidor</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div><div class="brow"><span class="bl">NO responde</span><div class="bt"><div class="bf" style="width:3%;background:linear-gradient(90deg,var(--bad),#ffa7b6)"></div></div><span class="bn tnum">1<br><small>2%</small></span></div></div>
   <div class="note">El <b>70%</b> de los descartes con motivo son por «Volumen insuficiente (&lt;3.000 consultas/mes)». Total con razón registrada: <b>44</b>.</div>
 </section>
 
 <section>
-  <div class="q">10 · ¿Cómo va el pipeline?</div>
+  <div class="q">09 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· 11</span> abiertas de inbound</h2>
   <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa.</div>
   <div class="cards" style="margin-bottom:18px">
@@ -381,7 +390,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 </section>
 
 <section>
-  <div class="q">11 · ¿Cerramos?</div>
+  <div class="q">10 · ¿Cerramos?</div>
   <h2 class="sh">Clientes <span class="tot">· 35</span> empresas</h2>
   <div class="sd">Clientes nuevos y conversión desde oportunidad.</div>
   <div class="cards">
@@ -391,6 +400,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 09:13 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 17 Jul 2026 · 09:29 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
