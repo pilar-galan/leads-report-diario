@@ -1321,6 +1321,21 @@ def main():
         "inbound": len(cli_inb), "inbound_emp": len({compkey(c) for c in cli_inb}),
         "hered": len(cli_her), "hered_emp": len({compkey(c) for c in cli_her}),
     }
+    # ── Churn: contactos que ALGUNA VEZ fueron cliente y ya no lo son ──
+    # (etapa "Churn" del ciclo de vida no se usa; lo derivamos de quién pasó por "customer")
+    # Sin filtro de fecha: un cliente perdido puede ser anterior a la ventana del embudo.
+    try:
+        churn_raw = fetch_all("contacts", [
+            {"propertyName": "hs_v2_date_entered_customer", "operator": "HAS_PROPERTY"},
+            {"propertyName": "lifecyclestage", "operator": "NOT_IN", "values": ["customer", "evangelist"]},
+            {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
+        ], ["email", "associatedcompanyid", "company", "lifecyclestage"])
+    except Exception as e:
+        print(f"[churn] error: {e}", file=sys.stderr); churn_raw = []
+    churn_contacts = [c for c in churn_raw if not is_test(None, c["properties"].get("email") or "")]
+    churn_comps = {c["properties"].get("associatedcompanyid") for c in churn_contacts
+                   if c["properties"].get("associatedcompanyid")}
+    exec_extra["churn"] = {"contactos": len(churn_contacts), "empresas": len(churn_comps)}
 
     def peak_insight(items, pred, origin=True):
         """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
@@ -2388,8 +2403,12 @@ def render_exec(d):
         if "align" in s: return "alineación"
         return (s[:12] or "otra")
     # Reuniones en pipeline = negocios vivos (ventas + brain) por persona
-    reun_pipe_break = " · ".join(f'{c} {esc(o)}' for o, c in ex.get("reun_owner", [])[:4]) or "—"
+    # Mostramos TODOS los propietarios (incluye Agustín, que antes quedaba fuera del top-4)
+    reun_pipe_break = " · ".join(f'{c} {esc(o)}' for o, c in ex.get("reun_owner", [])[:6]) or "—"
     reun_pipe_tot = ex.get("reun_owner_total", ex.get("pipeline_count", 0))
+    # Nota: "Sin asignar" son casi todos negocios de Brain (relaciones de Alex sin propietario)
+    _rown = dict(ex.get("reun_owner", []))
+    reun_sinasig = _rown.get("Sin asignar", 0)
 
     # ---------- 1 · EXECUTIVE SUMMARY ----------
     def kpi(lab, val, t, sub):
@@ -2421,7 +2440,8 @@ def render_exec(d):
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
         + f'<div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">{fmt(reun_pipe_tot)}</div>'
         f'<div class="kt" style="color:var(--mut)">negocios vivos · ventas + Brain</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div></div>'
+        f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div>'
+        f'<div class="kt" style="margin-top:4px;color:var(--mut);font-size:10px">«Sin asignar» ({fmt(reun_sinasig)}) = casi todo <b>Brain</b> (relaciones de Alex sin propietario). Agustín gestiona negocios de ventas.</div></div>'
         + kpi_emp_io("Oportunidades", g_opp, ex.get("reun_owner_total", g_opp_e), tr["opp"], opp_ci, ob["opp"], f'{pvf(g_opp, g_sql)} de SQL')
         + kpi_emp_io("Clientes", g_cli, g_cli_e, tr["cli"], cli_ci, ob["cli"], f'{pvf(g_cli, g_opp)} de oport.'))
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
@@ -3004,9 +3024,10 @@ def render_exec(d):
     <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Clientes totales (contactos)</div></div>
     <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound (fuente identificada) · {fmt(ex.get("cli_split",{}).get("inbound_emp",0))} empresas</div></div>
     <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("hered",0))}</div><div class="sl">🗂️ Heredados / comercial (offline) · {fmt(ex.get("cli_split",{}).get("hered_emp",0))} empresas</div></div>
-    <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
+    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos que fueron cliente y ya no lo son<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas asociadas</span></div></div>
   </div>
-  <div class="note">Los <b>heredados</b> son clientes de la cartera previa (fuente <i>offline</i>), no atribuibles al embudo inbound/outbound actual. Se mantienen aparte para no distorsionar la conversión del proceso nuevo; se irán migrando al proceso.</div>
+  <div class="note">Los <b>heredados</b> son clientes de la cartera previa (fuente <i>offline</i>), no atribuibles al embudo inbound/outbound actual. Se mantienen aparte para no distorsionar la conversión del proceso nuevo; se irán migrando al proceso.
+  <br><br>🔻 <b>Churn:</b> la etapa «Churn» del ciclo de vida no se usa, así que lo derivamos de <b>quién pasó por la etapa «cliente» y ya no está en ella</b> ({fmt(ex.get("churn",{}).get("contactos",0))} contactos · {fmt(ex.get("churn",{}).get("empresas",0))} empresas). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
