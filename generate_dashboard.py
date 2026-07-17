@@ -2502,10 +2502,7 @@ def render_exec(d):
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
         kpi_io("SQL", g_sql, tr["sql"], sql_d, ob["sql"]) +
         # ── 2ª fila ──
-        f'<div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">{fmt(ag_contact)}</div>'
-        f'<div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
-        + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
+        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
         f'<div class="kv tnum">{fmt(opp_real)}</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
         f'<div class="emprow">👤 <span class="eb tnum">{fmt(ex.get("opp_contactos",0))}</span> contactos con negocio asociado</div></div>'
@@ -2988,17 +2985,17 @@ def render_exec(d):
   <div class="sd">Desglose del embudo por vía. Cada columna es su volumen de <b>contactos</b> por etapa y el % <b>sobre su total de contactos</b>. El <b>pipeline de ventas es compartido</b>: inbound y outbound lo trabajan de forma conjunta.</div>
   <div class="io3">
     <div class="iocol in">
-      <div class="io-h">🟢 Inbound · <b>Agustín</b> <span class="io-tot tnum">{fmt(total_nf)}</span></div>
+      <div class="io-h">🟢 Pipeline de Inbound <span class="io-tot tnum">{fmt(total_nf)}</span></div>
       <div class="mf">{inb_fn}</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("inb_value",0)))) if ex.get("inb_value") else "— (importes sin cargar)"}</span></div>
     </div>
     <div class="iocol out">
-      <div class="io-h">🟠 Outbound · <b>Juanma</b> <span class="io-tot tnum">{fmt(ob["contactos"])}</span></div>
+      <div class="io-h">🟠 Pipeline de Outbound <span class="io-tot tnum">{fmt(ob["contactos"])}</span></div>
       <div class="mf">{out_fn}</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("out_value",0)))) if ex.get("out_value") else "— (importes sin cargar)"}</span></div>
     </div>
     <div class="iocol brain">
-      <div class="io-h">🧠 Brain <span class="io-tot tnum">{fmt(brain_ct)}</span></div>
+      <div class="io-h">🧠 Pipeline de Brain <span class="io-tot tnum">{fmt(brain_ct)}</span></div>
       <div class="mf">
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(brain_ct)}</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidad (negocio)</div><div class="mf-bar"><div class="mf-fill" style="width:{max(5, round(ex.get("brain_open",0)/(brain_ct or 1)*100))}%"></div></div><span class="mf-c">{pv(ex.get("brain_open",0), brain_ct or 1)}</span></div>
@@ -3108,6 +3105,7 @@ def render_exec(d):
           <div class="varr">↓ <span>{pv(pq.get("ag_opp",0), ag_base)}</span></div>
           <div class="vstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
         </div>
+        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 {pq.get("ag_calls_unique",0)} por teléfono · 📅 {pq.get("ag_reuniones",0)} agendadas</div>
         <details class="razd" style="margin-top:12px">
           <summary><span class="chev">▶</span> 🔴 {pq.get("ag_descartados",0)} descartados · ver razones</summary>
           <div class="razbox">{raz_rows}</div>
