@@ -1330,7 +1330,12 @@ def main():
     deals_by_chan = {}
     for dl in exec_opp:
         deals_by_chan.setdefault(dl.get("channel", "—"), []).append((dl.get("name", "—"), dl.get("stage_label", "—")))
+    # Orgánico y social son inbound: si algún negocio quedó clasificado ahí en outbound, se mueve a inbound
+    for _inb_lbl in ("SEO Orgánico", "Social orgánico"):
+        if _inb_lbl in deals_by_chan_out:
+            deals_by_chan.setdefault(_inb_lbl, []).extend(deals_by_chan_out.pop(_inb_lbl))
     exec_extra["deals_by_chan"] = deals_by_chan
+    exec_extra["deals_by_chan_out"] = deals_by_chan_out
     stage_dist = {}
     for dl in exec_opp:
         stage_dist[dl.get("stage_label", "Otra")] = stage_dist.get(dl.get("stage_label", "Otra"), 0) + 1
