@@ -2450,7 +2450,11 @@ def render_exec(d):
     sql_d = d["sql_disp"].get("total", cum["sql"])
     total_nf = ex.get("total_contactos", cum["total"])   # contactos SIN Freemium (inbound)
     # OUTBOUND (Juanma) y TOTALES GLOBALES (inbound + outbound)
-    ob = ex.get("out", {"contactos": 0, "lead": 0, "mql": 0, "sql": 0, "opp": 0, "cli": 0, "opp_emp": 0, "cli_emp": 0})
+    ob = dict(ex.get("out", {"contactos": 0, "lead": 0, "mql": 0, "sql": 0, "opp": 0, "cli": 0, "opp_emp": 0, "cli_emp": 0}))
+    # SQL outbound = el de la matriz por canal (excluye orgánico/social ya movidos a inbound) → cuadra KPI y matriz
+    _cmo_tot = ex.get("chan_matrix_out", [])
+    if _cmo_tot:
+        ob["sql"] = sum(e["sql"] for _, e in _cmo_tot)
     # Brain = relaciones estratégicas del pipeline Brain (cada negocio ≈ una persona/contacto)
     brain_ct = ex.get("brain_open", 0)
     g_contactos = total_nf + ob["contactos"] + brain_ct
