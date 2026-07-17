@@ -800,8 +800,12 @@ def main():
     exec_opp_out = []     # oportunidades abiertas OUTBOUND (fuentes no-inbound) en el pipeline de ventas
     _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
     brain_count = ventas_count = 0
+    clientes_activos = 0   # cuentas de cliente activas = negocios abiertos en el pipeline "Clientes"
+    CLIENTES_PL = "724590933"
     for dl in all_deals:
         p = dl["properties"]
+        if p.get("pipeline") == CLIENTES_PL:
+            clientes_activos += 1
         name = clean_deal(p.get("dealname", "—")) or "—"
         if not valid_deal(p.get("dealname", "")):
             continue
@@ -1312,14 +1316,14 @@ def main():
     exec_extra["brain_value"] = brain_value
     exec_extra["inb_value"] = exec_extra.get("pipeline_value", 0)
     exec_extra["out_value"] = out_value
-    # ── Clientes: de dónde vienen · inbound (proceso nuevo) vs heredados (OFFLINE/pre-proceso) ──
-    cli_all = [c for c in (hist_fun + hist_out_fun) if rank(c["lc"]) >= 5]
-    cli_inb = [c for c in cli_all if is_marketing(c.get("src"), c.get("d1"))]
-    cli_her = [c for c in cli_all if not is_marketing(c.get("src"), c.get("d1"))]
+    # ── Clientes: de dónde vienen · inbound + outbound (los clientes vienen de ambas vías) ──
+    cli_inb = [c for c in hist_fun if rank(c["lc"]) >= 5]      # inbound (embudo web/marketing)
+    cli_out = [c for c in hist_out_fun if rank(c["lc"]) >= 5]  # outbound (imports / sin origen / offline)
+    cli_all = cli_inb + cli_out
     exec_extra["cli_split"] = {
-        "total": len(cli_all),
+        "total": len(cli_all), "total_emp": len({compkey(c) for c in cli_all}),
         "inbound": len(cli_inb), "inbound_emp": len({compkey(c) for c in cli_inb}),
-        "hered": len(cli_her), "hered_emp": len({compkey(c) for c in cli_her}),
+        "outbound": len(cli_out), "outbound_emp": len({compkey(c) for c in cli_out}),
     }
     # ── Churn: contactos que ALGUNA VEZ fueron cliente y ya no lo son ──
     # (etapa "Churn" del ciclo de vida no se usa; lo derivamos de quién pasó por "customer")
@@ -1336,6 +1340,7 @@ def main():
     churn_comps = {c["properties"].get("associatedcompanyid") for c in churn_contacts
                    if c["properties"].get("associatedcompanyid")}
     exec_extra["churn"] = {"contactos": len(churn_contacts), "empresas": len(churn_comps)}
+    exec_extra["clientes_activos"] = clientes_activos
 
     def peak_insight(items, pred, origin=True):
         """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
@@ -2443,7 +2448,9 @@ def render_exec(d):
         f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div>'
         f'<div class="kt" style="margin-top:4px;color:var(--mut);font-size:10px">«Sin asignar» ({fmt(reun_sinasig)}) = casi todo <b>Brain</b> (relaciones de Alex sin propietario). Agustín gestiona negocios de ventas.</div></div>'
         + kpi_emp_io("Oportunidades", g_opp, ex.get("reun_owner_total", g_opp_e), tr["opp"], opp_ci, ob["opp"], f'{pvf(g_opp, g_sql)} de SQL')
-        + kpi_emp_io("Clientes", g_cli, g_cli_e, tr["cli"], cli_ci, ob["cli"], f'{pvf(g_cli, g_opp)} de oport.'))
+        + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
+        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>')
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
@@ -2677,8 +2684,7 @@ def render_exec(d):
     # ---------- 8 · SQL en 3 niveles ----------
     sd_ = d["sql_disp"]
     sql_total = sd_.get("total", 0)
-    # NIVEL 1 · Seguimiento de SQLs de pay (informe de Agustín · Paid Leads Tracker)
-    #   La fuente se llama "Paid Leads Tracker" pero aquí lo tratamos como SQLs de pay.
+    # NIVEL 1 · Seguimiento de SQLs de paid media (informe de Agustín · campañas de pago)
     pt3 = d.get("paid_tracker")
     def _pn(v):
         try: return int(v)
@@ -2692,23 +2698,25 @@ def render_exec(d):
                     ("⚪", "Sin contactar", s3.get("uncontacted")),
                     ("✅", "Ganados", s3.get("won")),
                     ("🔴", "Perdidos", s3.get("lost"))]
+        # Ordenar de mayor a menor volumen
+        pt3_defs = sorted(pt3_defs, key=lambda x: -_pn(x[2]))
         pt3_rows = "".join(
             f'<div class="ptr"><span class="ptr-l">{ic} {lab}</span>'
             f'<span class="ptr-n tnum">{_pn(v)} <small>{pv(_pn(v), pt3_tot)}</small></span></div>'
-            for ic, lab, v in pt3_defs if _pn(v) or lab in ("Cualificados", "En proceso"))
+            for ic, lab, v in pt3_defs if _pn(v))
         afc = s3.get("avg_first_contact_days")
         afc_html = ""
         if afc is not None:
             try: afc_html = f'<div class="paid3-foot">⏱️ Primer contacto medio: <b>{round(float(afc),1)} días</b></div>'
             except (TypeError, ValueError): afc_html = ""
         agustin_html = (
-            f'<div class="paid3"><div class="paid3-h">Estado de los SQLs de pay · en vivo '
-            f'<span>(informe de Agustín · desde 1 jul)</span></div>'
+            f'<div class="paid3"><div class="paid3-h">Estado de los SQLs de paid media · en vivo '
+            f'<span>(informe de Agustín · campañas de pago · desde 1 jul)</span></div>'
             f'<div class="ptr-box">{pt3_rows}</div>{afc_html}</div>')
     else:
         n1 = pq.get("ag_sql", 0)
         agustin_html = ('<div class="paid3 paid3-empty">Pendiente de conectar el informe de Agustín '
-                        '(seguimiento de SQLs de pay). Al conectarlo, se muestra en vivo el estado: '
+                        '(seguimiento de SQLs de paid media). Al conectarlo, se muestra en vivo el estado: '
                         'cualificados, en proceso, sin contactar, ganados y perdidos.</div>')
     # Flujo de precualificación de Agustín (SQL → agendados → oportunidad)
     agustin_flow_html = (
@@ -2865,7 +2873,7 @@ def render_exec(d):
   <h2 class="sh">Executive summary</h2>
   <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b>, incluye:
     <span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span><span class="src-chip cx">💬 Atención al cliente (CX)</span><span class="src-chip br">🧠 Brain</span>.
-    El número grande es el total de contactos; debajo, <b>in</b> (inbound · Agustín) y <b>out</b> (outbound · Juanma). En Oportunidades y Clientes el número grande es <b>volumen de contactos</b>; el nº de <b>empresas / negocios</b> va debajo para poder hacer match al buscarlos.</div>
+    El número grande es el total de contactos; debajo, <b>inb</b> (inbound) y <b>out</b> (outbound). En Oportunidades el número grande es <b>volumen de contactos</b> y el nº de <b>empresas / negocios</b> va debajo; en Clientes se muestran las <b>cuentas activas</b> del pipeline «Clientes».</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
@@ -2878,7 +2886,7 @@ def render_exec(d):
 <section>
   <div class="q">02 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Embudos por vía <span class="tot">· Inbound · Outbound · Brain</span></h2>
-  <div class="sd">Desglose del embudo por vía. Cada columna es su volumen de <b>contactos</b> por etapa y el % <b>sobre su total de contactos</b>. <b>Inbound → Agustín</b> · <b>Outbound → Juanma</b> · <b>Brain → Alex</b>.</div>
+  <div class="sd">Desglose del embudo por vía. Cada columna es su volumen de <b>contactos</b> por etapa y el % <b>sobre su total de contactos</b>. El <b>pipeline de ventas es compartido</b>: inbound y outbound lo trabajan de forma conjunta.</div>
   <div class="io3">
     <div class="iocol in">
       <div class="io-h">🟢 Inbound · <b>Agustín</b> <span class="io-tot tnum">{fmt(total_nf)}</span></div>
@@ -2957,12 +2965,12 @@ def render_exec(d):
     <details class="lvl">
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
-        <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de pay</small></span>
+        <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de paid media</small></span>
         <span class="lvl-n">{fmt(n1)}</span>
         <span class="chev">▶</span>
       </summary>
       <div class="lvl-body">
-        <div class="ph">SQLs de <b>pay</b> que gestiona Agustín (su informe en vivo). Así están repartidos:</div>
+        <div class="ph">SQLs de <b>paid media</b> (campañas de pago) que gestiona Agustín (su informe en vivo). Así están repartidos:</div>
         {agustin_html}
         <div class="lvl-subh">Precualificación · del SQL a la oportunidad</div>
         {agustin_flow_html}
@@ -2991,8 +2999,8 @@ def render_exec(d):
         <span class="chev">▶</span>
       </summary>
       <div class="lvl-body">
-        <div class="ph">Restantes tras sumar los de pay (①) y los descartados (②): <b>{fmt(n3)} SQL sin fuente identificada</b>.</div>
-        <div class="sd" style="margin-top:0;font-size:12px">No significa que no sean de pay: pueden ser <b>orgánicos, tráfico directo u otra vía</b> que no se identificó, pero que <b>sí tienen ≥3.000 consultas</b>. Desde el <b>9 jul</b> se decidió <b>precualificar automáticamente</b> para que solo lleguen los identificados; el motivo de descarte era el <b>volumen de consultas</b>, así que estos ahora <b>se tratan por mail</b>.</div>
+        <div class="ph">Restantes tras sumar los de paid media (①) y los descartados (②): <b>{fmt(n3)} SQL sin fuente identificada</b>.</div>
+        <div class="sd" style="margin-top:0;font-size:12px">No significa que no sean de paid media: pueden ser <b>orgánicos, tráfico directo u otra vía</b> que no se identificó, pero que <b>sí tienen ≥3.000 consultas</b>. Desde el <b>9 jul</b> se decidió <b>precualificar automáticamente</b> para que solo lleguen los identificados; el motivo de descarte era el <b>volumen de consultas</b>, así que estos ahora <b>se tratan por mail</b>.</div>
         <details class="razd" style="margin-top:14px">
           <summary><span class="chev">▶</span> ✉️ Ver el circuito de mail y sus datos</summary>
           <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
@@ -3018,15 +3026,15 @@ def render_exec(d):
 
 <section>
   <div class="q">10 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("total",0))}</span> · de dónde vienen</h2>
-  <div class="sd">Contactos en etapa <b>cliente</b>, separados por origen. La mayoría son <b>heredados</b> (cartera previa / comercial, fuente offline) que <b>aún no han entrado en el nuevo proceso</b> inbound/outbound; se irán incorporando.</div>
+  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("total_emp",0))} empresas</span> · de dónde vienen</h2>
+  <div class="sd">Contactos en etapa de ciclo de vida <b>cliente</b> ({fmt(ex.get("cli_split",{}).get("total",0))} contactos · {fmt(ex.get("cli_split",{}).get("total_emp",0))} empresas), separados por vía de origen. Los clientes vienen tanto de <b>inbound</b> como de <b>outbound</b>.</div>
   <div class="cards">
-    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Clientes totales (contactos)</div></div>
-    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound (fuente identificada) · {fmt(ex.get("cli_split",{}).get("inbound_emp",0))} empresas</div></div>
-    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("hered",0))}</div><div class="sl">🗂️ Heredados / comercial (offline) · {fmt(ex.get("cli_split",{}).get("hered_emp",0))} empresas</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total_emp",0))}</div><div class="sl">Empresas cliente · {fmt(ex.get("cli_split",{}).get("total",0))} contactos</div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · {fmt(ex.get("cli_split",{}).get("inbound_emp",0))} empresas</div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound · {fmt(ex.get("cli_split",{}).get("outbound_emp",0))} empresas</div></div>
     <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos que fueron cliente y ya no lo son<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas asociadas</span></div></div>
   </div>
-  <div class="note">Los <b>heredados</b> son clientes de la cartera previa (fuente <i>offline</i>), no atribuibles al embudo inbound/outbound actual. Se mantienen aparte para no distorsionar la conversión del proceso nuevo; se irán migrando al proceso.
+  <div class="note">Los clientes provienen de <b>ambas vías</b>: inbound (embudo web/marketing) y outbound (prospección / importaciones / offline). Se cuentan por <b>empresa</b> (varios contactos pueden pertenecer al mismo negocio de cliente).
   <br><br>🔻 <b>Churn:</b> la etapa «Churn» del ciclo de vida no se usa, así que lo derivamos de <b>quién pasó por la etapa «cliente» y ya no está en ella</b> ({fmt(ex.get("churn",{}).get("contactos",0))} contactos · {fmt(ex.get("churn",{}).get("empresas",0))} empresas). Nota: parte de este volumen procede de <b>importaciones antiguas</b> a las que se marcó «cliente» por error; conviene una limpieza en el CRM para depurar el dato.</div>
 </section>
 
