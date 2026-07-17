@@ -2332,7 +2332,7 @@ def render_exec(d):
                 f'<div class="kt">{arrow(t)}<span>· {sub}</span></div>'
                 f'<div class="emprow">🏢 <span class="eb tnum">{fmt(emp)}</span> empresas / negocios</div></div>')
     def io(inb, out):  # etiqueta pequeña inbound/outbound
-        return f'<span style="color:var(--mut)">in {fmt(inb)} · out {fmt(out)}</span>'
+        return f'<span style="color:var(--mut)">inb {fmt(inb)} · out {fmt(out)}</span>'
     def kpi_io(lab, val, t, inb, out):
         return (f'<div class="kc"><div class="kl">{lab}</div><div class="kv tnum">{fmt(val)}</div>'
                 f'<div class="kt">{arrow(t)}</div>'
