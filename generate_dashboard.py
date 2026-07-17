@@ -797,6 +797,7 @@ def main():
     total_pipeline = 0    # volumen total de negocios abiertos en el pipeline
     reun_pipe = {}        # reuniones VIVAS en el pipeline de ventas, por etapa (a día de hoy, cualquier fuente)
     exec_opp = []         # oportunidades abiertas de INBOUND en el pipeline de ventas (sin filtro de fecha)
+    exec_opp_out = []     # oportunidades abiertas OUTBOUND (fuentes no-inbound) en el pipeline de ventas
     _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
     brain_count = ventas_count = 0
     for dl in all_deals:
@@ -836,6 +837,14 @@ def main():
                 exec_opp.append({"name": name, "stage_label": _sl, "amount": _amt, "channel": _lb, "icon": _ic})
             else:
                 out_value += _amt   # valor de oportunidades outbound (no-inbound) en ventas
+                # Clasificar la fuente outbound del negocio (misma lógica que la matriz outbound)
+                _os = (src or "").upper()
+                if is_import(src, d1):        _olb = "Importaciones"
+                elif _os == "OFFLINE":        _olb = "Offline / manual"
+                elif _os == "INTEGRATION":    _olb = "Integración de la app"
+                elif not _os:                 _olb = "Sin asignar"
+                else:                          _olb = classify_channel(src, d1)[0]
+                exec_opp_out.append({"name": name, "stage_label": _sl, "channel": _olb})
         if is_marketing(src, d1) and created >= fstart and not excluded:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
@@ -1265,6 +1274,12 @@ def main():
         if r >= 2: e["mql"] += 1
         if c["lc"] in SQL_STAGES: e["sql"] += 1
     exec_extra["chan_matrix_out"] = sorted(chan_ext_out.items(), key=lambda x: -x[1]["contactos"])
+    # Oportunidades OUTBOUND con negocio asociado, por fuente
+    deals_by_chan_out = {}
+    for dl in exec_opp_out:
+        deals_by_chan_out.setdefault(dl.get("channel", "Sin asignar"), []).append(
+            (dl.get("name", "—"), dl.get("stage_label", "—")))
+    exec_extra["deals_by_chan_out"] = deals_by_chan_out
     # ── Pipeline de ventas · oportunidades abiertas de INBOUND (exec_opp, sin filtro de fecha) ──
     exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in exec_opp)
     exec_extra["pipeline_count"] = len(exec_opp)
@@ -2173,8 +2188,13 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mx-cell .emp{font-size:9px;color:var(--sky);display:block;font-weight:700}
 .mx-cell.hi .v{color:var(--brand)} .mx-cell.cv .v{color:var(--sky)}
 .mx-cell.mut .v{color:var(--mut);font-weight:700}
-.mx-row.mx-tot{background:rgba(111,240,162,.08);border-color:var(--line2)}
-.mx-row.mx-tot .c1 .nm{color:var(--brand);font-weight:800}
+.mx-row.mx-tot{background:rgba(148,163,184,.14);border-color:var(--line2)}
+.mx-row.mx-tot .c1 .nm{color:var(--ink);font-weight:800}
+.mx-row.mx-gtot{background:linear-gradient(120deg,rgba(111,240,162,.20),rgba(34,211,238,.16));border:1.5px solid var(--brand);border-radius:12px;padding-top:15px;padding-bottom:15px;margin-top:6px}
+.mx-row.mx-gtot .c1 .nm{color:var(--brand);font-weight:900;font-size:15px}
+.mx-row.mx-gtot .gsub{display:block;font-size:9.5px;color:var(--mut);font-weight:600;margin-top:2px}
+.mx-row.mx-gtot .mx-cell .v{font-size:18px}
+.mx-row.mx-gtot .mx-cell.hi .v{color:var(--brand)}
 .mx-sep{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px 4px;color:var(--brand)}
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
@@ -2221,6 +2241,32 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .sqlintro li b{color:var(--ink)}
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
+/* SQL · niveles desplegables */
+.sqlvl{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
+.lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
+.lvl.lvl3{margin-top:16px;background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
+.lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
+.lvl-sum::-webkit-details-marker{display:none}
+.lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
+.lvl-badge.b1{background:var(--brand)} .lvl-badge.b2{background:var(--bad);color:#fff} .lvl-badge.b3{background:var(--sky);color:#04120b}
+.lvl-tit{flex:1;font-size:13px;font-weight:800;color:var(--ink);line-height:1.35} .lvl-tit small{color:var(--mut);font-weight:600}
+.lvl-n{flex:none;font-size:20px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
+.lvl.lvl-bad .lvl-n{color:var(--bad)} .lvl.lvl3 .lvl-n{color:var(--sky)}
+.lvl-sum .chev{flex:none;font-size:10px;color:var(--mut);transition:transform .2s}
+.lvl[open] .lvl-sum .chev{transform:rotate(90deg)}
+.lvl-body{padding:0 16px 18px;border-top:1px solid var(--line);margin-top:2px;padding-top:16px}
+.lvl3-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+.lvl3-h{font-size:12px;font-weight:800;color:var(--ink2);margin-bottom:10px}
+.bf.bf-cold{background:linear-gradient(90deg,#64748b,#94a3b8)} .bf.bf-warm{background:linear-gradient(90deg,#f59e0b,#fbbf24)} .bf.bf-adv{background:linear-gradient(90deg,#22c55e,#6ff0a2)}
+.paid3{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:14px;padding:15px}
+.paid3-empty{color:var(--ink2);font-size:12.5px;line-height:1.55}
+.paid3-h{font-size:12.5px;font-weight:800;color:var(--ink)} .paid3-h span{font-weight:600;color:var(--mut);font-size:10.5px}
+.paid3-tot{font-size:13px;color:var(--ink2);margin:6px 0 12px} .paid3-tot b{font-size:22px;color:var(--sky);font-weight:900}
+.ptr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(148,163,184,.12);font-size:12.5px}
+.ptr:last-child{border-bottom:none} .ptr-l{color:var(--ink2)} .ptr-n{font-weight:800;color:var(--ink)} .ptr-n small{color:var(--mut);font-weight:600;font-size:10.5px}
+.paid3-foot{margin-top:11px;font-size:11px;color:var(--mut);line-height:1.5}
+@media(max-width:860px){ .sqlvl{grid-template-columns:1fr} .lvl3-grid{grid-template-columns:1fr} }
 .p2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
 .pcol{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));border:1px solid var(--line);border-radius:16px;padding:20px}
 .pcol.b{border-color:rgba(255,202,92,.3)}
@@ -2466,33 +2512,50 @@ def render_exec(d):
         + cell(t_c) + cell(t_l) + cell(t_m) + cell(t_s, cls="hi") + cell(t_o)
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o, t_c)}</span></div>'
         + '</div>')
-    # OUTBOUND rows + total global
+    # OUTBOUND rows + total outbound + total global
     cmo = ex.get("chan_matrix_out", [])
+    dbco_m = ex.get("deals_by_chan_out", {})
     mx_rows_out = ""
     for lbl, e in cmo:
-        mx_rows_out += (
-            '<div class="mx-row mx-ob">'
+        items = dbco_m.get(lbl, [])
+        opp_deals = len(items)   # oportunidades OUTBOUND = negocios asociados en pipeline
+        conv_o = pvf(opp_deals, e["contactos"])
+        opp_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{opp_deals}</span><span class="emp">🏢 ver ▾</span></div>'
+                    if items else cell(opp_deals, '<span class="p">—</span>'))
+        row_inner = (
             f'<div class="c1"><span class="nm">{esc(lbl)}</span></div>'
             + cell(e["contactos"]) + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
-            + '<div class="mx-cell mut"><span class="v">—</span></div>'
-            + '<div class="mx-cell"><span class="p">outbound</span></div>'
-            + '</div>')
+            + opp_cell
+            + f'<div class="mx-cell cv"><span class="v tnum">{conv_o}</span><span class="p">contacto→op.</span></div>')
+        if items:
+            deals_list = "".join(f'<span>{esc(nm)} · {esc(sl)}</span>' for nm, sl in items)
+            mx_rows_out += (f'<details class="mxd"><summary class="mx-row mx-ob">{row_inner}</summary>'
+                            f'<div class="mx-deals"><b>Oportunidades de {esc(lbl)}:</b> {deals_list}</div></details>')
+        else:
+            mx_rows_out += f'<div class="mx-row mx-ob">{row_inner}</div>'
     oc_c = sum(e["contactos"] for _, e in cmo); oc_l = sum(e["leads"] for _, e in cmo)
     oc_m = sum(e["mql"] for _, e in cmo); oc_s = sum(e["sql"] for _, e in cmo)
-    sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
-    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (Juanma)</div>' if cmo else ''
-    g_total = (
+    oc_o = sum(len(dbco_m.get(lbl, [])) for lbl, _ in cmo)   # oportunidades outbound con negocio asociado (coherente con las filas)
+    mx_total_out = (
         '<div class="mx-row mx-tot">'
-        '<div class="c1"><span class="nm">TOTAL GLOBAL</span></div>'
-        + cell(t_c + oc_c) + cell(t_l + oc_l) + cell(t_m + oc_m) + cell(t_s + oc_s, cls="hi") + cell(t_o)
-        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o, t_c + oc_c)}</span></div>'
+        '<div class="c1"><span class="nm">Total outbound</span></div>'
+        + cell(oc_c) + cell(oc_l) + cell(oc_m) + cell(oc_s, cls="hi") + cell(oc_o)
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o, oc_c)}</span></div>'
+        + '</div>') if cmo else ''
+    sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
+    sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (importaciones · offline · integración · sin asignar)</div>' if cmo else ''
+    g_total = (
+        '<div class="mx-row mx-gtot">'
+        '<div class="c1"><span class="nm">TOTAL GLOBAL</span><span class="gsub">inbound + outbound</span></div>'
+        + cell(t_c + oc_c) + cell(t_l + oc_l) + cell(t_m + oc_m) + cell(t_s + oc_s, cls="hi") + cell(t_o + oc_o)
+        + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o + oc_o, t_c + oc_c)}</span></div>'
         + '</div>')
     matrix_html = (
         '<div class="mxwrap"><div class="matrix">'
         '<div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span>'
-        '<span>MQL</span><span>SQL</span><span>Oport. (negocios)</span><span>Contacto→Op.</span></div>'
+        '<span>MQL</span><span>SQL</span><span>Oport. (negocio asoc.)</span><span>Contacto→Op.</span></div>'
         + sep_in + mx_rows + mx_total
-        + sep_out + mx_rows_out
+        + sep_out + mx_rows_out + mx_total_out
         + g_total + '</div></div>')
 
     # ---------- 24H (sin Freemium: volumen = lead+MQL+SQL) ----------
@@ -2586,6 +2649,47 @@ def render_exec(d):
     if desc:
         r0, n0 = desc[0]
         desc_interp = f'<div class="note">El <b>{pv(n0, desc_tot)}</b> de los descartes con motivo son por «{esc(r0)}». Total con razón registrada: <b>{desc_tot}</b>.</div>'
+
+    # ---------- 8·③ · SQL RESTANTES (ni descartados ni en el proceso de Agustín) ----------
+    sd_ = d["sql_disp"]
+    rest_n = sd_.get("pendiente", 0)   # revisión pendiente / sin asignar = fuera de descarte y del flujo de Agustín
+    # ¿Dónde están? → estado del lead (hs_lead_status) de los SQL (temperatura)
+    ls_base = sd_.get("ls_base", 0) or 1
+    rest_rows_html = "".join(
+        f'<div class="brow"><span class="bl">{esc(lbl)}</span>'
+        f'<div class="bt"><div class="bf {("bf-cold" if grp=="cold" else "bf-warm" if grp=="warm" else "bf-adv")}" '
+        f'style="width:{round(n/ (sd_["lead_status"][0][1] or 1) *100)}%"></div></div>'
+        f'<span class="bn tnum">{fmt(n)}<br><small>{pv(n, ls_base)}</small></span></div>'
+        for lbl, n, grp in sd_.get("lead_status", [])[:8]) or '<p class="sd">Sin datos.</p>'
+    # Estado de los leads de PAID (informe de Agustín · Paid Leads Tracker)
+    pt3 = d.get("paid_tracker")
+    if pt3 and pt3.get("stats"):
+        s3 = pt3["stats"]
+        def _pn(v):
+            try: return int(v)
+            except (TypeError, ValueError): return 0
+        pt3_tot = _pn(s3.get("total")) or 1
+        pt3_defs = [("🟢", "Cualificados", s3.get("qualified"), "adv"),
+                    ("🔵", "En proceso", s3.get("open"), "warm"),
+                    ("⚪", "Sin contactar", s3.get("uncontacted"), "cold"),
+                    ("✅", "Ganados", s3.get("won"), "adv"),
+                    ("🔴", "Perdidos", s3.get("lost"), "cold")]
+        pt3_rows = "".join(
+            f'<div class="ptr"><span class="ptr-l">{ic} {lab}</span>'
+            f'<span class="ptr-n tnum">{_pn(v)} <small>{pv(_pn(v), pt3_tot)}</small></span></div>'
+            for ic, lab, v, _g in pt3_defs)
+        paid3_html = (
+            f'<div class="paid3"><div class="paid3-h">📣 Leads de PAID · estado en vivo '
+            f'<span>(informe de Agustín · Paid Leads Tracker · desde 1 jul)</span></div>'
+            f'<div class="paid3-tot"><b>{_pn(s3.get("total"))}</b> leads de paid gestionados</div>'
+            f'<div class="ptr-box">{pt3_rows}</div>'
+            + (f'<div class="paid3-foot">⚪ Los <b>{_pn(s3.get("uncontacted"))} sin contactar</b> son el foco: '
+               f'leads de paid que aún no han entrado en gestión.</div>' if _pn(s3.get("uncontacted")) else '')
+            + '</div>')
+    else:
+        paid3_html = ('<div class="paid3 paid3-empty">📣 <b>Leads de PAID:</b> pendiente de conectar el Paid Leads '
+                      'Tracker de Agustín. Al conectarlo, este bloque muestra en vivo cuántos leads de paid están '
+                      'sin contactar, en proceso, ganados o perdidos.</div>')
 
     # ---------- 10 · OPORTUNIDADES abiertas (pipeline real, sin clientes) ----------
     dbc = ex.get("deals_by_chan", {})   # {canal: [(nombre, etapa), ...]} solo abiertas inbound
@@ -2789,57 +2893,94 @@ def render_exec(d):
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Tras analizar las razones de descarte y una reunión de pricing con el equipo, decidimos <b>pasar a ventas solo los SQL con &gt;3.000 consultas/mes</b> (muchos descartes eran de &lt;500). Se divide en dos:</div>
-  <ul class="sqlintro">
-    <li><b>① Desde el 9 jul · automatizado:</b> los de <b>≥3.000 o «no lo sé»</b> llegan a <b>Agustín</b>, que llama/agenda según preferencia y <b>cualifica → oportunidad</b> o descarta; los <b>&lt;3.000</b> van a una lista (revisable a futuro). Proceso más ágil.</li>
-    <li><b>② SQL previos:</b> los que ya estaban antes de esta decisión, tratados de otra forma y descartados por las razones que motivaron el cambio.</li>
-  </ul>
+  <div class="sd wide">Tras analizar las razones de descarte y una reunión de pricing con el equipo, decidimos <b>pasar a ventas solo los SQL con &gt;3.000 consultas/mes</b> (muchos descartes eran de &lt;500). Cada SQL cae en uno de <b>tres estados</b> · <i>pulsa cada nivel para desplegarlo</i>:</div>
 
-  <div class="part">① SQL tratados · flujo automatizado (desde 9 jul)</div>
-  <div class="p2">
-    <div class="pcol">
-      <h4>🟢 Precualifican · gestión de Agustín</h4>
-      <div class="ph">SQL asignados a Agustín que cualifican por volumen.</div>
-      <div class="flow">
-        <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL totales<br>a Agustín</span></div>
-        <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
-        <div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>
-        <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
-        <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
-      </div>
-      <details class="razd">
-        <summary><span class="chev">▶</span> 🔴 Ver descartados de Agustín · {pq.get("ag_descartados",raz_tot)} · razones</summary>
-        <div class="razbox">
-          <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre sus descartados</div>
-          {raz_rows}
+  <div class="sqlvl">
+    <details class="lvl" open>
+      <summary class="lvl-sum">
+        <span class="lvl-badge b1">①</span>
+        <span class="lvl-tit">En proceso · flujo automatizado <small>(desde 9 jul)</small></span>
+        <span class="lvl-n">{fmt(pq.get("ag_sql",0) + pq.get("ag_lt3000",0))}</span>
+        <span class="chev">▶</span>
+      </summary>
+      <div class="lvl-body">
+        <div class="p2">
+          <div class="pcol">
+            <h4>🟢 Precualifican · gestión de Agustín</h4>
+            <div class="ph">SQL de <b>≥3.000 o «no lo sé»</b> → Agustín llama/agenda y cualifica.</div>
+            <div class="flow">
+              <div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL totales<br>a Agustín</span></div>
+              <div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>
+              <div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>
+              <div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>
+              <div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
+            </div>
+            <details class="razd">
+              <summary><span class="chev">▶</span> 🔴 Ver descartados de Agustín · {pq.get("ag_descartados",raz_tot)} · razones</summary>
+              <div class="razbox">
+                <div class="rs">Motivos detectados en la precualificación de Agustín · % sobre sus descartados</div>
+                {raz_rows}
+              </div>
+            </details>
+          </div>
+          <div class="pcol b">
+            <h4>🟡 No cualifican · &lt;3.000 consultas</h4>
+            <div class="ph">Descarte inicial automático por volumen insuficiente → email + lista.</div>
+            <div class="emailbox">
+              <div class="eb tnum">{pq.get("ag_lt3000",0)}</div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:4px">SQL con &lt;3.000 consultas/mes (desde 9 jul)</div>
+            </div>
+            <details class="razd" style="margin-top:14px">
+              <summary><span class="chev">▶</span> Ver qué les pasa y a dónde van</summary>
+              <div class="razbox" style="background:rgba(255,202,92,.06);border-color:rgba(255,202,92,.25)">
+                <ul class="elist">
+                  <li>Email automático de agradecimiento</li>
+                  <li>Lista HubSpot «Descalificación SQL · &lt;3.000»</li>
+                  <li>Razón de descarte registrada para el evolutivo</li>
+                  <li>Reactivables si su volumen crece</li>
+                </ul>
+              </div>
+            </details>
+          </div>
         </div>
-      </details>
-    </div>
-    <div class="pcol b">
-      <h4>🟡 No cualifican · &lt;3.000 consultas</h4>
-      <div class="ph">Descarte inicial automático por volumen insuficiente.</div>
-      <div class="emailbox">
-        <div class="eb tnum">{pq.get("ag_lt3000",0)}</div>
-        <div style="font-size:12px;color:var(--ink2);margin-top:4px">SQL con &lt;3.000 consultas/mes (desde 9 jul)</div>
       </div>
-      <details class="razd" style="margin-top:14px">
-        <summary><span class="chev">▶</span> Ver qué les pasa y a dónde van</summary>
-        <div class="razbox" style="background:rgba(255,202,92,.06);border-color:rgba(255,202,92,.25)">
-          <ul class="elist">
-            <li>Email automático de agradecimiento</li>
-            <li>Lista HubSpot «Descalificación SQL · &lt;3.000»</li>
-            <li>Razón de descarte registrada para el evolutivo</li>
-            <li>Reactivables si su volumen crece</li>
-          </ul>
-        </div>
-      </details>
-    </div>
+    </details>
+
+    <details class="lvl lvl-bad">
+      <summary class="lvl-sum">
+        <span class="lvl-badge b2">②</span>
+        <span class="lvl-tit">Descartados · SQL previos <small>(razones que motivaron el cambio)</small></span>
+        <span class="lvl-n">{fmt(desc_tot)}</span>
+        <span class="chev">▶</span>
+      </summary>
+      <div class="lvl-body">
+        <div class="sd" style="margin-top:0">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
+        <div class="bars">{desc_html}</div>
+        {desc_interp}
+      </div>
+    </details>
   </div>
 
-  <div class="part part-bad" style="margin-top:30px">② SQL previos · descartados · {fmt(desc_tot)} · razones que motivaron el cambio</div>
-  <div class="sd">Descartes de <b>SQL en todo el journey</b> (feedback agregado de todo el proceso de ventas), con sus razones.</div>
-  <div class="bars">{desc_html}</div>
-  {desc_interp}
+  <details class="lvl lvl3">
+    <summary class="lvl-sum">
+      <span class="lvl-badge b3">③</span>
+      <span class="lvl-tit">Los que quedan · ni descartados ni en el flujo de Agustín <small>· ¿dónde están?</small></span>
+      <span class="lvl-n">{fmt(rest_n)}</span>
+      <span class="chev">▶</span>
+    </summary>
+    <div class="lvl-body">
+      <div class="sd" style="margin-top:0"><b>{fmt(rest_n)} SQL sin gestionar todavía</b> (revisión pendiente / sin asignar): no se han descartado y no están en el flujo automatizado de Agustín. Por estado del lead, así es como están repartidos:</div>
+      <div class="lvl3-grid">
+        <div class="lvl3-col">
+          <div class="lvl3-h">📍 Dónde están · por estado del lead</div>
+          <div class="bars">{rest_rows_html}</div>
+        </div>
+        <div class="lvl3-col">
+          {paid3_html}
+        </div>
+      </div>
+    </div>
+  </details>
 </section>
 
 <section>
