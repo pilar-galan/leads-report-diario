@@ -781,7 +781,7 @@ def main():
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
     ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed", "amount",
         "hs_analytics_source", "hs_analytics_source_data_1", "hubspot_owner_id"])
-    OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex"}
+    OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
 
@@ -812,7 +812,8 @@ def main():
         # solo dejamos fuera etapas Freemium/descarte por su etiqueta.
         _sl = STAGE_ID_LABEL.get((pid, stage), "Otra")
         _stg_ok = not any(x in _sl.lower() for x in _EXC_STG_PIPE)
-        _own = OWNER_NAME.get(str(p.get("hubspot_owner_id") or ""), "Otros")
+        _oid = str(p.get("hubspot_owner_id") or "")
+        _own = OWNER_NAME.get(_oid, "Sin asignar" if not _oid else "Otros")
         _brain = is_brain_pl(pid)
         if pid in SALES_PL and _stg_ok:
             reun_pipe[_sl] = reun_pipe.get(_sl, 0) + 1
@@ -2353,7 +2354,7 @@ def render_exec(d):
         + f'<div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">{fmt(reun_pipe_tot)}</div>'
         f'<div class="kt" style="color:var(--mut)">negocios vivos · ventas + Brain</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div></div>'
-        + kpi_emp_io("Oportunidades", g_opp, g_opp_e, tr["opp"], opp_ci, ob["opp"], f'{pvf(g_opp, g_sql)} de SQL')
+        + kpi_emp_io("Oportunidades", g_opp, ex.get("reun_owner_total", g_opp_e), tr["opp"], opp_ci, ob["opp"], f'{pvf(g_opp, g_sql)} de SQL')
         + kpi_emp_io("Clientes", g_cli, g_cli_e, tr["cli"], cli_ci, ob["cli"], f'{pvf(g_cli, g_opp)} de oport.'))
     # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
     rates = [
