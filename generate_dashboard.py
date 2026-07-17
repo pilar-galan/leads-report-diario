@@ -784,6 +784,7 @@ def main():
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
+    out_value = 0.0      # valor de oportunidades outbound (ventas, no-inbound)
 
     def valid_deal(n):
         n = (n or "").lower()
@@ -827,11 +828,14 @@ def main():
             except (TypeError, ValueError): pass
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
         # Pipeline EJECUTIVO: oportunidad abierta de inbound en el pipeline de VENTAS (sin filtro de fecha)
-        if pid in SALES_PL and _stg_ok and is_marketing(src, d1) and not excluded:
+        if pid in SALES_PL and _stg_ok:
             try: _amt = float(p.get("amount") or 0)
             except (TypeError, ValueError): _amt = 0.0
-            _ic, _lb = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
-            exec_opp.append({"name": name, "stage_label": _sl, "amount": _amt, "channel": _lb, "icon": _ic})
+            if is_marketing(src, d1) and not excluded:
+                _ic, _lb = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
+                exec_opp.append({"name": name, "stage_label": _sl, "amount": _amt, "channel": _lb, "icon": _ic})
+            else:
+                out_value += _amt   # valor de oportunidades outbound (no-inbound) en ventas
         if is_marketing(src, d1) and created >= fstart and not excluded:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
@@ -1291,6 +1295,17 @@ def main():
     exec_extra["reun_owner_total"] = sum(reun_owner.values())
     exec_extra["brain_open"] = brain_open
     exec_extra["brain_value"] = brain_value
+    exec_extra["inb_value"] = exec_extra.get("pipeline_value", 0)
+    exec_extra["out_value"] = out_value
+    # ── Clientes: de dónde vienen · inbound (proceso nuevo) vs heredados (OFFLINE/pre-proceso) ──
+    cli_all = [c for c in (hist_fun + hist_out_fun) if rank(c["lc"]) >= 5]
+    cli_inb = [c for c in cli_all if is_marketing(c.get("src"), c.get("d1"))]
+    cli_her = [c for c in cli_all if not is_marketing(c.get("src"), c.get("d1"))]
+    exec_extra["cli_split"] = {
+        "total": len(cli_all),
+        "inbound": len(cli_inb), "inbound_emp": len({compkey(c) for c in cli_inb}),
+        "hered": len(cli_her), "hered_emp": len({compkey(c) for c in cli_her}),
+    }
 
     def peak_insight(items, pred, origin=True):
         """Mejor pico (día de mayor incremento) de CADA mes, con su origen dominante."""
@@ -2100,6 +2115,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mf-fill{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand))}
 .iocol.out .mf-fill{background:linear-gradient(90deg,#a5741f,var(--warn))}
 .mf-c{font-size:10.5px;color:var(--mut);font-weight:700;text-align:right}
+.io-val{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2);font-size:11.5px;color:var(--mut);font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.io-val span{font-size:17px;font-weight:800;color:var(--brand)}
+.iocol.out .io-val span{color:var(--warn)} .iocol.brain .io-val span{color:var(--violet)}
 @media(max-width:820px){.io3{grid-template-columns:1fr}}
 .src-chip{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin:2px 4px 2px 0}
 .src-chip.in{background:rgba(111,240,162,.16);color:var(--brand);border:1px solid var(--brand-d)}
@@ -2703,18 +2721,20 @@ def render_exec(d):
     <div class="iocol in">
       <div class="io-h">🟢 Inbound · <b>Agustín</b> <span class="io-tot tnum">{fmt(total_nf)}</span></div>
       <div class="mf">{inb_fn}</div>
+      <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("inb_value",0)))) if ex.get("inb_value") else "— (importes sin cargar)"}</span></div>
     </div>
     <div class="iocol out">
       <div class="io-h">🟠 Outbound · <b>Juanma</b> <span class="io-tot tnum">{fmt(ob["contactos"])}</span></div>
       <div class="mf">{out_fn}</div>
+      <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("out_value",0)))) if ex.get("out_value") else "— (importes sin cargar)"}</span></div>
     </div>
     <div class="iocol brain">
       <div class="io-h">🧠 Brain · <b>Alex</b> <span class="io-tot tnum">{fmt(ex.get("brain_open", 0))}</span></div>
       <div class="mf">
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidades abiertas</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
-        <div class="mf-row"><div class="mf-l"><b class="tnum">{("€"+fmt(round(ex.get("brain_value",0)))) if ex.get("brain_value") else "—"}</b> Valor pipeline</div><div class="mf-bar"></div><span class="mf-c"></span></div>
       </div>
-      <div class="pend" style="margin-top:12px">⏳ Embudo completo de contactos <b>Brain / CX</b> (lead→cliente) pendiente de conectar; por ahora, oportunidades y valor del pipeline Brain.</div>
+      <div class="pend" style="margin-top:12px">⏳ Embudo completo de contactos <b>Brain / CX</b> (lead→cliente) pendiente de conectar.</div>
+      <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("brain_value",0)))) if ex.get("brain_value") else "— (importes sin cargar)"}</span></div>
     </div>
   </div>
 </section>
@@ -2834,14 +2854,15 @@ def render_exec(d):
 
 <section>
   <div class="q">10 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· inbound</span></h2>
-  <div class="sd">Clientes de <b>inbound</b> y su conversión desde oportunidad (mismo criterio que el KPI de arriba).</div>
+  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("total",0))}</span> · de dónde vienen</h2>
+  <div class="sd">Contactos en etapa <b>cliente</b>, separados por origen. La mayoría son <b>heredados</b> (cartera previa / comercial, fuente offline) que <b>aún no han entrado en el nuevo proceso</b> inbound/outbound; se irán incorporando.</div>
   <div class="cards">
-    <div class="stat ok"><div class="sv tnum">{fmt(cli_ci)}</div><div class="sl">Clientes inbound (contactos)</div></div>
-    <div class="stat"><div class="sv tnum">{fmt(cli_ei)}</div><div class="sl">Empresas / negocios inbound</div></div>
-    <div class="stat"><div class="sv tnum">{pvf(cli_ci, opp_ci)}</div><div class="sl">Conversión Oportunidad → Cliente (inbound)</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Clientes totales (contactos)</div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound (fuente identificada) · {fmt(ex.get("cli_split",{}).get("inbound_emp",0))} empresas</div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("hered",0))}</div><div class="sl">🗂️ Heredados / comercial (offline) · {fmt(ex.get("cli_split",{}).get("hered_emp",0))} empresas</div></div>
     <div class="stat bad"><div class="sv tnum">—</div><div class="sl">Churn (pendiente de conectar)</div></div>
   </div>
+  <div class="note">Los <b>heredados</b> son clientes de la cartera previa (fuente <i>offline</i>), no atribuibles al embudo inbound/outbound actual. Se mantienen aparte para no distorsionar la conversión del proceso nuevo; se irán migrando al proceso.</div>
 </section>
 
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
