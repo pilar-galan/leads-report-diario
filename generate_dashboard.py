@@ -2688,11 +2688,11 @@ def render_exec(d):
     El número grande es el total de contactos; debajo, <b>in</b> (inbound · Agustín) y <b>out</b> (outbound · Juanma). En Oportunidades y Clientes el número grande es <b>volumen de contactos</b>; el nº de <b>empresas / negocios</b> va debajo para poder hacer match al buscarlos.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
-  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa</span></div>
+  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
   <div class="ratesbanner">
     <div class="rb-grid">{rate_html}</div>
   </div>
-  <div class="fnote">Los <b>Freemium</b> (altas por la app) quedan <b>excluidos</b> del volumen de contactos y de todo el embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
+  <div class="fnote">* <b>¿Qué contactos no pasan a Lead?</b> Se excluyen del embudo la etapa «otros»: <b>{d.get("excl_internal",0)} internos (@gurusup)</b> y <b>{d.get("excl_tests",0)} pruebas/test</b>. Además, hay contactos que se crearon y luego se <b>eliminaron</b> (pruebas): tienen fecha de creación pero ya no existen en el CRM, por eso no se contabilizan. Los <b>Freemium</b> (altas por la app) también quedan fuera del embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
 
 <section>
