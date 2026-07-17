@@ -2328,6 +2328,8 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .vstep b{font-size:22px;font-weight:800;color:var(--ink);line-height:1} .vstep span{font-size:11.5px;color:var(--mut)}
 .vstep.ok b{color:var(--brand)} .vstep.bad b{color:var(--bad)}
 .varr{text-align:center;color:var(--mut);font-size:13px;line-height:1} .varr span{color:var(--brand);font-weight:800;font-size:11px;margin-left:4px}
+.vdet>summary{list-style:none;cursor:pointer} .vdet>summary::-webkit-details-marker{display:none}
+.vdet>summary .vchev{margin-left:auto;color:var(--bad);font-weight:800;font-size:10px} .vdet[open]>summary .vchev::after{content:" ▾"}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -3066,7 +3068,7 @@ def render_exec(d):
   <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> en tres bloques: ① los de <b>paid media</b> (Agustín), ② los <b>descartados</b> y ③ la <b>precualificación automatizada desde el 9 jul</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
 
   <div class="sqlvl3">
-    <details class="lvl">
+    <details class="lvl" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
         <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de paid media</small></span>
@@ -3079,7 +3081,7 @@ def render_exec(d):
       </div>
     </details>
 
-    <details class="lvl lvl-bad">
+    <details class="lvl lvl-bad" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b2">②</span>
         <span class="lvl-tit">Descartados <small>· descualificados + razón</small></span>
@@ -3093,7 +3095,7 @@ def render_exec(d):
       </div>
     </details>
 
-    <details class="lvl lvl3">
+    <details class="lvl lvl3" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b3">③</span>
         <span class="lvl-tit">Precualificación auto <small>· desde 9 jul</small></span>
@@ -3108,15 +3110,14 @@ def render_exec(d):
           <div class="varr">↓ <span>{pv(ag_contact, ag_base)}</span></div>
           <div class="vstep"><b>{ag_contact}</b><span>agendados / llamados</span></div>
           <div class="varr">↓</div>
-          <div class="vstep bad"><b>{pq.get("ag_descartados",0)}</b><span>descartados · no pasaron a ventas</span></div>
+          <details class="vdet">
+            <summary class="vstep bad"><b>{pq.get("ag_descartados",0)}</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
+            <div class="razbox" style="margin-top:6px">{raz_rows}</div>
+          </details>
           <div class="varr">↓ <span>{pv(pq.get("ag_opp",0), ag_base)}</span></div>
           <div class="vstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
         </div>
         <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 {pq.get("ag_calls_unique",0)} por teléfono · 📅 {pq.get("ag_reuniones",0)} agendadas</div>
-        <details class="razd" style="margin-top:12px">
-          <summary><span class="chev">▶</span> 🔴 {pq.get("ag_descartados",0)} descartados · ver razones</summary>
-          <div class="razbox">{raz_rows}</div>
-        </details>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
