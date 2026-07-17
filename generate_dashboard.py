@@ -2220,6 +2220,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mx-sep{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px 4px;color:var(--brand)}
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
+.mx-sep.br{color:var(--violet)}
+.mx-row.mx-br{background:linear-gradient(165deg,rgba(40,30,55,.4),rgba(25,20,40,.3));border-color:#3f3560}
+.mx-row.mx-br .c1 .nm{color:var(--violet);font-weight:800}
 .mxd{background:transparent;border:none;padding:0}
 .mxd>summary{list-style:none;cursor:pointer} .mxd>summary::-webkit-details-marker{display:none}
 .mx-cell.op-clk{cursor:pointer} .mx-cell.op-clk .emp{color:var(--sky)}
@@ -2396,6 +2399,12 @@ def render_exec(d):
     g_mql = mql_d + ob["mql"]; g_sql = sql_d + ob["sql"]
     g_opp = opp_ci + ob["opp"]; g_cli = cli_ci + ob["cli"]
     g_opp_e = opp_ei + ob["opp_emp"]; g_cli_e = cli_ei + ob["cli_emp"]
+    # ── Oportunidades REALES = negocios con deal asociado (no el lifecycle "opportunity" inflado por
+    #    automatismos/importaciones). Suma inbound + outbound + Brain para cuadrar con la matriz. ──
+    opp_inb_real = sum(len(v) for v in ex.get("deals_by_chan", {}).values())
+    opp_out_real = sum(len(v) for v in ex.get("deals_by_chan_out", {}).values())
+    opp_brain_real = ex.get("brain_open", 0)
+    opp_real = opp_inb_real + opp_out_real + opp_brain_real
     pq = d["preq"]
     ag_contact = pq.get("ag_calls_unique", 0) + pq.get("ag_reuniones", 0)   # llamadas + agendas de Agustín
     def _short_stage(s):
@@ -2447,7 +2456,10 @@ def render_exec(d):
         f'<div class="kt" style="color:var(--mut)">negocios vivos · ventas + Brain</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div>'
         f'<div class="kt" style="margin-top:4px;color:var(--mut);font-size:10px">«Sin asignar» ({fmt(reun_sinasig)}) = casi todo <b>Brain</b> (relaciones de Alex sin propietario). Agustín gestiona negocios de ventas.</div></div>'
-        + kpi_emp_io("Oportunidades", g_opp, ex.get("reun_owner_total", g_opp_e), tr["opp"], opp_ci, ob["opp"], f'{pvf(g_opp, g_sql)} de SQL')
+        + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">reales · con negocio</span></div>'
+        f'<div class="kv tnum">{fmt(opp_real)}</div>'
+        f'<div class="kt"><span style="color:var(--mut)">negocios abiertos con deal · excluye lifecycle sin deal</span></div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div></div>'
         + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>')
@@ -2459,8 +2471,8 @@ def render_exec(d):
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
-        ("SQL → Oportunidad", pvf(g_opp, g_sql), "global · sobre contactos"),
-        ("Oportunidad → Cliente", pvf(g_cli, g_opp), "global · sobre contactos"),
+        ("SQL → Oportunidad", pvf(opp_real, g_sql), "oportunidades reales / SQL"),
+        ("Oportunidad → Cliente", pvf(ex.get("clientes_activos",0), opp_real), "clientes activos / oport. reales"),
         ("Cliente → Churn", _churn_pct, "% de los que fueron cliente"),
     ]
     rate_html = "".join(
@@ -2496,8 +2508,9 @@ def render_exec(d):
         for lab, val, svg, note in charts)
 
     # ---------- 3 · FUNNEL ----------
+    # Oportunidad = reales (con deal); Cliente = cuentas activas del pipeline Clientes
     stages = [("Contactos", g_contactos, None), ("Leads", g_lead, None), ("MQL", g_mql, None),
-              ("SQL", g_sql, None), ("Oportunidad", g_opp, g_opp_e), ("Cliente", g_cli, g_cli_e)]
+              ("SQL", g_sql, None), ("Oportunidad", opp_real, None), ("Cliente", ex.get("clientes_activos", 0), None)]
     top = stages[0][1] or 1
     fn_rows = ""
     for i, (lab, val, emp) in enumerate(stages):
@@ -2570,7 +2583,7 @@ def render_exec(d):
             mx_rows_out += f'<div class="mx-row mx-ob">{row_inner}</div>'
     oc_c = sum(e["contactos"] for _, e in cmo); oc_l = sum(e["leads"] for _, e in cmo)
     oc_m = sum(e["mql"] for _, e in cmo); oc_s = sum(e["sql"] for _, e in cmo)
-    oc_o = sum(len(dbco_m.get(lbl, [])) for lbl, _ in cmo)   # oportunidades outbound con negocio asociado (coherente con las filas)
+    oc_o = sum(len(v) for v in dbco_m.values())   # TODAS las oportunidades outbound con negocio (cuadra con el KPI)
     mx_total_out = (
         '<div class="mx-row mx-tot">'
         '<div class="c1"><span class="nm">Total outbound</span></div>'
@@ -2579,10 +2592,21 @@ def render_exec(d):
         + '</div>') if cmo else ''
     sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
     sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound (importaciones · offline · integración · sin asignar)</div>' if cmo else ''
+    # BRAIN · oportunidades de relaciones estratégicas (sin embudo de contactos conectado)
+    brain_o = ex.get("brain_open", 0)
+    sep_brain = '<div class="mx-sep br">🧠 Brain · relaciones estratégicas (solo oportunidades)</div>' if brain_o else ''
+    mx_brain = (
+        '<div class="mx-row mx-br">'
+        '<div class="c1"><span class="nm">🧠 Brain</span></div>'
+        + '<div class="mx-cell mut"><span class="v">—</span></div>' * 4
+        + cell(brain_o)
+        + '<div class="mx-cell"><span class="p">negocios Brain</span></div>'
+        + '</div>') if brain_o else ''
+    g_opp_all = t_o + oc_o + brain_o
     g_total = (
         '<div class="mx-row mx-gtot">'
-        '<div class="c1"><span class="nm">TOTAL GLOBAL</span><span class="gsub">inbound + outbound</span></div>'
-        + cell(t_c + oc_c) + cell(t_l + oc_l) + cell(t_m + oc_m) + cell(t_s + oc_s, cls="hi") + cell(t_o + oc_o)
+        '<div class="c1"><span class="nm">TOTAL GLOBAL</span><span class="gsub">inbound + outbound + brain</span></div>'
+        + cell(t_c + oc_c) + cell(t_l + oc_l) + cell(t_m + oc_m) + cell(t_s + oc_s, cls="hi") + cell(g_opp_all)
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t_o + oc_o, t_c + oc_c)}</span></div>'
         + '</div>')
     matrix_html = (
@@ -2591,6 +2615,7 @@ def render_exec(d):
         '<span>MQL</span><span>SQL</span><span>Oport. (negocio asoc.)</span><span>Contacto→Op.</span></div>'
         + sep_in + mx_rows + mx_total
         + sep_out + mx_rows_out + mx_total_out
+        + sep_brain + mx_brain
         + g_total + '</div></div>')
 
     # ---------- 24H (sin Freemium: volumen = lead+MQL+SQL) ----------
@@ -2925,7 +2950,7 @@ def render_exec(d):
 <section>
   <div class="q">04 · ¿Qué canal genera negocio real?</div>
   <h2 class="sh">Rendimiento por canal <span class="tot">· global</span></h2>
-  <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b> y <b style="color:var(--warn)">🟠 Outbound</b>, con su total y el <b>TOTAL GLOBAL</b> al final. En Oportunidad solo los que tienen negocio asociado; última columna: <b>conversión contacto → oportunidad</b>.</div>
+  <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b>, <b style="color:var(--warn)">🟠 Outbound</b> y <b style="color:var(--violet)">🧠 Brain</b>, con su total y el <b>TOTAL GLOBAL</b> al final. En Oportunidad <b>solo los que tienen negocio (deal) asociado</b> — así el total de esta columna <b>cuadra con el KPI de Oportunidades reales</b> de arriba. Última columna: <b>conversión contacto → oportunidad</b>.</div>
   {matrix_html}
 </section>
 
