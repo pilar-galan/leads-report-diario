@@ -2744,6 +2744,8 @@ def render_exec(d):
   <h2 class="sh">Evolución acumulada</h2>
   <div class="sd">Crecimiento día a día <b style="color:var(--brand)">desde el 1 de enero</b>. Sobre cada línea, el total acumulado al cierre de cada mes y, más pequeño, lo generado ese mes.</div>
   <div class="cg">{charts_html}</div>
+  <div class="note">⚠️ <b>Por qué el total del gráfico no coincide con el KPI:</b> estos evolutivos cuentan contactos que <b>alcanzaron</b> cada etapa por su fecha de creación (<b>generación acumulada</b>), no el estado actual — si un contacto avanzó de etapa, sigue contando aquí. El KPI de arriba muestra el <b>estado a día de hoy</b>. Por eso difieren.
+  <br><br>🔎 <b>Dos picos revisados:</b> el de <b>MQL en junio</b> viene sobre todo de fuente <b>OFFLINE / importación</b> (etiqueta «Otros»), no de un canal inbound real. El de <b>Oportunidades en marzo (+50)</b> son contactos <b>marcados como «oportunidad» sin negocio (deal) asociado</b> — importación/automatismo, no oportunidades reales del pipeline (conviene limpiarlos).</div>
 </section>
 
 <section>
