@@ -2430,7 +2430,7 @@ def render_exec(d):
 <section style="border-top:none">
   <div class="q">01 · ¿Cuánto negocio está entrando?</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd wide">El número grande es el <b>total acumulado desde el 1 de enero</b>, repartido por su estado en el embudo a día de hoy. Debajo, <b style="color:var(--brand)">+X</b> = contactos nuevos en los <b>últimos 7 días</b>, con flecha <b style="color:var(--ok)">verde</b> si esta semana crece respecto a la anterior o <b style="color:var(--bad)">roja</b> si baja. En Oportunidades y Clientes el número grande es volumen de contactos y debajo se separa el nº de <b>empresas / negocios</b>.</div>
+  <div class="sd wide"><b>Volumen total de contactos y sus etapas desde el 1 de enero.</b> En pequeño, los <b style="color:var(--brand)">nuevos de esta última semana</b> con flecha <b style="color:var(--ok)">verde</b> o <b style="color:var(--bad)">roja</b> según crezca o no frente a la semana anterior. En Oportunidades y Clientes se separa además el nº de <b>empresas / negocios</b>.</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rates-head">Tasas de conversión · <b>todas sobre contactos</b> (misma variable, comparable etapa a etapa)</div>
