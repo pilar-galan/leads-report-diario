@@ -798,6 +798,7 @@ def main():
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
+    brain_contactos = 0  # contactos asociados a negocios del pipeline Brain (entran al CRM aparte)
     brain_names = []     # nombres de negocios Brain (para contar empresas únicas)
     out_value = 0.0      # valor de oportunidades outbound (ventas, no-inbound)
 
@@ -854,6 +855,8 @@ def main():
         if _brain and _stg_ok:
             brain_open += 1
             brain_names.append(name)
+            try: brain_contactos += int(p.get("num_associated_contacts") or 0)
+            except (TypeError, ValueError): pass
             try: brain_value += float(p.get("amount") or 0)
             except (TypeError, ValueError): pass
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
@@ -1358,6 +1361,7 @@ def main():
     exec_extra["reun_owner_total"] = sum(reun_owner.values())
     exec_extra["brain_open"] = brain_open
     exec_extra["brain_value"] = brain_value
+    exec_extra["brain_contactos"] = brain_contactos
     exec_extra["inb_value"] = exec_extra.get("pipeline_value", 0)
     exec_extra["out_value"] = out_value
     # ── Oportunidades = CONTACTOS en etapa oportunidad CON negocio (deal) asociado ──
@@ -2439,7 +2443,8 @@ def render_exec(d):
     total_nf = ex.get("total_contactos", cum["total"])   # contactos SIN Freemium (inbound)
     # OUTBOUND (Juanma) y TOTALES GLOBALES (inbound + outbound)
     ob = ex.get("out", {"contactos": 0, "lead": 0, "mql": 0, "sql": 0, "opp": 0, "cli": 0, "opp_emp": 0, "cli_emp": 0})
-    g_contactos = total_nf + ob["contactos"]
+    brain_ct = ex.get("brain_contactos", 0)
+    g_contactos = total_nf + ob["contactos"] + brain_ct
     g_lead = cum["lead"] + ob["lead"]
     g_mql = mql_d + ob["mql"]; g_sql = sql_d + ob["sql"]
     g_opp = opp_ci + ob["opp"]; g_cli = cli_ci + ob["cli"]
@@ -2489,7 +2494,9 @@ def render_exec(d):
                 f'<div class="kt" style="margin-top:5px">{io(inb, out)}</div>'
                 f'<div class="emprow">🏢 <span class="eb tnum">{fmt(emp)}</span> empresas / negocios</div></div>')
     kpi_html = (
-        kpi_io("Nuevos contactos", g_contactos, tr["contactos"], total_nf, ob["contactos"]) +
+        f'<div class="kc"><div class="kl">Nuevos contactos</div><div class="kv tnum">{fmt(g_contactos)}</div>'
+        f'<div class="kt">{arrow(tr["contactos"])}</div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(total_nf)} · out {fmt(ob["contactos"])} · 🧠 brain {fmt(brain_ct)}</span></div></div>' +
         kpi_io("Leads", g_lead, tr["leads"], cum["lead"], ob["lead"]) +
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
         kpi_io("SQL", g_sql, tr["sql"], sql_d, ob["sql"]) +
@@ -2989,11 +2996,12 @@ def render_exec(d):
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("out_value",0)))) if ex.get("out_value") else "— (importes sin cargar)"}</span></div>
     </div>
     <div class="iocol brain">
-      <div class="io-h">🧠 Brain · <b>Alex</b> <span class="io-tot tnum">{fmt(ex.get("brain_open", 0))}</span></div>
+      <div class="io-h">🧠 Brain <span class="io-tot tnum">{fmt(brain_ct)}</span></div>
       <div class="mf">
-        <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidades abiertas</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
+        <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(brain_ct)}</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
+        <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidad (negocio)</div><div class="mf-bar"><div class="mf-fill" style="width:{max(5, round(ex.get("brain_open",0)/(brain_ct or 1)*100))}%"></div></div><span class="mf-c">{pv(ex.get("brain_open",0), brain_ct or 1)}</span></div>
       </div>
-      <div class="pend" style="margin-top:12px">⏳ Embudo completo de contactos <b>Brain / CX</b> (lead→cliente) pendiente de conectar.</div>
+      <div class="pend" style="margin-top:12px">⏳ Embudo intermedio de <b>Brain / CX</b> (lead→MQL→SQL) pendiente de conectar; hoy se ven contactos y oportunidades.</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("brain_value",0)))) if ex.get("brain_value") else "— (importes sin cargar)"}</span></div>
     </div>
   </div>
