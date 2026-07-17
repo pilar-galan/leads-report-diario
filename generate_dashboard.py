@@ -2452,17 +2452,16 @@ def render_exec(d):
         f'<div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">{fmt(ag_contact)}</div>'
         f'<div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
-        + f'<div class="kc"><div class="kl">Reuniones en pipeline</div><div class="kv tnum">{fmt(reun_pipe_tot)}</div>'
-        f'<div class="kt" style="color:var(--mut)">negocios vivos · ventas + Brain</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--ink2);flex-wrap:wrap">{reun_pipe_break}</div>'
-        f'<div class="kt" style="margin-top:4px;color:var(--mut);font-size:10px">«Sin asignar» ({fmt(reun_sinasig)}) = casi todo <b>Brain</b> (relaciones de Alex sin propietario). Agustín gestiona negocios de ventas.</div></div>'
         + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">reales · con negocio</span></div>'
         f'<div class="kv tnum">{fmt(opp_real)}</div>'
         f'<div class="kt"><span style="color:var(--mut)">negocios abiertos con deal · excluye lifecycle sin deal</span></div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div></div>'
         + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>')
+        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>'
+        + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos que fueron cliente y ya no lo son</div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</span> empresas asociadas</div></div>')
     # tasa de churn = clientes perdidos / (clientes que han sido cliente alguna vez), en contactos
     _churn_c = ex.get("churn", {}).get("contactos", 0)
     _cli_now = ex.get("cli_split", {}).get("total", 0)
