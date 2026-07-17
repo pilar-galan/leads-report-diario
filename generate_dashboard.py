@@ -1179,7 +1179,10 @@ def main():
     }
     # ── Exec: contactos por etapa (no empresas) + filtrado inbound marketing + reuniones por etapa ──
     MKT_CH = set(FIXED_CHANNELS.keys())
-    def _chl(c): return classify_channel(c["src"], c["d1"])[0]
+    def _chl(c):
+        # Contactos captados por un webinar (p.ej. base de datos de TIC Negocios) → canal Webinar (inbound)
+        if c.get("webinar"): return "Webinar"
+        return classify_channel(c["src"], c["d1"])[0]
     exec_extra = {
         "opp_contacts": sum(1 for c in hist_fun if rank(c["lc"]) >= 4),
         "cli_contacts": sum(1 for c in hist_fun if rank(c["lc"]) >= 5),
@@ -2266,6 +2269,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mx-sep{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px 4px;color:var(--brand)}
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
+.nm-tag{display:inline-block;margin-left:7px;font-size:9px;font-weight:700;color:var(--mut);background:rgba(148,163,184,.14);border-radius:6px;padding:1px 6px;vertical-align:middle;white-space:nowrap}
 .mx-sep.br{color:var(--violet)}
 .mx-row.mx-br{background:linear-gradient(165deg,rgba(40,30,55,.4),rgba(25,20,40,.3));border-color:#3f3560}
 .mx-row.mx-br .c1 .nm{color:var(--violet);font-weight:800}
@@ -2599,8 +2603,9 @@ def render_exec(d):
         conv_o = pvf(opp_deals, e["contactos"])
         opp_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{opp_deals}</span><span class="emp">🏢 ver ▾</span></div>'
                     if items else cell(opp_deals, '<span class="p">—</span>'))
+        nm_tag = '<span class="nm-tag">🍪 sin cookies · no rastreable</span>' if lbl == "Otros" else ''
         row_inner = (
-            f'<div class="c1"><span class="nm">{esc(lbl)}</span>'
+            f'<div class="c1"><span class="nm">{esc(lbl)}{nm_tag}</span>'
             f'<div class="bt"><div class="bf" style="width:{bar_w}%"></div></div></div>'
             + cell(e["contactos"], pct_c)
             + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
