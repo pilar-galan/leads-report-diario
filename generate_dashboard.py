@@ -780,16 +780,21 @@ def main():
     all_deals = fetch_all("deals", [
         {"propertyName": "hs_is_closed", "operator": "EQ", "value": "false"},
     ], ["dealname", "dealstage", "pipeline", "createdate", "hs_is_closed", "amount",
-        "hs_analytics_source", "hs_analytics_source_data_1", "hubspot_owner_id"])
+        "hs_analytics_source", "hs_analytics_source_data_1", "hubspot_owner_id",
+        "num_associated_contacts"])
     # Churn REAL = cuentas del pipeline "Clientes" en etapa Churned/Dormidos (incluye cerradas)
     try:
         _churn_client_deals = fetch_all("deals", [
             {"propertyName": "pipeline", "operator": "EQ", "value": "724590933"},
             {"propertyName": "dealstage", "operator": "IN", "values": ["1367778337", "1177859668"]},
-        ], ["dealname", "dealstage"])
+        ], ["dealname", "dealstage", "num_associated_contacts"])
     except Exception as e:
         print(f"[churn] error: {e}", file=sys.stderr); _churn_client_deals = []
     cli_churn_n = len(_churn_client_deals)
+    def _nac(dl):
+        try: return int(dl["properties"].get("num_associated_contacts") or 0)
+        except (TypeError, ValueError): return 0
+    churn_contactos = sum(_nac(dl) for dl in _churn_client_deals)
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
@@ -812,12 +817,15 @@ def main():
     brain_count = ventas_count = 0
     clientes_activos = 0   # cuentas de cliente activas = negocios abiertos en el pipeline "Clientes"
     cli_inb_src = 0; cli_out_src = 0   # de dónde vienen los clientes activos (fuente real del negocio)
+    cli_contactos = 0      # volumen de contactos de la cartera real (contactos asociados a esas cuentas)
     CLIENTES_PL = "724590933"
     CLI_CHURN_STAGES = ("1367778337", "1177859668")   # Churned · Dormidos/Inactivos
     for dl in all_deals:
         p = dl["properties"]
         if p.get("pipeline") == CLIENTES_PL and p.get("dealstage") not in CLI_CHURN_STAGES:
             clientes_activos += 1
+            try: cli_contactos += int(p.get("num_associated_contacts") or 0)
+            except (TypeError, ValueError): pass
             if is_marketing(p.get("hs_analytics_source") or "", p.get("hs_analytics_source_data_1") or ""):
                 cli_inb_src += 1
             else:
@@ -1276,8 +1284,6 @@ def main():
         if c["lc"] in SQL_STAGES: e["sql"] += 1
         if r >= 4: e["opp_c"] += 1
         if r >= 5: e["cli_c"] += 1
-    chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
-    exec_extra["chan_matrix"] = chan_matrix
     # Rendimiento por canal · OUTBOUND (contactos de fuentes no-inbound)
     def _ochl(c):
         s = (c.get("src") or "").upper()
@@ -1294,6 +1300,15 @@ def main():
         if r >= 1: e["leads"] += 1
         if r >= 2: e["mql"] += 1
         if c["lc"] in SQL_STAGES: e["sql"] += 1
+    # Orgánico y social SON canales de inbound: se mueven de outbound → inbound
+    for _inb_lbl in ("SEO Orgánico", "Social orgánico"):
+        if _inb_lbl in chan_ext_out:
+            _mv = chan_ext_out.pop(_inb_lbl)
+            tgt = chan_ext.setdefault(_inb_lbl, {"contactos": 0, "leads": 0, "mql": 0, "sql": 0, "opp_c": 0, "cli_c": 0})
+            for k in ("contactos", "leads", "mql", "sql"):
+                tgt[k] += _mv.get(k, 0)
+    chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
+    exec_extra["chan_matrix"] = chan_matrix
     exec_extra["chan_matrix_out"] = sorted(chan_ext_out.items(), key=lambda x: -x[1]["contactos"])
     # Oportunidades OUTBOUND con negocio asociado, por fuente
     deals_by_chan_out = {}
@@ -1340,14 +1355,26 @@ def main():
     exec_extra["brain_value"] = brain_value
     exec_extra["inb_value"] = exec_extra.get("pipeline_value", 0)
     exec_extra["out_value"] = out_value
+    # ── Oportunidades = CONTACTOS en etapa oportunidad CON negocio (deal) asociado ──
+    try:
+        _opp_ct = fetch_all("contacts", [
+            {"propertyName": "lifecyclestage", "operator": "EQ", "value": "opportunity"},
+            {"propertyName": "num_associated_deals", "operator": "GT", "value": "0"},
+            {"propertyName": "email", "operator": "NOT_CONTAINS_TOKEN", "value": "gurusup.com"},
+        ], ["associatedcompanyid"])
+    except Exception as e:
+        print(f"[opp] error: {e}", file=sys.stderr); _opp_ct = []
+    exec_extra["opp_contactos"] = len(_opp_ct)
+    exec_extra["opp_empresas"] = len({c["properties"].get("associatedcompanyid") for c in _opp_ct
+                                      if c["properties"].get("associatedcompanyid")})
     # ── Clientes: cuentas ACTIVAS del pipeline "Clientes" y de dónde vienen (fuente real del negocio) ──
     exec_extra["cli_split"] = {
-        "total": clientes_activos,
+        "total": clientes_activos, "contactos": cli_contactos,
         "inbound": cli_inb_src,
         "outbound": cli_out_src,
     }
     # ── Churn REAL = cuentas de cliente que ya no lo son (etapa Churned/Dormidos del pipeline Clientes) ──
-    exec_extra["churn"] = {"empresas": cli_churn_n}
+    exec_extra["churn"] = {"empresas": cli_churn_n, "contactos": churn_contactos}
     exec_extra["clientes_activos"] = clientes_activos
 
     def peak_insight(items, pred, origin=True):
@@ -2460,28 +2487,29 @@ def render_exec(d):
         f'<div class="kc"><div class="kl">Llamadas precualif.</div><div class="kv tnum">{fmt(ag_contact)}</div>'
         f'<div class="kt" style="color:var(--mut)">SQL ≥3.000 · Agustín · desde 9 jul</div>'
         f'<div class="kt" style="margin-top:5px;color:var(--ink2)">📞 {pq.get("ag_calls_unique",0)} teléfono · 📅 {pq.get("ag_reuniones",0)} agenda</div></div>'
-        + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">reales · con negocio</span></div>'
-        f'<div class="kv tnum">{fmt(opp_real)}</div>'
-        f'<div class="kt"><span style="color:var(--mut)">negocios abiertos con deal · excluye lifecycle sin deal</span></div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
-        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_emp_total",0))}</span> empresas únicas con negocio</div></div>'
-        + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("clientes_activos",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">cuentas activas ahora mismo · pipeline «Clientes»</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 negocios de cliente en curso (onboarding + activos)</div></div>'
-        + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">cuentas que fueron cliente y ya no lo son</div>'
-        f'<div class="kt" style="margin-top:5px;color:var(--ink2)">🏢 pipeline Clientes · etapa Churned / Dormidos</div></div>')
-    # tasa de churn = cuentas perdidas / (cuentas que han sido cliente) — por cuenta/empresa
-    _churn_c = ex.get("churn", {}).get("empresas", 0)
-    _cli_now = ex.get("cli_split", {}).get("total", 0)
-    _churn_pct = pvf(_churn_c, _churn_c + _cli_now)
-    # tasas: TODAS sobre contactos (misma variable, comparable etapa a etapa)
+        + f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos · con negocio</span></div>'
+        f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
+        f'<div class="kt"><span style="color:var(--mut)">contactos en etapa oportunidad con deal asociado</span></div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_empresas",0) or opp_real)}</span> empresas / negocios</div></div>'
+        + f'<div class="kc"><div class="kl">Clientes</div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos de la cartera real · pipeline «Clientes»</div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("clientes_activos",0))}</span> empresas cliente activas</div></div>'
+        + f'<div class="kc"><div class="kl">Churn</div><div class="kv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">han sido cliente desde el 1 ene y hoy ya no lo son</div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</span> empresas (Churned / Dormidos)</div></div>')
+    # contactos por etapa (reales)
+    _opp_ct = ex.get("opp_contactos", 0)
+    _cli_ct = ex.get("cli_split", {}).get("contactos", 0)
+    _churn_ct = ex.get("churn", {}).get("contactos", 0)
+    _churn_pct = pvf(_churn_ct, _churn_ct + _cli_ct)
+    # tasas: sobre contactos (comparable etapa a etapa)
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
-        ("SQL → Oportunidad", pvf(opp_real, g_sql), "oportunidades reales / SQL"),
-        ("Oportunidad → Cliente", pvf(ex.get("clientes_activos",0), opp_real), "clientes activos / oport. reales"),
-        ("Cliente → Churn", _churn_pct, "% de los que fueron cliente"),
+        ("SQL → Oportunidad", pvf(_opp_ct, g_sql), "contactos con negocio / SQL"),
+        ("Oportunidad → Cliente", pvf(_cli_ct, _opp_ct), "contactos cliente / oportunidad"),
+        ("Cliente → Churn", _churn_pct, "contactos · desde 1 ene"),
     ]
     rate_html = "".join(
         f'<div class="rbc"><div class="rbl">{lab}</div><div class="rbv tnum">{val}</div>'
@@ -2498,15 +2526,19 @@ def render_exec(d):
             rows += (f'<div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(val)}</b> {lab}</div>'
                      f'<div class="mf-bar"><div class="mf-fill" style="width:{w}%"></div></div>{conv}</div>')
         return rows
-    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", sql_d), ("Oportunidad", opp_ci), ("Cliente", cli_ci)]
-    out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", ob["sql"]), ("Oportunidad", ob["opp"]), ("Cliente", ob["cli"])]
+    # Oportunidad = negocios reales con deal (por vía); Cliente = cuentas de cliente por fuente
+    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", sql_d), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
+    out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", ob["sql"]), ("Oportunidad (negocio)", opp_out_real), ("Cliente", ex.get("cli_split",{}).get("outbound",0))]
     inb_fn = mini_funnel(inb_st); out_fn = mini_funnel(out_st)
 
     # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
+    _imp_note = ('<br>⚠️ El total infla porque cuenta por <b>fecha de creación</b>, no por evolución real: ha habido '
+                 '<b>importaciones automáticas</b> que generaron SQLs/oportunidades de golpe (y no descuenta los que se '
+                 'eliminan, se descartan o no cualifican). El dato vivo real es el de los KPIs de arriba.')
     charts = [
         ("MQL", mql_d, ex["svg_mql_m"], ex.get("note_mql", "")),
-        ("SQL alcanzados", cum["sql"], ex["svg_sql_m"], ex.get("note_sql", "")),
-        ("Oportunidades", opp_e, ex["svg_opp_m"], ex.get("note_opp", "")),
+        ("SQL alcanzados", cum["sql"], ex["svg_sql_m"], ex.get("note_sql", "") + _imp_note),
+        ("Oportunidades", opp_e, ex["svg_opp_m"], ex.get("note_opp", "") + _imp_note),
         ("Clientes", cli_e, ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
     charts_html = "".join(
@@ -3075,10 +3107,10 @@ def render_exec(d):
 
 <section>
   <div class="q">10 · ¿Cerramos?</div>
-  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("total",0))} cuentas</span> · de dónde vienen</h2>
-  <div class="sd"><b>Cuentas de cliente activas</b> del pipeline «Clientes» (mismo dato que el KPI de arriba; excluye las que están en Churn/Dormidos). Fuente real del negocio (clasificada por <code>hs_analytics_source</code>): el total es la <b>suma de inbound + outbound</b>.</div>
+  <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("contactos",0))} contactos · {fmt(ex.get("cli_split",{}).get("total",0))} empresas</span></h2>
+  <div class="sd"><b>Cartera real</b> del pipeline «Clientes» (excluye Churn/Dormidos y las altas freemium de la app). Cifra grande = <b>contactos</b>; empresas = cuentas. Fuente real del negocio (por <code>hs_analytics_source</code>): el total es la <b>suma de inbound + outbound</b>.</div>
   <div class="cards">
-    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Cuentas de cliente activas</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Cuentas de cliente activas · {fmt(ex.get("cli_split",{}).get("contactos",0))} contactos</div></div>
     <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · orgánico / paid / social</div></div>
     <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound / otros · offline · importación · integración · tráfico directo</div></div>
   </div>
@@ -3087,10 +3119,10 @@ def render_exec(d):
 
 <section>
   <div class="q">11 · ¿Perdemos clientes?</div>
-  <h2 class="sh">Churn <span class="tot">· {fmt(ex.get("churn",{}).get("empresas",0))} cuentas</span></h2>
-  <div class="sd"><b>Clientes que ya no lo son</b>: cuentas del pipeline «Clientes» que han pasado a etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>.</div>
+  <h2 class="sh">Churn <span class="tot">· {fmt(ex.get("churn",{}).get("contactos",0))} contactos · {fmt(ex.get("churn",{}).get("empresas",0))} empresas</span></h2>
+  <div class="sd"><b>Clientes que lo fueron desde el 1 de enero y hoy ya no lo son</b>: cuentas del pipeline «Clientes» que han pasado a etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>. Cifra grande = contactos; empresas = cuentas.</div>
   <div class="cards">
-    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</div><div class="sl">🔻 Churn · cuentas de cliente perdidas<br><span style="color:var(--mut)">etapa Churned / Dormidos</span></div></div>
+    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas · Churned / Dormidos</span></div></div>
     <div class="stat"><div class="sv tnum">{_churn_pct}</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">churn / (churn + clientes activos)</span></div></div>
   </div>
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
