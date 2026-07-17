@@ -2443,7 +2443,8 @@ def render_exec(d):
     total_nf = ex.get("total_contactos", cum["total"])   # contactos SIN Freemium (inbound)
     # OUTBOUND (Juanma) y TOTALES GLOBALES (inbound + outbound)
     ob = ex.get("out", {"contactos": 0, "lead": 0, "mql": 0, "sql": 0, "opp": 0, "cli": 0, "opp_emp": 0, "cli_emp": 0})
-    brain_ct = ex.get("brain_contactos", 0)
+    # Brain = relaciones estratégicas del pipeline Brain (cada negocio ≈ una persona/contacto)
+    brain_ct = ex.get("brain_open", 0)
     g_contactos = total_nf + ob["contactos"] + brain_ct
     g_lead = cum["lead"] + ob["lead"]
     g_mql = mql_d + ob["mql"]; g_sql = sql_d + ob["sql"]
