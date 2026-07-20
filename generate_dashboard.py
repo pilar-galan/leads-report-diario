@@ -798,7 +798,8 @@ def main():
     churn_contactos = sum(_nac(dl) for dl in _churn_client_deals)
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
-    brain_open = 0; brain_value = 0.0   # oportunidades y valor del pipeline Brain
+    brain_open = 0; brain_value = 0.0   # oportunidades REALES del pipeline Brain (demo/validación/best case)
+    brain_total = 0      # todas las relaciones vivas de Brain (para volumen de contactos)
     brain_contactos = 0  # contactos asociados a negocios del pipeline Brain (entran al CRM aparte)
     brain_names = []     # nombres de negocios Brain (para contar empresas únicas)
     out_value = 0.0      # valor de oportunidades outbound (ventas, no-inbound)
@@ -856,14 +857,18 @@ def main():
         # Reuniones/negocios vivos en pipeline (ventas + brain), por persona
         if (pid in SALES_PL or _brain) and _stg_ok:
             reun_owner[_own] = reun_owner.get(_own, 0) + 1
-        # Brain: oportunidades abiertas y su valor
+        # Brain: contactos (todas las relaciones vivas) y oportunidades REALES (etapa demo/validación/best case)
         if _brain and _stg_ok:
-            brain_open += 1
-            brain_names.append(name)
+            brain_total += 1
             try: brain_contactos += int(p.get("num_associated_contacts") or 0)
             except (TypeError, ValueError): pass
-            try: brain_value += float(p.get("amount") or 0)
-            except (TypeError, ValueError): pass
+            # Oportunidad real solo si ya hay demo agendada / needs validation / best case
+            # (excluye «contactado»/«contestado», que aún no son oportunidad)
+            if stage in ("1310031527", "1310031528", "1310031529"):
+                brain_open += 1
+                brain_names.append(name)
+                try: brain_value += float(p.get("amount") or 0)
+                except (TypeError, ValueError): pass
         excluded = any(x in name.lower() for x in EXCLUDE_MKT)   # mal atribuido → fuera de marketing
         # Pipeline EJECUTIVO: oportunidad abierta de inbound en el pipeline de VENTAS (sin filtro de fecha)
         if pid in SALES_PL and _stg_ok:
@@ -1378,6 +1383,7 @@ def main():
     exec_extra["reun_owner"] = sorted(reun_owner.items(), key=lambda x: -x[1])
     exec_extra["reun_owner_total"] = sum(reun_owner.values())
     exec_extra["brain_open"] = brain_open
+    exec_extra["brain_total"] = brain_total
     exec_extra["brain_value"] = brain_value
     exec_extra["brain_contactos"] = brain_contactos
     exec_extra["inb_value"] = exec_extra.get("pipeline_value", 0)
@@ -2477,7 +2483,7 @@ def render_exec(d):
     if _cmo_tot:
         ob["sql"] = sum(e["sql"] for _, e in _cmo_tot)
     # Brain = relaciones estratégicas del pipeline Brain (cada negocio ≈ una persona/contacto)
-    brain_ct = ex.get("brain_open", 0)
+    brain_ct = ex.get("brain_total", ex.get("brain_open", 0))
     g_contactos = total_nf + ob["contactos"] + brain_ct
     g_lead = cum["lead"] + ob["lead"]
     # SQL inbound coherente con la matriz/embudo (sin freemium): usa el total por canal
