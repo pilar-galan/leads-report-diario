@@ -3199,10 +3199,28 @@ def render_exec(d):
 <footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · {esc(d["generado"])} (hora España) · documento confidencial</footer>
 </div>
 """
+    # Puerta de contraseña (ligera, del lado cliente) para compartir el informe
+    pw_gate = (
+        '<div id="pwg" style="position:fixed;inset:0;z-index:99999;background:#0a1712;display:flex;align-items:center;justify-content:center">'
+        '<div style="text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#e8f5ee;width:320px;max-width:88vw;padding:28px">'
+        '<div style="font-size:34px;margin-bottom:6px">🔒</div>'
+        '<div style="font-size:17px;font-weight:800;margin-bottom:4px">Informe protegido</div>'
+        '<div style="font-size:12.5px;color:#8fb3a4;margin-bottom:18px">Introduce la contraseña para ver el dashboard.</div>'
+        '<input id="pwi" type="password" placeholder="Contraseña" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #2b4a3c;background:#0f241b;color:#e8f5ee;font-size:14px;outline:none">'
+        '<button id="pwb" style="margin-top:12px;width:100%;padding:11px;border:none;border-radius:10px;background:#6ff0a2;color:#04120b;font-weight:800;font-size:14px;cursor:pointer">Entrar</button>'
+        '<div id="pwe" style="display:none;color:#ff6b5b;font-size:12px;margin-top:10px">Contraseña incorrecta</div>'
+        '</div></div>'
+        '<script>(function(){var K="cmFkYXIyMDI2";function ok(){var g=document.getElementById("pwg");if(g)g.style.display="none";}'
+        'try{if(sessionStorage.getItem("radar_ok")==="1")ok();}catch(e){}'
+        'function chk(){var v=(document.getElementById("pwi").value||"");var h="";try{h=btoa(v);}catch(e){}'
+        'if(h===K){try{sessionStorage.setItem("radar_ok","1");}catch(e){}ok();}else{document.getElementById("pwe").style.display="block";}}'
+        'document.getElementById("pwb").addEventListener("click",chk);'
+        'var i=document.getElementById("pwi");i.addEventListener("keydown",function(e){if(e.key==="Enter")chk();});try{i.focus();}catch(e){}})();</script>'
+    )
     return ('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
             '<title>GuruSup · Dashboard Ejecutivo</title><style>' + EXEC_CSS + '</style></head><body>'
-            + body + '</body></html>')
+            + pw_gate + body + '</body></html>')
 
 
 TEMPLATE = r"""<!DOCTYPE html>
