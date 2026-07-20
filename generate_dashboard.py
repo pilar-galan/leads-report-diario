@@ -814,6 +814,7 @@ def main():
     reun_pipe = {}        # reuniones VIVAS en el pipeline de ventas, por etapa (a día de hoy, cualquier fuente)
     exec_opp = []         # oportunidades abiertas de INBOUND en el pipeline de ventas (sin filtro de fecha)
     exec_opp_out = []     # oportunidades abiertas OUTBOUND (fuentes no-inbound) en el pipeline de ventas
+    opp_ct_inb = 0; opp_ct_out = 0   # contactos con negocio asociado (ventas), por vía
     _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
     brain_count = ventas_count = 0
     clientes_activos = 0   # cuentas de cliente activas = negocios abiertos en el pipeline "Clientes"
@@ -866,11 +867,15 @@ def main():
         if pid in SALES_PL and _stg_ok:
             try: _amt = float(p.get("amount") or 0)
             except (TypeError, ValueError): _amt = 0.0
+            try: _nac_d = int(p.get("num_associated_contacts") or 0)
+            except (TypeError, ValueError): _nac_d = 0
             if is_marketing(src, d1) and not excluded:
                 _ic, _lb = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
                 exec_opp.append({"name": name, "stage_label": _sl, "amount": _amt, "channel": _lb, "icon": _ic})
+                opp_ct_inb += _nac_d
             else:
                 out_value += _amt   # valor de oportunidades outbound (no-inbound) en ventas
+                opp_ct_out += _nac_d
                 # Clasificar la fuente outbound del negocio (misma lógica que la matriz outbound)
                 _os = (src or "").upper()
                 if is_import(src, d1):        _olb = "Importaciones"
@@ -1383,6 +1388,11 @@ def main():
     exec_extra["opp_contactos"] = len(_opp_ct)
     exec_extra["opp_empresas"] = len({c["properties"].get("associatedcompanyid") for c in _opp_ct
                                       if c["properties"].get("associatedcompanyid")})
+    # Contactos con negocio asociado (ventas o Brain), por vía → suman el total
+    exec_extra["opp_ct_inb"] = opp_ct_inb
+    exec_extra["opp_ct_out"] = opp_ct_out
+    exec_extra["opp_ct_brain"] = brain_contactos
+    exec_extra["opp_ct_total"] = opp_ct_inb + opp_ct_out + brain_contactos
     # ── Clientes: cuentas ACTIVAS del pipeline "Clientes" y de dónde vienen (fuente real del negocio) ──
     exec_extra["cli_split"] = {
         "total": clientes_activos, "contactos": cli_contactos,
@@ -2519,9 +2529,9 @@ def render_exec(d):
         kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]) +
         # ── 2ª fila ──
         f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
-        f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
+        f'<div class="kv tnum">{fmt(ex.get("opp_ct_total",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos con deal asociado · ventas o Brain</div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("opp_ct_inb",0))} · out {fmt(ex.get("opp_ct_out",0))} · 🧠 brain {fmt(ex.get("opp_ct_brain",0))}</span></div>'
         f'<div class="emprow">🏢 <span class="eb tnum">{fmt(opp_real)}</span> empresas / negocios</div></div>'
         + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">por contactos</span></div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos de la cartera real (excl. churn/dormidos)</div>'
