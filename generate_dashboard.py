@@ -815,6 +815,7 @@ def main():
     exec_opp = []         # oportunidades abiertas de INBOUND en el pipeline de ventas (sin filtro de fecha)
     exec_opp_out = []     # oportunidades abiertas OUTBOUND (fuentes no-inbound) en el pipeline de ventas
     opp_ct_inb = 0; opp_ct_out = 0   # contactos con negocio asociado (ventas), por vía
+    opp_neg_out = 0                  # nº de negocios outbound reales (excluye importaciones/freemium)
     _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
     brain_count = ventas_count = 0
     clientes_activos = 0   # cuentas de cliente activas = negocios abiertos en el pipeline "Clientes"
@@ -875,7 +876,6 @@ def main():
                 opp_ct_inb += _nac_d
             else:
                 out_value += _amt   # valor de oportunidades outbound (no-inbound) en ventas
-                opp_ct_out += _nac_d
                 # Clasificar la fuente outbound del negocio (misma lógica que la matriz outbound)
                 _os = (src or "").upper()
                 if is_import(src, d1):        _olb = "Importaciones"
@@ -884,6 +884,10 @@ def main():
                 elif not _os:                 _olb = "Comercial / prospección"
                 else:                          _olb = classify_channel(src, d1)[0]
                 exec_opp_out.append({"name": name, "stage_label": _sl, "channel": _olb})
+                # Oportunidades REALES de outbound = campañas/prospección (excluye importaciones directas y freemium)
+                if not is_import(src, d1) and _os != "INTEGRATION":
+                    opp_ct_out += _nac_d
+                    opp_neg_out += 1
         if is_marketing(src, d1) and created >= fstart and not excluded:
             # Brain solo cuenta como inbound si la fuente es web inbound real (orgánico / campaña / formulario web)
             if is_brain_pl(pid) and is_inbound_web(src): brain_count += 1
@@ -1389,10 +1393,13 @@ def main():
     exec_extra["opp_empresas"] = len({c["properties"].get("associatedcompanyid") for c in _opp_ct
                                       if c["properties"].get("associatedcompanyid")})
     # Contactos con negocio asociado (ventas o Brain), por vía → suman el total
+    # Solo campañas/inbound/outbound: excluye importaciones directas y freemium (automáticos, no cuadran)
     exec_extra["opp_ct_inb"] = opp_ct_inb
     exec_extra["opp_ct_out"] = opp_ct_out
     exec_extra["opp_ct_brain"] = brain_contactos
     exec_extra["opp_ct_total"] = opp_ct_inb + opp_ct_out + brain_contactos
+    # Empresas / negocios reales (mismos criterios): inbound + outbound (sin import/freemium) + brain
+    exec_extra["opp_neg_total"] = len(exec_opp) + opp_neg_out + brain_open
     # ── Clientes: cuentas ACTIVAS del pipeline "Clientes" y de dónde vienen (fuente real del negocio) ──
     exec_extra["cli_split"] = {
         "total": clientes_activos, "contactos": cli_contactos,
@@ -2530,9 +2537,9 @@ def render_exec(d):
         # ── 2ª fila ──
         f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
         f'<div class="kv tnum">{fmt(ex.get("opp_ct_total",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">contactos con deal asociado · ventas o Brain</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos con deal (ventas o Brain) · campañas/inbound/outbound · excl. importaciones y freemium</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("opp_ct_inb",0))} · out {fmt(ex.get("opp_ct_out",0))} · 🧠 brain {fmt(ex.get("opp_ct_brain",0))}</span></div>'
-        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(opp_real)}</span> empresas / negocios</div></div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_neg_total",0))}</span> empresas / negocios</div></div>'
         + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">por contactos</span></div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos de la cartera real (excl. churn/dormidos)</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("cli_split",{}).get("inbound_ct",0))} · out {fmt(ex.get("cli_split",{}).get("outbound_ct",0))} · 🧠 brain 0</span></div>'
