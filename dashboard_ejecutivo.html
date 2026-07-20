@@ -307,7 +307,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 @media(max-width:860px){ .kg,.cg{grid-template-columns:1fr 1fr} .p2{grid-template-columns:1fr} .q3{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:560px){ .kg{grid-template-columns:1fr 1fr} .cg{grid-template-columns:1fr} .fn .row{grid-template-columns:88px 1fr}
   .brow{grid-template-columns:120px 1fr 58px} }
-</style></head><body>
+</style></head><body><div id="pwg" style="position:fixed;inset:0;z-index:99999;background:#0a1712;display:flex;align-items:center;justify-content:center"><div style="text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#e8f5ee;width:320px;max-width:88vw;padding:28px"><div style="font-size:34px;margin-bottom:6px">🔒</div><div style="font-size:17px;font-weight:800;margin-bottom:4px">Informe protegido</div><div style="font-size:12.5px;color:#8fb3a4;margin-bottom:18px">Introduce la contraseña para ver el dashboard.</div><input id="pwi" type="password" placeholder="Contraseña" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #2b4a3c;background:#0f241b;color:#e8f5ee;font-size:14px;outline:none"><button id="pwb" style="margin-top:12px;width:100%;padding:11px;border:none;border-radius:10px;background:#6ff0a2;color:#04120b;font-weight:800;font-size:14px;cursor:pointer">Entrar</button><div id="pwe" style="display:none;color:#ff6b5b;font-size:12px;margin-top:10px">Contraseña incorrecta</div></div></div><script>(function(){var K="cmFkYXIyMDI2";function ok(){var g=document.getElementById("pwg");if(g)g.style.display="none";}try{if(sessionStorage.getItem("radar_ok")==="1")ok();}catch(e){}function chk(){var v=(document.getElementById("pwi").value||"");var h="";try{h=btoa(v);}catch(e){}if(h===K){try{sessionStorage.setItem("radar_ok","1");}catch(e){}ok();}else{document.getElementById("pwe").style.display="block";}}document.getElementById("pwb").addEventListener("click",chk);var i=document.getElementById("pwi");i.addEventListener("keydown",function(e){if(e.key==="Enter")chk();});try{i.focus();}catch(e){}})();</script>
 <div class="wrap">
 <header class="xhead">
   <div class="xtop">
@@ -330,7 +330,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>20 Jul 2026 · 14:01</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>20 Jul 2026 · 14:23</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -523,6 +523,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 20 Jul 2026 · 14:01 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 20 Jul 2026 · 14:23 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
