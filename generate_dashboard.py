@@ -2537,11 +2537,11 @@ def render_exec(d):
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
         kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]) +
         # ── 2ª fila ──
-        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
-        f'<div class="kv tnum">{fmt(ex.get("opp_ct_total",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">contactos con deal (ventas o Brain) · campañas/inbound/outbound · excl. importaciones y freemium</div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("opp_ct_inb",0))} · out {fmt(ex.get("opp_ct_out",0))} · 🧠 brain {fmt(ex.get("opp_ct_brain",0))}</span></div>'
-        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_neg_total",0))}</span> empresas / negocios</div></div>'
+        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
+        f'<div class="kv tnum">{fmt(opp_real)}</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos con negocio asociado · pipeline de ventas o Brain · desde 1 ene</div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} <small>(incl. sin fuente)</small> · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_empresas",0) or opp_real)}</span> empresas / negocios</div></div>'
         + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">por contactos</span></div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos de la cartera real (excl. churn/dormidos)</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("cli_split",{}).get("inbound_ct",0))} · out {fmt(ex.get("cli_split",{}).get("outbound_ct",0))} · 🧠 brain 0</span></div>'
