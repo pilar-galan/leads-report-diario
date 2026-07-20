@@ -688,15 +688,26 @@ def main():
         "hs_lead_status", "createdate", "recent_conversion_event_name",
         "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto",
         "razon_descarte_sql", "numero_de_conversaciones__inbound", "volumen_de_consultas_al_mes",
-        "phone", "mobilephone", "hubspot_owner_id"])
+        "phone", "mobilephone", "hubspot_owner_id",
+        "hs_v2_date_entered_lead", "hs_v2_date_entered_marketingqualifiedlead",
+        "hs_v2_date_entered_salesqualifiedlead", "hs_v2_date_entered_opportunity",
+        "hs_v2_date_entered_customer"])
 
     hist = []
     hist_out = []   # OUTBOUND / no-inbound: importaciones + leads sin origen identificado (los trabaja Juanma)
     imports = tests = internal = noinfo = 0
+    def _sdates(p):
+        # Fechas de entrada a cada etapa del ciclo de vida (para snapshots mensuales estáticos)
+        return {1: (p.get("hs_v2_date_entered_lead") or "")[:10],
+                2: (p.get("hs_v2_date_entered_marketingqualifiedlead") or "")[:10],
+                3: (p.get("hs_v2_date_entered_salesqualifiedlead") or "")[:10],
+                4: (p.get("hs_v2_date_entered_opportunity") or "")[:10],
+                5: (p.get("hs_v2_date_entered_customer") or "")[:10]}
     def _outrec(p, src, d1, lc):
         return {"src": src, "d1": d1, "lc": lc, "sql_state": p.get("estado_sql_consultoria") or "",
                 "email": p.get("email") or "", "company": p.get("company") or "",
-                "created": (p.get("createdate") or "")[:10], "created_full": p.get("createdate") or ""}
+                "created": (p.get("createdate") or "")[:10], "created_full": p.get("createdate") or "",
+                "sdates": _sdates(p)}
     for c in hraw:
         p = c["properties"]
         email = p.get("email") or ""
@@ -738,6 +749,7 @@ def main():
             "vol_mes": p.get("volumen_de_consultas_al_mes") or "",
             "phone": (p.get("phone") or p.get("mobilephone") or "").strip(),
             "owner": p.get("hubspot_owner_id") or "",
+            "sdates": _sdates(p),
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -1336,6 +1348,39 @@ def main():
     chan_matrix = sorted(chan_ext.items(), key=lambda x: -x[1]["contactos"])
     exec_extra["chan_matrix"] = chan_matrix
     exec_extra["chan_matrix_out"] = sorted(chan_ext_out.items(), key=lambda x: -x[1]["contactos"])
+    # ── Snapshots MENSUALES ESTÁTICOS por canal (estado a fin de mes, no evolución) ──
+    def _rank_at(rec, T):
+        sd = rec.get("sdates", {}) or {}
+        r = 0
+        for s in (1, 2, 3, 4, 5):
+            dts = sd.get(s)
+            if dts and dts <= T:
+                r = s if s > r else r
+        return r
+    _MONTH_ENDS = [("jun 2026", "2026-06-30"), ("may 2026", "2026-05-31"),
+                   ("abr 2026", "2026-04-30"), ("mar 2026", "2026-03-31"),
+                   ("feb 2026", "2026-02-28"), ("ene 2026", "2026-01-31")]
+    def _month_snap(T):
+        dd = {}
+        def _acc(recs, chl):
+            for c in recs:
+                if c["created"] > T:
+                    continue
+                lbl = chl(c)
+                e = dd.setdefault(lbl, {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0})
+                e["c"] += 1
+                r = _rank_at(c, T)
+                if r >= 1: e["l"] += 1
+                if r >= 2: e["m"] += 1
+                if r >= 3: e["s"] += 1
+                if r >= 4: e["o"] += 1
+        _acc(hist_nf, _chl)
+        _acc(hist_out_fun, _ochl)
+        rows = sorted(dd.items(), key=lambda x: -x[1]["c"])
+        tot = {k: sum(e[k] for _, e in rows) for k in ("c", "l", "m", "s", "o")}
+        return {"rows": rows, "tot": tot}
+    chan_months = [{"label": lbl, **_month_snap(T)} for lbl, T in _MONTH_ENDS]
+    exec_extra["chan_months"] = chan_months
     # Oportunidades OUTBOUND con negocio asociado, por fuente
     deals_by_chan_out = {}
     for dl in exec_opp_out:
@@ -2297,6 +2342,12 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
 .nm-tag{display:inline-block;margin-left:7px;font-size:9px;font-weight:700;color:var(--mut);background:rgba(148,163,184,.14);border-radius:6px;padding:1px 6px;vertical-align:middle;white-space:nowrap}
+.mxtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.mxtab{font-size:11.5px;font-weight:800;letter-spacing:.02em;padding:7px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--ink2);cursor:pointer}
+.mxtab.active{background:var(--brand);color:#04120b;border-color:var(--brand)}
+.mxnote{font-size:11px;color:var(--mut);line-height:1.5;margin-bottom:12px}
+.mxpanel{display:none} .mxpanel.active{display:block}
+.mom{display:block;font-size:9.5px;font-weight:800;margin-top:2px} .mom.up{color:var(--brand)} .mom.down{color:var(--bad)}
 .mx-sep.br{color:var(--violet)}
 .mx-row.mx-br{background:linear-gradient(165deg,rgba(40,30,55,.4),rgba(25,20,40,.3));border-color:#3f3560}
 .mx-row.mx-br .c1 .nm{color:var(--violet);font-weight:800}
@@ -2730,6 +2781,56 @@ def render_exec(d):
         + sep_out + mx_rows_out + mx_total_out
         + sep_brain + mx_brain
         + g_total + '</div></div>')
+
+    # ---------- Pestañas: ACUMULATIVO + snapshots mensuales estáticos ----------
+    def _mom(cur, prev):
+        if prev is None:
+            return ''
+        if prev == 0:
+            return '<span class="mom up">▲ nuevo</span>' if cur else ''
+        d_ = (cur - prev) / prev * 100
+        up = cur >= prev
+        return f'<span class="mom {"up" if up else "down"}">{"▲" if up else "▼"} {abs(round(d_))}%</span>'
+    cmonths = ex.get("chan_months", [])
+    tabs_btns = '<button class="mxtab active" data-mx="acum">ACUMULATIVO</button>'
+    panels = f'<div class="mxpanel active" id="mx-acum">{matrix_html}</div>'
+    for idx, mo in enumerate(cmonths):
+        mid = f'm{idx}'
+        tabs_btns += f'<button class="mxtab" data-mx="{mid}">{esc(mo["label"])}</button>'
+        prev = cmonths[idx + 1]["tot"] if idx + 1 < len(cmonths) else None
+        rows_h = ""
+        mmax = max((e["c"] for _, e in mo["rows"]), default=0) or 1
+        for lbl, e in mo["rows"]:
+            bw = round(e["c"] / mmax * 100)
+            rows_h += (
+                f'<div class="mx-row"><div class="c1"><span class="nm">{esc(lbl)}</span>'
+                f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
+                f'{cell(e["c"])}{cell(e["l"])}{cell(e["m"])}{cell(e["s"], cls="hi")}{cell(e["o"])}'
+                f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
+        t = mo["tot"]
+        tot_row = (
+            '<div class="mx-row mx-gtot"><div class="c1"><span class="nm">TOTAL {}</span></div>'.format(esc(mo["label"]))
+            + f'<div class="mx-cell"><span class="v tnum">{fmt(t["c"])}</span>{_mom(t["c"], prev["c"] if prev else None)}</div>'
+            + f'<div class="mx-cell"><span class="v tnum">{fmt(t["l"])}</span>{_mom(t["l"], prev["l"] if prev else None)}</div>'
+            + f'<div class="mx-cell"><span class="v tnum">{fmt(t["m"])}</span>{_mom(t["m"], prev["m"] if prev else None)}</div>'
+            + f'<div class="mx-cell hi"><span class="v tnum">{fmt(t["s"])}</span>{_mom(t["s"], prev["s"] if prev else None)}</div>'
+            + f'<div class="mx-cell"><span class="v tnum">{fmt(t["o"])}</span>{_mom(t["o"], prev["o"] if prev else None)}</div>'
+            + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t["o"], t["c"])}</span></div></div>')
+        panels += (
+            f'<div class="mxpanel" id="mx-{mid}">'
+            f'<div class="mxwrap"><div class="matrix">'
+            '<div class="mx-head"><span>Canal · fin de mes</span><span>Contactos</span><span>Leads</span>'
+            '<span>MQL</span><span>SQL</span><span>Oport.</span><span>Contacto→Op.</span></div>'
+            + rows_h + tot_row + '</div></div></div>')
+    matrix_html = (
+        '<div class="mxtabs">' + tabs_btns + '</div>'
+        '<div class="mxnote">Los meses son <b>estáticos</b>: reflejan el estado de cada contacto <b>a fin de ese mes</b> '
+        '(si a 30 jun era MQL, cuenta como MQL aunque luego avanzara). Las flechas comparan cada total con el mes anterior.</div>'
+        + panels
+        + '<script>(function(){var ts=document.querySelectorAll(".mxtab");ts.forEach(function(b){b.addEventListener("click",function(){'
+        'ts.forEach(function(x){x.classList.remove("active")});b.classList.add("active");'
+        'document.querySelectorAll(".mxpanel").forEach(function(p){p.classList.remove("active")});'
+        'var t=document.getElementById("mx-"+b.getAttribute("data-mx"));if(t)t.classList.add("active");});});})();</script>')
 
     # ---------- 24H (sin Freemium: volumen = lead+MQL+SQL) ----------
     def nn(e): return e.get("lead", 0) + e.get("mql", 0) + e.get("sql", 0)
