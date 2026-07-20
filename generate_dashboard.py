@@ -688,7 +688,7 @@ def main():
         "hs_lead_status", "createdate", "recent_conversion_event_name",
         "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto",
         "razon_descarte_sql", "numero_de_conversaciones__inbound", "volumen_de_consultas_al_mes",
-        "phone", "mobilephone"])
+        "phone", "mobilephone", "hubspot_owner_id"])
 
     hist = []
     hist_out = []   # OUTBOUND / no-inbound: importaciones + leads sin origen identificado (los trabaja Juanma)
@@ -737,6 +737,7 @@ def main():
             "num_conv": p.get("numero_de_conversaciones__inbound") or "",
             "vol_mes": p.get("volumen_de_consultas_al_mes") or "",
             "phone": (p.get("phone") or p.get("mobilephone") or "").strip(),
+            "owner": p.get("hubspot_owner_id") or "",
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -1278,6 +1279,7 @@ def main():
         "corp": sum(1 for c in hist_nf if has_corp(c)),
         "phone": sum(1 for c in hist_nf if c.get("phone")),
         "company": sum(1 for c in hist_nf if has_company(c)),
+        "owner": sum(1 for c in hist_nf if c.get("owner")),
     }
     # Volumen de consultas declarado en el formulario (≥3.000 / no lo sé / <3.000 / sin dato)
     volq = {"ge3000": 0, "nose": 0, "lt3000": 0, "sindato": 0}
@@ -2310,7 +2312,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .stat.ok{border-color:rgba(87,224,138,.4)} .stat.ok .sv{color:var(--ok)}
 .stat.warn{border-color:rgba(255,202,92,.4)} .stat.warn .sv{color:var(--warn)}
 .stat.bad{border-color:rgba(255,113,137,.4)} .stat.bad .sv{color:var(--bad)}
-.q3{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.q3{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 .qcol{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
 .qcol .qi{font-size:22px} .qcol .qv{font-size:32px;font-weight:800;margin:8px 0 2px;color:var(--brand)} .qcol .ql{font-size:12px;color:var(--ink2)}
 .qcol .qp{font-size:12px;color:var(--sky);font-weight:800;margin-top:4px}
@@ -2747,6 +2749,7 @@ def render_exec(d):
         f'<div class="qcol"><div class="qi">✉️</div><div class="qv tnum">{fmt(ql["corp"])}</div><div class="ql">Email corporativo</div><div class="qp">{pv(ql["corp"], qt)}</div></div>'
         f'<div class="qcol"><div class="qi">📞</div><div class="qv tnum">{fmt(ql["phone"])}</div><div class="ql">Con teléfono</div><div class="qp">{pv(ql["phone"], qt)}</div></div>'
         f'<div class="qcol"><div class="qi">🏢</div><div class="qv tnum">{fmt(ql["company"])}</div><div class="ql">Empresa identificada</div><div class="qp">{pv(ql["company"], qt)}</div></div>'
+        f'<div class="qcol"><div class="qi">👤</div><div class="qv tnum">{fmt(ql.get("owner",0))}</div><div class="ql">Con propietario</div><div class="qp">{pv(ql.get("owner",0), qt)}</div></div>'
         f'<div class="qcol"><div class="qi">🗣️</div><div class="qv tnum">{fmt(pr["total"])}</div><div class="ql">Preferencia de contacto</div>'
         f'<div class="qp">{pv(pr["total"], qt)} lo indican</div>'
         f'<div class="qsplit">📞 {pr["tel"]} <small>({pv(pr["tel"], pr_t)})</small> · ✉️ {pr["mail"]} <small>({pv(pr["mail"], pr_t)})</small></div>'
@@ -3072,6 +3075,7 @@ def render_exec(d):
   <h2 class="sh">Calidad de los nuevos contactos</h2>
   <div class="sd">Sobre el total de contactos desde el 1 de enero: completitud del dato (email corporativo, teléfono, empresa) y preferencia de contacto declarada.</div>
   <div class="q3">{qcols}</div>
+  <div class="note" style="margin-top:14px">👤 <b>Con propietario ({pv(ql.get("owner",0), qt)}):</b> se asigna un propietario a partir de que hay seguimiento directo — es decir, <b>desde SQL</b> en adelante. Los <b>leads y MQL todavía no tienen propietario</b> asignado, por eso el porcentaje es bajo.</div>
 </section>
 
 <section>
