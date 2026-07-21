@@ -1,191 +1,169 @@
 <style>
   :root{
-    --bg:#0a140f;
-    --surface:#0f1e17;
-    --surface-2:#13251c;
-    --border:rgba(120,190,155,.16);
-    --border-strong:rgba(120,190,155,.30);
-    --green:#2fe38a;
-    --green-deep:#12a866;
-    --green-soft:rgba(47,227,138,.13);
-    --coral:#ff7e66;
-    --coral-soft:rgba(255,126,102,.14);
-    --amber:#f5c04f;
-    --text:#eaf3ee;
-    --heading:#f6fbf8;
-    --muted:#9bb2a6;
-    --shadow:0 18px 44px -22px rgba(0,0,0,.75);
+    --bg:#08120d;
+    --surface:#0e1c15;
+    --surface-2:#12271c;
+    --border:rgba(90,240,140,.16);
+    --border-strong:rgba(90,240,140,.34);
+    --green:#2bf56b;
+    --green-bright:#63ff97;
+    --green-deep:#14bd57;
+    --green-soft:rgba(43,245,107,.13);
+    --green-glow:rgba(43,245,107,.28);
+    --coral:#ff7c62;
+    --coral-soft:rgba(255,124,98,.15);
+    --amber:#f5c451;
+    --text:#e7f4ec;
+    --heading:#f4fdf7;
+    --muted:#95b1a2;
+    --shadow:0 20px 48px -24px rgba(0,0,0,.8);
     --radius:18px;
-    --maxw:1080px;
+    --maxw:1280px;
     --sans:"Inter","Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   }
   @media (prefers-color-scheme: light){
     :root{
-      --bg:#eef4f0; --surface:#ffffff; --surface-2:#eaf3ee;
-      --border:rgba(12,60,38,.12); --border-strong:rgba(12,60,38,.22);
-      --green:#0c9a5f; --green-deep:#0a7a4b; --green-soft:rgba(12,154,95,.10);
-      --coral:#dd5842; --coral-soft:rgba(221,88,66,.10);
-      --amber:#b7791f;
-      --text:#132018; --heading:#0b1610; --muted:#4d6357;
-      --shadow:0 18px 40px -26px rgba(12,40,26,.45);
+      --bg:#eef5f0; --surface:#ffffff; --surface-2:#e9f4ee;
+      --border:rgba(12,120,66,.14); --border-strong:rgba(12,120,66,.26);
+      --green:#0c9a4d; --green-bright:#12b85c; --green-deep:#0a7a3d;
+      --green-soft:rgba(12,154,77,.10); --green-glow:rgba(12,154,77,.18);
+      --coral:#dc5741; --coral-soft:rgba(220,87,65,.10); --amber:#b7791f;
+      --text:#132018; --heading:#08130c; --muted:#4c6357;
+      --shadow:0 20px 44px -28px rgba(12,50,30,.5);
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0a140f; --surface:#0f1e17; --surface-2:#13251c;
-    --border:rgba(120,190,155,.16); --border-strong:rgba(120,190,155,.30);
-    --green:#2fe38a; --green-deep:#12a866; --green-soft:rgba(47,227,138,.13);
-    --coral:#ff7e66; --coral-soft:rgba(255,126,102,.14); --amber:#f5c04f;
-    --text:#eaf3ee; --heading:#f6fbf8; --muted:#9bb2a6;
-    --shadow:0 18px 44px -22px rgba(0,0,0,.75);
+    --bg:#08120d; --surface:#0e1c15; --surface-2:#12271c;
+    --border:rgba(90,240,140,.16); --border-strong:rgba(90,240,140,.34);
+    --green:#2bf56b; --green-bright:#63ff97; --green-deep:#14bd57;
+    --green-soft:rgba(43,245,107,.13); --green-glow:rgba(43,245,107,.28);
+    --coral:#ff7c62; --coral-soft:rgba(255,124,98,.15); --amber:#f5c451;
+    --text:#e7f4ec; --heading:#f4fdf7; --muted:#95b1a2;
+    --shadow:0 20px 48px -24px rgba(0,0,0,.8);
   }
   :root[data-theme="light"]{
-    --bg:#eef4f0; --surface:#ffffff; --surface-2:#eaf3ee;
-    --border:rgba(12,60,38,.12); --border-strong:rgba(12,60,38,.22);
-    --green:#0c9a5f; --green-deep:#0a7a4b; --green-soft:rgba(12,154,95,.10);
-    --coral:#dd5842; --coral-soft:rgba(221,88,66,.10); --amber:#b7791f;
-    --text:#132018; --heading:#0b1610; --muted:#4d6357;
-    --shadow:0 18px 40px -26px rgba(12,40,26,.45);
+    --bg:#eef5f0; --surface:#ffffff; --surface-2:#e9f4ee;
+    --border:rgba(12,120,66,.14); --border-strong:rgba(12,120,66,.26);
+    --green:#0c9a4d; --green-bright:#12b85c; --green-deep:#0a7a3d;
+    --green-soft:rgba(12,154,77,.10); --green-glow:rgba(12,154,77,.18);
+    --coral:#dc5741; --coral-soft:rgba(220,87,65,.10); --amber:#b7791f;
+    --text:#132018; --heading:#08130c; --muted:#4c6357;
+    --shadow:0 20px 44px -28px rgba(12,50,30,.5);
   }
 
   *{box-sizing:border-box}
   .gs-root{
-    font-family:var(--sans);
-    color:var(--text);
+    font-family:var(--sans);color:var(--text);
     background:
-      radial-gradient(1100px 620px at 82% -8%, var(--green-soft), transparent 60%),
-      radial-gradient(900px 520px at -6% 4%, var(--coral-soft), transparent 55%),
+      radial-gradient(1200px 680px at 88% -10%, var(--green-soft), transparent 58%),
+      radial-gradient(900px 520px at -8% 2%, var(--coral-soft), transparent 52%),
       var(--bg);
-    min-height:100%;
-    line-height:1.55;
-    -webkit-font-smoothing:antialiased;
-    padding:0 20px 72px;
+    min-height:100%;line-height:1.6;-webkit-font-smoothing:antialiased;
+    padding:0 clamp(18px,4vw,52px) 80px;
   }
   .gs-wrap{max-width:var(--maxw);margin:0 auto}
 
-  /* top bar */
-  .gs-bar{
-    max-width:var(--maxw);margin:0 auto;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:20px 4px 26px;
-  }
-  .gs-mark{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--heading)}
+  .gs-bar{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:22px 2px 30px}
+  .gs-mark{display:flex;align-items:center;gap:8px;font-weight:800;font-size:21px;letter-spacing:-.03em;color:var(--heading)}
   .gs-mark .sup{color:var(--green)}
-  .gs-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft);display:inline-block}
-  .gs-toggle{
-    appearance:none;border:1px solid var(--border-strong);background:var(--surface);
-    color:var(--muted);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:600;
-    cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:color .2s,border-color .2s;
-  }
+  .gs-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 14px 1px var(--green-glow);display:inline-block}
+  .gs-toggle{appearance:none;border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:color .2s,border-color .2s}
   .gs-toggle:hover{color:var(--text);border-color:var(--green)}
   .gs-toggle:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 
-  /* hero */
-  .gs-hero{padding:8px 4px 8px}
-  .gs-eyebrow{
-    display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:20px;
-  }
-  .gs-eyebrow::before{content:"";width:26px;height:1.5px;background:var(--green)}
-  .gs-hero h1{
-    font-size:clamp(30px,5.2vw,52px);line-height:1.04;letter-spacing:-.03em;
-    font-weight:800;color:var(--heading);margin:0 0 20px;text-wrap:balance;max-width:16ch;
-  }
+  /* HERO — two columns, fills width */
+  .gs-hero{display:grid;grid-template-columns:1.5fr .9fr;gap:34px;align-items:stretch;padding:6px 2px 10px}
+  @media (max-width:860px){.gs-hero{grid-template-columns:1fr;gap:22px}}
+  .gs-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--green);margin-bottom:20px}
+  .gs-eyebrow::before{content:"";width:30px;height:1.5px;background:var(--green)}
+  .gs-hero h1{font-size:clamp(32px,5vw,56px);line-height:1.02;letter-spacing:-.035em;font-weight:800;color:var(--heading);margin:0 0 20px;text-wrap:balance}
   .gs-hero h1 em{font-style:normal;color:var(--green)}
-  .gs-hero .lead{font-size:clamp(15px,1.7vw,18px);color:var(--muted);max-width:60ch;margin:0}
-  .gs-meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:24px;font-size:13px;color:var(--muted)}
+  .gs-hero .lead{font-size:clamp(15px,1.55vw,18px);color:var(--muted);margin:0;text-align:justify;hyphens:auto;max-width:60ch}
+  .gs-meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:24px;font-size:13px;color:var(--muted)}
   .gs-meta b{color:var(--text);font-weight:600}
-
-  /* north star banner */
-  .gs-ns{
-    margin:30px 0 8px;border:1px solid var(--border-strong);border-radius:var(--radius);
-    background:linear-gradient(100deg,var(--green-soft),transparent 70%),var(--surface);
-    padding:22px 24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow);
+  .gs-anchor{
+    background:linear-gradient(155deg,var(--coral-soft),transparent 62%),var(--surface);
+    border:1px solid var(--border-strong);border-left:3px solid var(--coral);
+    border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)
   }
-  .gs-ns .star{font-size:26px;line-height:1;filter:saturate(1.2)}
-  .gs-ns .body{flex:1;min-width:240px}
-  .gs-ns .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:700;margin-bottom:5px}
-  .gs-ns .v{font-size:16.5px;color:var(--heading);font-weight:600;margin:0}
-  .gs-ns .chip{
-    font-variant-numeric:tabular-nums;background:var(--surface-2);border:1px solid var(--border);
-    border-radius:12px;padding:12px 16px;text-align:center;min-width:112px;
-  }
-  .gs-ns .chip .n{font-size:24px;font-weight:800;color:var(--green);letter-spacing:-.02em}
-  .gs-ns .chip .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .gs-anchor .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--coral);font-weight:800;margin-bottom:10px}
+  .gs-anchor .big{font-size:clamp(20px,2.4vw,25px);font-weight:800;color:var(--heading);letter-spacing:-.02em;line-height:1.15;margin:0 0 10px}
+  .gs-anchor p{margin:0;font-size:13.5px;color:var(--muted)}
+  .gs-anchor .who{margin-top:14px;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--coral);background:var(--coral-soft);border-radius:999px;padding:4px 12px;align-self:flex-start}
 
-  /* section */
-  .gs-sec{margin-top:52px}
-  .gs-sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
-  .gs-sec-n{font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;color:var(--green);letter-spacing:.02em}
-  .gs-sec-h h2{font-size:clamp(21px,2.6vw,27px);letter-spacing:-.02em;color:var(--heading);margin:0;font-weight:800}
-  .gs-sec-sub{color:var(--muted);font-size:14.5px;margin:0 0 22px;max-width:66ch}
+  /* KPI BAND — global snapshot, full width */
+  .gs-band{margin:34px 0 8px}
+  .gs-band-cap{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+  .gs-band-cap .t{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
+  .gs-band-cap .l{font-size:12.5px;color:var(--muted)}
+  .gs-tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+  @media (max-width:960px){.gs-tiles{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:520px){.gs-tiles{grid-template-columns:repeat(2,1fr)}}
+  .gs-tile{background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:18px 16px;text-align:center;position:relative;overflow:hidden;transition:transform .16s ease,border-color .16s ease}
+  .gs-tile:hover{transform:translateY(-3px);border-color:var(--border-strong)}
+  .gs-tile .n{font-variant-numeric:tabular-nums;font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.03em;color:var(--green);line-height:1;text-shadow:0 0 22px var(--green-glow)}
+  .gs-tile.c .n{color:var(--coral);text-shadow:none}
+  .gs-tile .l{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
 
-  /* owner cards */
+  .gs-sec{margin-top:56px}
+  .gs-sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .gs-sec-n{font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;color:var(--green)}
+  .gs-sec-h h2{font-size:clamp(22px,2.7vw,29px);letter-spacing:-.025em;color:var(--heading);margin:0;font-weight:800}
+  .gs-sec-sub{color:var(--muted);font-size:14.5px;margin:0 0 24px;max-width:none;text-align:justify;hyphens:auto}
+
   .gs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-  @media (max-width:720px){.gs-grid{grid-template-columns:1fr}}
-  .gs-card{
-    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:22px 22px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow);
-    transition:transform .18s ease,border-color .18s ease;
-  }
+  @media (max-width:760px){.gs-grid{grid-template-columns:1fr}}
+  .gs-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .18s ease,border-color .18s ease}
   .gs-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accent,var(--green))}
   .gs-card:hover{transform:translateY(-3px);border-color:var(--border-strong)}
   .gs-card.anchor{--accent:var(--coral)}
   .gs-card .area{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent,var(--green))}
   .gs-card .area .d{width:8px;height:8px;border-radius:50%;background:var(--accent,var(--green))}
-  .gs-card h3{font-size:19px;color:var(--heading);margin:12px 0 2px;letter-spacing:-.01em;font-weight:800}
-  .gs-card .who{font-size:13px;color:var(--muted);margin:0 0 14px}
-  .gs-card .scope{font-size:13.5px;color:var(--text);margin:0 0 16px;opacity:.92}
-  .gs-ns-line{
-    background:var(--accent-soft,var(--green-soft));border:1px solid var(--border);
-    border-radius:12px;padding:11px 13px;margin-bottom:14px;
-  }
-  .gs-card.anchor .gs-ns-line{--accent-soft:var(--coral-soft)}
-  .gs-ns-line .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent,var(--green));font-weight:700;margin-bottom:3px}
-  .gs-ns-line .t{font-size:13.5px;color:var(--heading);font-weight:600}
-  .gs-kpi{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:7px}
-  .gs-kpi li{position:relative;padding-left:18px;font-size:13.5px;color:var(--text)}
+  .gs-card h3{font-size:20px;color:var(--heading);margin:12px 0 3px;letter-spacing:-.01em;font-weight:800}
+  .gs-card .who{font-size:13px;color:var(--muted);margin:0 0 15px}
+  .gs-nsl{background:var(--accent-soft,var(--green-soft));border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:15px}
+  .gs-card.anchor .gs-nsl{--accent-soft:var(--coral-soft)}
+  .gs-nsl .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent,var(--green));font-weight:800;margin-bottom:3px}
+  .gs-nsl .t{font-size:13.5px;color:var(--heading);font-weight:600}
+  .gs-kpi{list-style:none;margin:0 0 13px;padding:0;display:flex;flex-direction:column;gap:8px}
+  .gs-kpi li{position:relative;padding-left:19px;font-size:13.5px;color:var(--text)}
   .gs-kpi li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent,var(--green))}
-  .gs-guard{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px}
+  .gs-guard{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:13px;text-align:justify;hyphens:auto}
   .gs-guard b{color:var(--text);font-weight:600}
 
-  /* priorities */
   .gs-pri{display:flex;flex-direction:column;gap:12px}
-  .gs-pri-row{
-    display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;
-    background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;
-    transition:border-color .18s ease;
-  }
+  .gs-pri-row{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 24px;transition:border-color .18s ease}
+  @media (max-width:640px){.gs-pri-row{grid-template-columns:auto 1fr;gap:14px}.gs-pri-row .owner{grid-column:2}}
   .gs-pri-row:hover{border-color:var(--border-strong)}
-  .gs-pri-row.anchor{border-color:var(--coral);background:linear-gradient(100deg,var(--coral-soft),transparent 65%),var(--surface)}
-  .gs-rank{font-variant-numeric:tabular-nums;font-size:30px;font-weight:800;line-height:1;color:var(--green);letter-spacing:-.03em;min-width:34px}
-  .gs-pri-row.anchor .gs-rank{color:var(--coral)}
-  .gs-pri-row h4{margin:0 0 4px;font-size:16px;color:var(--heading);font-weight:700}
-  .gs-pri-row p{margin:0;font-size:13.5px;color:var(--muted)}
-  .gs-pri-row .owner{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--green);background:var(--green-soft);border:1px solid var(--border);border-radius:999px;padding:3px 10px}
+  .gs-pri-row.anchor{border-color:var(--coral);background:linear-gradient(100deg,var(--coral-soft),transparent 60%),var(--surface)}
+  .gs-rank{font-variant-numeric:tabular-nums;font-size:34px;font-weight:800;line-height:1;color:var(--green);letter-spacing:-.04em;min-width:34px;text-shadow:0 0 20px var(--green-glow)}
+  .gs-pri-row.anchor .gs-rank{color:var(--coral);text-shadow:none}
+  .gs-pri-row h4{margin:0 0 4px;font-size:16.5px;color:var(--heading);font-weight:700}
+  .gs-pri-row p{margin:0;font-size:13.5px;color:var(--muted);text-align:justify;hyphens:auto}
+  .gs-pri-row .owner{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--green);background:var(--green-soft);border:1px solid var(--border);border-radius:999px;padding:5px 13px;white-space:nowrap}
   .gs-pri-row.anchor .owner{color:var(--coral);background:var(--coral-soft)}
 
-  /* cadence table */
   .gs-tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
-  table.gs-t{width:100%;border-collapse:collapse;min-width:560px;background:var(--surface)}
-  table.gs-t th,table.gs-t td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:top}
+  table.gs-t{width:100%;border-collapse:collapse;min-width:600px;background:var(--surface)}
+  table.gs-t th,table.gs-t td{text-align:left;padding:15px 20px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:top}
   table.gs-t thead th{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;background:var(--surface-2)}
   table.gs-t tbody tr:last-child td{border-bottom:none}
   table.gs-t td b{color:var(--heading)}
   table.gs-t .ritmo{color:var(--green);font-weight:700;white-space:nowrap}
   .gs-hardstop{color:var(--coral);font-weight:700}
 
-  /* actions */
-  .gs-acts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media (max-width:720px){.gs-acts{grid-template-columns:1fr}}
+  .gs-acts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media (max-width:860px){.gs-acts{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.gs-acts{grid-template-columns:1fr}}
   .gs-act{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
-  .gs-act .mk{color:var(--green);font-weight:800;font-size:15px;line-height:1.4}
+  .gs-act .mk{color:var(--green);font-weight:800;font-size:16px;line-height:1.35}
   .gs-act p{margin:0;font-size:13.5px;color:var(--text)}
-  .gs-act p .o{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+  .gs-act p .o{display:block;color:var(--muted);font-size:12px;margin-top:4px}
 
-  .gs-foot{margin-top:54px;padding-top:22px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);max-width:80ch}
+  .gs-foot{margin-top:58px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);text-align:justify;hyphens:auto}
   .gs-foot .note{color:var(--amber)}
 
-  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes rise{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
   .reveal{animation:rise .6s cubic-bezier(.2,.7,.3,1) both}
   @media (prefers-reduced-motion:reduce){.reveal{animation:none}}
 </style>
@@ -194,42 +172,54 @@
   <div class="gs-bar">
     <div class="gs-mark">guru<span class="sup">sup</span><span class="gs-dot" aria-hidden="true"></span></div>
     <button class="gs-toggle" id="gsTheme" type="button" aria-label="Cambiar tema">
-      <span id="gsThemeIcon">◐</span><span id="gsThemeTxt">Tema</span>
+      <span id="gsThemeIcon">☾</span><span id="gsThemeTxt">Oscuro</span>
     </button>
   </div>
 
   <div class="gs-wrap">
-    <header class="gs-hero reveal">
-      <span class="gs-eyebrow">Departamento de Marketing · Propuesta de organización</span>
-      <h1>Un equipo, cuatro áreas y un <em>sistema que funciona</em> en septiembre.</h1>
-      <p class="lead">Cómo nos organizamos, qué mide cada persona y con qué ritmo hacemos seguimiento. Un responsable claro por área y un objetivo ancla para el trimestre: que en septiembre los datos traccionen y se pueda decidir sobre ellos.</p>
-      <div class="gs-meta">
-        <span><b>Actualizado</b> · 21 jul 2026</span>
-        <span><b>Responsable del doc</b> · Pico (Pilar)</span>
-        <span><b>Equipo</b> · Marisa · Marina · Melero · Pico</span>
+    <!-- HERO -->
+    <header class="gs-hero">
+      <div class="reveal">
+        <span class="gs-eyebrow">Departamento de Marketing · Propuesta de organización</span>
+        <h1>Un equipo, cuatro áreas y un <em>sistema que funciona</em> en septiembre.</h1>
+        <p class="lead">Cómo nos organizamos, qué mide cada persona y con qué ritmo hacemos seguimiento. Un responsable claro por área y un objetivo ancla para el trimestre: que en septiembre los datos traccionen y se pueda decidir sobre ellos.</p>
+        <div class="gs-meta">
+          <span><b>Actualizado</b> · 21 jul 2026</span>
+          <span><b>Responsable del doc</b> · Picu (Pilar)</span>
+          <span><b>Equipo</b> · Marisa · Marina · Melero · Picu</span>
+        </div>
       </div>
+      <aside class="gs-anchor reveal" style="animation-delay:.08s">
+        <div class="k">★ Objetivo ancla · Septiembre</div>
+        <p class="big">Un sistema que traccione y con el que se decida cada semana.</p>
+        <p>No tiene que ser perfecto. Tiene que funcionar: datos fiables, atribución y reporting único.</p>
+        <span class="who">Owner · Picu</span>
+      </aside>
     </header>
 
-    <section class="gs-ns reveal" style="animation-delay:.05s">
-      <div class="star" aria-hidden="true">★</div>
-      <div class="body">
-        <div class="k">North Star del departamento</div>
-        <p class="v">Demos / SQL cualificadas generadas por Marketing → pipeline.</p>
+    <!-- KPI BAND: global → detalle -->
+    <section class="gs-band reveal" style="animation-delay:.12s">
+      <div class="gs-band-cap"><span class="t">De un vistazo</span><span class="l">los datos clave que verás en detalle más abajo</span></div>
+      <div class="gs-tiles">
+        <div class="gs-tile"><div class="n">4·1</div><div class="l">áreas · un owner cada una</div></div>
+        <div class="gs-tile c"><div class="n">~70%</div><div class="l">conversión demo → cliente</div></div>
+        <div class="gs-tile"><div class="n">124</div><div class="l">leads paid · último mes</div></div>
+        <div class="gs-tile"><div class="n">76%</div><div class="l">precualificados agendados</div></div>
+        <div class="gs-tile"><div class="n">≥50</div><div class="l">umbral fit+hit para MQL</div></div>
+        <div class="gs-tile"><div class="n">25→32</div><div class="l">autoridad de dominio (SEO)</div></div>
       </div>
-      <div class="chip"><div class="n">~70%</div><div class="l">conversión demo → cliente</div></div>
     </section>
 
-    <!-- 1 · EQUIPO + KPIs -->
+    <!-- 01 EQUIPO + KPIs -->
     <section class="gs-sec">
       <div class="gs-sec-h"><span class="gs-sec-n">01</span><h2>El equipo: un owner por área</h2></div>
       <p class="gs-sec-sub">Tras la salida de Jonathan, cada área tiene un único responsable, con su propio North Star y sus KPIs según perfil, scope y misión. Organización plana, sin managers intermedios.</p>
-
       <div class="gs-grid">
         <article class="gs-card reveal">
           <div class="area"><span class="d"></span>Marca, eventos y comunicación</div>
           <h3>Marisa Silva</h3>
           <p class="who">Posicionamiento e ICP · marca y rebranding (con Diego Lunelli) · PR/prensa · eventos y partnerships · customer stories</p>
-          <div class="gs-ns-line"><div class="k">North Star</div><div class="t">Demos originadas por marca: eventos, partnerships, PR y contenido.</div></div>
+          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Demos originadas por marca: eventos, partnerships, PR y contenido.</div></div>
           <ul class="gs-kpi">
             <li>Leads/demos atribuidos a eventos y partnerships activos</li>
             <li>Publicaciones y menciones de prensa + colaboraciones vivas / mes</li>
@@ -242,7 +232,7 @@
           <div class="area"><span class="d"></span>SEO, web, tráfico y analítica</div>
           <h3>Marina Mas</h3>
           <p class="who">SEO por verticales · contenido y YouTube · enlazado externo · web · analítica y atribución (GA4)</p>
-          <div class="gs-ns-line"><div class="k">North Star</div><div class="t">Leads orgánicos cualificados (MQL) desde SEO y web.</div></div>
+          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Leads orgánicos cualificados (MQL) desde SEO y web.</div></div>
           <ul class="gs-kpi">
             <li>Rankings top 3 / top 10 en verticales prioritarias</li>
             <li>Tráfico orgánico y su tendencia mensual</li>
@@ -255,7 +245,7 @@
           <div class="area"><span class="d"></span>Paid · Google + Social Ads</div>
           <h3>Alejandro Melero</h3>
           <p class="who">Toda la adquisición de pago: Google, Meta, LinkedIn, Bing… · creatividades con IA · análisis y optimización de coste</p>
-          <div class="gs-ns-line"><div class="k">North Star</div><div class="t">MQL / demos cualificadas desde paid (fit + hit ≥ 50).</div></div>
+          <div class="gs-nsl"><div class="k">North Star</div><div class="t">MQL / demos cualificadas desde paid (fit + hit ≥ 50).</div></div>
           <ul class="gs-kpi">
             <li>CPL y CP-MQL por canal (Google · Meta · LinkedIn)</li>
             <li>Coste por oportunidad / ROAS cruzando campañas con CRM</li>
@@ -266,9 +256,9 @@
 
         <article class="gs-card anchor reveal" style="animation-delay:.18s">
           <div class="area"><span class="d"></span>CRM, automatización y sistema de datos</div>
-          <h3>Pico (Pilar)</h3>
+          <h3>Picu (Pilar)</h3>
           <p class="who">HubSpot · automatizaciones · calidad del dato · montar el sistema de reporting/tracking · owner del lead scoring</p>
-          <div class="gs-ns-line"><div class="k">North Star · ancla del trimestre</div><div class="t">En septiembre, un sistema de tracking y reporting que funciona y con el que se decide cada semana.</div></div>
+          <div class="gs-nsl"><div class="k">North Star · ancla del trimestre</div><div class="t">En septiembre, un sistema de tracking y reporting que funciona y con el que se decide cada semana.</div></div>
           <ul class="gs-kpi">
             <li>Calidad del dato: % de leads con fuente/UTM y scoring correctos</li>
             <li>Conversión MQL → SQL → Demo en un único cuadro de mando</li>
@@ -279,47 +269,35 @@
       </div>
     </section>
 
-    <!-- 2 · PRIORIDADES -->
+    <!-- 02 PRIORIDADES -->
     <section class="gs-sec">
       <div class="gs-sec-h"><span class="gs-sec-n">02</span><h2>Prioridades del trimestre</h2></div>
       <p class="gs-sec-sub">Ordenadas por impacto: dónde generamos más valor de aquí a septiembre.</p>
       <div class="gs-pri">
         <div class="gs-pri-row anchor reveal">
           <div class="gs-rank">1</div>
-          <div>
-            <h4>Un sistema de datos que funciona</h4>
-            <p>Objetivo ancla del trimestre: en septiembre, tracking y reporting fiables para decidir con datos. No perfecto — funcionando.</p>
-            <span class="owner">Owner · Pico</span>
-          </div>
+          <div><h4>Un sistema de datos que funciona</h4><p>Objetivo ancla del trimestre: en septiembre, tracking y reporting fiables para decidir con datos. No perfecto — funcionando.</p></div>
+          <span class="owner">Owner · Picu</span>
         </div>
         <div class="gs-pri-row reveal" style="animation-delay:.05s">
           <div class="gs-rank">2</div>
-          <div>
-            <h4>Marca: cerrar reposicionamiento y rebranding</h4>
-            <p>Tecnología y autonomía con tono intermedio (seguridad, ahorro, escalabilidad sin alarma). Rollout público + nota de prensa en septiembre.</p>
-            <span class="owner">Owner · Marisa</span>
-          </div>
+          <div><h4>Marca: cerrar reposicionamiento y rebranding</h4><p>Tecnología y autonomía con tono intermedio (seguridad, ahorro, escalabilidad sin alarma). Rollout público + nota de prensa en septiembre.</p></div>
+          <span class="owner">Owner · Marisa</span>
         </div>
         <div class="gs-pri-row reveal" style="animation-delay:.1s">
           <div class="gs-rank">3</div>
-          <div>
-            <h4>Adquisición cualificada</h4>
-            <p>Reactivar el paid que funcionó en junio, explotar Capterra/G2 y foco en verticales de menor presión de paid (salud, legal, inmobiliaria).</p>
-            <span class="owner">Owner · Melero</span>
-          </div>
+          <div><h4>Adquisición cualificada</h4><p>Reactivar el paid que funcionó en junio, explotar Capterra/G2 y foco en verticales de menor presión de paid (salud, legal, inmobiliaria).</p></div>
+          <span class="owner">Owner · Melero</span>
         </div>
         <div class="gs-pri-row reveal" style="animation-delay:.15s">
           <div class="gs-rank">4</div>
-          <div>
-            <h4>Conversión</h4>
-            <p>Arreglar la secuencia de nurturing (correos 2 y 3), formulario "pedir demo" bien trackeado y mejorar la activación de freemiums.</p>
-            <span class="owner">Owner · Pico + Marina</span>
-          </div>
+          <div><h4>Conversión</h4><p>Arreglar la secuencia de nurturing (correos 2 y 3), formulario "pedir demo" bien trackeado y mejorar la activación de freemiums.</p></div>
+          <span class="owner">Owner · Picu + Marina</span>
         </div>
       </div>
     </section>
 
-    <!-- 3 · CADENCIA -->
+    <!-- 03 CADENCIA -->
     <section class="gs-sec">
       <div class="gs-sec-h"><span class="gs-sec-n">03</span><h2>Seguimiento y cadencia</h2></div>
       <p class="gs-sec-sub">Cuatro capas. El reporting se lee <b>antes</b> del Syncro para no quemar la reunión en revisar números.</p>
@@ -336,22 +314,22 @@
       </div>
     </section>
 
-    <!-- 4 · ACCIONES -->
+    <!-- 04 ACCIONES -->
     <section class="gs-sec">
       <div class="gs-sec-h"><span class="gs-sec-n">04</span><h2>Acciones inmediatas</h2></div>
       <p class="gs-sec-sub">Lo que activamos ya para dejar el modelo funcionando.</p>
       <div class="gs-acts">
-        <div class="gs-act reveal"><span class="mk">→</span><p>Aplicar la cadencia (Syncro 60 min + Marketing Review mensual).<span class="o">Marisa + Pico</span></p></div>
+        <div class="gs-act reveal"><span class="mk">→</span><p>Aplicar la cadencia (Syncro 60 min + Marketing Review mensual).<span class="o">Marisa + Picu</span></p></div>
         <div class="gs-act reveal" style="animation-delay:.05s"><span class="mk">→</span><p>Fijar el objetivo mensual de cada KPI en el próximo Marketing Review.<span class="o">Cada responsable de área</span></p></div>
-        <div class="gs-act reveal" style="animation-delay:.1s"><span class="mk">→</span><p>Reflejar los KPIs en el dashboard ejecutivo como panel de seguimiento.<span class="o">Pico</span></p></div>
+        <div class="gs-act reveal" style="animation-delay:.1s"><span class="mk">→</span><p>Reflejar los KPIs en el dashboard ejecutivo como panel de seguimiento.<span class="o">Picu</span></p></div>
         <div class="gs-act reveal" style="animation-delay:.15s"><span class="mk">→</span><p>Backlog único priorizado con owner y objetivo, revisado cada mes.<span class="o">Marisa + cada área</span></p></div>
-        <div class="gs-act reveal" style="animation-delay:.2s"><span class="mk">→</span><p>Traspaso del CRM/scoring a Pico; el paid completo pasa a Melero.<span class="o">Pico + Melero</span></p></div>
+        <div class="gs-act reveal" style="animation-delay:.2s"><span class="mk">→</span><p>Traspaso del CRM/scoring a Picu; el paid completo pasa a Melero.<span class="o">Picu + Melero</span></p></div>
         <div class="gs-act reveal" style="animation-delay:.25s"><span class="mk">→</span><p>Confirmar la matriz de ownership con el equipo y Víctor.<span class="o">Equipo + Víctor</span></p></div>
       </div>
     </section>
 
     <footer class="gs-foot">
-      <p>Identidad visual alineada con el rebranding en curso: verde vibrante como color principal (variante oscura + salmón como acento) sobre fondo oscuro para resolver la legibilidad del verde, tipografía palo seco en minúsculas y recurso "punto". <span class="note">Los códigos HEX exactos están pendientes del brand book final de Diego Lunelli.</span></p>
+      <p>Identidad visual alineada con el rebranding aprobado el 13-jul: <b>verde vibrante como color principal</b> (variante oscura + salmón como acento) sobre fondo oscuro para resolver la legibilidad del verde, tipografía palo seco en minúsculas y recurso "punto". <span class="note">El tono exacto del verde y los HEX finales están pendientes del brand book de Diego Lunelli; aquí se usa una versión viva/saturada como aproximación.</span></p>
       <p style="margin-top:8px">Fuentes internas (GuruSup Brain): serie Syncro Marketing Squad (jun–jul 2026), decisión de rebranding/logo (13-jul) y reposicionamiento de marca (20-jul), modelo fit/hit score, concepto Funnel de leads, sesión de analítica (17-jun), fichas de equipo (Marisa, Marina, Melero) y reuniones de Leexi + hilos de Discord de marketing.</p>
     </footer>
   </div>
@@ -359,24 +337,11 @@
 
 <script>
   (function(){
-    var root=document.documentElement;
-    var btn=document.getElementById('gsTheme');
-    var txt=document.getElementById('gsThemeTxt');
-    var icon=document.getElementById('gsThemeIcon');
-    function current(){
-      var set=root.getAttribute('data-theme');
-      if(set) return set;
-      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
-    }
-    function paint(t){
-      icon.textContent = t==='dark' ? '☾' : '☀';
-      txt.textContent = t==='dark' ? 'Oscuro' : 'Claro';
-    }
+    var root=document.documentElement,btn=document.getElementById('gsTheme');
+    var txt=document.getElementById('gsThemeTxt'),icon=document.getElementById('gsThemeIcon');
+    function current(){var s=root.getAttribute('data-theme');if(s)return s;return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+    function paint(t){icon.textContent=t==='dark'?'☾':'☀';txt.textContent=t==='dark'?'Oscuro':'Claro';}
     paint(current());
-    btn.addEventListener('click',function(){
-      var next = current()==='dark' ? 'light':'dark';
-      root.setAttribute('data-theme',next);
-      paint(next);
-    });
+    btn.addEventListener('click',function(){var n=current()==='dark'?'light':'dark';root.setAttribute('data-theme',n);paint(n);});
   })();
 </script>
