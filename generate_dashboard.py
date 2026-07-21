@@ -3172,10 +3172,10 @@ def render_exec(d):
     <details class="dictx"><summary><span class="chev">▶</span>📖 Diccionario</summary>
       <div class="dwrap">
         <div class="dhdr">Etapas del ciclo de vida del contacto (en orden)</div>
-        <div class="d"><b>Lead</b><span>Etapa del ciclo de vida: ha entrado con algo de interés, pero aún no sabemos si nos encaja.</span></div>
-        <div class="d"><b>MQL</b><span>Etapa del ciclo de vida: el contacto ha consumido contenido de valor (ebook, webinar…). Interés medio.</span></div>
-        <div class="d"><b>SQL</b><span>Etapa del ciclo de vida: tiene una necesidad real y pide demo/consultoría. Listo para ventas.</span></div>
-        <div class="d"><b>Oportunidad</b><span>Etapa del ciclo de vida de un contacto que ya tiene un <b>negocio (deal) asociado</b>. Varios contactos pueden compartir el mismo negocio, pero es un único deal.</span></div>
+        <div class="d"><b>Lead</b><span>Etapa del ciclo de vida. <b>Intención:</b> aún no la conocemos.</span></div>
+        <div class="d"><b>MQL</b><span>Etapa del ciclo de vida. <b>Intención:</b> investigar e informarse (consume contenido de valor).</span></div>
+        <div class="d"><b>SQL</b><span>Etapa del ciclo de vida. <b>Intención:</b> ya tiene un <b>dolor y necesidad identificada</b>; pendiente de <b>hacer match</b> al cualificar el volumen.</span></div>
+        <div class="d"><b>Oportunidad</b><span>Etapa del ciclo de vida con <b>negocio (deal) asociado</b>. <b>Intención:</b> ventas lo <b>precualifica</b> y pasa al <b>pipeline</b>. Varios contactos pueden compartir el mismo negocio, pero es un único deal.</span></div>
         <div class="d"><b>Cliente</b><span>Etapa del ciclo de vida: contacto con negocio asociado que <b>ya ha convertido y compra</b>. Varios contactos pueden pertenecer al mismo negocio de cliente.</span></div>
         <div class="d"><b>Otros</b><span>Etapa del ciclo de vida fuera del proceso comercial: correos <b>@gurusup.com</b>, proveedores, gente externa o quien pide trabajar con nosotros. Incluye también algunas pruebas/test (para no crear más etapas).</span></div>
         <div class="dhdr">Otros conceptos</div>
