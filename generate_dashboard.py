@@ -2325,6 +2325,15 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .src-chip.out{background:rgba(255,202,92,.16);color:var(--warn);border:1px solid #a5741f}
 .src-chip.cx{background:rgba(104,209,245,.16);color:var(--sky);border:1px solid #1f7f96}
 .src-chip.br{background:rgba(200,166,255,.16);color:var(--violet);border:1px solid #6a4fa0}
+.cat-wrap{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 6px}
+.cat{display:inline-flex;flex-direction:column;gap:6px;padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.03)}
+.cat.cx{border:1px solid #1f7f96}
+.cat.brain{border:1px solid #6a4fa0}
+.cat-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:900;letter-spacing:.3px}
+.cat.cx .cat-h{color:var(--sky)}
+.cat.brain .cat-h{color:var(--violet)}
+.cat-sub{font-size:10.5px;font-weight:600;opacity:.6;margin-left:3px}
+.cat-body{display:flex;flex-wrap:wrap;align-items:center}
 .rb-title{font-size:13px;font-weight:800;color:var(--brand);margin:4px 0 10px;letter-spacing:.01em}
 .rb-title span{color:var(--mut);font-weight:600}
 .rb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -3193,8 +3202,13 @@ def render_exec(d):
 <section style="padding-top:30px;margin-top:16px">
   <div class="q">01 · ¿Cuánto negocio está entrando? · GLOBAL</div>
   <h2 class="sh">Executive summary</h2>
-  <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b>, incluye:
-    <span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span><span class="src-chip cx">💬 Atención al cliente (CX)</span><span class="src-chip br">🧠 Brain</span>.
+  <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b>, agrupado por las dos soluciones de la empresa:
+    <div class="cat-wrap">
+      <div class="cat cx"><div class="cat-h">🚀 GuruSup CX <span class="cat-sub">Customer Experience</span></div>
+        <div class="cat-body"><span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span><span class="src-chip cx">💬 Atención al cliente</span></div></div>
+      <div class="cat brain"><div class="cat-h">🧠 GuruSup Brain <span class="cat-sub">outbound directo (Alex)</span></div>
+        <div class="cat-body"><span class="src-chip br">🧠 Brain</span></div></div>
+    </div>
     El número grande es el total de contactos; debajo, <b>inb</b> (inbound) y <b>out</b> (outbound). En Oportunidades el número grande es <b>volumen de contactos</b> y el nº de <b>empresas / negocios</b> va debajo; en Clientes se muestran las <b>cuentas activas</b> del pipeline «Clientes».</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
