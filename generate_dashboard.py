@@ -2767,6 +2767,7 @@ def render_exec(d):
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
         ("SQL → Oportunidad", pv(_opp_ct, g_sql), "contactos · oportunidad / SQL"),
         ("Oportunidad → Cliente", pv(_cli_ct, _opp_ct), "contactos · cliente / oportunidad"),
+        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "empresas · cliente / oportunidad"),
         ("Cliente → Churn", _churn_pct, "empresas · desde 1 ene"),
     ]
     rate_html = "".join(
