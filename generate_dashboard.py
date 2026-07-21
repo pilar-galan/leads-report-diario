@@ -2557,6 +2557,12 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .vstep b{font-size:22px;font-weight:800;color:var(--ink);line-height:1} .vstep span{font-size:11.5px;color:var(--mut)}
 .vstep.ok b{color:var(--brand)} .vstep.bad b{color:var(--bad)}
 .varr{text-align:center;color:var(--mut);font-size:13px;line-height:1} .varr span{color:var(--brand);font-weight:800;font-size:11px;margin-left:4px}
+.vfork{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.vfork-col{display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:14px}
+.vfork-col.left{background:rgba(111,240,162,.05);border:1px solid var(--brand-d)}
+.vfork-col.right{background:rgba(255,107,107,.05);border:1px solid #a53a3a}
+.vfork-tag{font-size:11px;font-weight:800;margin-bottom:3px} .vfork-tag.ok{color:var(--brand)} .vfork-tag.bad{color:var(--bad)}
+@media(max-width:640px){.vfork{grid-template-columns:1fr}}
 .vdet>summary{list-style:none;cursor:pointer} .vdet>summary::-webkit-details-marker{display:none}
 .vdet>summary .vchev{margin-left:auto;color:var(--bad);font-weight:800;font-size:10px} .vdet[open]>summary .vchev::after{content:" ▾"}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
@@ -2789,7 +2795,6 @@ def render_exec(d):
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
         ("SQL → Oportunidad", pv(_opp_ct, g_sql), "contactos · oportunidad / SQL"),
-        ("Oportunidad → Cliente", pv(_cli_ct, _opp_ct), "contactos · cliente / oportunidad"),
         ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "empresas · cliente / oportunidad"),
         ("Cliente → Churn", _churn_pct, "empresas · desde 1 ene"),
     ]
@@ -3116,6 +3121,10 @@ def render_exec(d):
     raz_rows = "".join(
         f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n} <small>{pv(n, raz_tot)}</small></span></div>'
         for r, n in raz[:6]) or '<div class="mrow"><span class="ml">Sin razones registradas</span><span class="mn">—</span></div>'
+    # Bifurcación del embudo ≥3.000: gestionados (en proceso) vs descartados; base = suma de ambos
+    ag_desc = pq.get("ag_descartados", 0)
+    ag_split = (ag_contact + ag_desc) or 1
+    ag_opp_n = pq.get("ag_opp", 0)
 
     # ---------- 9 · MOTIVOS DESCARTE ----------
     desc = d["descarte"]
@@ -3604,20 +3613,23 @@ def render_exec(d):
       </summary>
       <div class="lvl-body">
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
-        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
-        <div class="vflow">
-          <div class="vstep"><b>{pq.get("ag_sql",0)}</b><span>precualificados</span></div>
-          <div class="varr">↓ <span>{pv(ag_contact, ag_base)}</span></div>
-          <div class="vstep"><b>{ag_contact}</b><span>agendados / llamados</span></div>
-          <div class="varr">↓</div>
-          <details class="vdet">
-            <summary class="vstep bad"><b>{pq.get("ag_descartados",0)}</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
-            <div class="razbox" style="margin-top:6px">{raz_rows}</div>
-          </details>
-          <div class="varr">↓ <span>{pv(pq.get("ag_opp",0), ag_base)}</span></div>
-          <div class="vstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>
+        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín · <b>{fmt(ag_split)}</b> gestionados (base 100%)</div>
+        <div class="vfork">
+          <div class="vfork-col left">
+            <div class="vfork-tag ok">✅ En proceso de contacto · <b>{pv(ag_contact, ag_split)}</b></div>
+            <div class="vstep"><b>{ag_contact}</b><span>contactados · aún sin oportunidad</span></div>
+            <div class="varr">↓ <span>{pv(ag_opp_n, ag_contact or 1)} conversión</span></div>
+            <div class="vstep ok"><b>🎯 {ag_opp_n}</b><span>oportunidad · {pv(ag_opp_n, ag_contact or 1)} de los gestionados</span></div>
+          </div>
+          <div class="vfork-col right">
+            <div class="vfork-tag bad">🔴 Descartados · <b>{pv(ag_desc, ag_split)}</b></div>
+            <details class="vdet">
+              <summary class="vstep bad"><b>{ag_desc}</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
+              <div class="razbox" style="margin-top:6px">{raz_rows}</div>
+            </details>
+          </div>
         </div>
-        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 {pq.get("ag_calls_unique",0)} por teléfono · 📅 {pq.get("ag_reuniones",0)} agendadas</div>
+        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 {pq.get("ag_calls_unique",0)} por teléfono · 📅 {pq.get("ag_reuniones",0)} agendadas · los porcentajes de gestionados y descartados son sobre su suma ({fmt(ag_split)})</div>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
