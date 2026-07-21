@@ -2846,14 +2846,25 @@ def render_exec(d):
         mid = f'm{idx}'
         tabs_btns += f'<button class="mxtab" data-mx="{mid}">{esc(mo["label"])}</button>'
         prev = cmonths[idx + 1]["tot"] if idx + 1 < len(cmonths) else None
+        # Mapa del mes anterior por canal (para % de crecimiento por canal y etapa)
+        prev_map = {}
+        if idx + 1 < len(cmonths):
+            pm = cmonths[idx + 1]
+            for l, e in pm["rows_in"] + pm["rows_out"]:
+                prev_map[l] = e
+            prev_map["🧠 Brain"] = pm["brain"]
         _allrows = mo["rows_in"] + mo["rows_out"]
         mmax = max([e["c"] for _, e in _allrows] + [mo["brain"]["c"]], default=0) or 1
+        def _mcell(v, pe, key, cls=""):
+            arrow = _mom(v, pe[key]) if pe is not None else ''
+            return f'<div class="mx-cell {cls}"><span class="v tnum">{fmt(v)}</span>{arrow}</div>'
         def _mrow(lbl, e, cls=""):
             bw = round(e["c"] / mmax * 100)
+            pe = prev_map.get(lbl)
             return (
                 f'<div class="mx-row {cls}"><div class="c1"><span class="nm">{esc(lbl)}</span>'
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
-                f'{cell(e["c"])}{cell(e["l"])}{cell(e["m"])}{cell(e["s"], cls="hi")}{cell(e["o"])}'
+                f'{cell(e["c"])}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{_mcell(e["o"], pe, "o")}'
                 f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
         rows_h = '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"])
         if mo["rows_out"]:
@@ -3226,6 +3237,7 @@ def render_exec(d):
   <h2 class="sh">Rendimiento por canal <span class="tot">· global</span></h2>
   <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b>, <b style="color:var(--warn)">🟠 Outbound</b> y <b style="color:var(--violet)">🧠 Brain</b>.</div>
   {matrix_html}
+  <div class="note" style="margin-top:16px">📌 <b>Lectura importante de los meses anteriores.</b> Hasta ahora no había un criterio único de atribución: muchos contactos estaban en la <b>etapa de ciclo de vida equivocada</b> (p. ej. <b>freemiums marcados como SQL u oportunidad</b>), lo que <b>sesga el dato</b>. Por eso los meses previos (p. ej. el volumen de oportunidades de febrero/marzo) <b>no reflejan oportunidades reales</b> según la lógica actual del pipeline. <b>Desde junio-julio</b> se ha establecido un <b>criterio de atribución</b> para trazar bien la adquisición y entender cómo evoluciona cada contacto. A partir de aquí el evolutivo es fiable y comparable — la clave es <b>mantener el proceso estable</b>.</div>
 </section>
 
 <div class="divbanner">
