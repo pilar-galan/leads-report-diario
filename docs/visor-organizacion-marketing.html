@@ -136,6 +136,19 @@
   .gs-guard{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:13px;text-align:justify;hyphens:auto}
   .gs-guard b{color:var(--text);font-weight:600}
 
+  .gs-funnel{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
+  .gs-funnel .fh .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800;margin-bottom:6px}
+  .gs-funnel .fh p{margin:0 0 18px;font-size:13.5px;color:var(--muted);text-align:justify;hyphens:auto}
+  .gs-funnel .stages{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;margin-bottom:20px}
+  .gs-funnel .stage{display:inline-flex;align-items:baseline;gap:8px;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:12px;padding:11px 16px;font-size:14.5px;font-weight:700;color:var(--heading)}
+  .gs-funnel .stage em{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .gs-funnel .stage.op{border-color:var(--coral);color:var(--coral);background:var(--coral-soft)}
+  .gs-funnel .stage.op em{color:var(--coral)}
+  .gs-funnel .arrow{color:var(--green);font-weight:800;font-size:18px}
+  .gs-funnel .ch{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid var(--border);padding-top:16px}
+  .gs-funnel .cht{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-right:4px}
+  .gs-funnel .chip{font-size:12.5px;color:var(--text);background:var(--green-soft);border:1px solid var(--border);border-radius:999px;padding:5px 12px}
+
   .gs-pri{display:flex;flex-direction:column;gap:12px}
   .gs-pri-row{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 24px;transition:border-color .18s ease}
   @media (max-width:640px){.gs-pri-row{grid-template-columns:auto 1fr;gap:14px}.gs-pri-row .owner{grid-column:2}}
@@ -249,7 +262,7 @@
             <li>Tráfico orgánico y su tendencia mensual</li>
             <li>Autoridad de dominio (ref. 25 → 32, creciente)</li>
           </ul>
-          <p class="gs-guard"><b>Calidad:</b> % de sesiones/leads con fuente-UTM bien atribuida (bajar la sobreatribución a "directo") y freemium instrumentado.</p>
+          <p class="gs-guard"><b>Calidad:</b> % de sesiones/leads con origen/canal bien atribuido (bajar la sobreatribución a "directo") y freemium instrumentado.</p>
         </article>
 
         <article class="gs-card reveal" style="animation-delay:.12s">
@@ -271,12 +284,43 @@
           <p class="who">HubSpot · automatizaciones · calidad del dato · montar el sistema de reporting/tracking · owner del lead scoring</p>
           <div class="gs-nsl"><div class="k">North Star · ancla del trimestre</div><div class="t">En septiembre, un sistema de tracking y reporting que funciona y con el que se decide cada semana.</div></div>
           <ul class="gs-kpi">
-            <li>Calidad del dato: % de leads con fuente/UTM y scoring correctos</li>
-            <li>Tasas de conversión del funnel (MQL → SQL → oportunidad) en un único cuadro de mando</li>
-            <li>Cobertura de atribución por canal (single source of truth HubSpot ↔ GA4)</li>
+            <li>Evolución del funnel: tasa de conversión <b>lead → MQL → SQL → oportunidad</b></li>
+            <li>Oportunidades generadas en pipeline (nueva oportunidad en discovery, ya precualificada por Ventas, de origen inbound)</li>
+            <li>Atribución por canal de inbound (orgánico, directo, pago, eventos, webinars, referencias, IA, newsletters, medios, chat web)</li>
           </ul>
-          <p class="gs-guard"><b>Que funcione, no que sea perfecto:</b> nurturing operativo y medido (arreglar correos 2 y 3), scoring fit+hit vivo, formularios nativos, freemium instrumentado y dashboard único en marcha.</p>
+          <p class="gs-guard"><b>Que funcione, no que sea perfecto:</b> calidad del dato y scoring fit+hit vivo, nurturing medido (arreglar correos 2 y 3), formularios nativos, freemium instrumentado y dashboard único en marcha.</p>
         </article>
+      </div>
+
+      <!-- Funnel inbound que mide el sistema -->
+      <div class="gs-funnel reveal" style="animation-delay:.22s">
+        <div class="fh">
+          <div class="k">El funnel inbound que mide el sistema</div>
+          <p>La evolución y la tasa de conversión en cada salto — hasta la oportunidad en pipeline (etapa discovery, ya precualificada por Ventas). El cierre lo lleva Ventas; nosotros medimos y optimizamos hasta aquí.</p>
+        </div>
+        <div class="stages">
+          <span class="stage">Lead</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <span class="stage">MQL <em>fit+hit ≥50</em></span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <span class="stage">SQL</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <span class="stage op">Oportunidad <em>discovery</em></span>
+        </div>
+        <div class="ch">
+          <span class="cht">Canales de inbound</span>
+          <span class="chip">Orgánico</span>
+          <span class="chip">Directo</span>
+          <span class="chip">Pago · Google / Social Ads</span>
+          <span class="chip">Eventos</span>
+          <span class="chip">Webinars</span>
+          <span class="chip">Referencias</span>
+          <span class="chip">Referencias de IA</span>
+          <span class="chip">Newsletters externas</span>
+          <span class="chip">Medios</span>
+          <span class="chip">Chat web</span>
+          <span class="chip">Otros · web sin cookies</span>
+        </div>
       </div>
     </section>
 

@@ -85,7 +85,7 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
   - Rankings **top 3 / top 10** en las verticales prioritarias.
   - Tráfico orgánico y su tendencia mensual.
   - Autoridad de dominio (referencia 25→32; objetivo creciente).
-- **Guardrail/calidad (analítica):** **% de sesiones/leads con fuente-UTM correctamente atribuida** (bajar la sobreatribución a "directo") y freemium instrumentado en GA4.
+- **Guardrail/calidad (analítica):** **% de sesiones/leads con origen/canal correctamente atribuido** (bajar la sobreatribución a "directo") y freemium instrumentado en GA4.
 - *Coordinación:* avisar de picos de SEO forzado y no pisar cambios de web.
 
 ### 📈 Alejandro Melero — Paid (Google + Social Ads)
@@ -100,9 +100,9 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
 ### ⚙️ Picu — CRM, automatización y sistema de datos
 - **North Star:** **en septiembre, un sistema de tracking/reporting operativo y fiable** — que el equipo tome decisiones semanales sobre sus datos (que funcione, no que sea perfecto).
 - **Primarios:**
-  - **Calidad del dato:** % de leads con fuente/UTM y scoring correctos.
-  - **Tasas de conversión del funnel:** lead→MQL→SQL→oportunidad, visibles en un único cuadro de mando.
-  - **Cobertura de atribución** por canal (single source of truth entre HubSpot y GA4).
+  - **Evolución del funnel:** tasa de conversión en cada salto — **lead → MQL → SQL → oportunidad** — visible en un único cuadro de mando.
+  - **Oportunidades generadas en pipeline:** contactos con una nueva oportunidad en etapa (p. ej. *discovery*) ya precualificada por Ventas y de origen inbound.
+  - **Atribución por canal de inbound:** orgánico, directo, pago (Google Ads / social ads), eventos, webinars, referencias, referencias de IA, newsletters externas, medios, chat web y *otros* (tráfico web sin identificar por no aprobar cookies).
 - **Automatización:** nurturing operativo y medido (apertura/CTR; arreglar correos 2 y 3) y lead scoring fit+hit vivo y mantenido.
 - **Health del proyecto (milestone septiembre):** hitos cumplidos — formularios nativos de HubSpot, `forms.gurusup.com`, freemium instrumentado, dashboard único en marcha.
 
