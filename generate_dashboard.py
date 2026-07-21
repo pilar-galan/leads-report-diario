@@ -1162,6 +1162,30 @@ def main():
         e["opp"] = opp_by_chan.get(lbl, 0)
     chan_funnel = sorted(chan_fun.items(), key=lambda x: -x[1]["sql"])
 
+    # ── Calculadora de CAC: coste + oportunidades (con negocio) + clientes por canal (1 ene→hoy) ──
+    def _chan_kpis(recs):
+        opp_c = sum(1 for c in recs if rank(c["lc"]) >= 4)            # contactos en oportunidad+ (con negocio)
+        cli_e = len({compkey(c) for c in recs if rank(c["lc"]) >= 5}) # empresas cliente (real)
+        return opp_c, cli_e
+    _paid_set = {"Google Ads", "Social Ads"}
+    g_opp, g_cli = _chan_kpis(paid_google)
+    s_opp, s_cli = _chan_kpis(paid_social)
+    _rest = [c for c in hist_fun if chan_label(c) not in _paid_set]
+    r_opp, r_cli = _chan_kpis(_rest)
+    # Cuentas reales que alimentan Social Ads (origen/detalle en HubSpot)
+    _soc_accts = {}
+    for c in paid_social:
+        k = (c.get("d1") or c.get("src") or "sin origen").strip() or "sin origen"
+        _soc_accts[k] = _soc_accts.get(k, 0) + 1
+    soc_accounts = sorted(_soc_accts.items(), key=lambda x: -x[1])
+    _cac_data = {
+        "ticket_default": 750, "margin_default": 40, "payback_default": 6,
+        "spend_google": paid["spend_google"], "spend_social": paid["spend_social"],
+        "google": {"opp": g_opp, "cli": g_cli},
+        "social": {"opp": s_opp, "cli": s_cli, "accounts": soc_accounts},
+        "rest":   {"opp": r_opp, "cli": r_cli},
+    }
+
     # Oportunidades y clientes = EMPRESAS (ciclo de vida); reunión = deals en demo+
     agenda_cum, cum["opp"], cum["cli"] = reunion_cum, opp_cum, cli_cum
     # Reuniones agendadas (24h) = demos agendadas + llamadas de los SDR (Agustín/Juanma)
@@ -1227,6 +1251,7 @@ def main():
         "opp_emp_mkt": len({compkey(c) for c in hist_fun if rank(c["lc"]) >= 4 and _chl(c) in MKT_CH}),
         "cli_emp_mkt": len({compkey(c) for c in hist_fun if rank(c["lc"]) >= 5 and _chl(c) in MKT_CH}),
         "free_last7": trends["free"]["last7"],
+        "cac": _cac_data,
     }
     REUN_STAGES = {"1107496610": "Discovery", "presentationscheduled": "Demo",
                    "1033589123": "Best Case", "1119432966": "Cierre"}
@@ -2380,6 +2405,48 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .brow .bt{background:rgba(255,255,255,.05);border-radius:6px;height:20px;overflow:hidden}
 .brow .bf{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--brand-d),var(--brand));min-width:3px}
 .brow .bn{text-align:right;font-weight:800} .brow .bn small{color:var(--mut);font-weight:600;font-size:10.5px}
+/* Calculadora de CAC */
+.cac-wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;margin-top:20px;position:relative;left:50%;transform:translateX(-50%);width:min(1280px,calc(100vw - 32px))}
+.cac-left,.cac-right{background:linear-gradient(165deg,rgba(24,52,38,.55),rgba(19,41,30,.35));border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+.cac-field{margin-bottom:20px}
+.cac-field:last-child{margin-bottom:0}
+.cac-lab{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:800;color:var(--ink);margin-bottom:9px}
+.cac-out{color:var(--brand);font-size:15px}
+.cac-help{font-size:10.5px;color:var(--mut);line-height:1.5;margin-top:8px}
+.cac-flag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.04em;color:#a5741f;background:rgba(255,202,92,.16);border:1px solid #a5741f;border-radius:6px;padding:1px 6px;margin-right:4px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:999px;background:rgba(255,255,255,.12);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--brand);cursor:pointer;border:3px solid #0c2419}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--brand);cursor:pointer;border:3px solid #0c2419}
+.cac-pay{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.cac-pay button{font-size:12px;font-weight:800;padding:9px 4px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--ink2);cursor:pointer}
+.cac-pay button.on{background:var(--brand);color:#04120b;border-color:var(--brand)}
+.cac-topcap{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.cac-big{font-size:clamp(38px,6vw,60px);font-weight:900;color:var(--brand);line-height:1.05;margin:2px 0}
+.cac-big em{font-size:22px;font-style:normal;color:var(--ink2)}
+.cac-formula{font-size:12px;color:var(--mut);margin-bottom:14px}
+.cac-mini{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:6px}
+.cac-mcap{font-size:10.5px;color:var(--mut)}
+.cac-mval{font-size:20px;font-weight:900;color:var(--ink)}
+.cac-mval.cac-g{color:var(--brand)}
+.cac-sep{height:1px;background:var(--line);margin:16px 0}
+.cac-tcap{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:10px}
+.cac-tcap span{color:var(--mut);font-weight:600;font-size:10.5px}
+.cac-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.cac-tbl th{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--mut);text-align:left;padding:0 8px 8px}
+.cac-tbl td{padding:9px 8px;border-top:1px solid var(--line)}
+.cac-tbl .cac-num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cac-tbl th.cac-num{text-align:right}
+.cac-ch b{font-weight:800;color:var(--ink)}
+.cac-sub{display:block;font-size:10px;color:var(--mut);font-weight:500;margin-top:2px;line-height:1.5}
+.cac-acct{display:inline-block;background:rgba(255,255,255,.05);border-radius:6px;padding:1px 6px;margin:2px 4px 0 0}
+.cac-acct b{color:var(--ink2)}
+.cac-noc{color:#a5741f;font-weight:700}
+.cac-verd{text-align:right}
+.cac-badge{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.03em;padding:3px 9px;border-radius:999px}
+.cac-badge.ok{color:var(--brand);background:rgba(111,240,162,.16);border:1px solid var(--brand-d)}
+.cac-badge.bad{color:#ff6b6b;background:rgba(255,107,107,.14);border:1px solid #a53a3a}
+.cac-foot{font-size:10px;color:var(--mut);line-height:1.55;margin-top:12px}
+@media(max-width:860px){.cac-wrap{grid-template-columns:1fr}}
 /* matriz por fuente */
 .mxwrap{overflow-x:auto}
 .matrix{min-width:720px;display:flex;flex-direction:column;gap:7px}
@@ -3201,6 +3268,109 @@ def render_exec(d):
     acts.append(("Conectar el gasto de Paid", "Falta el gasto de Google/Meta/LinkedIn para leer CPL y coste por oportunidad reales."))
     acts_html = "".join(f'<div class="act"><b>{b}</b>{t}</div>' for b, t in acts[:5])
 
+    # ---------- Calculadora de CAC máximo (dinámica, cliente) ----------
+    _cac = ex.get("cac", {}) or {}
+    def _spend_num(v):
+        try:
+            return float(str(v).replace(".", "").replace(",", ".")) if v else 0.0
+        except (TypeError, ValueError):
+            return 0.0
+    _g = _cac.get("google", {}); _s = _cac.get("social", {}); _r = _cac.get("rest", {})
+    _sg = _spend_num(_cac.get("spend_google")); _ss = _spend_num(_cac.get("spend_social"))
+    _t0 = _cac.get("ticket_default", 750); _m0 = _cac.get("margin_default", 40); _p0 = _cac.get("payback_default", 6)
+    # cuentas de social ads (detalle)
+    _accts = _cac.get("social", {}).get("accounts", []) or []
+    _acct_chips = "".join(
+        f'<span class="cac-acct">{esc(str(nm))} <b>{fmt(n)}</b></span>' for nm, n in _accts[:6]) or \
+        '<span class="cac-acct" style="opacity:.6">sin origen detallado</span>'
+    _n_soc_accts = len(_accts)
+    # filas de canal: nombre, coste (spend), oportunidades con negocio, clientes, data-cost para JS
+    def _cac_row(name, sub, spend_val, opp, cli, extra_cls=""):
+        cost_txt = (f'{fmt(round(spend_val))} €' if spend_val else '<span class="cac-noc">a imputar*</span>')
+        return (
+            f'<tr class="{extra_cls}" data-cost="{round(spend_val)}">'
+            f'<td class="cac-ch"><b>{name}</b>{sub}</td>'
+            f'<td class="cac-num">{cost_txt}</td>'
+            f'<td class="cac-num">{fmt(opp)}</td>'
+            f'<td class="cac-num">{fmt(cli)}</td>'
+            f'<td class="cac-verd"><span class="cac-badge">—</span></td></tr>')
+    _rows_cac = (
+        _cac_row("🔍 Google Ads", "", _sg, _g.get("opp", 0), _g.get("cli", 0))
+        + _cac_row("📣 Social Ads", f'<span class="cac-sub">{_n_soc_accts} cuenta(s): {_acct_chips}</span>',
+                   _ss, _s.get("opp", 0), _s.get("cli", 0))
+        + _cac_row("🌱 Orgánico / Outbound", '<span class="cac-sub">sin coste de medios registrado</span>',
+                   0, _r.get("opp", 0), _r.get("cli", 0), "cac-free"))
+    cac_html = f"""
+  <div class="cac-wrap">
+    <div class="cac-left">
+      <div class="cac-field">
+        <div class="cac-lab">Ticket medio recurrente <b class="cac-out" id="cacTicketOut">{fmt(_t0)} €/mes</b></div>
+        <input type="range" id="cacTicket" min="100" max="2500" step="50" value="{_t0}">
+        <div class="cac-help">Confirmado en HubSpot ({fmt(_t0)} €). Planes reales: 250 €/mes sin onboarding · 750 €/mes con onboarding · ICP-A objetivo 1.000–2.500 €/mes.</div>
+      </div>
+      <div class="cac-field">
+        <div class="cac-lab">Margen bruto <b class="cac-out" id="cacMarginOut">{_m0} %</b></div>
+        <input type="range" id="cacMargin" min="10" max="90" step="5" value="{_m0}">
+        <div class="cac-help"><span class="cac-flag">A CONFIRMAR</span> No hay dato de margen en HubSpot. Escenario por defecto conservador.</div>
+      </div>
+      <div class="cac-field">
+        <div class="cac-lab">Payback objetivo <b class="cac-out" id="cacPayOut">{_p0} meses</b></div>
+        <div class="cac-pay" id="cacPay">
+          <button data-p="1">1 mes</button><button data-p="3">3 m</button>
+          <button data-p="6">6 m</button><button data-p="12">12 m</button>
+        </div>
+        <div class="cac-help">Meses de margen para recuperar el CAC. Referencia SaaS sana: 6–12 m. Objetivo interno ICP-B: payback &lt; 3 m.</div>
+      </div>
+    </div>
+    <div class="cac-right">
+      <div class="cac-topcap">CAC máximo permitido</div>
+      <div class="cac-big"><span id="cacBig">0</span> <em>€</em></div>
+      <div class="cac-formula" id="cacFormula"></div>
+      <div class="cac-mini">
+        <div><div class="cac-mcap">Suelo (breakeven mes 1)</div><div class="cac-mval" id="cacFloor">0 €</div></div>
+        <div><div class="cac-mcap">LTV a 24 meses · ratio 3:1 →</div><div class="cac-mval cac-g" id="cacLtv">0 €</div></div>
+      </div>
+      <div class="cac-sep"></div>
+      <div class="cac-tcap">¿Qué canales caben bajo este techo? <span>· coste vs. oportunidades y clientes generados (1 ene→hoy)</span></div>
+      <table class="cac-tbl">
+        <thead><tr><th>Canal</th><th class="cac-num">Coste</th><th class="cac-num">Oport. c/negocio</th><th class="cac-num">Clientes</th><th></th></tr></thead>
+        <tbody id="cacTbody">{_rows_cac}</tbody>
+      </table>
+      <div class="cac-foot">*Sin coste de medios registrado en HubSpot; habría que imputar el gasto real (Google/Meta/LinkedIn) o el coste del equipo de ventas. <b>Oport. c/negocio</b> = contactos en etapa oportunidad con negocio en pipeline · <b>Clientes</b> = empresas que han sido cliente desde el 1 ene.</div>
+    </div>
+  </div>
+  <script>(function(){{
+    var t=document.getElementById('cacTicket'),m=document.getElementById('cacMargin'),pay=document.getElementById('cacPay');
+    if(!t)return; var P={_p0};
+    function money(n){{return Math.round(n).toLocaleString('es-ES');}}
+    function calc(){{
+      var tk=+t.value, mg=+m.value/100;
+      var cacMax=tk*mg*P, floor=tk*mg*1, ltv=tk*mg*24;
+      document.getElementById('cacTicketOut').textContent=money(tk)+' €/mes';
+      document.getElementById('cacMarginOut').textContent=(+m.value)+' %';
+      document.getElementById('cacPayOut').textContent=P+(P===1?' mes':' meses');
+      document.getElementById('cacBig').textContent=money(cacMax);
+      document.getElementById('cacFormula').textContent=money(tk)+' € × '+(+m.value)+' % margen × '+P+' mes'+(P===1?'':'es');
+      document.getElementById('cacFloor').textContent=money(floor)+' €';
+      document.getElementById('cacLtv').textContent=money(ltv)+' €';
+      document.querySelectorAll('#cacTbody tr').forEach(function(tr){{
+        var c=+tr.getAttribute('data-cost'), b=tr.querySelector('.cac-badge');
+        if(!c){{b.textContent='CABE';b.className='cac-badge ok';}}
+        else if(c>cacMax){{b.textContent='SE PASA';b.className='cac-badge bad';}}
+        else {{b.textContent='CABE';b.className='cac-badge ok';}}
+      }});
+    }}
+    pay.querySelectorAll('button').forEach(function(btn){{
+      if(+btn.getAttribute('data-p')===P)btn.classList.add('on');
+      btn.addEventListener('click',function(){{
+        P=+btn.getAttribute('data-p');
+        pay.querySelectorAll('button').forEach(function(x){{x.classList.remove('on');}});
+        btn.classList.add('on'); calc();
+      }});
+    }});
+    t.addEventListener('input',calc); m.addEventListener('input',calc); calc();
+  }})();</script>"""
+
     body = f"""
 <div class="wrap">
 <header class="xhead">
@@ -3299,6 +3469,13 @@ def render_exec(d):
   <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b>, <b style="color:var(--warn)">🟠 Outbound</b> y <b style="color:var(--violet)">🧠 Brain</b>.</div>
   {matrix_html}
   <div class="note" style="margin-top:16px">📌 <b>Lectura importante de los meses anteriores.</b> Hasta ahora no había un criterio único de atribución: muchos contactos estaban en la <b>etapa de ciclo de vida equivocada</b> (p. ej. <b>freemiums marcados como SQL u oportunidad</b>), lo que <b>sesga el dato</b>. Por eso los meses previos (p. ej. el volumen de oportunidades de febrero/marzo) <b>no reflejan oportunidades reales</b> según la lógica actual del pipeline. <b>Desde junio-julio</b> se ha establecido un <b>criterio de atribución</b> para trazar bien la adquisición y entender cómo evoluciona cada contacto. A partir de aquí el evolutivo es fiable y comparable — la clave es <b>mantener el proceso estable</b>.</div>
+</section>
+
+<section>
+  <div class="q">04b · ¿Cuánto podemos pagar por captar?</div>
+  <h2 class="sh">Calculadora de CAC máximo</h2>
+  <div class="sd">Mové el <b>margen</b> y el <b>payback objetivo</b> para ver el techo de CAC en vivo. La tabla cruza ese techo con lo que cada canal ha <b>costado</b> y las <b>oportunidades con negocio</b> y <b>clientes</b> que ha generado (desde el 1 de enero).</div>
+  {cac_html}
 </section>
 
 <div class="divbanner">
