@@ -114,7 +114,8 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
   - **Evolución del funnel:** tasa de conversión en cada salto — **lead → MQL → SQL → oportunidad** — visible en un único cuadro de mando.
   - **Oportunidades generadas en pipeline:** contactos con una nueva oportunidad en etapa (p. ej. *discovery*) ya precualificada por Ventas y de origen inbound.
   - **Atribución por canal de inbound:** orgánico, directo, pago (Google Ads / social ads), eventos, webinars, referencias, referencias de IA, newsletters externas, medios, chat web y *otros* (tráfico web sin identificar por no aprobar cookies).
-- **Automatización:** nurturing operativo y medido (apertura/CTR; arreglar correos 2 y 3) y lead scoring fit+hit vivo y mantenido.
+- **Automatización:** nurturing operativo y medido (apertura/CTR; arreglar correos 2 y 3); lead scoring fit+hit vivo; comunicaciones a freemium (activar cuenta / desactivar o empujar a pago); workflows para identificar razones de descarte y precualificar contactos (alertas a responsables + comunicaciones de descarte automatizadas).
+- **Auditoría y base:** auditoría de tracking/atribución, base del funnel y flujo 360 del usuario.
 - **Health del proyecto (milestone septiembre):** hitos cumplidos — formularios nativos de HubSpot, `forms.gurusup.com`, freemium instrumentado, dashboard único en marcha.
 
 ---
