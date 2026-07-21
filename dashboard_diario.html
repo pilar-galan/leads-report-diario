@@ -458,8 +458,8 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   <div id="gs-err" class="err">Contraseña incorrecta</div></div></div>
 
 <div class="header"><div class="header-inner"><div class="logo-box">GS</div>
-  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Martes, 21 de julio de 2026 · 20 jul 09:00 → 21 jul 17:33 (hora España)</p></div></div>
-  <div class="sync-bar">Generado el 21 Jul 2026 · 17:33 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
+  <div class="header-title"><h1>GuruSup · Dashboard Diario</h1><p>Martes, 21 de julio de 2026 · 20 jul 09:00 → 21 jul 17:45 (hora España)</p></div></div>
+  <div class="sync-bar">Generado el 21 Jul 2026 · 17:45 · embudos acumulados 1 ene 2026 → hoy · gráficos anuales 1 ene 2026 → hoy</div></div>
 
 <div class="main">
 
@@ -486,7 +486,7 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   <div class="hero24">
     <div class="section-label" style="margin:0 0 14px;">Contactos generados · últimas 24h</div>
     <div class="daytree"><div class="dt-root"><div class="fc-label">Contactos · últimas 24h</div><div class="fc-value">7</div><div class="fc-sub">total de nuevos contactos que entran</div></div><div class="dt-branches"><div class="dt-branch dt-com"><div class="dt-arm">→</div><div class="dt-body"><div class="dt-btag">🛠️ Proceso comercial · <b>100%</b> del total (7)</div><div class="dt-row"><div class="df-card df-state"><div class="fc-label">Leads</div><div class="fc-value">2</div><div class="fc-sub">📘 1 contenido · ❔ 0 sin info</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">MQL</div><div class="fc-value">0</div><div class="fc-sub">consumió contenido</div></div><div class="df-op">+</div><div class="df-card df-state"><div class="fc-label">SQL</div><div class="fc-value">5</div><div class="fc-sub">piden demo → seguimiento de Agustín</div></div></div></div></div><div class="dt-branch dt-free"><div class="dt-arm">→</div><div class="dt-body"><div class="dt-btag dt-free-tag">🧊 Producto gratuito · <b>0%</b> del total</div><div class="dt-row"><div class="df-card df-free-card"><div class="fc-label">Free</div><div class="fc-value">0</div><div class="fc-sub">0% del total</div></div><div class="dt-free-txt">Altas gratuitas por la app. <b>No pasan por Leads, MQL ni SQL</b>, ni por reuniones agendadas. Se quedan aquí, fuera del embudo comercial.</div></div></div></div></div></div>
-    <div class="caption hero24-cap">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: <strong>Lorena Bordonaba</strong> (Tráfico directo)</div>
+    <div class="caption hero24-cap">ℹ️ Volumen de nuevos contactos de las últimas 24h y en qué se dividen (Leads + MQL + SQL). Los <strong>SQL</strong> derivan en <strong>llamadas/videollamadas</strong> realizadas por los SDR (Agustín/Juanma). <strong>Freemium</strong> va aparte (fuera del embudo comercial). Reuniones hoy: <strong>Lorena Bordonaba</strong> (Tráfico directo) · <strong>Víctor Mollá</strong> (Chat web)</div>
   </div>
 
   <div class="down-link"><span class="dl-arrow">↓</span> Y estos contactos, <b>¿de qué canales vienen?</b></div>
@@ -580,21 +580,21 @@ body { background:var(--guru-900); color:var(--text); font-family:-apple-system,
   <div class="section-label">Oportunidades activas · Pipeline de ventas · solo canales de marketing</div>
   <div class="card">
     <div class="card-header"><span class="card-title">Empresas en pipeline · por canal y etapa</span>
-      <span class="badge badge-green">24 oportunidades de marketing</span></div>
+      <span class="badge badge-green">23 oportunidades de marketing</span></div>
     <div style="font-size:12px;color:var(--text-2);margin:-6px 0 14px;line-height:1.5;">
       Oportunidades inbound reales (se excluyen deals heredados/comercial mal atribuidos como Xtrim o Plenergy) ·
       🧠 <strong style="color:var(--guru-300)">0</strong> en Pipeline <strong>Brain</strong> ·
-      💼 <strong style="color:var(--guru-300)">20</strong> en <strong>ventas normales</strong></div>
+      💼 <strong style="color:var(--guru-300)">19</strong> en <strong>ventas normales</strong></div>
     <input type="text" id="emp-search" onkeyup="filtrarEmpresas()" placeholder="🔍 Buscar empresa…"
       style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;margin-bottom:14px;outline:none;">
     <table class="table" id="emp-table"><thead><tr><th>Empresa</th><th>Canal</th><th>Etapa / estado</th><th>📅 Última reunión</th><th>Razón de descarte</th></tr></thead>
-    <tbody><tr class="stage-divider"><td colspan="5">Discovery · 3 deals</td></tr><tr data-name="youtax"><td><strong>Youtax</strong></td><td>📣 Social Ads</td><td><span class="pill pill-discov">Discovery</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="ole energia"><td><strong>Ole energia</strong> <span class="new-tag">NUEVO</span></td><td>📣 Social Ads</td><td><span class="pill pill-discov">Discovery</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-discov">Discovery</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr class="stage-divider"><td colspan="5">Demo / Reunión · 3 deals</td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="centro médico lámar"><td><strong>Centro Médico Lámar</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="cos global services"><td><strong>COS Global Services</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-demo">Demo / Reunión</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr></tbody></table>
+    <tbody><tr class="stage-divider"><td colspan="5">Discovery · 3 deals</td></tr><tr data-name="youtax"><td><strong>Youtax</strong></td><td>📣 Social Ads</td><td><span class="pill pill-discov">Discovery</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="ole energia"><td><strong>Ole energia</strong> <span class="new-tag">NUEVO</span></td><td>📣 Social Ads</td><td><span class="pill pill-discov">Discovery</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="grupo asesban"><td><strong>Grupo Asesban</strong></td><td>🔗 Tráfico directo</td><td><span class="pill pill-discov">Discovery</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr class="stage-divider"><td colspan="5">Demo / Reunión · 2 deals</td></tr><tr data-name="weekendesk"><td><strong>Weekendesk</strong></td><td>🎪 Eventos / Campañas</td><td><span class="pill pill-demo">Demo / Reunión</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr><tr data-name="centro médico lámar"><td><strong>Centro Médico Lámar</strong></td><td>🔍 Google Ads</td><td><span class="pill pill-demo">Demo / Reunión</span></td><td class="dt-none">—</td><td class="dt-none"></td></tr></tbody></table>
     <div id="emp-empty" style="display:none;padding:14px 0;font-size:13px;color:var(--muted);text-align:center;">Sin resultados</div>
-    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades <strong>activas</strong> cuyo contacto entró por canal de marketing, por etapa del pipeline (Discovery → Demo → Best Case). Cada fila muestra empresa, canal y etapa/estado, <strong>ordenadas dentro de cada etapa por canal</strong>. La fecha es la <strong>última reunión</strong> (en <span class="dt-next">salmón</span> si es futura). Reparto por canal: 9 🔗 Tráfico directo · 6 🌿 SEO Orgánico · 3 🔍 Google Ads · 2 🎪 Eventos / Campañas · 2 📣 Social Ads · 1 🌱 Social orgánico · 1 💬 Chat web.</div></div>
+    <div class="alert alert-muted"><span>ℹ️</span><div>Solo oportunidades <strong>activas</strong> cuyo contacto entró por canal de marketing, por etapa del pipeline (Discovery → Demo → Best Case). Cada fila muestra empresa, canal y etapa/estado, <strong>ordenadas dentro de cada etapa por canal</strong>. La fecha es la <strong>última reunión</strong> (en <span class="dt-next">salmón</span> si es futura). Reparto por canal: 8 🔗 Tráfico directo · 6 🌿 SEO Orgánico · 3 🔍 Google Ads · 2 🎪 Eventos / Campañas · 2 📣 Social Ads · 1 🌱 Social orgánico · 1 💬 Chat web.</div></div>
   </div>
 
   <div style="margin-top:40px;text-align:center;font-size:12px;color:var(--muted);">
-    GuruSup · Dashboard Diario · generado el 21 Jul 2026 · 17:33 (hora España)
+    GuruSup · Dashboard Diario · generado el 21 Jul 2026 · 17:45 (hora España)
   </div>
 </div>
 
