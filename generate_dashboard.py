@@ -2692,12 +2692,14 @@ def render_exec(d):
     _sql_emp = ex.get("sql_empresas", 0) or g_sql      # empresas con SQL
     _churn_emp = ex.get("churn", {}).get("empresas", 0)
     _churn_pct = pvf(_churn_emp, _churn_emp + _cli_emp)
-    # tasas de Lead/MQL/SQL sobre contactos; de Oportunidad/Cliente sobre EMPRESAS (negocio = 1+ contactos)
+    # todas las tasas del embudo sobre CONTACTOS (volumen total), etapa a etapa
+    _opp_ct = ex.get("opp_contactos", 0)
+    _cli_ct = ex.get("cli_split", {}).get("contactos", 0)
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
-        ("SQL → Oportunidad", pvf(_opp_emp, _sql_emp), "empresas · oportunidad / SQL"),
-        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "empresas · cliente / oportunidad"),
+        ("SQL → Oportunidad", pv(_opp_ct, g_sql), "contactos · oportunidad / SQL"),
+        ("Oportunidad → Cliente", pv(_cli_ct, _opp_ct), "contactos · cliente / oportunidad"),
         ("Cliente → Churn", _churn_pct, "empresas · desde 1 ene"),
     ]
     rate_html = "".join(
