@@ -1178,9 +1178,13 @@ def main():
         k = (c.get("d1") or c.get("src") or "sin origen").strip() or "sin origen"
         _soc_accts[k] = _soc_accts.get(k, 0) + 1
     soc_accounts = sorted(_soc_accts.items(), key=lambda x: -x[1])
+    # Gasto de medios: usa las variables de entorno si están; si no, los importes de referencia
+    # (acumulado 1 ene→hoy) hasta conectar el gasto real automáticamente.
+    _sp_google = paid["spend_google"] or "6297"
+    _sp_social = paid["spend_social"] or "3342"   # 3 cuentas de social; total ads ≈ 9.639 €
     _cac_data = {
         "ticket_default": 750, "margin_default": 40, "payback_default": 6,
-        "spend_google": paid["spend_google"], "spend_social": paid["spend_social"],
+        "spend_google": _sp_google, "spend_social": _sp_social,
         "google": {"opp": g_opp, "cli": g_cli},
         "social": {"opp": s_opp, "cli": s_cli, "accounts": soc_accounts},
         "rest":   {"opp": r_opp, "cli": r_cli},
@@ -2429,6 +2433,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .cac-mval{font-size:20px;font-weight:900;color:var(--ink)}
 .cac-mval.cac-g{color:var(--brand)}
 .cac-sep{height:1px;background:var(--line);margin:16px 0}
+.cac-spendbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;margin-bottom:14px;border-radius:12px;background:rgba(255,202,92,.1);border:1px solid #a5741f}
+.cac-sb-cap{font-size:12px;font-weight:800;color:var(--warn)}
+.cac-sb-cap small{font-weight:600;color:var(--mut);font-size:10px}
+.cac-sb-val{font-size:20px;font-weight:900;color:var(--warn);font-variant-numeric:tabular-nums}
+.cac-tbl td.cac-num{font-weight:800;color:var(--ink)}
 .cac-tcap{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:10px}
 .cac-tcap span{color:var(--mut);font-weight:600;font-size:10.5px}
 .cac-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -3332,6 +3341,7 @@ def render_exec(d):
         <div><div class="cac-mcap">LTV a 24 meses · ratio 3:1 →</div><div class="cac-mval cac-g" id="cacLtv">0 €</div></div>
       </div>
       <div class="cac-sep"></div>
+      <div class="cac-spendbar"><span class="cac-sb-cap">💰 Gasto total en medios <small>· acumulado 1 ene→hoy</small></span><span class="cac-sb-val">{fmt(round(_sg + _ss))} €</span></div>
       <div class="cac-tcap">¿Qué canales caben bajo este techo? <span>· coste vs. oportunidades y clientes generados (1 ene→hoy)</span></div>
       <table class="cac-tbl">
         <thead><tr><th>Canal</th><th class="cac-num">Coste</th><th class="cac-num">Oport. c/negocio</th><th class="cac-num">Clientes</th><th></th></tr></thead>
