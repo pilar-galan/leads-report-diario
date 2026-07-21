@@ -302,6 +302,12 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .vstep b{font-size:22px;font-weight:800;color:var(--ink);line-height:1} .vstep span{font-size:11.5px;color:var(--mut)}
 .vstep.ok b{color:var(--brand)} .vstep.bad b{color:var(--bad)}
 .varr{text-align:center;color:var(--mut);font-size:13px;line-height:1} .varr span{color:var(--brand);font-weight:800;font-size:11px;margin-left:4px}
+.vfork{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.vfork-col{display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:14px}
+.vfork-col.left{background:rgba(111,240,162,.05);border:1px solid var(--brand-d)}
+.vfork-col.right{background:rgba(255,107,107,.05);border:1px solid #a53a3a}
+.vfork-tag{font-size:11px;font-weight:800;margin-bottom:3px} .vfork-tag.ok{color:var(--brand)} .vfork-tag.bad{color:var(--bad)}
+@media(max-width:640px){.vfork{grid-template-columns:1fr}}
 .vdet>summary{list-style:none;cursor:pointer} .vdet>summary::-webkit-details-marker{display:none}
 .vdet>summary .vchev{margin-left:auto;color:var(--bad);font-weight:800;font-size:10px} .vdet[open]>summary .vchev::after{content:" ▾"}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
@@ -427,7 +433,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>21 Jul 2026 · 17:45</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>21 Jul 2026 · 17:49</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -445,7 +451,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
   <div class="ratesbanner">
-    <div class="rb-grid"><div class="rbc"><div class="rbl">Lead → MQL</div><div class="rbv tnum">34%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">MQL → SQL</div><div class="rbv tnum">31%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">SQL → Oportunidad</div><div class="rbv tnum">42%</div><div class="rbs">contactos · oportunidad / SQL</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">169%</div><div class="rbs">contactos · cliente / oportunidad</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">55%</div><div class="rbs">empresas · cliente / oportunidad</div></div><div class="rbc"><div class="rbl">Cliente → Churn</div><div class="rbv tnum">14%</div><div class="rbs">empresas · desde 1 ene</div></div></div>
+    <div class="rb-grid"><div class="rbc"><div class="rbl">Lead → MQL</div><div class="rbv tnum">34%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">MQL → SQL</div><div class="rbv tnum">31%</div><div class="rbs">global · sobre contactos</div></div><div class="rbc"><div class="rbl">SQL → Oportunidad</div><div class="rbv tnum">42%</div><div class="rbs">contactos · oportunidad / SQL</div></div><div class="rbc"><div class="rbl">Oportunidad → Cliente</div><div class="rbv tnum">55%</div><div class="rbs">empresas · cliente / oportunidad</div></div><div class="rbc"><div class="rbl">Cliente → Churn</div><div class="rbv tnum">14%</div><div class="rbs">empresas · desde 1 ene</div></div></div>
   </div>
   <div class="fnote">* <b>¿Qué contactos no pasan a Lead?</b> Se excluyen del embudo la etapa «otros»: <b>0 internos (@gurusup)</b> y <b>178 pruebas/test</b>. Además, hay contactos que se crearon y luego se <b>eliminaron</b> (pruebas): tienen fecha de creación pero ya no existen en el CRM, por eso no se contabilizan. Los <b>Freemium</b> (altas por la app) también quedan fuera del embudo comercial. El churn se mostrará en cuanto se conecte su fuente.</div>
 </section>
@@ -669,20 +675,23 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
       </summary>
       <div class="lvl-body">
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
-        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
-        <div class="vflow">
-          <div class="vstep"><b>32</b><span>precualificados</span></div>
-          <div class="varr">↓ <span>53%</span></div>
-          <div class="vstep"><b>17</b><span>agendados / llamados</span></div>
-          <div class="varr">↓</div>
-          <details class="vdet">
-            <summary class="vstep bad"><b>12</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
-            <div class="razbox" style="margin-top:6px"><div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">19 <small>79%</small></span></div><div class="mrow"><span class="ml">Lead accidental / no recuerda</span><span class="mn">2 <small>8%</small></span></div><div class="mrow"><span class="ml">Caso de uso / no target</span><span class="mn">1 <small>4%</small></span></div><div class="mrow"><span class="ml">NO responde</span><span class="mn">1 <small>4%</small></span></div><div class="mrow"><span class="ml">Datos Falsos</span><span class="mn">1 <small>4%</small></span></div></div>
-          </details>
-          <div class="varr">↓ <span>9%</span></div>
-          <div class="vstep ok"><b>🎯 3</b><span>oportunidad</span></div>
+        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín · <b>29</b> gestionados (base 100%)</div>
+        <div class="vfork">
+          <div class="vfork-col left">
+            <div class="vfork-tag ok">✅ En proceso de contacto · <b>59%</b></div>
+            <div class="vstep"><b>17</b><span>contactados · aún sin oportunidad</span></div>
+            <div class="varr">↓ <span>18% conversión</span></div>
+            <div class="vstep ok"><b>🎯 3</b><span>oportunidad · 18% de los gestionados</span></div>
+          </div>
+          <div class="vfork-col right">
+            <div class="vfork-tag bad">🔴 Descartados · <b>41%</b></div>
+            <details class="vdet">
+              <summary class="vstep bad"><b>12</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
+              <div class="razbox" style="margin-top:6px"><div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">19 <small>79%</small></span></div><div class="mrow"><span class="ml">Lead accidental / no recuerda</span><span class="mn">2 <small>8%</small></span></div><div class="mrow"><span class="ml">Caso de uso / no target</span><span class="mn">1 <small>4%</small></span></div><div class="mrow"><span class="ml">NO responde</span><span class="mn">1 <small>4%</small></span></div><div class="mrow"><span class="ml">Datos Falsos</span><span class="mn">1 <small>4%</small></span></div></div>
+            </details>
+          </div>
         </div>
-        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 16 por teléfono · 📅 1 agendadas</div>
+        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 16 por teléfono · 📅 1 agendadas · los porcentajes de gestionados y descartados son sobre su suma (29)</div>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           <div class="emailbox"><div class="eb tnum">4</div><div style="font-size:12px;color:var(--ink2);margin-top:6px">contactos con &lt;3.000 consultas/mes (desde 9 jul)</div></div><ul class="elist" style="margin-top:14px"><li>Mail automático de <b>descalificación</b></li><li>Se añaden a <b>listas de HubSpot</b> para reevaluar</li><li>Reactivables si su volumen de consultas crece</li></ul>
@@ -735,6 +744,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 21 Jul 2026 · 17:45 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 21 Jul 2026 · 17:49 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
