@@ -1050,8 +1050,12 @@ def main():
     preq["ag_calls_attempts"] = ag["attempts"]
     preq["ag_reuniones"] = sum(1 for x in deals if x["stage"] in DEMO_PLUS and x["created"] >= AG_START)
     # Oportunidad = deal NUEVO en pipeline (inbound marketing) creado desde el 9 jul (abierto o cerrado)
-    preq["ag_opp"] = (sum(1 for x in open_deals if x["created"] >= AG_START)
-                      + sum(1 for x in lost_deals if x["created"] >= AG_START))
+    _ag_opp_open = [x for x in open_deals if x["created"] >= AG_START]
+    _ag_opp_lost = [x for x in lost_deals if x["created"] >= AG_START]
+    preq["ag_opp"] = len(_ag_opp_open) + len(_ag_opp_lost)
+    preq["ag_opp_list"] = (
+        [(x.get("name", "—"), x.get("stage_label", "—"), x.get("channel", "")) for x in _ag_opp_open]
+        + [(x.get("name", "—"), "❌ Perdida", x.get("channel", "")) for x in _ag_opp_lost])
     # Razones de descarte de los SQL que fueron a Agustín (por qué se caen)
     ag_sql_contacts = [c for c in hist if c["lc"] in ("salesqualifiedlead", "1394675094", "1394675096")
                        and c["created"] >= AG_START]
@@ -2586,6 +2590,16 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .fstep.ok b{color:var(--brand)}
 .farr{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);font-weight:800;font-size:15px;min-width:40px}
 .farr .fp{font-size:10.5px;color:var(--brand);font-weight:800}
+.fstep-cl{cursor:pointer;flex:1.4;min-width:120px}
+.fstep-cl summary{list-style:none;text-align:center}
+.fstep-cl summary::-webkit-details-marker{display:none}
+.fstep-cl .agopp-hint{font-style:normal;color:var(--brand);font-weight:700;opacity:.85}
+.fstep-cl[open] .agopp-hint{opacity:0}
+.agopp-list{margin-top:10px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.agopp-item{display:flex;flex-direction:column;gap:1px;padding:7px 9px;border-radius:8px;background:rgba(111,240,162,.08);border:1px solid var(--brand-d)}
+.agopp-nm{font-size:12px;font-weight:800;color:var(--ink)}
+.agopp-st{font-size:9.5px;color:var(--mut);font-weight:600}
+.agopp-empty{font-size:11px;color:var(--mut);padding:6px}
 .razbox{margin-top:16px;background:rgba(255,113,137,.06);border:1px solid rgba(255,113,137,.25);border-radius:12px;padding:14px}
 .razbox .rh{font-size:12.5px;font-weight:800;color:var(--bad);margin-bottom:2px}
 .razbox .rs{font-size:11px;color:var(--mut);margin-bottom:10px}
@@ -3154,13 +3168,26 @@ def render_exec(d):
                         '(seguimiento de SQLs de paid media). Al conectarlo, se muestra en vivo el estado: '
                         'cualificados, en proceso, sin contactar, ganados y perdidos.</div>')
     # Flujo de precualificación de Agustín (SQL → agendados → oportunidad)
+    _ag_opp_n = pq.get("ag_opp", 0)
+    _ag_opp_list = pq.get("ag_opp_list", []) or []
+    _ag_opp_items = "".join(
+        f'<div class="agopp-item"><span class="agopp-nm">{esc(str(nm))}</span>'
+        f'<span class="agopp-st">{esc(str(ch))}{" · " if ch else ""}{esc(str(stg))}</span></div>'
+        for nm, stg, ch in _ag_opp_list)
+    _ag_opp_inner = _ag_opp_items or '<div class="agopp-empty">Sin oportunidades todavía</div>'
+    _ag_opp_step = (
+        f'<details class="fstep ok fstep-cl"><summary><b>🎯 {_ag_opp_n}</b>'
+        f'<span>oportunidad{"es" if _ag_opp_n != 1 else ""} <i class="agopp-hint">· ver</i></span></summary>'
+        f'<div class="agopp-list">{_ag_opp_inner}</div></details>'
+    ) if _ag_opp_n else (
+        f'<div class="fstep ok"><b>🎯 {_ag_opp_n}</b><span>oportunidad</span></div>')
     agustin_flow_html = (
         '<div class="flow" style="margin-top:14px">'
         f'<div class="fstep"><b>{pq.get("ag_sql",0)}</b><span>SQL<br>precualificados</span></div>'
         f'<div class="farr"><span class="fp">{pv(ag_contact, ag_base)}</span>→</div>'
         f'<div class="fstep"><b>{ag_contact}</b><span>agendados /<br>llamados</span></div>'
-        f'<div class="farr"><span class="fp">{pv(pq.get("ag_opp",0), ag_base)}</span>→</div>'
-        f'<div class="fstep ok"><b>🎯 {pq.get("ag_opp",0)}</b><span>oportunidad</span></div>'
+        f'<div class="farr"><span class="fp">{pv(_ag_opp_n, ag_base)}</span>→</div>'
+        f'{_ag_opp_step}'
         '</div>')
     # NIVEL 2 · Descartados / descualificados (desc_tot, desc_html ya calculados arriba)
     n2 = desc_tot
