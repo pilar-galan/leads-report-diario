@@ -1255,9 +1255,13 @@ def main():
     exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
     # Nota de pico estacional: si un mes supera claramente la mediana, ¿de qué canal vino?
     from collections import Counter as _Ctr
-    def spike_note(pred, keyf=None):
+    def spike_note(pred, keyf=None, recs=None):
+        recs = recs if recs is not None else hist
+        def _lab(it):
+            if is_import(it.get("src"), it.get("d1")): return "Importaciones"
+            return classify_channel(it.get("src"), it.get("d1"))[0]
         mtot, mchan, seen = {}, {}, set()
-        for it in hist:
+        for it in recs:
             if it["created"] in idx and pred(it):
                 if keyf:
                     k = keyf(it)
@@ -1265,24 +1269,36 @@ def main():
                     seen.add(k)
                 mo = it["created"][:7]
                 mtot[mo] = mtot.get(mo, 0) + 1
-                mchan.setdefault(mo, _Ctr())[classify_channel(it["src"], it["d1"])[0]] += 1
-            elif keyf:  # asegurar dedupe global aunque el pred filtre
-                pass
+                mchan.setdefault(mo, _Ctr())[_lab(it)] += 1
         if len(mtot) < 2:
-            return "* Aún sin histórico suficiente para detectar estacionalidad."
+            return "📈 Aún sin histórico suficiente para detectar estacionalidad."
         vals = sorted(mtot.values())
         med = vals[len(vals) // 2] or 1
-        mo_max = max(mtot, key=lambda m: mtot[m]); n = mtot[mo_max]
-        mes = MESES[int(mo_max[5:7]) - 1]
+        # 1) Mayor salto mes a mes (detecta importaciones que entran de golpe)
+        ms = sorted(mtot)
+        jump = None
+        for i in range(1, len(ms)):
+            pv_, cv = mtot[ms[i - 1]], mtot[ms[i]]
+            if cv >= pv_ * 1.5 and (cv - pv_) >= 5 and (jump is None or (cv - pv_) > jump[0]):
+                jump = (cv - pv_, ms[i], ms[i - 1])
+        if jump:
+            mo2 = jump[1]; mes2 = MESES[int(mo2[5:7]) - 1]; mes1 = MESES[int(jump[2][5:7]) - 1]
+            ch, cnt = mchan[mo2].most_common(1)[0]
+            extra = ' — es una <b>importación</b>, no captación real' if ch == "Importaciones" else ''
+            return (f'📈 <b>Salto de {mes1} a {mes2}</b> (+{jump[0]}), sobre todo por <b>{esc(ch)}</b>'
+                    f'{extra}. Cuenta por fecha de creación, no por evolución.')
+        # 2) Pico puntual vs la media
+        mo_max = max(mtot, key=lambda m: mtot[m]); n = mtot[mo_max]; mes = MESES[int(mo_max[5:7]) - 1]
         if n >= max(med * 1.5, med + 3):
             ch, cn = mchan[mo_max].most_common(1)[0]
-            return (f'📈 <b>Pico en {mes}</b> (+{n}, ~{round(n/med,1)}× la media mensual), sobre todo por '
-                    f'<b>{esc(ch)}</b> ({round(cn/n*100)}%): volumen no lineal, de una acción/estacional.')
-        return "📈 Crecimiento sostenido, sin picos estacionales marcados."
+            return (f'📈 <b>Pico en {mes}</b> (+{n}, ~{round(n/med,1)}× la media), sobre todo por '
+                    f'<b>{esc(ch)}</b> ({round(cn/n*100)}%).')
+        return "📈 Crecimiento sostenido, sin picos marcados."
     exec_extra["note_mql"] = spike_note(lambda c: not is_free(c) and rank(c["lc"]) >= 1
                                         and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
-    exec_extra["note_sql"] = spike_note(lambda c: c["lc"] in SQL_STAGES)
-    exec_extra["note_opp"] = spike_note(lambda c: c["lc"] == "opportunity", compkey)
+    # SQL y Oportunidades: incluir también outbound/importaciones (el pico may→jun viene de ahí)
+    exec_extra["note_sql"] = spike_note(lambda c: rank(c["lc"]) >= 3, recs=hist + hist_out)
+    exec_extra["note_opp"] = spike_note(lambda c: rank(c["lc"]) >= 4, compkey, recs=hist + hist_out)
     exec_extra["note_cli"] = spike_note(lambda c: c["lc"] == "customer", compkey)
     # Calidad del dato (sobre contactos desde 1 ene): email corporativo, teléfono, empresa
     FREE_MAIL = {"gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "yahoo.es", "icloud.com",
@@ -2815,10 +2831,12 @@ def render_exec(d):
         if prev is None:
             return ''
         if prev == 0:
-            return '<span class="mom up">▲ nuevo</span>' if cur else ''
+            return '<span class="mom up">▲ +{} · nuevo</span>'.format(cur) if cur else ''
         d_ = (cur - prev) / prev * 100
         up = cur >= prev
-        return f'<span class="mom {"up" if up else "down"}">{"▲" if up else "▼"} {abs(round(d_))}%</span>'
+        sign = "+" if cur >= prev else "−"
+        return (f'<span class="mom {"up" if up else "down"}">{"▲" if up else "▼"} '
+                f'{sign}{fmt(abs(cur - prev))} · {abs(round(d_))}%</span>')
     cmonths = ex.get("chan_months", [])
     tabs_btns = '<button class="mxtab active" data-mx="acum">ACUMULATIVO</button>'
     panels = f'<div class="mxpanel active" id="mx-acum">{matrix_html}</div>'
@@ -3309,6 +3327,7 @@ def render_exec(d):
   <div class="q">09 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· {fmt(pipe_cnt)}</span> abiertas de inbound</h2>
   <div class="sd">Solo <b>oportunidades abiertas</b> del pipeline de ventas que vienen de campañas inbound (se excluyen clientes/ganados). <b>Pulsa un canal</b> para ver los negocios y su etapa. El pipeline tiene <b>3 etapas</b>: <b>Discovery → Demo/Validación → Best Case</b> (no hay una etapa «Demo» aparte: la <b>demo/reunión ocurre dentro de «Needs Validation & Solution Alignment»</b>).</div>
+  <div class="note" style="margin-bottom:16px">💡 <b>Qué cuenta como oportunidad y por qué mejora el dato.</b> Todo lo que entra en el <b>pipeline de ventas</b> se cuenta como oportunidad — es su función (proceso comercial). La fase previa (descubrir la necesidad, validar el encaje, confirmar presupuesto y decisor) se trabaja por otras vías, p. ej. <b>Brain</b>: un contacto ahí <b>no es oportunidad</b> hasta que está validado y pasa a ventas. Antes se mezclaban como «oportunidad» contactos que aún no lo eran (e <b>importaciones</b> sin la etapa de ciclo de vida correcta), lo que inflaba el volumen y sesgaba la conversión. Ya está depurado, así que verás <b>menos oportunidades pero más fiables</b>. Es un <b>evolutivo</b>: la clave es mantener el proceso estable para poder comparar y aprender mes a mes.</div>
   <div class="cards" style="margin-bottom:18px">
     <div class="stat ok"><div class="sv tnum">{("€"+fmt(round(pipe_val))) if pipe_val else "—"}</div><div class="sl">Valor estimado del pipeline abierto{("" if pipe_val else " · importes no cargados en los deals")}</div></div>
     <div class="stat"><div class="sv tnum">{fmt(pipe_cnt)}</div><div class="sl">Negocios abiertos ({pipe_known} con importe)</div></div>
