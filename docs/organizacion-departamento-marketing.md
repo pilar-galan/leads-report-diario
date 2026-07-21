@@ -51,7 +51,7 @@ Regla de oro: **el reporting se lee antes** del Syncro (Picu comparte highlights
 
 ### ✅ 2.2 KPIs del equipo
 
-**North Star del departamento:** **oportunidades cualificadas generadas por Marketing en el pipeline.** El foco es **mejorar y optimizar las tasas de conversión del funnel inbound** (lead → MQL → SQL → oportunidad). El cierre del pipeline es responsabilidad de **Ventas**: Marketing aprende de él y saca feedback (entender por qué no convierten) pero no lo gestiona — esto es estructura de Marketing.
+**North Star del departamento:** ser el **motor de generación de demanda** que tracciona — mejorar y optimizar las tasas de conversión del funnel inbound (lead → MQL → SQL → oportunidad) para generar **oportunidades cualificadas en el pipeline**. **Ventas** cualifica esa demanda, nos devuelve sus insights y la convierte en clientes reales. La clave que nos une a todos: **aprender de cada ciclo, sacar conclusiones y optimizar** para mejorar.
 
 Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de calidad/guardrail**, todos con objetivo mensual. Ver detalle por persona en la **sección 3**.
 
@@ -108,7 +108,44 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
 
 ---
 
-## 4. Acciones
+## 4. Resultados por canal (acumulado desde el 1-ene-2026)
+
+SQLs generados por cada canal de inbound y cuántos han llegado a oportunidad en pipeline. Fuente: dashboard ejecutivo (HubSpot), sin Freemium. La conversión SQL→Op. es orientativa (depende del proceso y de muchas variables); sirve para comparar y mejorar canales.
+
+| Canal de inbound | SQL | Oportunidades | SQL → Op. |
+|---|--:|--:|--:|
+| Google Ads (pago) | 61 | 2 | 3% |
+| SEO Orgánico | 43 | 3 | 7% |
+| Tráfico directo | 28 | 4 | 14% |
+| Social Ads (pago) | 19 | 1 | 5% |
+| Eventos / Campañas | 2 | 2 | 100% (base baja) |
+| Webinar | 2 | 0 | — |
+| Referido | 2 | 0 | — |
+| Chat web | 0 | 0 | — |
+| Social orgánico | 0 | 0 | — |
+| Otros (web sin cookies) | 0 | 0 | — |
+| Referencias de IA | s/d | s/d | por instrumentar |
+| Newsletters externas | s/d | s/d | por instrumentar |
+| Medios | s/d | s/d | por instrumentar |
+| **Total inbound** | **157** | **12** | **~8%** |
+
+*«s/d» = canal aún no medible en el sistema — parte del trabajo del sistema de septiembre.*
+
+---
+
+## 5. Recomendaciones (priorizadas por impacto)
+
+1. **Calidad > volumen en paid.** Google Ads es el que más SQL trae (61) pero el que menos convierte a oportunidad (3%). Afinar fit+hit y creatividades para que el SQL de pago llegue con intención real, vigilando el CPL para no disparar el gasto.
+2. **Iluminar el "tráfico directo".** Mayor fuente de oportunidades inbound (4) y convierte al 14%, pero "directo" esconde el origen real → cerrar la instrumentación para replicarlo.
+3. **Escalar eventos, revisar webinars.** Eventos/Campañas convierte 2/2 (señal fuerte pese a base baja) → escalar (palanca de Marisa). El webinar acumula muchos MQL pero 2 SQL y 0 oportunidades → revisar cualificación y seguimiento post-webinar.
+4. **Encender los canales ciegos.** Referencias de IA, newsletters externas y medios no se miden hoy → instrumentarlos (trabajo del sistema de septiembre).
+5. **Arreglar el nurturing.** 1er email al 45% de apertura, pero el 2º y 3º caen → reescribirlos para mejorar lead → MQL → SQL.
+6. **Cerrar el bucle con Ventas.** Recoger por qué las oportunidades no avanzan y volcarlo a scoring y campañas — aprendizaje común.
+7. **Higiene de datos continua.** Limpiar oportunidades sin negocio asociado y contactos freemium para un reporting fiable.
+
+---
+
+## 6. Acciones
 
 ### 4.1 Definir rituales del equipo
 - [ ] Aplicar la cadencia de 2.1 (Syncro 60 min con hard stop + Marketing Review mensual). — *Owner: Marisa + Picu*
@@ -128,7 +165,7 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
 
 ---
 
-## 5. Matriz de ownership
+## 7. Matriz de ownership
 
 | Área | Owner | Consultado |
 |---|---|---|

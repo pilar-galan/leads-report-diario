@@ -145,6 +145,29 @@
   .gs-kpi li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent,var(--green))}
   .gs-guard{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:13px;text-align:justify;hyphens:auto}
   .gs-guard b{color:var(--text);font-weight:600}
+  .gs-card .gs-alab{font-size:10.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);font-weight:700;margin-bottom:9px}
+
+  /* Resultados por canal */
+  .gs-datebadge{display:inline-flex;align-items:center;gap:8px;background:var(--coral-soft);border:1px solid var(--coral);color:var(--coral);border-radius:999px;padding:9px 16px;font-size:12.5px;font-weight:700;letter-spacing:.01em}
+  .gs-datebadge b{color:var(--coral)}
+  table.gs-res th:not(:first-child),table.gs-res td.num,table.gs-res td.cv{text-align:right}
+  table.gs-res td.num{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--heading)}
+  table.gs-res td.cv{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.gs-res td.cv small{display:block;font-weight:500;font-size:10px;color:var(--muted)}
+  table.gs-res td.cv.hi{color:var(--green)}
+  table.gs-res td.cv.mid{color:var(--text)}
+  table.gs-res td.cv.low{color:var(--amber)}
+  table.gs-res td.cv.none{color:var(--muted)}
+  table.gs-res tr.sd td{color:var(--muted);font-style:italic}
+  table.gs-res tr.tot td{border-top:2px solid var(--border-strong);background:var(--surface-2)}
+  .gs-res .tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green);background:var(--green-soft);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+  .gs-cap{font-size:11.5px;color:var(--muted);margin-top:12px;text-align:justify;hyphens:auto}
+
+  /* Recomendaciones */
+  .gs-recs{list-style:none;counter-reset:r;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .gs-recs li{counter-increment:r;position:relative;padding:15px 18px 15px 54px;background:var(--surface);border:1px solid var(--border);border-radius:14px;font-size:13.5px;color:var(--text);text-align:justify;hyphens:auto}
+  .gs-recs li::before{content:counter(r);position:absolute;left:16px;top:14px;width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+  .gs-recs li b{color:var(--heading)}
 
   .gs-funnel{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
   .gs-funnel .fh .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800;margin-bottom:6px}
@@ -240,103 +263,140 @@
 
     <!-- FOCO DE MARKETING · boundary -->
     <section class="gs-note reveal" style="animation-delay:.16s">
-      <div class="k">★ Foco de Marketing · inbound</div>
-      <p>Nuestro trabajo es <b>mejorar y optimizar las tasas de conversión</b> del funnel para <b>generar oportunidades cualificadas en el pipeline</b>. El cierre del pipeline es responsabilidad de Ventas: aprendemos de él y sacamos feedback (entender por qué no convierten), pero no lo gestionamos. Esto es estructura de Marketing.</p>
+      <div class="k">★ Nuestro modelo · motor de demanda</div>
+      <p>Marketing construye el <b>motor de generación de demanda</b> que tracciona; <b>Ventas cualifica</b> esa demanda, nos devuelve sus <b>insights</b> y la convierte en clientes reales. La clave que nos une a todos: <b>aprender de cada ciclo, sacar conclusiones y optimizar</b> para mejorar.</p>
     </section>
 
     <!-- 01 EQUIPO + KPIs -->
     <section class="gs-sec">
       <div class="gs-sec-h"><span class="gs-sec-n">01</span><h2>El equipo: un owner por área</h2></div>
-      <p class="gs-sec-sub">Tras la salida de Jonathan, cada área tiene un único responsable, con su propio North Star y sus KPIs según perfil, scope y misión. Organización plana, sin managers intermedios.</p>
+      <p class="gs-sec-sub">Tras la salida de Jonathan, cada área tiene un único responsable. Aquí, su palanca sobre el conjunto y las acciones de mayor impacto que ha aportado estos meses. Organización plana, sin managers intermedios.</p>
       <div class="gs-grid">
         <article class="gs-card reveal">
           <div class="area"><span class="d"></span>Marca, eventos y comunicación</div>
           <h3>Marisa Silva</h3>
           <p class="who">Posicionamiento e ICP · marca y rebranding (con Diego Lunelli) · PR/prensa · eventos y partnerships · customer stories</p>
-          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Oportunidades cualificadas originadas por marca: eventos, partnerships, PR y contenido.</div></div>
+          <div class="gs-nsl"><div class="k">Palanca</div><div class="t">Percepción y confianza: marca y relaciones que abren puertas y dan credibilidad a todo el funnel.</div></div>
+          <div class="gs-alab">Acciones de mayor impacto</div>
           <ul class="gs-kpi">
-            <li>Leads/oportunidades atribuidos a eventos y partnerships activos</li>
-            <li>Publicaciones y menciones de prensa + colaboraciones vivas / mes</li>
-            <li>Customer stories publicadas (objetivo trimestral)</li>
+            <li>Rebranding aprobado (nuevo logo, concepto Guru+Up, verde vibrante) → identidad única para web, ventas y eventos; rollout público + nota de prensa en septiembre</li>
+            <li>Reposicionamiento del mensaje (tecnología + autonomía, tono intermedio) → deja de parecer "otro chatbot"</li>
+            <li>Alianzas anuales cerradas para arrancar en septiembre: Cámara de Madrid, Contact Center Hub, Relación Cliente</li>
+            <li>Estrategia de medios/PR hacia el lanzamiento (Marketing4Ecommerce, Comunicae) + dashboard de medios contactados</li>
+            <li>ICP definido y campaña de customer stories; "CRM" de contactos de prensa como activo reutilizable</li>
+            <li>Expansión internacional: exploración de Colombia (Embajada de España), ICEX / ANDICOM</li>
           </ul>
-          <p class="gs-guard"><b>Calidad:</b> hitos del rebranding a tiempo y claim aprobado aplicado de forma consistente en todas las piezas.</p>
         </article>
 
         <article class="gs-card reveal" style="animation-delay:.06s">
           <div class="area"><span class="d"></span>SEO, web, tráfico y analítica</div>
           <h3>Marina Mas</h3>
           <p class="who">SEO por verticales · contenido y YouTube · enlazado externo · web · analítica y atribución (GA4)</p>
-          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Leads y oportunidades orgánicas cualificadas desde SEO y web.</div></div>
+          <div class="gs-nsl"><div class="k">Palanca</div><div class="t">Tráfico cualificado y de verdad medible: cada lead con su origen claro.</div></div>
+          <div class="gs-alab">Acciones de mayor impacto</div>
           <ul class="gs-kpi">
-            <li>Rankings top 3 / top 10 en verticales prioritarias</li>
-            <li>Tráfico orgánico y su tendencia mensual</li>
-            <li>Autoridad de dominio (ref. 25 → 32, creciente)</li>
+            <li>Posicionamiento: inmobiliaria y restaurantes en top 3; autoridad de dominio de 25 → 32 con la estrategia de enlazado externo</li>
+            <li>Auditoría de analítica: detectó Consent Mode roto, sobreatribución a "directo" y leads de la calculadora ~2 meses sin sincronizar → protocolo de subidas a Vercel</li>
+            <li>Se hizo cargo del tracking del freemium (nunca instrumentado) + propiedad GA4 separada; API de GA4 conectada a repo (con Picu)</li>
+            <li>Reestructuración de sectores para más volumen; nuevos verticales: administraciones públicas, universidades, másters</li>
+            <li>Dashboard de atribución (España), plan de contenidos de YouTube y SEO internacional (LATAM / USA)</li>
           </ul>
-          <p class="gs-guard"><b>Calidad:</b> % de sesiones/leads con origen/canal bien atribuido (bajar la sobreatribución a "directo") y freemium instrumentado.</p>
         </article>
 
         <article class="gs-card reveal" style="animation-delay:.12s">
           <div class="area"><span class="d"></span>Paid · Google + Social Ads</div>
           <h3>Alejandro Melero</h3>
           <p class="who">Toda la adquisición de pago: Google, Meta, LinkedIn, Bing… · creatividades con IA · análisis y optimización de coste</p>
-          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Oportunidades cualificadas desde paid (MQL con fit + hit ≥ 50).</div></div>
+          <div class="gs-nsl"><div class="k">Palanca</div><div class="t">Volumen cualificado y eficiente: demanda a demanda, aprendiendo qué convierte y a qué coste.</div></div>
+          <div class="gs-alab">Acciones de mayor impacto</div>
           <ul class="gs-kpi">
-            <li>CPL y CP-MQL por canal (Google · Meta · LinkedIn)</li>
-            <li>Coste por oportunidad / ROAS cruzando campañas con CRM</li>
-            <li>% de leads cualificados vs volumen de "porra"</li>
+            <li>Reactivación y reestructuración de campañas (Google/PMax = leads más cualificados; 124 leads el último mes)</li>
+            <li>Consolidación de Meta a 1 ad set ("Andrómeda") concentrando presupuesto → más aprendizaje y eficiencia</li>
+            <li>Nuevo criterio de cualificación paid: formulario + >3.000 consultas/mes → workflow de asignación a Ventas</li>
+            <li>Entender las razones de descarte y los sectores que mejor funcionan; pricing orientativo en el email de descarte</li>
+            <li>Scraper de competidores (API Meta + IA) y creatividades con IA (Veo3, Creatify, HeyGen); dashboards que cruzan campañas con CRM</li>
+            <li>Targeting ABM por empresa; Capterra aceptado + campañas en Capterra/G2; test A/B de precio en landing</li>
           </ul>
-          <p class="gs-guard"><b>Calidad:</b> tasa de disqualified/spam por canal (señal de vuelta a las plataformas) y gasto vs presupuesto.</p>
         </article>
 
         <article class="gs-card anchor reveal" style="animation-delay:.18s">
           <div class="area"><span class="d"></span>CRM, automatización y sistema de datos</div>
           <h3>Picu (Pilar)</h3>
           <p class="who">HubSpot · automatizaciones · calidad del dato · montar el sistema de reporting/tracking · owner del lead scoring</p>
-          <div class="gs-nsl"><div class="k">North Star · ancla del trimestre</div><div class="t">En septiembre, un sistema de tracking y reporting que funciona y con el que se decide cada semana.</div></div>
+          <div class="gs-nsl"><div class="k">Palanca · ancla del trimestre</div><div class="t">El motor de datos que conecta todo: en septiembre, un sistema que funciona y con el que se decide cada semana.</div></div>
+          <div class="gs-alab">Acciones de mayor impacto</div>
           <ul class="gs-kpi">
-            <li>Evolución del funnel: tasa de conversión <b>lead → MQL → SQL → oportunidad</b></li>
-            <li>Oportunidades generadas en pipeline (nueva oportunidad en discovery, ya precualificada por Ventas, de origen inbound)</li>
-            <li>Atribución por canal de inbound (orgánico, directo, pago, eventos, webinars, referencias, IA, newsletters, medios, chat web)</li>
+            <li>Ownership de HubSpot (era "tierra de nadie") + depuración del CRM y taxonomía del funnel → lenguaje común</li>
+            <li>Lead scoring fit+hit (umbral ~50 MQL) y precualificación automatizada desde el 9-jul (33 entradas, 76% agendadas)</li>
+            <li>Ciclo de vida de leads (spam / disqualified / bad fit…) con señales de vuelta a las plataformas de ads</li>
+            <li>Formularios migrados a nativos de HubSpot + subdominio forms.gurusup.com (autenticación, anti-spam)</li>
+            <li>Sistema de reporting: dashboards ejecutivo / diario / semanal como fuente única para decidir</li>
+            <li>Higiene del dato con Ventas: análisis lead a lead, fugas por falta de logging (caso Hotel Emilio), alerta de leads no sincronizados</li>
           </ul>
-          <p class="gs-guard"><b>Que funcione, no que sea perfecto:</b> calidad del dato y scoring fit+hit vivo, nurturing medido (arreglar correos 2 y 3), formularios nativos, freemium instrumentado y dashboard único en marcha.</p>
         </article>
       </div>
 
-      <!-- Funnel inbound que mide el sistema -->
-      <div class="gs-funnel reveal" style="animation-delay:.22s">
-        <div class="fh">
-          <div class="k">El funnel inbound que mide el sistema</div>
-          <p>La evolución y la tasa de conversión en cada salto — hasta la oportunidad en pipeline (etapa discovery, ya precualificada por Ventas). El cierre lo lleva Ventas; nosotros medimos y optimizamos hasta aquí.</p>
-        </div>
-        <div class="stages">
-          <span class="stage">Lead</span>
-          <span class="arrow" aria-hidden="true">→</span>
-          <span class="stage">MQL <em>fit+hit ≥50</em></span>
-          <span class="arrow" aria-hidden="true">→</span>
-          <span class="stage">SQL</span>
-          <span class="arrow" aria-hidden="true">→</span>
-          <span class="stage op">Oportunidad <em>discovery</em></span>
-        </div>
-        <div class="ch">
-          <span class="cht">Canales de inbound</span>
-          <span class="chip">Orgánico</span>
-          <span class="chip">Directo</span>
-          <span class="chip">Pago · Google / Social Ads</span>
-          <span class="chip">Eventos</span>
-          <span class="chip">Webinars</span>
-          <span class="chip">Referencias</span>
-          <span class="chip">Referencias de IA</span>
-          <span class="chip">Newsletters externas</span>
-          <span class="chip">Medios</span>
-          <span class="chip">Chat web</span>
-          <span class="chip">Otros · web sin cookies</span>
-        </div>
-      </div>
     </section>
 
-    <!-- 02 PRIORIDADES -->
+    <!-- 02 RESULTADOS POR CANAL (Nivel 2) -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">02</span><h2>Prioridades del trimestre</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">02</span><h2>Resultados por canal</h2></div>
+      <p class="gs-sec-sub">Cuántos SQL ha generado cada canal de inbound y cuántos han llegado a oportunidad en pipeline. Es una referencia para mejorar la conversión de cada canal de adquisición, no un dato del día a día.</p>
+
+      <div class="gs-datebadge">📅 Acumulado desde el <b>1 de enero de 2026</b> · fuente: dashboard ejecutivo (HubSpot) · sin Freemium</div>
+
+      <div class="gs-funnel" style="margin-top:16px">
+        <div class="fh"><div class="k">El funnel que medimos</div><p>Generamos y medimos la demanda hasta la oportunidad; Ventas la cualifica y la convierte, y compartimos aprendizajes en ambos sentidos para optimizar.</p></div>
+        <div class="stages">
+          <span class="stage">Lead</span><span class="arrow" aria-hidden="true">→</span>
+          <span class="stage">MQL <em>fit+hit ≥50</em></span><span class="arrow" aria-hidden="true">→</span>
+          <span class="stage">SQL</span><span class="arrow" aria-hidden="true">→</span>
+          <span class="stage op">Oportunidad <em>discovery</em></span>
+        </div>
+      </div>
+
+      <div class="gs-tablewrap" style="margin-top:16px">
+        <table class="gs-t gs-res">
+          <thead><tr><th>Canal de inbound</th><th>SQL</th><th>Oportunidades</th><th>SQL → Op.</th></tr></thead>
+          <tbody>
+            <tr><td>Google Ads <span class="tag">pago</span></td><td class="num">61</td><td class="num">2</td><td class="cv low">3%</td></tr>
+            <tr><td>SEO Orgánico</td><td class="num">43</td><td class="num">3</td><td class="cv mid">7%</td></tr>
+            <tr><td>Tráfico directo</td><td class="num">28</td><td class="num">4</td><td class="cv hi">14%</td></tr>
+            <tr><td>Social Ads <span class="tag">pago</span></td><td class="num">19</td><td class="num">1</td><td class="cv low">5%</td></tr>
+            <tr><td>Eventos / Campañas</td><td class="num">2</td><td class="num">2</td><td class="cv hi">100%<small>base baja</small></td></tr>
+            <tr><td>Webinar</td><td class="num">2</td><td class="num">0</td><td class="cv none">—</td></tr>
+            <tr><td>Referido</td><td class="num">2</td><td class="num">0</td><td class="cv none">—</td></tr>
+            <tr><td>Chat web</td><td class="num">0</td><td class="num">0</td><td class="cv none">—</td></tr>
+            <tr><td>Social orgánico</td><td class="num">0</td><td class="num">0</td><td class="cv none">—</td></tr>
+            <tr><td>Otros · web sin cookies</td><td class="num">0</td><td class="num">0</td><td class="cv none">—</td></tr>
+            <tr class="sd"><td>Referencias de IA</td><td class="num">s/d</td><td class="num">s/d</td><td class="cv none">por instrumentar</td></tr>
+            <tr class="sd"><td>Newsletters externas</td><td class="num">s/d</td><td class="num">s/d</td><td class="cv none">por instrumentar</td></tr>
+            <tr class="sd"><td>Medios</td><td class="num">s/d</td><td class="num">s/d</td><td class="cv none">por instrumentar</td></tr>
+            <tr class="tot"><td><b>Total inbound</b></td><td class="num"><b>157</b></td><td class="num"><b>12</b></td><td class="cv mid"><b>~8%</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="gs-cap">La conversión SQL → oportunidad es orientativa: depende del proceso y de muchas variables, sirve para comparar y mejorar canales. «s/d» = canal aún no medible en el sistema, parte del trabajo del sistema de septiembre. Datos acumulados desde el 1-ene-2026 (dashboard ejecutivo, HubSpot).</p>
+    </section>
+
+    <!-- 03 RECOMENDACIONES (Nivel 3) -->
+    <section class="gs-sec">
+      <div class="gs-sec-h"><span class="gs-sec-n">03</span><h2>Recomendaciones</h2></div>
+      <p class="gs-sec-sub">A partir de los datos de canal, las reuniones y el CRM — priorizadas de mayor a menor impacto.</p>
+      <ol class="gs-recs">
+        <li class="reveal"><b>Calidad &gt; volumen en paid.</b> Google Ads es el que más SQL trae (61) pero el que menos convierte a oportunidad (3%). Afinar fit+hit y creatividades para que el SQL de pago llegue con intención real, vigilando el CPL para no disparar el gasto.</li>
+        <li class="reveal"><b>Iluminar el "tráfico directo".</b> Es la mayor fuente de oportunidades inbound (4) y convierte al 14%, pero "directo" esconde el origen real. Cerrar la instrumentación para saber qué hay detrás y poder replicarlo.</li>
+        <li class="reveal"><b>Escalar eventos, revisar webinars.</b> Eventos/Campañas convierte 2/2 (señal fuerte pese a base baja) → palanca de Marisa para escalar. El webinar acumula muchos MQL pero 2 SQL y 0 oportunidades → revisar cualificación y seguimiento post-webinar.</li>
+        <li class="reveal"><b>Encender los canales ciegos.</b> Referencias de IA, newsletters externas y medios no se miden hoy → instrumentarlos para atribuir sus SQL y oportunidades (trabajo del sistema de septiembre).</li>
+        <li class="reveal"><b>Arreglar el nurturing.</b> El primer email va al 45% de apertura, pero el 2º y 3º caen mucho → reescribirlos para mejorar el paso lead → MQL → SQL en todos los canales.</li>
+        <li class="reveal"><b>Cerrar el bucle con Ventas.</b> Recoger de forma sistemática por qué las oportunidades no avanzan y volcarlo a scoring y campañas — aprendizaje común.</li>
+        <li class="reveal"><b>Higiene de datos continua.</b> Limpiar oportunidades sin negocio asociado y contactos freemium para que el reporting sea fiable.</li>
+      </ol>
+    </section>
+
+    <!-- 04 PRIORIDADES -->
+    <section class="gs-sec">
+      <div class="gs-sec-h"><span class="gs-sec-n">04</span><h2>Prioridades del trimestre</h2></div>
       <p class="gs-sec-sub">Ordenadas por impacto: dónde generamos más valor de aquí a septiembre.</p>
       <div class="gs-pri">
         <div class="gs-pri-row anchor reveal">
@@ -364,7 +424,7 @@
 
     <!-- 03 CADENCIA -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">03</span><h2>Seguimiento y cadencia</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">05</span><h2>Seguimiento y cadencia</h2></div>
       <p class="gs-sec-sub">Cuatro capas. El reporting se lee <b>antes</b> del Syncro para no quemar la reunión en revisar números.</p>
       <div class="gs-tablewrap">
         <table class="gs-t">
@@ -381,7 +441,7 @@
 
     <!-- 04 ACCIONES -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">04</span><h2>Acciones inmediatas</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">06</span><h2>Acciones inmediatas</h2></div>
       <p class="gs-sec-sub">Lo que activamos ya para dejar el modelo funcionando.</p>
       <div class="gs-acts">
         <div class="gs-act reveal"><span class="mk">→</span><p>Aplicar la cadencia (Syncro 60 min + Marketing Review mensual).<span class="o">Marisa + Picu</span></p></div>
