@@ -182,6 +182,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .cac-mval{font-size:20px;font-weight:900;color:var(--ink)}
 .cac-mval.cac-g{color:var(--brand)}
 .cac-sep{height:1px;background:var(--line);margin:16px 0}
+.cac-spendbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;margin-bottom:14px;border-radius:12px;background:rgba(255,202,92,.1);border:1px solid #a5741f}
+.cac-sb-cap{font-size:12px;font-weight:800;color:var(--warn)}
+.cac-sb-cap small{font-weight:600;color:var(--mut);font-size:10px}
+.cac-sb-val{font-size:20px;font-weight:900;color:var(--warn);font-variant-numeric:tabular-nums}
+.cac-tbl td.cac-num{font-weight:800;color:var(--ink)}
 .cac-tcap{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:10px}
 .cac-tcap span{color:var(--mut);font-weight:600;font-size:10.5px}
 .cac-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -412,7 +417,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>21 Jul 2026 · 17:32</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>21 Jul 2026 · 17:33</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -524,10 +529,11 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
         <div><div class="cac-mcap">LTV a 24 meses · ratio 3:1 →</div><div class="cac-mval cac-g" id="cacLtv">0 €</div></div>
       </div>
       <div class="cac-sep"></div>
+      <div class="cac-spendbar"><span class="cac-sb-cap">💰 Gasto total en medios <small>· acumulado 1 ene→hoy</small></span><span class="cac-sb-val">9.639 €</span></div>
       <div class="cac-tcap">¿Qué canales caben bajo este techo? <span>· coste vs. oportunidades y clientes generados (1 ene→hoy)</span></div>
       <table class="cac-tbl">
         <thead><tr><th>Canal</th><th class="cac-num">Coste</th><th class="cac-num">Oport. c/negocio</th><th class="cac-num">Clientes</th><th></th></tr></thead>
-        <tbody id="cacTbody"><tr class="" data-cost="0"><td class="cac-ch"><b>🔍 Google Ads</b></td><td class="cac-num"><span class="cac-noc">a imputar*</span></td><td class="cac-num">10</td><td class="cac-num">0</td><td class="cac-verd"><span class="cac-badge">—</span></td></tr><tr class="" data-cost="0"><td class="cac-ch"><b>📣 Social Ads</b><span class="cac-sub">2 cuenta(s): <span class="cac-acct">Facebook <b>65</b></span><span class="cac-acct">LinkedIn <b>47</b></span></span></td><td class="cac-num"><span class="cac-noc">a imputar*</span></td><td class="cac-num">3</td><td class="cac-num">0</td><td class="cac-verd"><span class="cac-badge">—</span></td></tr><tr class="cac-free" data-cost="0"><td class="cac-ch"><b>🌱 Orgánico / Outbound</b><span class="cac-sub">sin coste de medios registrado</span></td><td class="cac-num"><span class="cac-noc">a imputar*</span></td><td class="cac-num">150</td><td class="cac-num">36</td><td class="cac-verd"><span class="cac-badge">—</span></td></tr></tbody>
+        <tbody id="cacTbody"><tr class="" data-cost="6297"><td class="cac-ch"><b>🔍 Google Ads</b></td><td class="cac-num">6.297 €</td><td class="cac-num">10</td><td class="cac-num">0</td><td class="cac-verd"><span class="cac-badge">—</span></td></tr><tr class="" data-cost="3342"><td class="cac-ch"><b>📣 Social Ads</b><span class="cac-sub">2 cuenta(s): <span class="cac-acct">Facebook <b>65</b></span><span class="cac-acct">LinkedIn <b>47</b></span></span></td><td class="cac-num">3.342 €</td><td class="cac-num">3</td><td class="cac-num">0</td><td class="cac-verd"><span class="cac-badge">—</span></td></tr><tr class="cac-free" data-cost="0"><td class="cac-ch"><b>🌱 Orgánico / Outbound</b><span class="cac-sub">sin coste de medios registrado</span></td><td class="cac-num"><span class="cac-noc">a imputar*</span></td><td class="cac-num">150</td><td class="cac-num">36</td><td class="cac-verd"><span class="cac-badge">—</span></td></tr></tbody>
       </table>
       <div class="cac-foot">*Sin coste de medios registrado en HubSpot; habría que imputar el gasto real (Google/Meta/LinkedIn) o el coste del equipo de ventas. <b>Oport. c/negocio</b> = contactos en etapa oportunidad con negocio en pipeline · <b>Clientes</b> = empresas que han sido cliente desde el 1 ene.</div>
     </div>
@@ -712,6 +718,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 21 Jul 2026 · 17:32 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 21 Jul 2026 · 17:33 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
