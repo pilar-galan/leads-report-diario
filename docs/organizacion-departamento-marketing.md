@@ -51,7 +51,7 @@ Regla de oro: **el reporting se lee antes** del Syncro (Picu comparte highlights
 
 ### ✅ 2.2 KPIs del equipo
 
-**North Star del departamento:** **Demos / SQL cualificadas generadas por Marketing** → pipeline (la conversión demo→cliente es ~70%, así que las demos cualificadas son la palanca directa de ingresos).
+**North Star del departamento:** **oportunidades cualificadas generadas por Marketing en el pipeline.** El foco es **mejorar y optimizar las tasas de conversión del funnel inbound** (lead → MQL → SQL → oportunidad). El cierre del pipeline es responsabilidad de **Ventas**: Marketing aprende de él y saca feedback (entender por qué no convierten) pero no lo gestiona — esto es estructura de Marketing.
 
 Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de calidad/guardrail**, todos con objetivo mensual. Ver detalle por persona en la **sección 3**.
 
@@ -71,7 +71,7 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
 ## 3. KPIs por persona (según perfil, scope y misión)
 
 ### 🎨 Marisa — Marca, eventos y comunicación
-- **North Star:** demos/SQL originadas por marca (eventos, partnerships, PR y contenido de marca).
+- **North Star:** oportunidades cualificadas originadas por marca (eventos, partnerships, PR y contenido de marca).
 - **Primarios:**
   - Leads/demos atribuidos a eventos y partnerships activos (Cámaras, Contact Center Hub…).
   - Publicaciones/menciones de prensa y colaboraciones vivas al mes.
@@ -89,7 +89,7 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
 - *Coordinación:* avisar de picos de SEO forzado y no pisar cambios de web.
 
 ### 📈 Alejandro Melero — Paid (Google + Social Ads)
-- **North Star:** MQL / demos cualificadas desde paid (fit+hit ≥50).
+- **North Star:** oportunidades cualificadas desde paid (MQL con fit+hit ≥50).
 - **Primarios:**
   - **CPL y CP-MQL por canal** (Google, Meta, LinkedIn).
   - **Coste por oportunidad / ROAS** cruzando campañas con CRM.
@@ -101,7 +101,7 @@ Cada área tiene **1 North Star propio + 2-3 KPIs primarios + 1 métrica de cali
 - **North Star:** **en septiembre, un sistema de tracking/reporting operativo y fiable** — que el equipo tome decisiones semanales sobre sus datos (que funcione, no que sea perfecto).
 - **Primarios:**
   - **Calidad del dato:** % de leads con fuente/UTM y scoring correctos.
-  - **Conversión medida end-to-end:** MQL→SQL→Demo visible en un único cuadro de mando.
+  - **Tasas de conversión del funnel:** lead→MQL→SQL→oportunidad, visibles en un único cuadro de mando.
   - **Cobertura de atribución** por canal (single source of truth entre HubSpot y GA4).
 - **Automatización:** nurturing operativo y medido (apertura/CTR; arreglar correos 2 y 3) y lead scoring fit+hit vivo y mantenido.
 - **Health del proyecto (milestone septiembre):** hitos cumplidos — formularios nativos de HubSpot, `forms.gurusup.com`, freemium instrumentado, dashboard único en marcha.

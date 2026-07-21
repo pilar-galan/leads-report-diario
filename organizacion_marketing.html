@@ -114,6 +114,11 @@
   .gs-tile.c .n{color:var(--coral);text-shadow:none}
   .gs-tile .l{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
 
+  .gs-note{margin-top:18px;background:linear-gradient(100deg,var(--green-soft),transparent 72%),var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:14px;padding:16px 22px;box-shadow:var(--shadow)}
+  .gs-note .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800;margin-bottom:6px}
+  .gs-note p{margin:0;font-size:13.5px;color:var(--text);text-align:justify;hyphens:auto}
+  .gs-note b{color:var(--heading);font-weight:600}
+
   .gs-sec{margin-top:56px}
   .gs-sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
   .gs-sec-n{font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;color:var(--green)}
@@ -210,13 +215,19 @@
     <section class="gs-band reveal" style="animation-delay:.12s">
       <div class="gs-band-cap"><span class="t">De un vistazo</span><span class="l">los datos clave que verás en detalle más abajo</span></div>
       <div class="gs-tiles">
-        <div class="gs-tile"><div class="n">4·1</div><div class="l">áreas · un owner cada una</div></div>
-        <div class="gs-tile c"><div class="n">~70%</div><div class="l">conversión demo → cliente</div></div>
+        <div class="gs-tile"><div class="n">4</div><div class="l">áreas · un owner por cada una</div></div>
         <div class="gs-tile"><div class="n">124</div><div class="l">leads paid · último mes</div></div>
         <div class="gs-tile"><div class="n">76%</div><div class="l">precualificados agendados</div></div>
         <div class="gs-tile"><div class="n">≥50</div><div class="l">umbral fit+hit para MQL</div></div>
+        <div class="gs-tile"><div class="n">45%</div><div class="l">apertura · 1er email nurturing</div></div>
         <div class="gs-tile"><div class="n">25→32</div><div class="l">autoridad de dominio (SEO)</div></div>
       </div>
+    </section>
+
+    <!-- FOCO DE MARKETING · boundary -->
+    <section class="gs-note reveal" style="animation-delay:.16s">
+      <div class="k">★ Foco de Marketing · inbound</div>
+      <p>Nuestro trabajo es <b>mejorar y optimizar las tasas de conversión</b> del funnel para <b>generar oportunidades cualificadas en el pipeline</b>. El cierre del pipeline es responsabilidad de Ventas: aprendemos de él y sacamos feedback (entender por qué no convierten), pero no lo gestionamos. Esto es estructura de Marketing.</p>
     </section>
 
     <!-- 01 EQUIPO + KPIs -->
@@ -228,9 +239,9 @@
           <div class="area"><span class="d"></span>Marca, eventos y comunicación</div>
           <h3>Marisa Silva</h3>
           <p class="who">Posicionamiento e ICP · marca y rebranding (con Diego Lunelli) · PR/prensa · eventos y partnerships · customer stories</p>
-          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Demos originadas por marca: eventos, partnerships, PR y contenido.</div></div>
+          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Oportunidades cualificadas originadas por marca: eventos, partnerships, PR y contenido.</div></div>
           <ul class="gs-kpi">
-            <li>Leads/demos atribuidos a eventos y partnerships activos</li>
+            <li>Leads/oportunidades atribuidos a eventos y partnerships activos</li>
             <li>Publicaciones y menciones de prensa + colaboraciones vivas / mes</li>
             <li>Customer stories publicadas (objetivo trimestral)</li>
           </ul>
@@ -241,7 +252,7 @@
           <div class="area"><span class="d"></span>SEO, web, tráfico y analítica</div>
           <h3>Marina Mas</h3>
           <p class="who">SEO por verticales · contenido y YouTube · enlazado externo · web · analítica y atribución (GA4)</p>
-          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Leads orgánicos cualificados (MQL) desde SEO y web.</div></div>
+          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Leads y oportunidades orgánicas cualificadas desde SEO y web.</div></div>
           <ul class="gs-kpi">
             <li>Rankings top 3 / top 10 en verticales prioritarias</li>
             <li>Tráfico orgánico y su tendencia mensual</li>
@@ -254,7 +265,7 @@
           <div class="area"><span class="d"></span>Paid · Google + Social Ads</div>
           <h3>Alejandro Melero</h3>
           <p class="who">Toda la adquisición de pago: Google, Meta, LinkedIn, Bing… · creatividades con IA · análisis y optimización de coste</p>
-          <div class="gs-nsl"><div class="k">North Star</div><div class="t">MQL / demos cualificadas desde paid (fit + hit ≥ 50).</div></div>
+          <div class="gs-nsl"><div class="k">North Star</div><div class="t">Oportunidades cualificadas desde paid (MQL con fit + hit ≥ 50).</div></div>
           <ul class="gs-kpi">
             <li>CPL y CP-MQL por canal (Google · Meta · LinkedIn)</li>
             <li>Coste por oportunidad / ROAS cruzando campañas con CRM</li>
@@ -270,7 +281,7 @@
           <div class="gs-nsl"><div class="k">North Star · ancla del trimestre</div><div class="t">En septiembre, un sistema de tracking y reporting que funciona y con el que se decide cada semana.</div></div>
           <ul class="gs-kpi">
             <li>Calidad del dato: % de leads con fuente/UTM y scoring correctos</li>
-            <li>Conversión MQL → SQL → Demo en un único cuadro de mando</li>
+            <li>Tasas de conversión del funnel (MQL → SQL → oportunidad) en un único cuadro de mando</li>
             <li>Cobertura de atribución por canal (single source of truth HubSpot ↔ GA4)</li>
           </ul>
           <p class="gs-guard"><b>Que funcione, no que sea perfecto:</b> nurturing operativo y medido (arreglar correos 2 y 3), scoring fit+hit vivo, formularios nativos, freemium instrumentado y dashboard único en marcha.</p>
