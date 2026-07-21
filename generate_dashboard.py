@@ -1185,7 +1185,8 @@ def main():
     # Gasto real de campañas de ads (acumulado 1 ene→hoy), facilitado desde las plataformas.
     # Meta + LinkedIn se agrupan como "Social Ads" en el CRM (sus oportunidades van combinadas).
     _now_cac = datetime.now(timezone.utc).astimezone(tz)
-    _months_elapsed = round(((_now_cac.date() - date(2026, 1, 1)).days) / 30.44, 1) or 1
+    # Media mensual desde MAYO (mes de mayor push de campañas), no desde enero
+    _months_elapsed = round(((_now_cac.date() - date(2026, 5, 1)).days) / 30.44, 1) or 1
     _ads_platforms = [
         {"name": "Google Ads", "icon": "🔍", "spend": 37781.20, "contactos": 183, "clientes": 6,
          "opp": g_opp, "opp_note": ""},
@@ -3419,7 +3420,7 @@ def render_exec(d):
     <div class="cac-ads-head">📣 Inversión real en campañas de Ads <span>· acumulado desde el 1 de enero (sin orgánico)</span></div>
     <div class="cac-ads-kpis">
       <div class="cac-ak big"><div class="cac-ak-v">{fmt(round(_ads_total))} €</div><div class="cac-ak-l">Gasto total en Ads</div></div>
-      <div class="cac-ak"><div class="cac-ak-v">{fmt(_ads_monthly)} €</div><div class="cac-ak-l">Media mensual <small>· sobre {_months_el} meses</small></div></div>
+      <div class="cac-ak"><div class="cac-ak-v">{fmt(_ads_monthly)} €</div><div class="cac-ak-l">Media mensual <small>· desde mayo ({_months_el} meses, mayor push)</small></div></div>
       <div class="cac-ak"><div class="cac-ak-v">{fmt(_ads_opp)}</div><div class="cac-ak-l">Oportunidades generadas</div></div>
       <div class="cac-ak"><div class="cac-ak-v">{fmt(_ads_cli)}</div><div class="cac-ak-l">Clientes generados</div></div>
     </div>
