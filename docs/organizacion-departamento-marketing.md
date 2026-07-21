@@ -51,6 +51,15 @@ Tras la salida de Jonathan, el equipo queda con **un único owner por área**. O
 
 Regla de oro: **el reporting se lee antes** del Syncro (Picu comparte highlights), para no quemar la reunión en revisar números.
 
+**Ciclo de Marketing (Syncro semanal · 60 min · 4 personas).** Reparto equilibrado para que cada uno comunique 2-3 puntos de la semana:
+
+- **5 min** · bienvenida y conexión (margen para quien entra tarde).
+- **12 min × 4 = 48 min** · turno individual de cada persona.
+- **~1 min × 3 = 3 min** · traspaso entre turnos.
+- **4 min** · cierre: acuerdos y prioridades.
+
+En cada turno (~12 min), 2-3 puntos: **(1)** en qué trabajo (foco de la semana), **(2)** resultados y conclusiones, **(3)** ayuda y bloqueos / qué decidir.
+
 ### ✅ 2.2 KPIs del equipo
 
 **North Star del departamento:** ser el **motor de generación de demanda** que tracciona — mejorar y optimizar las tasas de conversión del funnel inbound (lead → MQL → SQL → oportunidad) para generar **oportunidades cualificadas en el pipeline**. **Ventas** cualifica esa demanda, nos devuelve sus insights y la convierte en clientes reales. La clave que nos une a todos: **aprender de cada ciclo, sacar conclusiones y optimizar** para mejorar.
@@ -140,7 +149,8 @@ SQLs generados por cada canal de inbound y cuántos han llegado a oportunidad en
 1. **Calidad > volumen en paid.** Google Ads es el que más SQL trae (61) pero el que menos convierte a oportunidad (3%). Afinar fit+hit y creatividades para que el SQL de pago llegue con intención real, vigilando el CPL para no disparar el gasto.
 2. **Iluminar el "tráfico directo".** Mayor fuente de oportunidades inbound (4) y convierte al 14%, pero "directo" esconde el origen real → cerrar la instrumentación para replicarlo.
 3. **Escalar eventos, revisar webinars.** Eventos/Campañas convierte 2/2 (señal fuerte pese a base baja) → escalar (palanca de Marisa). El webinar acumula muchos MQL pero 2 SQL y 0 oportunidades → revisar cualificación y seguimiento post-webinar.
-4. **Encender los canales ciegos.** Referencias de IA, newsletters externas y medios no se miden hoy → instrumentarlos (trabajo del sistema de septiembre).
+4. **Explotar la ventaja competitiva frente a Eleven Labs.** En discovery de deals grandes competimos con Eleven Labs (oficina en Madrid, foco voz/corporate) y le hemos ganado 2 de 2 por pricing y atención → convertirlo en argumento de posicionamiento y prueba en el mensaje.
+5. **Encender los canales ciegos.** Referencias de IA, newsletters externas y medios no se miden hoy → instrumentarlos (trabajo del sistema de septiembre).
 5. **Arreglar el nurturing.** 1er email al 45% de apertura, pero el 2º y 3º caen → reescribirlos para mejorar lead → MQL → SQL.
 6. **Cerrar el bucle con Ventas.** Recoger por qué las oportunidades no avanzan y volcarlo a scoring y campañas — aprendizaje común.
 7. **Higiene de datos continua.** Limpiar oportunidades sin negocio asociado y contactos freemium para un reporting fiable.

@@ -137,6 +137,37 @@
   .gs-model .foot{margin-top:13px;border-top:1px solid var(--border);padding-top:12px;font-size:12.5px;color:var(--muted)}
   .gs-model .foot b{color:var(--text)}
 
+  /* Ciclo de Marketing · reparto de 60 min */
+  .gs-cycle{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
+  .gs-cycle .cyc-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .gs-cycle .cyc-h .k{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--green);font-weight:800}
+  .gs-cycle .cyc-tot{font-size:12px;font-weight:800;color:var(--coral)}
+  .gs-cycle .cyc-sub{margin:8px 0 16px;font-size:13px;color:var(--muted);text-align:justify;hyphens:auto}
+  .gs-cycle .cyc-bar{display:flex;gap:3px;height:54px;margin-bottom:12px}
+  .gs-cycle .seg{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;min-width:0;overflow:hidden;padding:4px 2px}
+  .gs-cycle .seg b{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .gs-cycle .seg small{font-size:9.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .gs-cycle .s-open{background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+  .gs-cycle .s-turn{background:var(--green-soft);color:var(--green);border:1px solid var(--border-strong)}
+  .gs-cycle .s-turn.anchor{background:var(--coral-soft);color:var(--coral);border-color:var(--coral)}
+  .gs-cycle .s-gap{background:transparent;border:1px dashed var(--border)}
+  .gs-cycle .s-close{background:var(--surface-2);color:var(--coral);border:1px solid var(--coral)}
+  .gs-cycle .cyc-legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11.5px;color:var(--muted);margin-bottom:16px}
+  .gs-cycle .cyc-legend span{display:inline-flex;align-items:center;gap:6px}
+  .gs-cycle .cyc-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .gs-cycle .cyc-legend .d-open{background:var(--surface-2);border:1px solid var(--border)}
+  .gs-cycle .cyc-legend .d-turn{background:var(--green-soft);border:1px solid var(--border-strong)}
+  .gs-cycle .cyc-legend .d-gap{background:transparent;border:1px dashed var(--border)}
+  .gs-cycle .cyc-legend .d-close{background:var(--surface-2);border:1px solid var(--coral)}
+  .gs-cycle .cyc-turn{border-top:1px solid var(--border);padding-top:14px}
+  .gs-cycle .cyc-turn .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:10px}
+  .gs-cycle .cyc-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:640px){.gs-cycle .cyc-steps{grid-template-columns:1fr}}
+  .gs-cycle .step{display:flex;gap:10px;align-items:flex-start;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:11px 13px}
+  .gs-cycle .step .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--green-soft);color:var(--green);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .gs-cycle .step b{font-size:13px;color:var(--heading);display:block}
+  .gs-cycle .step small{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+
   .gs-sec{margin-top:56px}
   .gs-sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
   .gs-sec-n{font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;color:var(--green)}
@@ -157,9 +188,15 @@
   .gs-card.anchor .gs-nsl{--accent-soft:var(--coral-soft)}
   .gs-nsl .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent,var(--green));font-weight:800;margin-bottom:3px}
   .gs-nsl .t{font-size:13.5px;color:var(--heading);font-weight:600}
-  .gs-kpi{list-style:none;margin:0 0 13px;padding:0;display:flex;flex-direction:column;gap:8px}
-  .gs-kpi li{position:relative;padding-left:19px;font-size:13.5px;color:var(--text)}
-  .gs-kpi li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent,var(--green))}
+  .gs-kpi{list-style:none;margin:0 0 13px;padding:0;counter-reset:k;display:flex;flex-direction:column;gap:8px}
+  .gs-kpi li{counter-increment:k;position:relative;padding-left:28px;font-size:13.5px;color:var(--text)}
+  .gs-kpi li::before{content:counter(k);position:absolute;left:0;top:0;width:19px;height:19px;border-radius:6px;background:var(--green-soft);color:var(--accent,var(--green));font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+  .gs-card.anchor .gs-kpi li::before{background:var(--coral-soft)}
+  /* avatar redondo */
+  .gs-card .gs-ava{position:absolute;top:18px;right:20px;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;letter-spacing:.02em;color:var(--green);background:var(--green-soft);border:1.5px solid var(--border-strong);overflow:hidden;z-index:2}
+  .gs-card.anchor .gs-ava{color:var(--coral);background:var(--coral-soft)}
+  .gs-card .gs-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  .gs-card .area,.gs-card h3{padding-right:56px}
   .gs-guard{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:13px;text-align:justify;hyphens:auto}
   .gs-guard b{color:var(--text);font-weight:600}
   .gs-card .gs-alab{font-size:10.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);font-weight:700;margin-bottom:9px}
@@ -312,6 +349,7 @@
       <p class="gs-sec-sub">Tras la salida de Jonathan, cada área tiene un único responsable. Aquí, su palanca sobre el conjunto y las acciones de mayor impacto que ha aportado estos meses. Organización plana, sin managers intermedios.</p>
       <div class="gs-grid">
         <article class="gs-card reveal">
+          <span class="gs-ava" aria-hidden="true" title="Marisa Silva">MS</span>
           <div class="area"><span class="d"></span>Marca, eventos y comunicación</div>
           <h3>Marisa Silva</h3>
           <p class="who">Posicionamiento e ICP · marca y rebranding (con Diego Lunelli) · PR/prensa · eventos y partnerships · customer stories</p>
@@ -328,6 +366,7 @@
         </article>
 
         <article class="gs-card reveal" style="animation-delay:.06s">
+          <span class="gs-ava" aria-hidden="true" title="Marina Mas">MM</span>
           <div class="area"><span class="d"></span>SEO, web, tráfico y analítica</div>
           <h3>Marina Mas</h3>
           <p class="who">SEO por verticales · contenido y YouTube · enlazado externo · web · analítica y atribución (GA4)</p>
@@ -344,6 +383,7 @@
         </article>
 
         <article class="gs-card reveal" style="animation-delay:.12s">
+          <span class="gs-ava" aria-hidden="true" title="Alejandro Melero">AM</span>
           <div class="area"><span class="d"></span>Paid · Google + Social Ads</div>
           <h3>Alejandro Melero</h3>
           <p class="who">Toda la adquisición de pago: Google, Meta, LinkedIn, Bing… · creatividades con IA · análisis y optimización de coste</p>
@@ -360,6 +400,7 @@
         </article>
 
         <article class="gs-card anchor reveal" style="animation-delay:.18s">
+          <span class="gs-ava" aria-hidden="true" title="Picu (Pilar)">Pi</span>
           <div class="area"><span class="d"></span>CRM, automatización y sistema de datos</div>
           <h3>Picu (Pilar)</h3>
           <p class="who">HubSpot · automatizaciones · calidad del dato · montar el sistema de reporting/tracking · owner del lead scoring</p>
@@ -385,6 +426,7 @@
         <li class="reveal"><b>Calidad &gt; volumen en paid.</b> Google Ads es el que más SQL trae (61) pero el que menos convierte a oportunidad (3%). Afinar fit+hit y creatividades para que el SQL de pago llegue con intención real, vigilando el CPL para no disparar el gasto.</li>
         <li class="reveal"><b>Iluminar el "tráfico directo".</b> Es la mayor fuente de oportunidades inbound (4) y convierte al 14%, pero "directo" esconde el origen real. Cerrar la instrumentación para saber qué hay detrás y poder replicarlo.</li>
         <li class="reveal"><b>Escalar eventos, revisar webinars.</b> Eventos/Campañas convierte 2/2 (señal fuerte pese a base baja) → palanca de Marisa para escalar. El webinar acumula muchos MQL pero 2 SQL y 0 oportunidades → revisar cualificación y seguimiento post-webinar.</li>
+        <li class="reveal"><b>Explotar la ventaja competitiva frente a Eleven Labs.</b> En discovery de deals grandes competimos con Eleven Labs (oficina en Madrid, foco voz/corporate) y le hemos ganado 2 de 2 por pricing y atención → convertirlo en argumento de posicionamiento y prueba en el mensaje.</li>
         <li class="reveal"><b>Encender los canales ciegos.</b> Referencias de IA, newsletters externas y medios no se miden hoy → instrumentarlos para atribuir sus SQL y oportunidades (trabajo del sistema de septiembre).</li>
         <li class="reveal"><b>Arreglar el nurturing.</b> El primer email va al 45% de apertura, pero el 2º y 3º caen mucho → reescribirlos para mejorar el paso lead → MQL → SQL en todos los canales.</li>
         <li class="reveal"><b>Cerrar el bucle con Ventas.</b> Recoger de forma sistemática por qué las oportunidades no avanzan y volcarlo a scoring y campañas — aprendizaje común.</li>
@@ -434,6 +476,40 @@
             <tr><td class="ritmo">Trimestral</td><td>Planificación de roadmap y objetivos</td><td>2 h</td><td>Fijar prioridades y objetivos del trimestre</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Ciclo de Marketing: reparto de los 60 min -->
+      <div class="gs-cycle reveal">
+        <div class="cyc-h">
+          <div class="k">Ciclo de Marketing · el Syncro semanal al detalle</div>
+          <span class="cyc-tot">60 min · 4 personas</span>
+        </div>
+        <p class="cyc-sub">Reparto equilibrado para que cada uno comunique 2-3 puntos de la semana (avances, resultados y conclusiones, ayuda o bloqueos), con margen de bienvenida y de traspaso entre turnos.</p>
+        <div class="cyc-bar">
+          <span class="seg s-open" style="flex:5" title="Bienvenida y conexión · 5 min"><b>5'</b><small>Bienvenida</small></span>
+          <span class="seg s-turn" style="flex:12" title="Marisa · 12 min"><b>12'</b><small>Marisa</small></span>
+          <span class="seg s-gap" style="flex:1" title="Traspaso ~1 min"></span>
+          <span class="seg s-turn" style="flex:12" title="Marina · 12 min"><b>12'</b><small>Marina</small></span>
+          <span class="seg s-gap" style="flex:1" title="Traspaso ~1 min"></span>
+          <span class="seg s-turn" style="flex:12" title="Melero · 12 min"><b>12'</b><small>Melero</small></span>
+          <span class="seg s-gap" style="flex:1" title="Traspaso ~1 min"></span>
+          <span class="seg s-turn anchor" style="flex:12" title="Picu · 12 min"><b>12'</b><small>Picu</small></span>
+          <span class="seg s-close" style="flex:4" title="Cierre y acuerdos · 4 min"><b>4'</b><small>Cierre</small></span>
+        </div>
+        <div class="cyc-legend">
+          <span><i class="d-open"></i>Bienvenida y conexión · 5'</span>
+          <span><i class="d-turn"></i>Turno individual · 12' × 4</span>
+          <span><i class="d-gap"></i>Traspaso · ~1' × 3</span>
+          <span><i class="d-close"></i>Cierre: acuerdos y prioridades · 4'</span>
+        </div>
+        <div class="cyc-turn">
+          <div class="k">En tu turno (~12 min) · 2-3 puntos</div>
+          <div class="cyc-steps">
+            <div class="step"><span class="n">1</span><div><b>En qué trabajo</b><small>foco de la semana · ~4 min</small></div></div>
+            <div class="step"><span class="n">2</span><div><b>Resultados y conclusiones</b><small>qué ha salido y qué aprendemos · ~4 min</small></div></div>
+            <div class="step"><span class="n">3</span><div><b>Ayuda y bloqueos</b><small>qué necesito y qué decidir · ~4 min</small></div></div>
+          </div>
+        </div>
       </div>
     </section>
 
