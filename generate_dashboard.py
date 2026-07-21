@@ -3468,6 +3468,7 @@ def render_exec(d):
   <div class="q">02 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Embudos por vía <span class="tot">· Inbound · Outbound · Brain</span></h2>
   <div class="sd">Desglose del embudo por vía. Cada columna es su volumen de <b>contactos</b> por etapa y el % <b>sobre su total de contactos</b>. El <b>pipeline de ventas es compartido</b>: inbound y outbound lo trabajan de forma conjunta.</div>
+  <div class="cac-spendbar" style="background:rgba(111,240,162,.08);border-color:var(--brand-d);max-width:640px;margin:12px auto 0"><span class="cac-sb-cap" style="color:var(--brand)">💰 Valor estimado total del pipeline de ventas <small>· todas las etapas abiertas</small></span><span class="cac-sb-val" style="color:var(--brand)">{("€"+fmt(round(ex.get("inb_value",0) + ex.get("out_value",0) + ex.get("brain_value",0)))) if (ex.get("inb_value",0) + ex.get("out_value",0) + ex.get("brain_value",0)) else "—"}</span></div>
   <div class="io3grp">
    <div class="iogrp cx">
     <div class="iogrp-h">🚀 GuruSup CX <span>Customer Experience</span></div>
@@ -3652,9 +3653,10 @@ def render_exec(d):
   </div>
   <div class="section-label" style="margin:6px 0 12px">Detalle del pipeline de inbound · {fmt(pipe_cnt)} negocios abiertos</div>
   <div class="cards" style="margin-bottom:18px">
-    <div class="stat ok"><div class="sv tnum">{("€"+fmt(round(pipe_val + ex.get("out_value",0)))) if (pipe_val + ex.get("out_value",0)) else "—"}</div><div class="sl">Valor estimado del pipeline de ventas abierto<br><span style="color:var(--mut)">inbound €{fmt(round(pipe_val))} · outbound/comercial €{fmt(round(ex.get("out_value",0)))}</span></div></div>
-    <div class="stat"><div class="sv tnum">{fmt(pipe_cnt)}</div><div class="sl">Negocios inbound abiertos ({pipe_known} con importe)</div></div>
+    <div class="stat ok"><div class="sv tnum">{("€"+fmt(round(pipe_val + ex.get("out_value",0) + ex.get("brain_value",0)))) if (pipe_val + ex.get("out_value",0) + ex.get("brain_value",0)) else "—"}</div><div class="sl">Valor estimado total del pipeline de ventas abierto<br><span style="color:var(--mut)">🟢 inbound €{fmt(round(pipe_val))} · 🟠 outbound/comercial €{fmt(round(ex.get("out_value",0)))} · 🧠 brain €{fmt(round(ex.get("brain_value",0)))}</span></div></div>
+    <div class="stat"><div class="sv tnum">{fmt(pipe_cnt)}</div><div class="sl">Negocios inbound abiertos<br><span style="color:var(--mut)">{pipe_known} con importe estimado · {fmt(max(0, pipe_cnt - pipe_known))} aún sin estimar</span></div></div>
   </div>
+  <div class="note" style="margin-bottom:16px">💰 El <b>valor estimado</b> suma el importe de <b>todos los negocios abiertos en todas las etapas</b> del pipeline (Discovery, Demo/Validación, Best Case y <b>negociación</b>) — no se excluye ninguna etapa salvo las ya cerradas (ganadas/perdidas) y las freemium. Los negocios <b>sin importe cargado</b> en HubSpot no suman (aparecen como «aún sin estimar»): conviene rellenar su cantidad estimada para que el total refleje el potencial real.</div>
   <div class="pipe-legend">Etapas: {pipe_legend or '<span>Sin etapas registradas</span>'}</div>
   {opp_ch_html}
 </section>
