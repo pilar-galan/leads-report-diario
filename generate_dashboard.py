@@ -691,7 +691,7 @@ def main():
         "phone", "mobilephone", "hubspot_owner_id",
         "hs_v2_date_entered_lead", "hs_v2_date_entered_marketingqualifiedlead",
         "hs_v2_date_entered_salesqualifiedlead", "hs_v2_date_entered_opportunity",
-        "hs_v2_date_entered_customer"])
+        "hs_v2_date_entered_customer", "num_associated_deals"])
 
     hist = []
     hist_out = []   # OUTBOUND / no-inbound: importaciones + leads sin origen identificado (los trabaja Juanma)
@@ -703,11 +703,15 @@ def main():
                 3: (p.get("hs_v2_date_entered_salesqualifiedlead") or "")[:10],
                 4: (p.get("hs_v2_date_entered_opportunity") or "")[:10],
                 5: (p.get("hs_v2_date_entered_customer") or "")[:10]}
+    def _ndeals(p):
+        try: return int(p.get("num_associated_deals") or 0)
+        except (TypeError, ValueError): return 0
     def _outrec(p, src, d1, lc):
         return {"src": src, "d1": d1, "lc": lc, "sql_state": p.get("estado_sql_consultoria") or "",
                 "email": p.get("email") or "", "company": p.get("company") or "",
+                "firstname": p.get("firstname") or "",
                 "created": (p.get("createdate") or "")[:10], "created_full": p.get("createdate") or "",
-                "sdates": _sdates(p)}
+                "sdates": _sdates(p), "deals": _ndeals(p)}
     for c in hraw:
         p = c["properties"]
         email = p.get("email") or ""
@@ -749,7 +753,7 @@ def main():
             "vol_mes": p.get("volumen_de_consultas_al_mes") or "",
             "phone": (p.get("phone") or p.get("mobilephone") or "").strip(),
             "owner": p.get("hubspot_owner_id") or "",
-            "sdates": _sdates(p),
+            "sdates": _sdates(p), "deals": _ndeals(p),
         })
 
     daily = [c for c in hist if c["created_full"] >= start_iso]
@@ -813,6 +817,7 @@ def main():
     brain_open = 0; brain_value = 0.0   # oportunidades REALES del pipeline Brain (demo/validación/best case)
     brain_total = 0      # todas las relaciones vivas de Brain (para volumen de contactos)
     brain_contactos = 0  # contactos asociados a negocios del pipeline Brain (entran al CRM aparte)
+    brain_month_recs = []  # (created, es_oportunidad, name) de Brain para snapshots mensuales
     brain_names = []     # nombres de negocios Brain (para contar empresas únicas)
     out_value = 0.0      # valor de oportunidades outbound (ventas, no-inbound)
 
@@ -874,9 +879,11 @@ def main():
             brain_total += 1
             try: brain_contactos += int(p.get("num_associated_contacts") or 0)
             except (TypeError, ValueError): pass
+            _is_bopp = stage in ("1310031527", "1310031528", "1310031529")
+            brain_month_recs.append({"created": created, "opp": _is_bopp, "name": name})
             # Oportunidad real solo si ya hay demo agendada / needs validation / best case
             # (excluye «contactado»/«contestado», que aún no son oportunidad)
-            if stage in ("1310031527", "1310031528", "1310031529"):
+            if _is_bopp:
                 brain_open += 1
                 brain_names.append(name)
                 try: brain_value += float(p.get("amount") or 0)
@@ -1360,8 +1367,13 @@ def main():
     _MONTH_ENDS = [("jun 2026", "2026-06-30"), ("may 2026", "2026-05-31"),
                    ("abr 2026", "2026-04-30"), ("mar 2026", "2026-03-31"),
                    ("feb 2026", "2026-02-28"), ("ene 2026", "2026-01-31")]
+    def _cname(c):
+        return (c.get("company") or c.get("firstname") or c.get("email") or "—").strip() or "—"
     def _month_snap(T):
+        # Buckets EXCLUSIVOS: cada contacto cuenta en UNA sola etapa (la más alta a fin de mes).
+        # Oportunidad solo si etapa oportunidad + negocio (deal) asociado; si no, cae a SQL.
         dd = {}
+        opp_list = []
         def _acc(recs, chl):
             for c in recs:
                 if c["created"] > T:
@@ -1370,15 +1382,29 @@ def main():
                 e = dd.setdefault(lbl, {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0})
                 e["c"] += 1
                 r = _rank_at(c, T)
-                if r >= 1: e["l"] += 1
-                if r >= 2: e["m"] += 1
-                if r >= 3: e["s"] += 1
-                if r >= 4: e["o"] += 1
-        _acc(hist_nf, _chl)
-        _acc(hist_out_fun, _ochl)
-        rows = sorted(dd.items(), key=lambda x: -x[1]["c"])
-        tot = {k: sum(e[k] for _, e in rows) for k in ("c", "l", "m", "s", "o")}
-        return {"rows": rows, "tot": tot}
+                if r >= 4 and c.get("deals", 0) > 0:
+                    e["o"] += 1; opp_list.append((lbl, _cname(c)))
+                elif r >= 3: e["s"] += 1
+                elif r == 2: e["m"] += 1
+                elif r >= 1: e["l"] += 1
+        _acc(hist_nf, _chl)          # inbound
+        inb_labels = set(dd.keys())
+        _acc(hist_out_fun, _ochl)    # outbound
+        # Brain (relaciones estratégicas): contactos y oportunidad real por fecha de creación del negocio
+        b_c = sum(1 for r in brain_month_recs if r["created"] and r["created"] <= T)
+        b_o = sum(1 for r in brain_month_recs if r["opp"] and r["created"] and r["created"] <= T)
+        for r in brain_month_recs:
+            if r["opp"] and r["created"] and r["created"] <= T:
+                opp_list.append(("🧠 Brain", r["name"].replace("GuruSup Brain · ", "")))
+        # Orden: inbound primero, luego outbound, luego brain
+        rows_in = sorted([(l, e) for l, e in dd.items() if l in inb_labels], key=lambda x: -x[1]["c"])
+        rows_out = sorted([(l, e) for l, e in dd.items() if l not in inb_labels], key=lambda x: -x[1]["c"])
+        brain_row = {"c": b_c, "l": 0, "m": 0, "s": 0, "o": b_o}
+        tot = {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0}
+        for _, e in rows_in + rows_out:
+            for k in tot: tot[k] += e[k]
+        for k in tot: tot[k] += brain_row[k]
+        return {"rows_in": rows_in, "rows_out": rows_out, "brain": brain_row, "tot": tot, "opp_list": opp_list}
     chan_months = [{"label": lbl, **_month_snap(T)} for lbl, T in _MONTH_ENDS]
     exec_extra["chan_months"] = chan_months
     # Oportunidades OUTBOUND con negocio asociado, por fuente
@@ -1445,6 +1471,7 @@ def main():
     exec_extra["opp_contactos"] = len(_opp_ct)
     exec_extra["opp_empresas"] = len({c["properties"].get("associatedcompanyid") for c in _opp_ct
                                       if c["properties"].get("associatedcompanyid")})
+    exec_extra["sql_empresas"] = len({compkey(c) for c in sql_stage_contacts})
     # Contactos con negocio asociado (ventas o Brain), por vía → suman el total
     # Solo campañas/inbound/outbound: excluye importaciones directas y freemium (automáticos, no cuadran)
     exec_extra["opp_ct_inb"] = opp_ct_inb
@@ -2594,10 +2621,10 @@ def render_exec(d):
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
         kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]) +
         # ── 2ª fila ──
-        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
-        f'<div class="kv tnum">{fmt(opp_real)}</div>'
-        f'<div class="kt" style="color:var(--mut)">contactos con negocio asociado · pipeline de ventas o Brain · desde 1 ene</div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} <small>(incl. sin fuente)</small> · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
+        f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
+        f'<div class="kt" style="color:var(--mut)">contactos en etapa oportunidad con negocio asociado · ventas o Brain (sin cerrados)</div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
         f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_empresas",0) or opp_real)}</span> empresas / negocios</div></div>'
         + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">por contactos</span></div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos de la cartera real (excl. churn/dormidos)</div>'
@@ -2607,17 +2634,18 @@ def render_exec(d):
         f'<div class="kt" style="color:var(--mut)">han sido cliente desde el 1 ene y hoy ya no lo son</div>'
         f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</span> empresas (Churned / Dormidos)</div></div>')
     # contactos por etapa (reales)
-    _opp_ct = ex.get("opp_contactos", 0)
-    _cli_ct = ex.get("cli_split", {}).get("contactos", 0)
-    _churn_ct = ex.get("churn", {}).get("contactos", 0)
-    _churn_pct = pvf(_churn_ct, _churn_ct + _cli_ct)
-    # tasas: sobre contactos (comparable etapa a etapa)
+    _cli_emp = ex.get("clientes_activos", 0)      # empresas cliente activas
+    _opp_emp = ex.get("opp_empresas", 0) or opp_real   # empresas con negocio (oportunidad)
+    _sql_emp = ex.get("sql_empresas", 0) or g_sql      # empresas con SQL
+    _churn_emp = ex.get("churn", {}).get("empresas", 0)
+    _churn_pct = pvf(_churn_emp, _churn_emp + _cli_emp)
+    # tasas de Lead/MQL/SQL sobre contactos; de Oportunidad/Cliente sobre EMPRESAS (negocio = 1+ contactos)
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
         ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
-        ("SQL → Oportunidad", pvf(opp_real, g_sql), "negocios / SQL"),
-        ("Oportunidad → Cliente", pvf(ex.get("clientes_activos",0), opp_real), "empresas cliente / oportunidades"),
-        ("Cliente → Churn", _churn_pct, "contactos · desde 1 ene"),
+        ("SQL → Oportunidad", pvf(_opp_emp, _sql_emp), "empresas · oportunidad / SQL"),
+        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "empresas · cliente / oportunidad"),
+        ("Cliente → Churn", _churn_pct, "empresas · desde 1 ene"),
     ]
     rate_html = "".join(
         f'<div class="rbc"><div class="rbl">{lab}</div><div class="rbv tnum">{val}</div>'
@@ -2798,15 +2826,20 @@ def render_exec(d):
         mid = f'm{idx}'
         tabs_btns += f'<button class="mxtab" data-mx="{mid}">{esc(mo["label"])}</button>'
         prev = cmonths[idx + 1]["tot"] if idx + 1 < len(cmonths) else None
-        rows_h = ""
-        mmax = max((e["c"] for _, e in mo["rows"]), default=0) or 1
-        for lbl, e in mo["rows"]:
+        _allrows = mo["rows_in"] + mo["rows_out"]
+        mmax = max([e["c"] for _, e in _allrows] + [mo["brain"]["c"]], default=0) or 1
+        def _mrow(lbl, e, cls=""):
             bw = round(e["c"] / mmax * 100)
-            rows_h += (
-                f'<div class="mx-row"><div class="c1"><span class="nm">{esc(lbl)}</span>'
+            return (
+                f'<div class="mx-row {cls}"><div class="c1"><span class="nm">{esc(lbl)}</span>'
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
                 f'{cell(e["c"])}{cell(e["l"])}{cell(e["m"])}{cell(e["s"], cls="hi")}{cell(e["o"])}'
                 f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
+        rows_h = '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"])
+        if mo["rows_out"]:
+            rows_h += '<div class="mx-sep out">🟠 Outbound</div>' + "".join(_mrow(l, e, "mx-ob") for l, e in mo["rows_out"])
+        if mo["brain"]["c"]:
+            rows_h += '<div class="mx-sep br">🧠 Brain</div>' + _mrow("🧠 Brain", mo["brain"], "mx-br")
         t = mo["tot"]
         tot_row = (
             '<div class="mx-row mx-gtot"><div class="c1"><span class="nm">TOTAL {}</span></div>'.format(esc(mo["label"]))
@@ -2816,16 +2849,20 @@ def render_exec(d):
             + f'<div class="mx-cell hi"><span class="v tnum">{fmt(t["s"])}</span>{_mom(t["s"], prev["s"] if prev else None)}</div>'
             + f'<div class="mx-cell"><span class="v tnum">{fmt(t["o"])}</span>{_mom(t["o"], prev["o"] if prev else None)}</div>'
             + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t["o"], t["c"])}</span></div></div>')
+        opp_items = "".join(f'<span>{esc(nm)} <small>· {esc(lbl)}</small></span>' for lbl, nm in mo["opp_list"])
+        opp_det = (f'<details class="razd" style="margin-top:12px"><summary><span class="chev">▶</span> '
+                   f'🎯 Ver las {fmt(len(mo["opp_list"]))} oportunidades de {esc(mo["label"])}</summary>'
+                   f'<div class="mx-deals">{opp_items or "—"}</div></details>') if mo["opp_list"] else ''
         panels += (
             f'<div class="mxpanel" id="mx-{mid}">'
             f'<div class="mxwrap"><div class="matrix">'
-            '<div class="mx-head"><span>Canal · fin de mes</span><span>Contactos</span><span>Leads</span>'
-            '<span>MQL</span><span>SQL</span><span>Oport.</span><span>Contacto→Op.</span></div>'
-            + rows_h + tot_row + '</div></div></div>')
+            '<div class="mx-head"><span>Canal · etapa a fin de mes</span><span>Contactos</span><span>Solo Lead</span>'
+            '<span>Solo MQL</span><span>Solo SQL</span><span>Oport. (deal)</span><span>Contacto→Op.</span></div>'
+            + rows_h + tot_row + '</div></div>' + opp_det + '</div>')
     matrix_html = (
         '<div class="mxtabs">' + tabs_btns + '</div>'
-        '<div class="mxnote">Los meses son <b>estáticos</b>: reflejan el estado de cada contacto <b>a fin de ese mes</b> '
-        '(si a 30 jun era MQL, cuenta como MQL aunque luego avanzara). Las flechas comparan cada total con el mes anterior.</div>'
+        '<div class="mxnote">Los meses son <b>estáticos</b>: cada contacto cuenta en <b>una sola etapa</b> (en la que estaba a fin de ese mes). '
+        '«Oportunidad» = contacto en etapa oportunidad <b>con negocio (deal) asociado</b> · <b>pulsa</b> para ver cuáles. Las flechas comparan cada total con el mes anterior.</div>'
         + panels
         + '<script>(function(){var ts=document.querySelectorAll(".mxtab");ts.forEach(function(b){b.addEventListener("click",function(){'
         'ts.forEach(function(x){x.classList.remove("active")});b.classList.add("active");'
@@ -3167,7 +3204,7 @@ def render_exec(d):
 <section>
   <div class="q">04 · ¿Qué canal genera negocio real?</div>
   <h2 class="sh">Rendimiento por canal <span class="tot">· global</span></h2>
-  <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b>, <b style="color:var(--warn)">🟠 Outbound</b> y <b style="color:var(--violet)">🧠 Brain</b>, con su total y el <b>TOTAL GLOBAL</b> al final. En Oportunidad <b>solo los que tienen negocio (deal) asociado</b> — así el total de esta columna <b>cuadra con el KPI de Oportunidades reales</b> de arriba. Última columna: <b>conversión contacto → oportunidad</b>.</div>
+  <div class="sd">Cómo rinde cada canal del contacto al negocio (acumulado desde el 1 de enero, sin Freemium), separado en <b style="color:var(--brand)">🟢 Inbound</b>, <b style="color:var(--warn)">🟠 Outbound</b> y <b style="color:var(--violet)">🧠 Brain</b>.</div>
   {matrix_html}
 </section>
 
