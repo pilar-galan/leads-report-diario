@@ -1423,6 +1423,9 @@ def main():
         return {"rows_in": rows_in, "rows_out": rows_out, "brain": brain_row, "tot": tot, "opp_list": opp_list}
     chan_months = [{"label": lbl, **_month_snap(T)} for lbl, T in _MONTH_ENDS]
     exec_extra["chan_months"] = chan_months
+    _MES_ES = ["", "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+    _now_es = datetime.now(timezone.utc).astimezone(tz)
+    exec_extra["cur_month_label"] = f'{_MES_ES[_now_es.month]} {_now_es.year}'
     # Oportunidades OUTBOUND con negocio asociado, por fuente
     deals_by_chan_out = {}
     for dl in exec_opp_out:
@@ -2877,7 +2880,9 @@ def render_exec(d):
         return (f'<span class="mom {"up" if up else "down"}">{"▲" if up else "▼"} '
                 f'{sign}{fmt(abs(cur - prev))} · {abs(round(d_))}%</span>')
     cmonths = ex.get("chan_months", [])
-    tabs_btns = '<button class="mxtab active" data-mx="acum">ACUMULATIVO</button>'
+    _cur_lbl = ex.get("cur_month_label", "")
+    tabs_btns = '<button class="mxtab active" data-mx="acum">MES ACTUAL{}</button>'.format(
+        f' · {esc(_cur_lbl)}' if _cur_lbl else '')
     panels = f'<div class="mxpanel active" id="mx-acum">{matrix_html}</div>'
     for idx, mo in enumerate(cmonths):
         mid = f'm{idx}'
@@ -3226,7 +3231,7 @@ def render_exec(d):
   <div class="sd wide"><b>Volumen total del CRM y sus etapas desde el 1 de enero</b>, agrupado por las dos soluciones de la empresa:
     <div class="cat-wrap">
       <div class="cat cx"><div class="cat-h">🚀 GuruSup CX <span class="cat-sub">Customer Experience</span></div>
-        <div class="cat-body"><span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span><span class="src-chip cx">💬 Atención al cliente</span></div></div>
+        <div class="cat-body"><span class="src-chip in">🟢 Inbound</span><span class="src-chip out">🟠 Outbound</span></div></div>
       <div class="cat brain"><div class="cat-h">🧠 GuruSup Brain <span class="cat-sub">outbound directo (Alex)</span></div>
         <div class="cat-body"><span class="src-chip br">🧠 Brain</span></div></div>
     </div>
