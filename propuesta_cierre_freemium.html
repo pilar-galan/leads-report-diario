@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cierre del plan Freemium · Propuesta — GuruSup</title>
+</head>
+<body>
+<style>
+  :root{
+    --ink:#0b0a1f; --navy:#12102a; --panel:#171531; --panel2:#1e1b3d;
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.05);
+    --txt:#ece9f7; --muted:#a7a3c6; --dim:#7c789e;
+    --coral:#ff6b5b; --coral-d:#e85647;
+    --green:#57e08a; --green2:#22c55e;
+    --amber:#f6b545; --red:#ef4444; --blue:#5bc8f2;
+    --mono:'SF Mono',ui-monospace,'Segoe UI Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--txt);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}
+  .page{max-width:var(--maxw);margin:0 auto;padding:0 22px 72px}
+  .num{font-variant-numeric:tabular-nums}
+  h1,h2,h3{margin:0;text-wrap:balance;line-height:1.15}
+  p{margin:0}
+  a{color:inherit}
+
+  /* ---- topbar ---- */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(11,10,31,.82);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:var(--maxw);margin:0 auto;padding:13px 22px;display:flex;
+    align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:11px;min-width:0}
+  .brand .word{font-weight:700;letter-spacing:-.01em;font-size:16px}
+  .brand .sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+  .brand .kicker{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .date{font-size:12px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  /* ---- hero ---- */
+  .hero{background:
+      radial-gradient(120% 130% at 88% -10%,rgba(255,107,91,.16),transparent 55%),
+      radial-gradient(90% 120% at 5% 0%,rgba(87,224,138,.09),transparent 50%),
+      linear-gradient(180deg,var(--navy),var(--ink));
+    border:1px solid var(--line);border-radius:20px;padding:40px 38px 32px;margin-top:26px;
+    position:relative;overflow:hidden}
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--coral);display:flex;align-items:center;gap:9px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--coral);border-radius:2px}
+  .hero h1{font-size:clamp(30px,5.2vw,46px);font-weight:800;letter-spacing:-.025em;margin:16px 0 0}
+  .hero .lead{color:var(--muted);font-size:16px;max-width:64ch;margin-top:15px}
+
+  /* ---- kpi grid ---- */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:30px}
+  .kpi{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;
+    padding:16px 17px;position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--coral)}
+  .kpi.g::before{background:var(--green)} .kpi.a::before{background:var(--amber)}
+  .kpi.r::before{background:var(--red)} .kpi.b::before{background:var(--blue)}
+  .kpi .v{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .kpi.c .v{color:var(--coral)} .kpi.g .v{color:var(--green)} .kpi.a .v{color:var(--amber)}
+  .kpi.r .v{color:var(--red)} .kpi.b .v{color:var(--blue)}
+  .kpi .l{font-size:12.5px;color:var(--muted);margin-top:7px}
+
+  /* ---- sections ---- */
+  section{margin-top:46px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .sec-head .mk{width:5px;height:22px;border-radius:3px;background:var(--coral);flex:none}
+  .sec-head h2{font-size:21px;font-weight:750;letter-spacing:-.02em}
+  .sec-head .tag{margin-left:auto;font-size:11px;color:var(--dim);font-family:var(--mono);
+    border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .sub{color:var(--muted);font-size:15px;max-width:70ch;margin-bottom:20px}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:13px}
+  .card h3{font-size:15px;font-weight:700;margin-bottom:7px}
+  .card p{font-size:13.5px;color:var(--muted)}
+  .tint-coral{background:rgba(255,107,91,.13);color:var(--coral)}
+  .tint-green{background:rgba(87,224,138,.14);color:var(--green)}
+  .tint-amber{background:rgba(246,181,69,.14);color:var(--amber)}
+  .tint-blue{background:rgba(91,200,242,.14);color:var(--blue)}
+  .tint-red{background:rgba(239,68,68,.14);color:var(--red)}
+
+  /* objetivo cards */
+  .obj{position:relative;overflow:hidden}
+  .obj::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+  .obj.c::after{background:var(--coral)} .obj.g::after{background:var(--green)} .obj.b::after{background:var(--blue)}
+  .obj .lab{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:8px}
+  .obj.c .lab{color:var(--coral)} .obj.g .lab{color:var(--green)} .obj.b .lab{color:var(--blue)}
+
+  /* funnel */
+  .funnel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 26px}
+  .frow{margin-bottom:18px}
+  .frow:last-child{margin-bottom:0}
+  .frow .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:12px}
+  .frow .name{font-size:13.5px;font-weight:600}
+  .frow .name small{display:block;color:var(--dim);font-weight:400;font-size:12px;margin-top:1px}
+  .frow .val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+  .frow .val small{font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+  .track{height:34px;background:rgba(255,255,255,.045);border-radius:9px;overflow:hidden;display:flex}
+  .fill{height:100%;display:flex;align-items:center;padding-left:13px;font-size:12px;font-weight:700;
+    color:#0b0a1f;border-radius:9px}
+  .fill.split{border-radius:0}
+  .fill.left{border-radius:9px 0 0 9px}
+  .fill.right{border-radius:0 9px 9px 0}
+  .grad-grey{background:linear-gradient(90deg,#4a4770,#6b678f);color:#fff}
+  .grad-coral{background:linear-gradient(90deg,var(--coral-d),var(--coral))}
+  .grad-green{background:linear-gradient(90deg,#3bb56b,var(--green))}
+  .grad-amber{background:linear-gradient(90deg,#d99a2f,var(--amber))}
+  .fnote{margin-top:18px;font-size:12.5px;color:var(--dim);border-top:1px dashed var(--line);padding-top:14px}
+
+  /* action plan */
+  .plan{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .prow{display:grid;grid-template-columns:64px 1fr 168px 96px;gap:14px;align-items:center;
+    padding:15px 18px;border-top:1px solid var(--line2)}
+  .prow:first-child{border-top:none}
+  .prow:nth-child(odd){background:rgba(255,255,255,.015)}
+  .pri{font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 0;border-radius:7px;
+    text-align:center;letter-spacing:.03em}
+  .p0{background:rgba(255,107,91,.16);color:var(--coral);border:1px solid rgba(255,107,91,.3)}
+  .p1{background:rgba(246,181,69,.14);color:var(--amber);border:1px solid rgba(246,181,69,.28)}
+  .p2{background:rgba(124,120,158,.16);color:var(--muted);border:1px solid var(--line)}
+  .prow .act{font-size:14px;font-weight:600}
+  .prow .act small{display:block;color:var(--dim);font-weight:400;font-size:12.5px;margin-top:2px}
+  .prow .owner{font-size:12.5px;color:var(--muted)}
+  .prow .when{font-size:12px;font-family:var(--mono);color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
+  .plan-head{display:grid;grid-template-columns:64px 1fr 168px 96px;gap:14px;padding:10px 18px;
+    background:rgba(255,255,255,.03);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--dim);font-weight:700}
+  .plan-head .r{text-align:right}
+
+  /* callout */
+  .callout{margin-top:16px;background:rgba(91,200,242,.06);border:1px solid rgba(91,200,242,.22);
+    border-radius:13px;padding:17px 19px;display:flex;gap:14px}
+  .callout .ico{flex:none;color:var(--blue);margin-top:1px}
+  .callout h4{font-size:13px;font-weight:700;color:var(--blue);margin:0 0 8px;letter-spacing:.02em}
+  .callout ol{margin:0;padding-left:18px;color:var(--muted);font-size:13px}
+  .callout li{margin-bottom:5px}
+  .callout li b{color:var(--txt);font-weight:600}
+
+  /* option A/B */
+  .opt{position:relative;border-radius:15px;padding:22px;border:1px solid var(--line);background:var(--panel);overflow:hidden}
+  .opt::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
+  .opt.bad::before{background:var(--red)} .opt.good::before{background:var(--green)}
+  .opt .head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+  .opt .wn{font-family:var(--mono);font-size:12px;font-weight:700;width:26px;height:26px;border-radius:8px;
+    display:grid;place-items:center;flex:none}
+  .opt.bad .wn{background:rgba(239,68,68,.16);color:var(--red)}
+  .opt.good .wn{background:rgba(87,224,138,.16);color:var(--green)}
+  .opt h3{font-size:15.5px;font-weight:700}
+  .opt .li{display:flex;gap:10px;font-size:13.5px;color:var(--muted);margin-bottom:11px;align-items:flex-start}
+  .opt .li svg{flex:none;margin-top:2px}
+  .opt .li b{color:var(--txt);font-weight:600}
+  .verdict{margin-top:6px;font-size:12px;font-weight:700;letter-spacing:.03em;padding:8px 12px;
+    border-radius:9px;display:flex;align-items:center;gap:8px}
+  .verdict.bad{background:rgba(239,68,68,.1);color:var(--red)}
+  .verdict.good{background:rgba(87,224,138,.1);color:var(--green)}
+  .reco-note{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
+
+  /* kpi targets */
+  .targets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .tgt{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px}
+  .tgt .k{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .tgt .k svg{color:var(--coral);flex:none}
+  .tgt .goal{margin-top:11px;font-size:13px;color:var(--txt);font-weight:600}
+  .tgt .goal span{color:var(--green)}
+
+  /* email mock */
+  .mail-wrap{background:
+      repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0 12px,transparent 12px 24px),
+      var(--navy);
+    border:1px solid var(--line);border-radius:18px;padding:26px;display:flex;flex-direction:column;align-items:center}
+  .subj{align-self:stretch;margin-bottom:18px}
+  .subj .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);font-weight:700;margin-bottom:9px}
+  .subj .opt-line{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:9px;
+    padding:11px 14px;font-size:13.5px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+  .subj .opt-line .pill{font-size:10px;font-family:var(--mono);color:var(--coral);border:1px solid rgba(255,107,91,.35);
+    border-radius:6px;padding:2px 7px;flex:none}
+  .subj .opt-line.alt .pill{color:var(--muted);border-color:var(--line)}
+
+  .mail{width:100%;max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);color:#2a2540}
+  .mail .m-top{background:#fff;padding:22px 34px 8px;text-align:center;border-bottom:1px solid #f0ecf5}
+  .mail .m-body{background:#fdeeeb;padding:30px 34px 34px}
+  .mail .m-body p{font-size:14.5px;color:#3a3550;margin-bottom:15px;line-height:1.6}
+  .mail .m-body .under{text-decoration:underline;font-weight:600}
+  .mail ul{margin:4px 0 16px;padding-left:20px}
+  .mail li{font-size:14px;color:#3a3550;margin-bottom:12px;line-height:1.55}
+  .mail li b{color:#1f1b33}
+  .m-cta{display:block;background:#ff7a6b;color:#fff;text-align:center;text-decoration:none;
+    font-weight:700;font-size:15px;padding:16px;border-radius:11px;margin-top:6px;
+    box-shadow:0 8px 20px rgba(255,107,91,.4)}
+  .mlogo{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:20px;color:#1f1b33}
+  .mail-note{align-self:stretch;margin-top:18px;font-size:12px;color:var(--dim);display:flex;gap:9px;align-items:flex-start}
+  .mail-note svg{flex:none;margin-top:1px;color:var(--green)}
+
+  /* footer */
+  footer{margin-top:54px;border-top:1px solid var(--line);padding-top:24px;
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  footer .word{font-weight:700;font-size:15px}
+  footer .meta{font-size:12px;color:var(--dim);text-align:right;line-height:1.7}
+  .flag{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--amber);
+    background:rgba(246,181,69,.1);border:1px solid rgba(246,181,69,.25);border-radius:999px;padding:4px 12px;font-weight:600}
+
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.reveal{animation:none;opacity:1;transform:none}}
+
+  @media(max-width:860px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .grid3,.grid2,.targets{grid-template-columns:1fr}
+    .hero{padding:30px 22px 26px}
+    .plan-head{display:none}
+    .prow{grid-template-columns:56px 1fr;gap:8px 12px}
+    .prow .owner,.prow .when{grid-column:2;text-align:left}
+    .prow .when{font-size:11px}
+  }
+</style>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+        <circle cx="21" cy="21" r="20" fill="#FF6B5B" opacity=".14"/>
+        <circle cx="21" cy="21" r="13" fill="#FF6B5B" opacity=".26"/>
+        <circle cx="21" cy="21" r="6.5" fill="#FF6B5B"/>
+        <circle cx="21" cy="21" r="2.3" fill="#fff"/>
+      </svg>
+      <span class="word">gurusup</span>
+      <span class="sep"></span>
+      <span class="kicker">Propuesta interna · RevOps &amp; Marketing</span>
+    </div>
+    <span class="date">21 jul 2026</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="hero reveal">
+    <div class="eyebrow">Estrategia · Base de contactos</div>
+    <h1>Cierre del plan Freemium</h1>
+    <p class="lead">Liberamos el freemium: dejamos de invertir esfuerzo en cuentas gratuitas que no aportan
+      impacto en negocio. Comunicamos el cierre con <b>30 días de plazo</b>, empujamos la conversión de quien
+      tenga interés real y aprovechamos para limpiar una base de contactos grande y de baja calidad.</p>
+
+    <div class="kpis">
+      <div class="kpi b"><div class="v num">10.000</div><div class="l">Contactos en la base de datos</div></div>
+      <div class="kpi c"><div class="v num">~6.000</div><div class="l">En etapa de ciclo de vida <b>Freemium</b> · 60% de la BD</div></div>
+      <div class="kpi g"><div class="v num">~2.000</div><div class="l">Accionables por email <b>(con consentimiento de marketing)</b></div></div>
+      <div class="kpi a"><div class="v num">~4.000</div><div class="l">Sin consentimiento → <b>decisión abierta</b></div></div>
+      <div class="kpi r"><div class="v num">~0%</div><div class="l">Conversión histórica freemium → pago (1 caso en 3 años)</div></div>
+      <div class="kpi"><div class="v num">30 días</div><div class="l">Plazo antes de desactivar las cuentas gratuitas</div></div>
+    </div>
+  </div>
+
+  <!-- ============ POR QUÉ ============ -->
+  <section>
+    <div class="sec-head"><span class="mk"></span><h2>Por qué lo hacemos</h2><span class="tag">contexto</span></div>
+    <p class="sub">El freemium ya se ha retirado de la web (el CTA de “prueba gratis” pasó a “Solicitar demo”).
+      Falta cerrar las cuentas que ya existen. La decisión de negocio es clara: no dedicar más esfuerzo a un canal sin retorno.</p>
+    <div class="grid3">
+      <div class="card">
+        <div class="ico tint-red">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+        </div>
+        <h3>Conversión ~0%</h3>
+        <p>En 3 años solo <b>1 cuenta</b> pasó de freemium a pago (outlier). Entran ~500–600 registros/mes con activación casi nula.</p>
+      </div>
+      <div class="card">
+        <div class="ico tint-amber">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <h3>Coste sin retorno</h3>
+        <p>Consume foco de marketing y producto, y <b>satura el límite de Marketing Hub Pro</b> con contactos de baja calidad (emails Gmail/Hotmail).</p>
+      </div>
+      <div class="card">
+        <div class="ico tint-coral">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.7 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>
+        </div>
+        <h3>Foco en lo que sí importa</h3>
+        <p>Los contactos gratuitos <b>no aportan valor ni impacto en negocio</b>. Liberar el freemium libera recursos para el ICP real.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OBJETIVO DOBLE ============ -->
+  <section>
+    <div class="sec-head"><span class="mk"></span><h2>Objetivo de la acción</h2><span class="tag">doble + limpieza</span></div>
+    <div class="grid3">
+      <div class="card obj c">
+        <div class="lab">01 · Informar</div>
+        <h3>Aviso activo y profesional</h3>
+        <p>Comunicar de forma clara y educada que la cuenta gratuita <b>se desactivará en 30 días</b> si no se hace nada. Sin alarmismo, tono humano y B2B.</p>
+      </div>
+      <div class="card obj g">
+        <div class="lab">02 · Convertir</div>
+        <h3>Empujar a quien tenga interés</h3>
+        <p>Dar salida a quien lo tenía previsto o quede interesante: <b>hablar con ventas</b> y pasar al plan profesional (desde 750 €/mes). Rescatar cada conversión posible.</p>
+      </div>
+      <div class="card obj b">
+        <div class="lab">03 · Limpiar</div>
+        <h3>Depurar la base</h3>
+        <p>Al cierre, dar de baja las cuentas gratuitas y <b>liberar el límite de Marketing Hub Pro</b>: una base más pequeña y de mayor calidad.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEGMENTACIÓN ============ -->
+  <section>
+    <div class="sec-head"><span class="mk"></span><h2>La base, segmentada</h2><span class="tag">10.000 contactos</span></div>
+    <p class="sub">De los 10.000 contactos, casi dos tercios están en etapa Freemium. Pero <b>solo ~1 de cada 3 de esos freemium
+      tiene las comunicaciones de marketing activadas</b> — es el único segmento al que podemos escribir de forma legítima.</p>
+    <div class="funnel">
+      <div class="frow">
+        <div class="top"><div class="name">Base de datos total<small>Todos los contactos en HubSpot</small></div>
+          <div class="val num">10.000<small>100%</small></div></div>
+        <div class="track"><div class="fill grad-grey" style="width:100%">Contactos totales</div></div>
+      </div>
+      <div class="frow">
+        <div class="top"><div class="name">En etapa Freemium<small>Ciclo de vida = cuenta gratuita</small></div>
+          <div class="val num" style="color:var(--coral)">~6.000<small>60%</small></div></div>
+        <div class="track"><div class="fill grad-coral" style="width:60%">Freemium</div></div>
+      </div>
+      <div class="frow">
+        <div class="top"><div class="name">Reparto del segmento Freemium<small>Por consentimiento de marketing</small></div>
+          <div class="val num"><span style="color:var(--green)">~2.000</span> <span style="color:var(--dim)">/</span> <span style="color:var(--amber)">~4.000</span></div></div>
+        <div class="track">
+          <div class="fill grad-green left" style="width:20%">Consienten · ~2.000</div>
+          <div class="fill grad-amber right" style="width:40%">Sin consentimiento · ~4.000</div>
+        </div>
+      </div>
+      <div class="fnote">
+        <b style="color:var(--green)">■</b> <b>~2.000 accionables</b> — reciben el email de cierre (campaña activa). &nbsp;·&nbsp;
+        <b style="color:var(--amber)">■</b> <b>~4.000 sin consentimiento</b> — no se les puede enviar marketing legalmente → decisión abierta (ver más abajo).
+        <br><span style="opacity:.8">Cifras de tu segmentación en curso — ajustables según el corte final del CRM.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLAN DE ACCIÓN ============ -->
+  <section>
+    <div class="sec-head"><span class="mk"></span><h2>Plan de acción por prioridad</h2><span class="tag">P0 → P2</span></div>
+    <p class="sub">Ordenado de mayor a menor impacto. Lo primero es validar y lanzar sobre el segmento accionable; lo último, medir y limpiar.</p>
+    <div class="plan">
+      <div class="plan-head"><div>Prioridad</div><div>Acción</div><div>Responsable</div><div class="r">Cuándo</div></div>
+      <div class="prow">
+        <div class="pri p0">P0</div>
+        <div class="act">Validar la comunicación con Víctor<small>Aprobar mensaje, alcance y plazo antes de lanzar nada.</small></div>
+        <div class="owner">Pilar → Víctor</div><div class="when">Ahora</div>
+      </div>
+      <div class="prow">
+        <div class="pri p0">P0</div>
+        <div class="act">Enviar el email de cierre a los ~2.000 con consentimiento<small>Workflow en HubSpot al segmento accionable.</small></div>
+        <div class="owner">Pilar · HubSpot</div><div class="when">Día 0</div>
+      </div>
+      <div class="prow">
+        <div class="pri p0">P0</div>
+        <div class="act">Decidir la vía para los ~4.000 sin consentimiento<small>Forzar como MK vs. eliminar cuentas (ver sección siguiente).</small></div>
+        <div class="owner">Pilar + Víctor</div><div class="when">Ahora</div>
+      </div>
+      <div class="prow">
+        <div class="pri p1">P1</div>
+        <div class="act">Activar la ruta de conversión<small>CTA → agenda con ventas → propuesta de plan profesional.</small></div>
+        <div class="owner">Ventas</div><div class="when">Día 0–30</div>
+      </div>
+      <div class="prow">
+        <div class="pri p1">P1</div>
+        <div class="act">Secuencia de recordatorio<small>Refuerzo a medio plazo y último aviso antes del cierre.</small></div>
+        <div class="owner">Pilar · HubSpot</div><div class="when">Días 0 · 15 · 25</div>
+      </div>
+      <div class="prow">
+        <div class="pri p2">P2</div>
+        <div class="act">Desactivar cuentas gratuitas y depurar BD<small>Al vencer el plazo: baja de cuentas y liberación del límite de MK Hub.</small></div>
+        <div class="owner">Producto + Pilar</div><div class="when">Día 30</div>
+      </div>
+      <div class="prow">
+        <div class="pri p2">P2</div>
+        <div class="act">Medir resultados<small>Cerrar el bucle con los KPIs de la acción.</small></div>
+        <div class="owner">Pilar</div><div class="when">Día 30+</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg></span>
+      <div>
+        <h4>Decisiones abiertas antes de lanzar</h4>
+        <ol>
+          <li><b>Alcance:</b> confirmar que el envío se limita a los ~2.000 con consentimiento (reconciliar con el criterio de “no comunicar de forma masiva” del 15-jul).</li>
+          <li><b>Salto de precio:</b> de 0 € a 750 € es un salto grande. ¿Acompañarlo con un <b>plan intermedio self-service</b> para mejorar la conversión?</li>
+          <li><b>Los ~4.000:</b> elegir vía (abajo) — es la decisión con más implicación legal.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOS 4K ============ -->
+  <section>
+    <div class="sec-head"><span class="mk" style="background:var(--amber)"></span><h2>Los ~4.000 sin consentimiento · 2 vías</h2><span class="tag">decisión clave</span></div>
+    <p class="sub">Este bloque no se puede incluir en el email (no han aceptado comunicaciones de marketing). Hay que elegir entre alcance y cumplimiento.</p>
+    <div class="grid2">
+      <div class="opt bad">
+        <div class="head"><span class="wn">A</span><h3>Forzarlos como contactos de Marketing</h3></div>
+        <div class="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          <span><b>Oportunidad:</b> amplías el alcance de la comunicación → más probabilidad de rescatar alguna conversión.</span></div>
+        <div class="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <span><b>Riesgo alto:</b> enviar marketing sin consentimiento es mala práctica y expone a <b>denuncias (RGPD)</b>.</span></div>
+        <div class="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <span>Daña la <b>reputación de dominio</b> (deliverability) y la imagen de marca.</span></div>
+        <div class="verdict bad"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h16.9a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg> No recomendado</div>
+      </div>
+      <div class="opt good">
+        <div class="head"><span class="wn">B</span><h3>Dejarlos como están y eliminar sus cuentas</h3></div>
+        <div class="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          <span><b>Cumples normativa</b> y buenas prácticas; proteges reputación y deliverability.</span></div>
+        <div class="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+          <span>Limpias la BD y <b>liberas el límite de Marketing Hub Pro</b> (objetivo declarado de la acción).</span></div>
+        <div class="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Renuncias al alcance sobre ese segmento — de bajo valor esperado dado el ~0% de conversión.</span></div>
+        <div class="verdict good"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V5z"/><path d="M9 12l2 2 4-4"/></svg> Recomendado</div>
+      </div>
+    </div>
+    <p class="reco-note">Recomendación alineada con la decisión de exigir email corporativo y limpiar el CRM. La elección final es de Pilar + Víctor.</p>
+  </section>
+
+  <!-- ============ KPIs ============ -->
+  <section>
+    <div class="sec-head"><span class="mk"></span><h2>KPIs a seguir</h2><span class="tag">medición día 30+</span></div>
+    <p class="sub">Objetivos a fijar con Víctor. La acción se juzga por conversión rescatada y por calidad de base resultante.</p>
+    <div class="targets">
+      <div class="tgt"><div class="k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Reuniones con ventas</div><div class="goal">Objetivo: <span>a definir</span></div></div>
+      <div class="tgt"><div class="k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Conversiones a plan profesional</div><div class="goal">Rescatar <span>&ge; 1–2%</span> del segmento accionable</div></div>
+      <div class="tgt"><div class="k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H5.2L4 19z"/></svg> Tasa de bajas / quejas</div><div class="goal">Mantener <span>lo más baja posible</span></div></div>
+      <div class="tgt"><div class="k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> Cuentas desactivadas</div><div class="goal">Cierre limpio al <span>día 30</span></div></div>
+      <div class="tgt"><div class="k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18"/></svg> Contactos MK liberados</div><div class="goal">Recuperar límite de <span>Marketing Hub Pro</span></div></div>
+      <div class="tgt"><div class="k"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M19 9l-5 5-3-3-4 4"/></svg> Calidad de base resultante</div><div class="goal">Más pequeña, <span>mayor intención</span></div></div>
+    </div>
+  </section>
+
+  <!-- ============ EMAIL ============ -->
+  <section>
+    <div class="sec-head"><span class="mk"></span><h2>El email de cierre</h2><span class="tag">pieza a enviar</span></div>
+    <p class="sub">Tu contenido, ordenado por relevancia y con jerarquía visual: cambio importante → plazo de 30 días → las dos opciones → CTA a ventas.</p>
+    <div class="mail-wrap">
+      <div class="subj">
+        <div class="lbl">Asunto propuesto</div>
+        <div class="opt-line"><span class="pill">A</span>Tu cuenta gratuita de GuruSup cambia en 30 días</div>
+        <div class="opt-line alt"><span class="pill">B</span>Un cambio importante en tu cuenta de GuruSup</div>
+      </div>
+
+      <div class="mail">
+        <div class="m-top">
+          <span class="mlogo">
+            <svg width="24" height="24" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+              <circle cx="21" cy="21" r="20" fill="#FF6B5B" opacity=".16"/>
+              <circle cx="21" cy="21" r="12.5" fill="#FF6B5B" opacity=".3"/>
+              <circle cx="21" cy="21" r="6.2" fill="#FF6B5B"/>
+              <circle cx="21" cy="21" r="2.2" fill="#fff"/>
+            </svg>
+            GuruSup
+          </span>
+        </div>
+        <div class="m-body">
+          <p>Hola [nombre],</p>
+          <p>Queremos informarte de un cambio importante en GuruSup.</p>
+          <p><b>Tu cuenta gratuita seguirá activa durante los próximos 30 días.</b> Después de ese plazo, el plan gratuito dejará de estar disponible.</p>
+          <p class="under">A partir de entonces tendrás dos opciones:</p>
+          <ul>
+            <li><b>Mantener tu cuenta</b> pasando a un <b>plan profesional desde 750 €/mes.</b> Nuestro equipo te ayudará a adaptar GuruSup a las necesidades de tu empresa y sacar el máximo partido a tus agentes de IA.</li>
+            <li><b>No realizar ningún cambio.</b> En ese caso, tu cuenta se desactivará automáticamente al finalizar el periodo de 30 días.</li>
+          </ul>
+          <p>Si quieres seguir utilizando GuruSup, solo tienes que agendar una llamada con nuestro equipo de ventas.</p>
+          <a class="m-cta" href="#" onclick="return false">Agendar una llamada para subir de plan</a>
+        </div>
+      </div>
+
+      <div class="mail-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Contenido idéntico al que enviaste, con tono profesional y sin alarmismo. Solo enviar al segmento con consentimiento; personalizar <b>[nombre]</b> y enlazar el CTA al calendario de ventas.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+        <circle cx="21" cy="21" r="20" fill="#FF6B5B" opacity=".14"/>
+        <circle cx="21" cy="21" r="6.5" fill="#FF6B5B"/><circle cx="21" cy="21" r="2.3" fill="#fff"/>
+      </svg>
+      <span class="word">gurusup</span>
+    </div>
+    <div class="meta">
+      <span class="flag"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h16.9a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg> Documento interno · pendiente de validar con Víctor antes de lanzar</span><br>
+      Propuesta de cierre del Freemium · RevOps &amp; Marketing · 21 jul 2026
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
