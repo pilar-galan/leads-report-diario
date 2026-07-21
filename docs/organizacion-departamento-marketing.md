@@ -2,6 +2,8 @@
 
 > **Objetivo.** Definir cómo funciona el departamento de Marketing de GuruSup: organización, KPIs, seguimiento y ownership. Este documento ya no es un borrador de opciones: da **una solución cerrada por cada punto** de la propuesta.
 >
+> **Alcance.** Este informe se centra en la parte **inbound** del modelo de generación de demanda (outbound y otras vías quedan fuera). Los datos por canal son acumulados **desde el 1-ene-2026 hasta hoy** (dashboard ejecutivo · HubSpot).
+>
 > Última actualización: 2026-07-21 · Responsable del doc: **Picu** (Pilar — RevOps / Marketing Automation)
 
 ---

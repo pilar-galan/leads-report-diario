@@ -120,6 +120,32 @@
   .gs-note p{margin:0;font-size:13.5px;color:var(--text);text-align:justify;hyphens:auto}
   .gs-note b{color:var(--heading);font-weight:600}
 
+  /* Snapshot superior: contactos + tabla de canales */
+  .gs-topres{display:grid;grid-template-columns:.85fr 1.15fr;gap:16px;margin:34px 0 8px;align-items:stretch}
+  @media (max-width:820px){.gs-topres{grid-template-columns:1fr}}
+  .gs-topres .tr-left{background:linear-gradient(150deg,var(--green-soft),transparent 70%),var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+  .gs-topres .tr-left .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--green);font-weight:800}
+  .gs-topres .tr-left .big{font-size:clamp(46px,7vw,68px);font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--heading);margin:8px 0 2px;font-variant-numeric:tabular-nums;text-shadow:0 0 28px var(--green-glow)}
+  .gs-topres .tr-left .sub{font-size:13px;color:var(--muted);font-weight:600}
+  .gs-topres .tr-left .foot{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--border);padding-top:12px;text-align:justify;hyphens:auto}
+  .gs-topres .tr-right{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+  .gs-topres .trh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .gs-topres .trh .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+  .gs-topres .trh .tot{font-size:12px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums}
+  .gs-topres .gs-tablewrap{box-shadow:none;border:none;border-radius:0}
+  .gs-topres table.gs-res{min-width:0}
+  .gs-topres table.gs-res th,.gs-topres table.gs-res td{padding:9px 10px;font-size:13px}
+
+  /* Modelo de generación de demanda (por puntos) */
+  .gs-model{margin-top:16px;background:linear-gradient(100deg,var(--green-soft),transparent 74%),var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow)}
+  .gs-model .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800;margin-bottom:12px}
+  .gs-model ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+  .gs-model li{position:relative;padding-left:20px;font-size:13.5px;color:var(--text);text-align:justify;hyphens:auto}
+  .gs-model li::before{content:"";position:absolute;left:0;top:8px;width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .gs-model b{color:var(--heading);font-weight:600}
+  .gs-model .foot{margin-top:13px;border-top:1px solid var(--border);padding-top:12px;font-size:12.5px;color:var(--muted)}
+  .gs-model .foot b{color:var(--text)}
+
   .gs-sec{margin-top:56px}
   .gs-sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
   .gs-sec-n{font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;color:var(--green)}
@@ -249,22 +275,44 @@
     </header>
 
     <!-- KPI BAND: global → detalle -->
-    <section class="gs-band reveal" style="animation-delay:.12s">
-      <div class="gs-band-cap"><span class="t">De un vistazo</span><span class="l">los datos clave que verás en detalle más abajo</span></div>
-      <div class="gs-tiles">
-        <div class="gs-tile"><div class="n">4</div><div class="l">áreas · un owner por cada una</div></div>
-        <div class="gs-tile"><div class="n">124</div><div class="l">leads paid · último mes</div></div>
-        <div class="gs-tile"><div class="n">76%</div><div class="l">precualificados agendados</div></div>
-        <div class="gs-tile"><div class="n">≥50</div><div class="l">umbral fit+hit para MQL</div></div>
-        <div class="gs-tile"><div class="n">45%</div><div class="l">apertura · 1er email nurturing</div></div>
-        <div class="gs-tile"><div class="n">25→32</div><div class="l">autoridad de dominio (SEO)</div></div>
+    <!-- SNAPSHOT: contactos inbound + SQL por canal -->
+    <section class="gs-topres reveal" style="animation-delay:.12s">
+      <div class="tr-left">
+        <div class="k">Contactos generados · inbound</div>
+        <div class="big">1.548</div>
+        <div class="sub">1 ene → hoy · 2026</div>
+        <div class="foot">Acumulado. La demanda se cocina en muchos puntos de contacto; en el CRM registramos por dónde entró cada contacto.</div>
+      </div>
+      <div class="tr-right">
+        <div class="trh"><span class="k">SQL por canal → oportunidad</span><span class="tot">157 SQL · 12 op · ~8%</span></div>
+        <div class="gs-tablewrap">
+          <table class="gs-t gs-res">
+            <thead><tr><th>Canal</th><th>SQL</th><th>Op.</th><th>SQL→Op.</th></tr></thead>
+            <tbody>
+              <tr><td>Google Ads <span class="tag">pago</span></td><td class="num">61</td><td class="num">2</td><td class="cv low">3%</td></tr>
+              <tr><td>SEO Orgánico</td><td class="num">43</td><td class="num">3</td><td class="cv mid">7%</td></tr>
+              <tr><td>Tráfico directo</td><td class="num">28</td><td class="num">4</td><td class="cv hi">14%</td></tr>
+              <tr><td>Social Ads <span class="tag">pago</span></td><td class="num">19</td><td class="num">1</td><td class="cv low">5%</td></tr>
+              <tr><td>Eventos / Campañas</td><td class="num">2</td><td class="num">2</td><td class="cv hi">100%<small>base baja</small></td></tr>
+              <tr><td>Webinar</td><td class="num">2</td><td class="num">0</td><td class="cv none">—</td></tr>
+              <tr><td>Referido</td><td class="num">2</td><td class="num">0</td><td class="cv none">—</td></tr>
+              <tr class="tot"><td><b>Total inbound</b></td><td class="num"><b>157</b></td><td class="num"><b>12</b></td><td class="cv mid"><b>~8%</b></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
+    <p class="gs-cap">📅 Acumulado <b>1-ene → hoy · 2026</b> · fuente: dashboard ejecutivo (HubSpot), sin Freemium. Solo canales con datos. La conversión SQL → oportunidad es orientativa (depende del proceso y de varios puntos de contacto). Última actualización del dashboard: 21-jul-2026.</p>
 
-    <!-- FOCO DE MARKETING · boundary -->
-    <section class="gs-note reveal" style="animation-delay:.16s">
-      <div class="k">★ Nuestro modelo · motor de demanda</div>
-      <p>Marketing construye el <b>motor de generación de demanda</b> que tracciona; <b>Ventas cualifica</b> esa demanda, nos devuelve sus <b>insights</b> y la convierte en clientes reales. La clave que nos une a todos: <b>aprender de cada ciclo, sacar conclusiones y optimizar</b> para mejorar.</p>
+    <!-- MODELO DE GENERACIÓN DE DEMANDA -->
+    <section class="gs-model reveal" style="animation-delay:.16s">
+      <div class="k">★ Modelo de generación de demanda · hoy</div>
+      <ul>
+        <li><b>Inbound (foco de este informe).</b> Genera demanda y no solo atiende los leads que entran: los <b>nutre desde el propio CRM</b> hasta que están listos.</li>
+        <li><b>Atribución multicanal.</b> La demanda se cocina en muchos puntos de contacto, canales y momentos. En el CRM registramos <b>por dónde entró</b> el contacto, pero muchas veces otros canales han colaborado o hecho push (nos vieron o consumieron contenido por otras vías); hasta tener el contacto, esa influencia no queda "certificada".</li>
+        <li><b>Outbound y nuevas vías.</b> Generación de demanda nueva por otros caminos (prospección, Brain, partnerships) — fuera del alcance de este informe.</li>
+      </ul>
+      <div class="foot">Marketing es el <b>motor de demanda</b>; <b>Ventas cualifica</b> y convierte; la clave común a todos: <b>aprender y optimizar</b>.</div>
     </section>
 
     <!-- 01 EQUIPO + KPIs -->
@@ -296,6 +344,7 @@
           <div class="gs-alab">Acciones de mayor impacto</div>
           <ul class="gs-kpi">
             <li>Posicionamiento: inmobiliaria y restaurantes en top 3; autoridad de dominio de 25 → 32 con la estrategia de enlazado externo</li>
+            <li>Orgánico por delante de marcas de referencia y gran autoridad: <b>Eleven Labs</b> y Zendesk (en "software de atención al cliente")</li>
             <li>Auditoría de analítica: detectó Consent Mode roto, sobreatribución a "directo" y leads de la calculadora ~2 meses sin sincronizar → protocolo de subidas a Vercel</li>
             <li>Se hizo cargo del tracking del freemium (nunca instrumentado) + propiedad GA4 separada; API de GA4 conectada a repo (con Picu)</li>
             <li>Reestructuración de sectores para más volumen; nuevos verticales: administraciones públicas, universidades, másters</li>
@@ -328,7 +377,6 @@
           <ul class="gs-kpi">
             <li>Ownership de HubSpot (era "tierra de nadie") + depuración del CRM y taxonomía del funnel → lenguaje común</li>
             <li>Lead scoring fit+hit (umbral ~50 MQL) y precualificación automatizada desde el 9-jul (33 entradas, 76% agendadas)</li>
-            <li>Ciclo de vida de leads (spam / disqualified / bad fit…) con señales de vuelta a las plataformas de ads</li>
             <li>Formularios migrados a nativos de HubSpot + subdominio forms.gurusup.com (autenticación, anti-spam)</li>
             <li>Sistema de reporting: dashboards ejecutivo / diario / semanal como fuente única para decidir</li>
             <li>Higiene del dato con Ventas: análisis lead a lead, fugas por falta de logging (caso Hotel Emilio), alerta de leads no sincronizados</li>
@@ -338,50 +386,9 @@
 
     </section>
 
-    <!-- 02 RESULTADOS POR CANAL (Nivel 2) -->
+    <!-- 02 RECOMENDACIONES -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">02</span><h2>Resultados por canal</h2></div>
-      <p class="gs-sec-sub">Cuántos SQL ha generado cada canal de inbound y cuántos han llegado a oportunidad en pipeline. Es una referencia para mejorar la conversión de cada canal de adquisición, no un dato del día a día.</p>
-
-      <div class="gs-datebadge">📅 Acumulado desde el <b>1 de enero de 2026</b> · fuente: dashboard ejecutivo (HubSpot) · sin Freemium</div>
-
-      <div class="gs-funnel" style="margin-top:16px">
-        <div class="fh"><div class="k">El funnel que medimos</div><p>Generamos y medimos la demanda hasta la oportunidad; Ventas la cualifica y la convierte, y compartimos aprendizajes en ambos sentidos para optimizar.</p></div>
-        <div class="stages">
-          <span class="stage">Lead</span><span class="arrow" aria-hidden="true">→</span>
-          <span class="stage">MQL <em>fit+hit ≥50</em></span><span class="arrow" aria-hidden="true">→</span>
-          <span class="stage">SQL</span><span class="arrow" aria-hidden="true">→</span>
-          <span class="stage op">Oportunidad <em>discovery</em></span>
-        </div>
-      </div>
-
-      <div class="gs-tablewrap" style="margin-top:16px">
-        <table class="gs-t gs-res">
-          <thead><tr><th>Canal de inbound</th><th>SQL</th><th>Oportunidades</th><th>SQL → Op.</th></tr></thead>
-          <tbody>
-            <tr><td>Google Ads <span class="tag">pago</span></td><td class="num">61</td><td class="num">2</td><td class="cv low">3%</td></tr>
-            <tr><td>SEO Orgánico</td><td class="num">43</td><td class="num">3</td><td class="cv mid">7%</td></tr>
-            <tr><td>Tráfico directo</td><td class="num">28</td><td class="num">4</td><td class="cv hi">14%</td></tr>
-            <tr><td>Social Ads <span class="tag">pago</span></td><td class="num">19</td><td class="num">1</td><td class="cv low">5%</td></tr>
-            <tr><td>Eventos / Campañas</td><td class="num">2</td><td class="num">2</td><td class="cv hi">100%<small>base baja</small></td></tr>
-            <tr><td>Webinar</td><td class="num">2</td><td class="num">0</td><td class="cv none">—</td></tr>
-            <tr><td>Referido</td><td class="num">2</td><td class="num">0</td><td class="cv none">—</td></tr>
-            <tr><td>Chat web</td><td class="num">0</td><td class="num">0</td><td class="cv none">—</td></tr>
-            <tr><td>Social orgánico</td><td class="num">0</td><td class="num">0</td><td class="cv none">—</td></tr>
-            <tr><td>Otros · web sin cookies</td><td class="num">0</td><td class="num">0</td><td class="cv none">—</td></tr>
-            <tr class="sd"><td>Referencias de IA</td><td class="num">s/d</td><td class="num">s/d</td><td class="cv none">por instrumentar</td></tr>
-            <tr class="sd"><td>Newsletters externas</td><td class="num">s/d</td><td class="num">s/d</td><td class="cv none">por instrumentar</td></tr>
-            <tr class="sd"><td>Medios</td><td class="num">s/d</td><td class="num">s/d</td><td class="cv none">por instrumentar</td></tr>
-            <tr class="tot"><td><b>Total inbound</b></td><td class="num"><b>157</b></td><td class="num"><b>12</b></td><td class="cv mid"><b>~8%</b></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="gs-cap">La conversión SQL → oportunidad es orientativa: depende del proceso y de muchas variables, sirve para comparar y mejorar canales. «s/d» = canal aún no medible en el sistema, parte del trabajo del sistema de septiembre. Datos acumulados desde el 1-ene-2026 (dashboard ejecutivo, HubSpot).</p>
-    </section>
-
-    <!-- 03 RECOMENDACIONES (Nivel 3) -->
-    <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">03</span><h2>Recomendaciones</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">02</span><h2>Recomendaciones</h2></div>
       <p class="gs-sec-sub">A partir de los datos de canal, las reuniones y el CRM — priorizadas de mayor a menor impacto.</p>
       <ol class="gs-recs">
         <li class="reveal"><b>Calidad &gt; volumen en paid.</b> Google Ads es el que más SQL trae (61) pero el que menos convierte a oportunidad (3%). Afinar fit+hit y creatividades para que el SQL de pago llegue con intención real, vigilando el CPL para no disparar el gasto.</li>
@@ -396,7 +403,7 @@
 
     <!-- 04 PRIORIDADES -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">04</span><h2>Prioridades del trimestre</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">03</span><h2>Prioridades del trimestre</h2></div>
       <p class="gs-sec-sub">Ordenadas por impacto: dónde generamos más valor de aquí a septiembre.</p>
       <div class="gs-pri">
         <div class="gs-pri-row anchor reveal">
@@ -424,7 +431,7 @@
 
     <!-- 03 CADENCIA -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">05</span><h2>Seguimiento y cadencia</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">04</span><h2>Seguimiento y cadencia</h2></div>
       <p class="gs-sec-sub">Cuatro capas. El reporting se lee <b>antes</b> del Syncro para no quemar la reunión en revisar números.</p>
       <div class="gs-tablewrap">
         <table class="gs-t">
@@ -441,7 +448,7 @@
 
     <!-- 04 ACCIONES -->
     <section class="gs-sec">
-      <div class="gs-sec-h"><span class="gs-sec-n">06</span><h2>Acciones inmediatas</h2></div>
+      <div class="gs-sec-h"><span class="gs-sec-n">05</span><h2>Acciones inmediatas</h2></div>
       <p class="gs-sec-sub">Lo que activamos ya para dejar el modelo funcionando.</p>
       <div class="gs-acts">
         <div class="gs-act reveal"><span class="mk">→</span><p>Aplicar la cadencia (Syncro 60 min + Marketing Review mensual).<span class="o">Marisa + Picu</span></p></div>
