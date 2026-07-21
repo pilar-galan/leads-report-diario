@@ -2832,9 +2832,11 @@ def render_exec(d):
             return ''
         if prev == 0:
             return '<span class="mom up">▲ +{} · nuevo</span>'.format(cur) if cur else ''
+        if cur == prev:
+            return '<span class="mom" style="color:var(--mut)">= igual</span>'
         d_ = (cur - prev) / prev * 100
-        up = cur >= prev
-        sign = "+" if cur >= prev else "−"
+        up = cur > prev
+        sign = "+" if up else "−"
         return (f'<span class="mom {"up" if up else "down"}">{"▲" if up else "▼"} '
                 f'{sign}{fmt(abs(cur - prev))} · {abs(round(d_))}%</span>')
     cmonths = ex.get("chan_months", [])
