@@ -2320,6 +2320,17 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .io-val span{font-size:17px;font-weight:800;color:var(--brand)}
 .iocol.out .io-val span{color:var(--warn)} .iocol.brain .io-val span{color:var(--violet)}
 @media(max-width:820px){.io3{grid-template-columns:1fr}}
+.io3grp{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-top:22px;position:relative;left:50%;transform:translateX(-50%);width:min(1280px,calc(100vw - 32px));align-items:start}
+.iogrp{border-radius:18px;padding:14px}
+.iogrp.cx{border:1.5px solid #1f7f96;background:rgba(104,209,245,.05)}
+.iogrp.brainbox{border:1.5px solid #6a4fa0;background:rgba(200,166,255,.05)}
+.iogrp-h{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:900;letter-spacing:.4px;margin:2px 2px 12px;text-transform:uppercase}
+.iogrp.cx .iogrp-h{color:var(--sky)}
+.iogrp.brainbox .iogrp-h{color:var(--violet)}
+.iogrp-h span{font-size:10.5px;font-weight:600;opacity:.6;text-transform:none;letter-spacing:0}
+.iogrp-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.iogrp.brainbox .iogrp-cols{grid-template-columns:1fr}
+@media(max-width:980px){.io3grp{grid-template-columns:1fr}.iogrp-cols{grid-template-columns:1fr}}
 .src-chip{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin:2px 4px 2px 0}
 .src-chip.in{background:rgba(111,240,162,.16);color:var(--brand);border:1px solid var(--brand-d)}
 .src-chip.out{background:rgba(255,202,92,.16);color:var(--warn);border:1px solid #a5741f}
@@ -2390,6 +2401,11 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mx-row.mx-gtot .gsub{display:block;font-size:9.5px;color:var(--mut);font-weight:600;margin-top:2px}
 .mx-row.mx-gtot .mx-cell .v{font-size:18px}
 .mx-row.mx-gtot .mx-cell.hi .v{color:var(--brand)}
+.mx-cat{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:11px 12px;margin:14px 0 2px;border-radius:11px}
+.mx-cat span{font-size:10px;font-weight:600;opacity:.65;text-transform:none;letter-spacing:0}
+.mx-cat.cx{color:var(--sky);border:1.5px solid #1f7f96;background:rgba(104,209,245,.06)}
+.mx-cat.brain{color:var(--violet);border:1.5px solid #6a4fa0;background:rgba(200,166,255,.06)}
+.mx-cat:first-child{margin-top:0}
 .mx-sep{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px 4px;color:var(--brand)}
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
@@ -2816,6 +2832,8 @@ def render_exec(d):
         + cell(oc_c) + cell(oc_l) + cell(oc_m) + cell(oc_s, cls="hi") + cell(oc_o)
         + f'<div class="mx-cell cv"><span class="v tnum">{pvf(oc_o_wc, oc_c)}</span></div>'
         + '</div>') if cmo_merged else ''
+    cat_cx = '<div class="mx-cat cx">🚀 GuruSup CX <span>Customer Experience · inbound + outbound</span></div>'
+    cat_brain = '<div class="mx-cat brain">🧠 GuruSup Brain <span>outbound directo (Alex)</span></div>'
     sep_in = '<div class="mx-sep in">🟢 Inbound · por canal de adquisición</div>'
     sep_out = '<div class="mx-sep out">🟠 Outbound · fuentes no-inbound</div>' if cmo_merged else ''
     # BRAIN · oportunidades de relaciones estratégicas (sin embudo de contactos conectado)
@@ -2839,9 +2857,10 @@ def render_exec(d):
         '<div class="mxwrap"><div class="matrix">'
         '<div class="mx-head"><span>Canal · % s/total contactos</span><span>Contactos</span><span>Leads</span>'
         '<span>MQL</span><span>SQL</span><span>Oport. (negocio asoc.)</span><span>Contacto→Op.</span></div>'
+        + cat_cx
         + sep_in + mx_rows + mx_total
         + sep_out + mx_rows_out + mx_total_out
-        + sep_brain + mx_brain
+        + (cat_brain + sep_brain + mx_brain if brain_o else '')
         + g_total + '</div></div>')
 
     # ---------- Pestañas: ACUMULATIVO + snapshots mensuales estáticos ----------
@@ -2884,11 +2903,13 @@ def render_exec(d):
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
                 f'{cell(e["c"])}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{_mcell(e["o"], pe, "o")}'
                 f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
-        rows_h = '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"])
+        rows_h = ('<div class="mx-cat cx">🚀 GuruSup CX <span>Customer Experience · inbound + outbound</span></div>'
+                  '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"]))
         if mo["rows_out"]:
             rows_h += '<div class="mx-sep out">🟠 Outbound</div>' + "".join(_mrow(l, e, "mx-ob") for l, e in mo["rows_out"])
         if mo["brain"]["c"]:
-            rows_h += '<div class="mx-sep br">🧠 Brain</div>' + _mrow("🧠 Brain", mo["brain"], "mx-br")
+            rows_h += ('<div class="mx-cat brain">🧠 GuruSup Brain <span>outbound directo (Alex)</span></div>'
+                       '<div class="mx-sep br">🧠 Brain</div>' + _mrow("🧠 Brain", mo["brain"], "mx-br"))
         t = mo["tot"]
         tot_row = (
             '<div class="mx-row mx-gtot"><div class="c1"><span class="nm">TOTAL {}</span></div>'.format(esc(mo["label"]))
@@ -3223,7 +3244,10 @@ def render_exec(d):
   <div class="q">02 · ¿Dónde está cada contacto?</div>
   <h2 class="sh">Embudos por vía <span class="tot">· Inbound · Outbound · Brain</span></h2>
   <div class="sd">Desglose del embudo por vía. Cada columna es su volumen de <b>contactos</b> por etapa y el % <b>sobre su total de contactos</b>. El <b>pipeline de ventas es compartido</b>: inbound y outbound lo trabajan de forma conjunta.</div>
-  <div class="io3">
+  <div class="io3grp">
+   <div class="iogrp cx">
+    <div class="iogrp-h">🚀 GuruSup CX <span>Customer Experience</span></div>
+    <div class="iogrp-cols">
     <div class="iocol in">
       <div class="io-h">🟢 Pipeline de Inbound <span class="io-tot tnum">{fmt(total_nf)}</span></div>
       <div class="mf">{inb_fn}</div>
@@ -3234,15 +3258,22 @@ def render_exec(d):
       <div class="mf">{out_fn}</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("out_value",0)))) if ex.get("out_value") else "— (importes sin cargar)"}</span></div>
     </div>
+    </div>
+   </div>
+   <div class="iogrp brainbox">
+    <div class="iogrp-h">🧠 GuruSup Brain <span>outbound directo (Alex)</span></div>
+    <div class="iogrp-cols">
     <div class="iocol brain">
       <div class="io-h">🧠 Pipeline de Brain <span class="io-tot tnum">{fmt(brain_ct)}</span></div>
       <div class="mf">
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(brain_ct)}</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidad (negocio)</div><div class="mf-bar"><div class="mf-fill" style="width:{max(5, round(ex.get("brain_open",0)/(brain_ct or 1)*100))}%"></div></div><span class="mf-c">{pv(ex.get("brain_open",0), brain_ct or 1)}</span></div>
       </div>
-      <div class="pend" style="margin-top:12px">⏳ Embudo intermedio de <b>Brain / CX</b> (lead→MQL→SQL) pendiente de conectar; hoy se ven contactos y oportunidades.</div>
+      <div class="pend" style="margin-top:12px">⏳ Embudo intermedio de <b>Brain</b> (lead→MQL→SQL) pendiente de conectar; hoy se ven contactos y oportunidades.</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("brain_value",0)))) if ex.get("brain_value") else "— (importes sin cargar)"}</span></div>
     </div>
+    </div>
+   </div>
   </div>
 </section>
 
