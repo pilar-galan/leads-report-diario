@@ -2514,6 +2514,15 @@ details.chdeals .dl span{font-size:11px;background:rgba(104,209,245,.1);border:1
   background:linear-gradient(135deg,#123a2a,#0f2f32);border:1px solid var(--brand-d);border-left:4px solid var(--brand);
   box-shadow:0 8px 34px rgba(87,224,138,.18);font-size:14px;line-height:1.6;color:#eafff4}
 .strat .strat-i{font-size:34px;flex:0 0 auto}
+.lead-strat{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.ls-col{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line2);border-radius:16px;padding:18px 20px}
+.ls-col.b{border-color:rgba(255,202,92,.28)}
+.ls-h{font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:12px}
+.ls-list{list-style:none;margin:0;display:flex;flex-direction:column;gap:9px}
+.ls-list li{position:relative;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.ls-list li::before{content:"•";position:absolute;left:2px;color:var(--brand);font-weight:800}
+.ls-col.b .ls-list li::before{color:var(--warn)}
+@media(max-width:820px){.lead-strat{grid-template-columns:1fr}}
 .strat b{color:var(--brand)}
 .note{background:linear-gradient(150deg,rgba(111,240,162,.12),rgba(111,240,162,.02));border:1px solid var(--line2);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--ink2);margin-top:18px}
 .note b{color:var(--brand)}
@@ -3259,9 +3268,23 @@ def render_exec(d):
   <h2 class="sh">Estado de los contactos · etapa lead <span class="tot">· {fmt(d["origin"]["total"])}</span></h2>
   <div class="sd">Por qué origen / contenido han entrado (blog, calculadora, webinar, formulario, app…), con % sobre el total. «Lead Ads (paid)» es desplegable por red.</div>
   <div class="bars">{leads_html}</div>
-  <div class="strat">
-    <div class="strat-i">🌱→🎯</div>
-    <div><b>Qué hacemos con leads y MQL:</b> los <b>nutrimos con contenido de GuruSup</b> (nurturing) y un <b>lead score</b> que sube con cada acción, hasta que maduran a SQL. Si un lead <b>encaja con el perfil target</b> —aunque aún no llegue a 3.000 consultas/mes— saltamos una <b>alerta a ventas</b> para contactarle con la necesidad detectada según el <b>contenido que ha consumido</b>.</div>
+  <div class="lead-strat">
+    <div class="ls-col">
+      <div class="ls-h">🌱 Qué hacemos con los leads</div>
+      <ul class="ls-list">
+        <li><b>Nurturing</b> con contenido de GuruSup (ebooks, webinars, artículos) en <b>secuencias</b>.</li>
+        <li>Objetivo: <b>identificar y generar la necesidad</b> según lo que consume cada contacto.</li>
+        <li>Cuando encaja con el <b>perfil target</b>, salta <b>alerta a ventas</b> con la necesidad detectada.</li>
+      </ul>
+    </div>
+    <div class="ls-col b">
+      <div class="ls-h">🎯 Scoring · <span style="color:var(--warn)">en implementación</span></div>
+      <ul class="ls-list">
+        <li><b>Lead score</b> (interés/engagement) + <b>Fit score</b> (encaje con el cliente ideal).</li>
+        <li>Cada acción suma puntos: <b>abrir un mail</b>, <b>visitar la web</b>, <b>asistir a un webinar</b>…</li>
+        <li>Al llegar al <b>umbral</b>, el contacto <b>avanza de etapa</b> con criterio y de forma trazable.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
