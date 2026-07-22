@@ -3734,6 +3734,7 @@ def render_exec(d):
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
         </div>
+        <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización · 22 jul 2026:</b> los contactos de <b>&lt;3.000</b> y <b>«no sé»</b> ya no se descartan directo: pasan por una <b>2ª precualificación</b> con un nuevo campo de <b>volumen del equipo de soporte</b> — si tiene <b>&gt;5 personas</b>, pasan a <b>Agustín</b> y los trata; si no, van al <b>mail automatizado de descarte</b>.</div>
       </div>
     </details>
   </div>
