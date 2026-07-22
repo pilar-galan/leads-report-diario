@@ -1187,13 +1187,28 @@ def main():
     _now_cac = datetime.now(timezone.utc).astimezone(tz)
     # Media mensual desde MAYO (mes de mayor push de campañas), no desde enero
     _months_elapsed = round(((_now_cac.date() - date(2026, 5, 1)).days) / 30.44, 1) or 1
+    # Listas reales de oportunidades y clientes por canal de pago (nombres, desde el CRM)
+    def _cname_cac(c):
+        return (c.get("company") or c.get("firstname") or c.get("email") or "—").strip() or "—"
+    def _names(recs, minrank):
+        out = []
+        for c in recs:
+            if rank(c["lc"]) >= minrank:
+                nm = _cname_cac(c)
+                if nm and nm != "—" and nm not in out:
+                    out.append(nm)
+        return sorted(out, key=str.lower)
+    g_opp_list = _names(paid_google, 4); g_cli_list = _names(paid_google, 5)
+    s_opp_list = _names(paid_social, 4); s_cli_list = _names(paid_social, 5)
     _ads_platforms = [
-        {"name": "Google Ads", "icon": "🔍", "spend": 37781.20, "contactos": 183, "clientes": 6,
-         "opp": g_opp, "opp_note": ""},
-        {"name": "Meta Ads", "icon": "📣", "spend": 9993.77, "contactos": 71, "clientes": 0,
-         "opp": None, "opp_note": "social*"},
-        {"name": "LinkedIn Ads", "icon": "🔗", "spend": 10060.27, "contactos": 48, "clientes": 0,
-         "opp": None, "opp_note": "social*"},
+        {"name": "Google Ads", "icon": "🔍", "spend": 37781.20,
+         "opp": len(g_opp_list), "opp_list": g_opp_list, "cli": len(g_cli_list), "cli_list": g_cli_list,
+         "combined": False},
+        {"name": "Meta Ads", "icon": "📣", "spend": 9993.77,
+         "opp": len(s_opp_list), "opp_list": s_opp_list, "cli": len(s_cli_list), "cli_list": s_cli_list,
+         "combined": True},   # Meta+LinkedIn agrupados como Social Ads en el CRM
+        {"name": "LinkedIn Ads", "icon": "🔗", "spend": 10060.27,
+         "opp": None, "opp_list": [], "cli": None, "cli_list": [], "combined": True},
     ]
     _ads_total_spend = round(sum(p["spend"] for p in _ads_platforms), 2)
     _cac_data = {
@@ -1202,9 +1217,8 @@ def main():
         "ads_total_spend": _ads_total_spend,
         "ads_monthly_avg": round(_ads_total_spend / _months_elapsed),
         "months_elapsed": _months_elapsed,
-        "social_opp_combined": s_opp,      # Meta+LinkedIn oportunidades combinadas (CRM)
-        "ads_total_opp": g_opp + s_opp,    # oportunidades totales de ads (CRM)
-        "ads_total_cli": sum(p["clientes"] for p in _ads_platforms),
+        "ads_total_opp": len(g_opp_list) + len(s_opp_list),   # oportunidades totales de ads (CRM)
+        "ads_total_cli": len(g_cli_list) + len(s_cli_list),   # clientes totales de ads (CRM)
         "social": {"accounts": soc_accounts},
     }
 
@@ -2468,6 +2482,12 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .cac-badge.warn{color:var(--warn);background:rgba(255,202,92,.14);border:1px solid #a5741f}
 .cac-reach{margin-top:16px;padding:14px 16px;border-radius:14px;background:linear-gradient(120deg,rgba(111,240,162,.12),rgba(104,209,245,.08));border:1px solid var(--brand-d);font-size:12.5px;color:var(--ink2);line-height:1.6}
 .cac-reach-n{color:var(--brand);font-size:15px}
+.cac-det{display:inline-block}
+.cac-det>summary{list-style:none;cursor:pointer;font-variant-numeric:tabular-nums} .cac-det>summary::-webkit-details-marker{display:none}
+.cac-see{font-size:9px;font-weight:800;color:var(--brand);background:rgba(111,240,162,.14);border-radius:5px;padding:1px 5px;margin-left:3px}
+.cac-det[open]>summary .cac-see::after{content:" ▾"}
+.cac-names{margin-top:6px;text-align:right;display:flex;flex-direction:column;gap:3px;max-height:220px;overflow:auto}
+.cac-li{font-size:11px;font-weight:600;color:var(--ink2);background:rgba(255,255,255,.04);border-radius:6px;padding:3px 8px}
 @media(max-width:820px){.cac-ads-kpis{grid-template-columns:1fr 1fr}}
 .cac-sep{height:1px;background:var(--line);margin:16px 0}
 .cac-spendbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;margin-bottom:14px;border-radius:12px;background:rgba(255,202,92,.1);border:1px solid #a5741f}
@@ -3359,7 +3379,6 @@ def render_exec(d):
     _ads_total = _cac.get("ads_total_spend", 0)
     _ads_monthly = _cac.get("ads_monthly_avg", 0)
     _months_el = _cac.get("months_elapsed", 1)
-    _soc_comb = _cac.get("social_opp_combined", 0)
     _ads_opp = _cac.get("ads_total_opp", 0)
     _ads_cli = _cac.get("ads_total_cli", 0)
     # cuentas de social ads (detalle)
@@ -3367,20 +3386,25 @@ def render_exec(d):
     _acct_chips = "".join(
         f'<span class="cac-acct">{esc(str(nm))} <b>{fmt(n)}</b></span>' for nm, n in _accts[:5]) or \
         '<span class="cac-acct" style="opacity:.6">sin origen detallado</span>'
-    # filas por plataforma de ads: coste · oportunidades · clientes · veredicto (dinámico JS)
+    # celda clicable con la lista de nombres (oportunidades o clientes)
+    def _cac_cell(n, names, kind):
+        if n is None:   # LinkedIn: va combinado con Meta en «Social»
+            return '<td class="cac-num"><span class="cac-comb" style="opacity:.55">incl. Social*</span></td>'
+        if not names:
+            return f'<td class="cac-num">{fmt(n)}</td>'
+        items = "".join(f'<div class="cac-li">{esc(nm)}</div>' for nm in names)
+        return (f'<td class="cac-num"><details class="cac-det"><summary>{fmt(n)} <span class="cac-see">ver</span></summary>'
+                f'<div class="cac-names">{items}</div></details></td>')
     def _cac_row(p):
-        opp = p.get("opp")
-        opp_txt = (f'{fmt(opp)}' if opp is not None else
-                   f'<span class="cac-comb">{fmt(_soc_comb)}<small> Meta+LinkedIn*</small></span>' if p.get("opp_note") == "social*" else "—")
-        # las oportunidades combinadas solo se muestran una vez (en Meta); LinkedIn hereda la nota
-        if p.get("name") == "LinkedIn Ads":
-            opp_txt = '<span class="cac-comb" style="opacity:.55">incl. arriba*</span>'
+        nm = p.get("name", "")
+        cli_extra = ' · Social = Meta+LinkedIn*' if p.get("name") == "Meta Ads" else ''
+        label = esc(nm) + ('<span class="cac-sub">agrupa Meta + LinkedIn (CRM)</span>' if p.get("name") == "Meta Ads" else '')
         return (
             f'<tr data-cost="{round(p.get("spend",0))}">'
-            f'<td class="cac-ch"><b>{p.get("icon","")} {esc(p.get("name",""))}</b></td>'
+            f'<td class="cac-ch"><b>{p.get("icon","")} {label}</b></td>'
             f'<td class="cac-num">{fmt(round(p.get("spend",0)))} €</td>'
-            f'<td class="cac-num">{opp_txt}</td>'
-            f'<td class="cac-num">{fmt(p.get("clientes",0))}</td>'
+            f'{_cac_cell(p.get("opp"), p.get("opp_list", []), "opp")}'
+            f'{_cac_cell(p.get("cli"), p.get("cli_list", []), "cli")}'
             f'<td class="cac-verd"><span class="cac-badge">—</span></td></tr>')
     _rows_cac = "".join(_cac_row(p) for p in _plats)
     cac_html = f"""
@@ -3431,7 +3455,7 @@ def render_exec(d):
       </tbody>
     </table>
     <div class="cac-reach" id="cacReach"></div>
-    <div class="cac-foot">* <b>Meta + LinkedIn</b> se agrupan como «Social Ads» en el CRM, por eso sus <b>{fmt(_soc_comb)} oportunidades</b> van combinadas. <b>Oportunidades</b> = contactos en etapa oportunidad con negocio · <b>Clientes</b> = clientes atribuidos a cada plataforma (dato de la plataforma). El veredicto <b>¿Cabe en CAC?</b> compara el <b>coste por cliente</b> de cada plataforma con el techo de CAC que fijas arriba.</div>
+    <div class="cac-foot">* <b>Meta + LinkedIn</b> se agrupan como «Social Ads» en el CRM: sus oportunidades y clientes van <b>combinados</b> en la fila de Meta. <b>Pulsa un número</b> para ver los nombres. <b>Oportunidades</b> = contactos en etapa oportunidad con negocio · <b>Clientes</b> = contactos atribuidos al canal de pago que han llegado a etapa cliente en el CRM (no el conteo de la plataforma de Ads, que puede diferir). El veredicto <b>¿Cabe en CAC?</b> compara el <b>coste por cliente</b> de cada plataforma con el techo de CAC que fijas arriba.</div>
   </div>
   <script>(function(){{
     var t=document.getElementById('cacTicket'),m=document.getElementById('cacMargin'),pay=document.getElementById('cacPay');
