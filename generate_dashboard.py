@@ -1482,7 +1482,8 @@ def main():
         # Orden: inbound primero, luego outbound, luego brain
         rows_in = sorted([(l, e) for l, e in dd.items() if l in inb_labels], key=lambda x: -x[1]["c"])
         rows_out = sorted([(l, e) for l, e in dd.items() if l not in inb_labels], key=lambda x: -x[1]["c"])
-        brain_row = {"c": b_c, "l": 0, "m": 0, "s": 0, "o": b_o}
+        # Brain: relaciones que aún no son oportunidad = etapa pre-oportunidad (lead), para que c = l + o
+        brain_row = {"c": b_c, "l": max(0, b_c - b_o), "m": 0, "s": 0, "o": b_o}
         tot = {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0}
         for _, e in rows_in + rows_out:
             for k in tot: tot[k] += e[k]
