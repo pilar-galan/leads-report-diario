@@ -1198,8 +1198,18 @@ def main():
                 if nm and nm != "—" and nm not in out:
                     out.append(nm)
         return sorted(out, key=str.lower)
-    g_opp_list = _names(paid_google, 4); g_cli_list = _names(paid_google, 5)
-    s_opp_list = _names(paid_social, 4); s_cli_list = _names(paid_social, 5)
+    # Oportunidades = negocios REALES en el pipeline de VENTAS atribuidos a cada plataforma
+    # (no contactos con lifecycle "oportunidad": eso incluía tests como "demo" y deals de otros pipelines)
+    def _deal_names(match):
+        out = []
+        for dl in open_deals:
+            if dl.get("is_sales") and match in dl.get("channel", ""):
+                nm = dl.get("name", "—")
+                if nm and nm != "—" and nm not in out:
+                    out.append(nm)
+        return sorted(out, key=str.lower)
+    g_opp_list = _deal_names("Google Ads"); g_cli_list = _names(paid_google, 5)
+    s_opp_list = _deal_names("Social Ads"); s_cli_list = _names(paid_social, 5)
     _ads_platforms = [
         {"name": "Google Ads", "icon": "🔍", "spend": 37781.20,
          "opp": len(g_opp_list), "opp_list": g_opp_list, "cli": len(g_cli_list), "cli_list": g_cli_list,
@@ -2614,7 +2624,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .sqlvl3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
 .lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
 .lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
-.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
+.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28);grid-column:1/-1}
 .lvl .ph{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 .lvl-subh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin:16px 0 4px}
 .vflow{display:flex;flex-direction:column;gap:5px;margin-top:6px}
@@ -3207,6 +3217,20 @@ def render_exec(d):
     ag_desc = pq.get("ag_descartados", 0)
     ag_split = (ag_contact + ag_desc) or 1
     ag_opp_n = pq.get("ag_opp", 0)
+    # Lista clicable de las oportunidades de Agustín (nombre · canal · etapa)
+    _agopps = pq.get("ag_opp_list", []) or []
+    _ag_opp_items = "".join(
+        f'<div class="agopp-item"><span class="agopp-nm">{esc(str(nm))}</span>'
+        f'<span class="agopp-st">{esc(str(ch))}{" · " if ch else ""}{esc(str(stg))}</span></div>'
+        for nm, stg, ch in _agopps)
+    if ag_opp_n and _agopps:
+        ag_opp_step = (
+            f'<details class="vdet vopp"><summary class="vstep ok"><b>🎯 {ag_opp_n}</b>'
+            f'<span>oportunidad{"es" if ag_opp_n != 1 else ""} · {pv(ag_opp_n, ag_contact or 1)} de los gestionados</span>'
+            f'<span class="vchev">▶ ver</span></summary><div class="agopp-list">{_ag_opp_items}</div></details>')
+    else:
+        ag_opp_step = (f'<div class="vstep ok"><b>🎯 {ag_opp_n}</b>'
+                       f'<span>oportunidad · {pv(ag_opp_n, ag_contact or 1)} de los gestionados</span></div>')
 
     # ---------- 9 · MOTIVOS DESCARTE ----------
     desc = d["descarte"]
@@ -3729,7 +3753,7 @@ def render_exec(d):
             <div class="vfork-tag ok">✅ En proceso de contacto · <b>{pv(ag_contact, ag_split)}</b></div>
             <div class="vstep"><b>{ag_contact}</b><span>contactados · aún sin oportunidad</span></div>
             <div class="varr">↓ <span>{pv(ag_opp_n, ag_contact or 1)} conversión</span></div>
-            <div class="vstep ok"><b>🎯 {ag_opp_n}</b><span>oportunidad · {pv(ag_opp_n, ag_contact or 1)} de los gestionados</span></div>
+            {ag_opp_step}
           </div>
           <div class="vfork-col right">
             <div class="vfork-tag bad">🔴 Descartados · <b>{pv(ag_desc, ag_split)}</b></div>
@@ -3744,7 +3768,7 @@ def render_exec(d):
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
         </div>
-        <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización · 22 jul 2026:</b> los contactos de <b>&lt;3.000</b> y <b>«no sé»</b> ya no se descartan directo: pasan por una <b>2ª precualificación</b> con un nuevo campo de <b>volumen del equipo de soporte</b> — si tiene <b>&gt;5 personas</b>, pasan a <b>Agustín</b> y los trata; si no, van al <b>mail automatizado de descarte</b>.</div>
+        <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización del workflow · 22 jul 2026:</b> a <b>Agustín</b> solo llegan los contactos que han <b>solicitado demo</b> y tienen <b>≥3.000 consultas/mes</b> o un <b>equipo de soporte de &gt;5 personas</b>. El resto se <b>descalifica automáticamente por mail</b>.</div>
       </div>
     </details>
   </div>
