@@ -1446,14 +1446,17 @@ def main():
                    ("feb 2026", "2026-02-28"), ("ene 2026", "2026-01-31")]
     def _cname(c):
         return (c.get("company") or c.get("firstname") or c.get("email") or "—").strip() or "—"
-    def _month_snap(T):
+    def _month_snap(T, since=None):
         # Buckets EXCLUSIVOS: cada contacto cuenta en UNA sola etapa (la más alta a fin de mes).
         # Oportunidad solo si etapa oportunidad + negocio (deal) asociado; si no, cae a SQL.
+        # since=None → acumulado hasta T (histórico). since=fecha → solo contactos creados en [since, T].
         dd = {}
         opp_list = []
         def _acc(recs, chl):
             for c in recs:
                 if c["created"] > T:
+                    continue
+                if since and c["created"] < since:
                     continue
                 lbl = chl(c)
                 e = dd.setdefault(lbl, {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0})
@@ -1468,10 +1471,12 @@ def main():
         inb_labels = set(dd.keys())
         _acc(hist_out_fun, _ochl)    # outbound
         # Brain (relaciones estratégicas): contactos y oportunidad real por fecha de creación del negocio
-        b_c = sum(1 for r in brain_month_recs if r["created"] and r["created"] <= T)
-        b_o = sum(1 for r in brain_month_recs if r["opp"] and r["created"] and r["created"] <= T)
+        def _bwin(r):
+            return r["created"] and r["created"] <= T and (not since or r["created"] >= since)
+        b_c = sum(1 for r in brain_month_recs if _bwin(r))
+        b_o = sum(1 for r in brain_month_recs if r["opp"] and _bwin(r))
         for r in brain_month_recs:
-            if r["opp"] and r["created"] and r["created"] <= T:
+            if r["opp"] and _bwin(r):
                 opp_list.append(("🧠 Brain", r["name"].replace("GuruSup Brain · ", "")))
         # Orden: inbound primero, luego outbound, luego brain
         rows_in = sorted([(l, e) for l, e in dd.items() if l in inb_labels], key=lambda x: -x[1]["c"])
@@ -1487,6 +1492,10 @@ def main():
     _MES_ES = ["", "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
     _now_es = datetime.now(timezone.utc).astimezone(tz)
     exec_extra["cur_month_label"] = f'{_MES_ES[_now_es.month]} {_now_es.year}'
+    # Snapshot del MES ACTUAL: contactos NUEVOS del mes en curso (1 del mes → hoy), buckets exclusivos
+    _cur_start = _now_es.strftime("%Y-%m-01")
+    _cur_end = _now_es.strftime("%Y-%m-%d")
+    exec_extra["cur_month_snap"] = _month_snap(_cur_end, since=_cur_start)
     # Oportunidades OUTBOUND con negocio asociado, por fuente
     deals_by_chan_out = {}
     for dl in exec_opp_out:
@@ -3032,32 +3041,29 @@ def render_exec(d):
                 f'{sign}{fmt(abs(cur - prev))} · {abs(round(d_))}%</span>')
     cmonths = ex.get("chan_months", [])
     _cur_lbl = ex.get("cur_month_label", "")
-    tabs_btns = '<button class="mxtab active" data-mx="acum">MES ACTUAL{}</button>'.format(
-        f' · {esc(_cur_lbl)}' if _cur_lbl else '')
-    panels = f'<div class="mxpanel active" id="mx-acum">{matrix_html}</div>'
-    for idx, mo in enumerate(cmonths):
-        mid = f'm{idx}'
-        tabs_btns += f'<button class="mxtab" data-mx="{mid}">{esc(mo["label"])}</button>'
-        prev = cmonths[idx + 1]["tot"] if idx + 1 < len(cmonths) else None
-        # Mapa del mes anterior por canal (para % de crecimiento por canal y etapa)
+    _cur_snap = ex.get("cur_month_snap")
+    # Render de un panel-snapshot (buckets EXCLUSIVOS: Contactos = Lead+MQL+SQL+Oportunidad por fuente)
+    def _snap_panel(mo, prev_snap, label, pid, active=False, head_lbl="Canal · etapa a fin de mes"):
+        prev = prev_snap["tot"] if prev_snap else None
         prev_map = {}
-        if idx + 1 < len(cmonths):
-            pm = cmonths[idx + 1]
-            for l, e in pm["rows_in"] + pm["rows_out"]:
+        if prev_snap:
+            for l, e in prev_snap["rows_in"] + prev_snap["rows_out"]:
                 prev_map[l] = e
-            prev_map["🧠 Brain"] = pm["brain"]
+            prev_map["🧠 Brain"] = prev_snap["brain"]
         _allrows = mo["rows_in"] + mo["rows_out"]
         mmax = max([e["c"] for _, e in _allrows] + [mo["brain"]["c"]], default=0) or 1
+        _tc_all = mo["tot"]["c"] or 1   # total contactos del panel (inbound+outbound+brain) para el %
         def _mcell(v, pe, key, cls=""):
             arrow = _mom(v, pe[key]) if pe is not None else ''
             return f'<div class="mx-cell {cls}"><span class="v tnum">{fmt(v)}</span>{arrow}</div>'
         def _mrow(lbl, e, cls=""):
             bw = round(e["c"] / mmax * 100)
             pe = prev_map.get(lbl)
+            c_cell = f'<div class="mx-cell"><span class="v tnum">{fmt(e["c"])}</span><span class="p">{pv(e["c"], _tc_all)}</span></div>'
             return (
                 f'<div class="mx-row {cls}"><div class="c1"><span class="nm">{esc(lbl)}</span>'
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
-                f'{cell(e["c"])}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{_mcell(e["o"], pe, "o")}'
+                f'{c_cell}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{_mcell(e["o"], pe, "o")}'
                 f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
         rows_h = ('<div class="mx-cat cx">🚀 GuruSup CX <span>Customer Experience · inbound + outbound</span></div>'
                   '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"]))
@@ -3068,7 +3074,7 @@ def render_exec(d):
                        '<div class="mx-sep br">🧠 Brain</div>' + _mrow("🧠 Brain", mo["brain"], "mx-br"))
         t = mo["tot"]
         tot_row = (
-            '<div class="mx-row mx-gtot"><div class="c1"><span class="nm">TOTAL {}</span></div>'.format(esc(mo["label"]))
+            '<div class="mx-row mx-gtot"><div class="c1"><span class="nm">TOTAL {}</span></div>'.format(esc(label))
             + f'<div class="mx-cell"><span class="v tnum">{fmt(t["c"])}</span>{_mom(t["c"], prev["c"] if prev else None)}</div>'
             + f'<div class="mx-cell"><span class="v tnum">{fmt(t["l"])}</span>{_mom(t["l"], prev["l"] if prev else None)}</div>'
             + f'<div class="mx-cell"><span class="v tnum">{fmt(t["m"])}</span>{_mom(t["m"], prev["m"] if prev else None)}</div>'
@@ -3077,18 +3083,31 @@ def render_exec(d):
             + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t["o"], t["c"])}</span></div></div>')
         opp_items = "".join(f'<span>{esc(nm)} <small>· {esc(lbl)}</small></span>' for lbl, nm in mo["opp_list"])
         opp_det = (f'<details class="razd" style="margin-top:12px"><summary><span class="chev">▶</span> '
-                   f'🎯 Ver las {fmt(len(mo["opp_list"]))} oportunidades de {esc(mo["label"])}</summary>'
+                   f'🎯 Ver las {fmt(len(mo["opp_list"]))} oportunidades de {esc(label)}</summary>'
                    f'<div class="mx-deals">{opp_items or "—"}</div></details>') if mo["opp_list"] else ''
-        panels += (
-            f'<div class="mxpanel" id="mx-{mid}">'
+        return (
+            f'<div class="mxpanel{" active" if active else ""}" id="mx-{pid}">'
             f'<div class="mxwrap"><div class="matrix">'
-            '<div class="mx-head"><span>Canal · etapa a fin de mes</span><span>Contactos</span><span>Solo Lead</span>'
+            f'<div class="mx-head"><span>{head_lbl}</span><span>Contactos</span><span>Solo Lead</span>'
             '<span>Solo MQL</span><span>Solo SQL</span><span>Oport. (deal)</span><span>Contacto→Op.</span></div>'
             + rows_h + tot_row + '</div></div>' + opp_det + '</div>')
+    # Pestaña 1 = MES ACTUAL (contactos nuevos del mes en curso, buckets exclusivos)
+    tabs_btns = '<button class="mxtab active" data-mx="acum">MES ACTUAL{}</button>'.format(
+        f' · {esc(_cur_lbl)}' if _cur_lbl else '')
+    _prev_for_cur = cmonths[0] if cmonths else None   # mes cerrado más reciente (jun) para la flecha MoM
+    panels = _snap_panel(_cur_snap, _prev_for_cur, _cur_lbl or "mes actual", "acum",
+                         active=True, head_lbl="Canal · nuevos este mes") if _cur_snap else \
+             f'<div class="mxpanel active" id="mx-acum">{matrix_html}</div>'
+    for idx, mo in enumerate(cmonths):
+        mid = f'm{idx}'
+        tabs_btns += f'<button class="mxtab" data-mx="{mid}">{esc(mo["label"])}</button>'
+        prev_snap = cmonths[idx + 1] if idx + 1 < len(cmonths) else None
+        panels += _snap_panel(mo, prev_snap, mo["label"], mid)
     matrix_html = (
         '<div class="mxtabs">' + tabs_btns + '</div>'
-        '<div class="mxnote">Los meses son <b>estáticos</b>: cada contacto cuenta en <b>una sola etapa</b> (en la que estaba a fin de ese mes). '
-        '«Oportunidad» = contacto en etapa oportunidad <b>con negocio (deal) asociado</b> · <b>pulsa</b> para ver cuáles. Las flechas comparan cada total con el mes anterior.</div>'
+        '<div class="mxnote"><b>MES ACTUAL</b> = contactos <b>nuevos del mes en curso</b> (del 1 a hoy). Los meses cerrados son <b>estáticos</b>. '
+        'En todas las pestañas cada contacto cuenta en <b>una sola etapa</b>, así que <b>Lead + MQL + SQL + Oportunidad = Contactos</b> de cada fuente. '
+        '«Oportunidad» = contacto en etapa oportunidad <b>con negocio (deal) asociado</b> · <b>pulsa</b> para ver cuáles. Las flechas comparan con el mes anterior.</div>'
         + panels
         + '<script>(function(){var ts=document.querySelectorAll(".mxtab");ts.forEach(function(b){b.addEventListener("click",function(){'
         'ts.forEach(function(x){x.classList.remove("active")});b.classList.add("active");'
