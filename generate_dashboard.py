@@ -1467,7 +1467,7 @@ def main():
                     e["o"] += 1; opp_list.append((lbl, _cname(c)))
                 elif r >= 3: e["s"] += 1
                 elif r == 2: e["m"] += 1
-                elif r >= 1: e["l"] += 1
+                else: e["l"] += 1   # r<=1: lead o contacto en bruto sin etapa registrada → cuenta como lead
         _acc(hist_nf, _chl)          # inbound
         inb_labels = set(dd.keys())
         _acc(hist_out_fun, _ochl)    # outbound
