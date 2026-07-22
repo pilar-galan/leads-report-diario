@@ -1441,9 +1441,10 @@ def main():
             if dts and dts <= T:
                 r = s if s > r else r
         return r
-    _MONTH_ENDS = [("jun 2026", "2026-06-30"), ("may 2026", "2026-05-31"),
-                   ("abr 2026", "2026-04-30"), ("mar 2026", "2026-03-31"),
-                   ("feb 2026", "2026-02-28"), ("ene 2026", "2026-01-31")]
+    # (label, inicio, fin): cada mes es una COHORTE de contactos creados ESE mes (no acumulado)
+    _MONTH_ENDS = [("jun 2026", "2026-06-01", "2026-06-30"), ("may 2026", "2026-05-01", "2026-05-31"),
+                   ("abr 2026", "2026-04-01", "2026-04-30"), ("mar 2026", "2026-03-01", "2026-03-31"),
+                   ("feb 2026", "2026-02-01", "2026-02-28"), ("ene 2026", "2026-01-01", "2026-01-31")]
     def _cname(c):
         return (c.get("company") or c.get("firstname") or c.get("email") or "—").strip() or "—"
     def _month_snap(T, since=None):
@@ -1487,7 +1488,7 @@ def main():
             for k in tot: tot[k] += e[k]
         for k in tot: tot[k] += brain_row[k]
         return {"rows_in": rows_in, "rows_out": rows_out, "brain": brain_row, "tot": tot, "opp_list": opp_list}
-    chan_months = [{"label": lbl, **_month_snap(T)} for lbl, T in _MONTH_ENDS]
+    chan_months = [{"label": lbl, **_month_snap(end, since=start)} for lbl, start, end in _MONTH_ENDS]
     exec_extra["chan_months"] = chan_months
     _MES_ES = ["", "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
     _now_es = datetime.now(timezone.utc).astimezone(tz)
@@ -2560,6 +2561,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .mxtab.active{background:var(--brand);color:#04120b;border-color:var(--brand)}
 .mxnote{font-size:11px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 .mxpanel{display:none} .mxpanel.active{display:block}
+.mx-imp-note{font-size:10.5px;color:var(--warn);margin-top:8px;line-height:1.5;border-top:1px dashed #a5741f;padding-top:6px}
 .mom{display:block;font-size:9.5px;font-weight:800;margin-top:2px} .mom.up{color:var(--brand)} .mom.down{color:var(--bad)}
 .mx-sep.br{color:var(--violet)}
 .mx-row.mx-br{background:linear-gradient(165deg,rgba(40,30,55,.4),rgba(25,20,40,.3));border-color:#3f3560}
@@ -3081,10 +3083,17 @@ def render_exec(d):
             + f'<div class="mx-cell hi"><span class="v tnum">{fmt(t["s"])}</span>{_mom(t["s"], prev["s"] if prev else None)}</div>'
             + f'<div class="mx-cell"><span class="v tnum">{fmt(t["o"])}</span>{_mom(t["o"], prev["o"] if prev else None)}</div>'
             + f'<div class="mx-cell cv"><span class="v tnum">{pvf(t["o"], t["c"])}</span></div></div>')
-        opp_items = "".join(f'<span>{esc(nm)} <small>· {esc(lbl)}</small></span>' for lbl, nm in mo["opp_list"])
+        _n_imp = sum(1 for lbl, _ in mo["opp_list"] if "importaci" in lbl.lower())
+        def _oppitem(lbl, nm):
+            imp = "importaci" in lbl.lower()
+            star = ' <b style="color:var(--warn)">*importación</b>' if imp else ''
+            return f'<span>{esc(nm)} <small>· {esc(lbl)}</small>{star}</span>'
+        opp_items = "".join(_oppitem(lbl, nm) for lbl, nm in mo["opp_list"])
+        imp_note = (f'<div class="mx-imp-note">* {fmt(_n_imp)} de estas «oportunidades» son <b>importaciones</b> '
+                    f'(datos cargados en bloque, no oportunidades reales de venta): conviene depurarlas.</div>') if _n_imp else ''
         opp_det = (f'<details class="razd" style="margin-top:12px"><summary><span class="chev">▶</span> '
-                   f'🎯 Ver las {fmt(len(mo["opp_list"]))} oportunidades de {esc(label)}</summary>'
-                   f'<div class="mx-deals">{opp_items or "—"}</div></details>') if mo["opp_list"] else ''
+                   f'🎯 Ver las {fmt(len(mo["opp_list"]))} oportunidades generadas en {esc(label)}</summary>'
+                   f'<div class="mx-deals">{opp_items or "—"}</div>{imp_note}</details>') if mo["opp_list"] else ''
         return (
             f'<div class="mxpanel{" active" if active else ""}" id="mx-{pid}">'
             f'<div class="mxwrap"><div class="matrix">'
@@ -3105,9 +3114,9 @@ def render_exec(d):
         panels += _snap_panel(mo, prev_snap, mo["label"], mid)
     matrix_html = (
         '<div class="mxtabs">' + tabs_btns + '</div>'
-        '<div class="mxnote"><b>MES ACTUAL</b> = contactos <b>nuevos del mes en curso</b> (del 1 a hoy). Los meses cerrados son <b>estáticos</b>. '
-        'En todas las pestañas cada contacto cuenta en <b>una sola etapa</b>, así que <b>Lead + MQL + SQL + Oportunidad = Contactos</b> de cada fuente. '
-        '«Oportunidad» = contacto en etapa oportunidad <b>con negocio (deal) asociado</b> · <b>pulsa</b> para ver cuáles. Las flechas comparan con el mes anterior.</div>'
+        '<div class="mxnote">Cada pestaña es una <b>cohorte del mes</b>: cuenta solo los <b>contactos generados ese mes</b> (MES ACTUAL = del 1 a hoy) y su etapa. '
+        'Cada contacto cuenta en <b>una sola etapa</b>, así que <b>Lead + MQL + SQL + Oportunidad = Contactos</b> de cada fuente. '
+        'Las <b>oportunidades son las generadas ese mes</b> (no se arrastran de meses anteriores) · <b>pulsa</b> para ver cuáles. Las flechas comparan con el mes anterior.</div>'
         + panels
         + '<script>(function(){var ts=document.querySelectorAll(".mxtab");ts.forEach(function(b){b.addEventListener("click",function(){'
         'ts.forEach(function(x){x.classList.remove("active")});b.classList.add("active");'
