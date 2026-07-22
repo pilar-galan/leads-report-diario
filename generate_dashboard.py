@@ -686,7 +686,7 @@ def main():
     ], ["email", "firstname", "company", "lifecyclestage", "hs_analytics_source",
         "hs_analytics_source_data_1", "revision_ventas", "estado_sql_consultoria",
         "hs_lead_status", "createdate", "recent_conversion_event_name",
-        "first_conversion_event_name", "fuente_webinar", "preferencia_canal_de_contacto",
+        "first_conversion_event_name", "fuente_webinar", "webinarasistio", "preferencia_canal_de_contacto",
         "razon_descarte_sql", "numero_de_conversaciones__inbound", "volumen_de_consultas_al_mes",
         "phone", "mobilephone", "hubspot_owner_id",
         "hs_v2_date_entered_lead", "hs_v2_date_entered_marketingqualifiedlead",
@@ -747,6 +747,7 @@ def main():
             "created_full": p.get("createdate") or "",
             "conv": p.get("recent_conversion_event_name") or p.get("first_conversion_event_name") or "",
             "webinar": p.get("fuente_webinar") or "",
+            "web_asis": str(p.get("webinarasistio") or "").lower() == "true",
             "canal_pref": p.get("preferencia_canal_de_contacto") or "",
             "razon": p.get("razon_descarte_sql") or "",
             "num_conv": p.get("numero_de_conversaciones__inbound") or "",
@@ -1473,6 +1474,10 @@ def main():
                 e = dd.setdefault(lbl, {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0})
                 e["c"] += 1
                 r = _rank_at(c, T)
+                # Asistentes a webinar = MQL (asistir es acción de consideración), aunque en HubSpot
+                # se quedaran en «lead» por no haberse etiquetado. Solo sube leads, no baja etapas altas.
+                if c.get("web_asis") and r < 2:
+                    r = 2
                 if r >= 4 and c.get("deals", 0) > 0:
                     e["o"] += 1; opp_list.append((lbl, _cname(c)))
                 elif r >= 3: e["s"] += 1
