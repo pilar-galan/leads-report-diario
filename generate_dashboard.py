@@ -1424,7 +1424,7 @@ def main():
             ch, cnt = mchan[mo2].most_common(1)[0]
             extra = ' — es una <b>importación</b>, no captación real' if ch == "Importaciones" else ''
             return (f'📈 <b>Salto de {mes1} a {mes2}</b> (+{jump[0]}), sobre todo por <b>{esc(ch)}</b>'
-                    f'{extra}. Cuenta por fecha de creación, no por evolución.')
+                    f'{extra}.')
         # 2) Pico puntual vs la media
         mo_max = max(mtot, key=lambda m: mtot[m]); n = mtot[mo_max]; mes = MESES[int(mo_max[5:7]) - 1]
         if n >= max(med * 1.5, med + 3):
