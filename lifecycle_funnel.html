@@ -5,501 +5,855 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GuruSup · Lifecycle Funnel</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0c1b15; --bg2:#10251b; --card:#183426; --card2:#13291e;
-  --line:#2c5443; --line2:#3a6b54;
-  --ink:#f2fff8; --ink2:#bcdccd; --mut:#83a593;
-  --brand:#6ff0a2; --brand-2:#57e08a; --brand-d:#2bb673; --brand-deep:#0f4a30;
-  --ok:#57e08a; --warn:#ffca5c; --bad:#ff7189; --sky:#68d1f5; --violet:#c8a6ff;
-  /* colores por etapa del lifecycle */
-  --st-lead:#6ff0a2; --st-mql:#68d1f5; --st-sql:#ffca5c;
-  --st-opp:#c8a6ff; --st-cus:#34d399; --st-churn:#ff7189;
-}
-html{font-size:15px;-webkit-text-size-adjust:100%}
-body{background:var(--bg);color:var(--ink);line-height:1.55;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-  background-image:
-    radial-gradient(1200px 560px at 80% -12%,rgba(111,240,162,.16),transparent 62%),
-    radial-gradient(900px 500px at 2% 3%,rgba(104,209,245,.08),transparent 55%),
-    linear-gradient(180deg,#0e2019 0%,#0c1b15 40%);
-  background-attachment:fixed}
-.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
-h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
+  :root{
+    --paper:#F4F9F6;--surface:#FFFFFF;--surface-2:#FAFDFB;--ink:#0E1613;--muted:#495A52;
+    --line:#E1EAE4;--green:#0FA968;--green-bright:#17C77C;--green-deep:#0A472F;--green-soft:#E6F6EE;
+    --salmon:#F97A57;--salmon-soft:#FCE7DF;
+    --red:#D64550;--red-soft:#FCEAEA;
+    --shadow-sm:0 1px 2px rgba(10,50,32,.05);
+    --shadow:0 2px 6px rgba(10,50,32,.05),0 12px 34px rgba(10,50,32,.07);
+    --shadow-lg:0 26px 62px rgba(10,50,32,.13);
+    --radius:20px;
+    --grad:linear-gradient(115deg,var(--green-deep),var(--green) 55%,var(--green-bright));
+    --font-display:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,sans-serif;
+    --font-body:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --step--1:clamp(.8rem,.78rem + .1vw,.86rem);
+    --step-0:clamp(1rem,.97rem + .16vw,1.1rem);
+    --step-1:clamp(1.18rem,1.06rem + .5vw,1.42rem);
+    --step-2:clamp(1.45rem,1.2rem + 1vw,2rem);
+    --step-3:clamp(1.9rem,1.45rem + 2.1vw,3.1rem);
+    --step-4:clamp(2.7rem,1.9rem + 3.9vw,4.9rem);
+    --step-num:clamp(1.5rem,1.2rem + 1.3vw,2.2rem);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{--paper:#0A110E;--surface:#111A15;--surface-2:#0E1611;--ink:#EAF2ED;--muted:#A6BAAF;--line:#21302A;--green:#34D98C;--green-bright:#57E8A4;--green-deep:#B4F2D2;--green-soft:#12261C;--salmon:#FF9878;--salmon-soft:#2A1B15;--shadow-sm:0 1px 2px rgba(0,0,0,.4);--shadow:0 2px 6px rgba(0,0,0,.35),0 14px 40px rgba(0,0,0,.4);--shadow-lg:0 26px 70px rgba(0,0,0,.55);--grad:linear-gradient(115deg,#0C3B28,var(--green) 55%,var(--green-bright));}
+  }
+  :root[data-theme="light"]{--paper:#F4F9F6;--surface:#FFFFFF;--surface-2:#FAFDFB;--ink:#0E1613;--muted:#495A52;--line:#E1EAE4;--green:#0FA968;--green-bright:#17C77C;--green-deep:#0A472F;--green-soft:#E6F6EE;--salmon:#F97A57;--salmon-soft:#FCE7DF;--shadow-sm:0 1px 2px rgba(10,50,32,.05);--shadow:0 2px 6px rgba(10,50,32,.05),0 12px 34px rgba(10,50,32,.07);--shadow-lg:0 26px 62px rgba(10,50,32,.13);--grad:linear-gradient(115deg,var(--green-deep),var(--green) 55%,var(--green-bright));}
+  :root[data-theme="dark"]{--paper:#0A110E;--surface:#111A15;--surface-2:#0E1611;--ink:#EAF2ED;--muted:#A6BAAF;--line:#21302A;--green:#34D98C;--green-bright:#57E8A4;--green-deep:#B4F2D2;--green-soft:#12261C;--salmon:#FF9878;--salmon-soft:#2A1B15;--shadow-sm:0 1px 2px rgba(0,0,0,.4);--shadow:0 2px 6px rgba(0,0,0,.35),0 14px 40px rgba(0,0,0,.4);--shadow-lg:0 26px 70px rgba(0,0,0,.55);--grad:linear-gradient(115deg,#0C3B28,var(--green) 55%,var(--green-bright));}
 
-/* ---------- Header / hero ---------- */
-.xhead{padding:34px 0 8px}
-.xtop{display:flex;align-items:center;gap:14px;margin-bottom:26px;flex-wrap:wrap}
-.xbrand{font-size:21px;font-weight:800;letter-spacing:-.02em}
-.xbrand b{color:var(--brand)} .xbrand i{color:var(--brand);font-style:normal}
-.tag{font-size:11px;color:var(--ink2);border:1px solid var(--line2);padding:6px 12px;border-radius:999px;background:rgba(111,240,162,.05);font-weight:600}
-.xhead h1{font-size:clamp(30px,5vw,50px);font-weight:800;margin-bottom:12px}
-.xhead h1 span{color:var(--brand);text-shadow:0 0 34px rgba(111,240,162,.4)}
-.xhead .lead{color:var(--ink2);font-size:clamp(15px,1.9vw,18px);line-height:1.62;max-width:760px;
-  text-align:justify;text-justify:inter-word;text-wrap:pretty}
-@media(max-width:640px){.xhead .lead{text-align:left}}
-.pill-note{display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:12px 18px;border-radius:14px;
-  background:linear-gradient(120deg,rgba(111,240,162,.14),rgba(104,209,245,.08));
-  border:1px solid var(--brand-d);font-size:14px;font-weight:700;color:var(--ink);box-shadow:0 0 34px rgba(111,240,162,.1)}
-.pill-note .em{font-size:19px}
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:var(--step-0);line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4.5vw,52px);}
+  section{padding-block:clamp(42px,6vw,80px);scroll-margin-top:20px;}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.05;text-wrap:balance;margin:0;letter-spacing:-.015em;}
+  p{text-wrap:pretty;}
+  em{font-style:normal;color:var(--green);font-weight:600;}
+  .dot{display:inline-block;width:.44em;height:.44em;border-radius:50%;background:var(--green);vertical-align:baseline;margin-left:.12em;}
 
-/* ---------- Secciones ---------- */
-section{padding:44px 0;border-top:1px solid var(--line)}
-.q{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
-.sh{font-size:clamp(23px,3.2vw,32px);font-weight:800;margin:8px 0 6px}
-.sd{color:var(--ink2);font-size:15px;max-width:88ch;margin-bottom:26px;line-height:1.66;
-  text-align:justify;text-justify:inter-word;text-wrap:pretty}
-@media(max-width:640px){.sd{text-align:left}}
+  /* progress + dot nav */
+  .progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:60;transition:width .1s linear;}
+  .dotnav{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:13px;}
+  .dotnav a{width:11px;height:11px;border-radius:50%;background:var(--line);position:relative;transition:transform .2s ease,background .2s ease;}
+  .dotnav a:hover{background:var(--green);}
+  .dotnav a.active{background:var(--green);transform:scale(1.35);}
+  .dotnav a::after{content:attr(data-label);position:absolute;right:22px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:.72rem;font-family:var(--font-display);font-weight:600;color:#fff;background:var(--green-deep);padding:4px 9px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  :root[data-theme="dark"] .dotnav a::after{color:#04241a;background:var(--green-deep);}
+  .dotnav a:hover::after{opacity:1;}
+  @media(max-width:1180px){.dotnav{display:none;}}
 
-/* ---------- Por qué existe ---------- */
-.why{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:stretch}
-@media(max-width:820px){.why{grid-template-columns:1fr}}
-.panel{background:linear-gradient(165deg,rgba(24,52,38,.9),rgba(19,41,30,.6));
-  border:1px solid var(--line);border-radius:18px;padding:26px 28px}
-.panel h3{font-size:18px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.chk{list-style:none;display:flex;flex-direction:column;gap:12px}
-.chk li{display:flex;gap:12px;font-size:14.5px;color:var(--ink2);line-height:1.5}
-.chk li::before{content:"✓";color:var(--brand);font-weight:900;flex:none;margin-top:1px}
-.idea{background:linear-gradient(155deg,rgba(255,202,92,.12),rgba(40,30,15,.2));
-  border:1.5px solid #a5741f;border-radius:18px;padding:26px 28px;display:flex;flex-direction:column;justify-content:center}
-.idea .badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:900;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--warn);margin-bottom:14px}
-.idea p{font-size:16px;line-height:1.6;color:var(--ink);font-weight:600}
-.idea .big{font-size:30px;line-height:1;margin-bottom:12px}
+  /* section header */
+  .sec-head{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(14px,2vw,30px);align-items:center;margin-bottom:clamp(26px,3.5vw,40px);}
+  .sec-head h2{font-size:var(--step-3);}
+  .eyebrow{font-family:var(--font-display);text-transform:lowercase;letter-spacing:.04em;font-size:var(--step--1);font-weight:600;color:var(--green-deep);display:inline-flex;align-items:center;gap:.55em;margin:0 0 12px;}
+  .eyebrow .ei{width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;}
+  .eyebrow .ei svg{width:15px;height:15px;}
+  .sh-intro{color:var(--muted);font-size:var(--step-1);line-height:1.5;max-width:56ch;}
+  .sh-intro strong{color:#063320;font-weight:700;}
+  @media (prefers-color-scheme: dark){.sh-intro strong{color:var(--green-deep);}}
+  :root[data-theme="light"] .sh-intro strong{color:#063320;}
+  :root[data-theme="dark"] .sh-intro strong{color:var(--green-deep);}
+  @media(max-width:820px){.sec-head{grid-template-columns:1fr;gap:10px;align-items:start;}.sh-intro{font-size:var(--step-0);}}
 
-/* ---------- Flujo horizontal del lifecycle ---------- */
-.flow{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;justify-content:center}
-.fnode{--c:var(--brand);flex:1 1 150px;min-width:140px;text-align:center;padding:22px 14px 20px;border-radius:16px;
-  background:linear-gradient(165deg,rgba(24,52,38,.72),rgba(19,41,30,.5));
-  border:1px solid var(--line);position:relative;overflow:hidden;
-  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-.fnode::after{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c)}
-.fnode:hover{transform:translateY(-6px);border-color:var(--c);box-shadow:0 14px 40px -12px color-mix(in srgb,var(--c) 55%,transparent)}
-.fnode .fi{font-size:32px;line-height:1;margin-bottom:12px;display:block}
-.fnode .fn-t{font-size:16px;font-weight:800;color:var(--c);letter-spacing:-.01em}
-.fnode .fn-s{font-size:11.5px;color:var(--mut);margin-top:6px;font-weight:600}
-.farrow{display:flex;align-items:center;color:var(--line2);font-size:22px;font-weight:800;flex:none}
-@media(max-width:900px){.farrow{transform:rotate(90deg)}.flow{flex-direction:column;align-items:stretch}.fnode{flex:none}}
+  .key{display:flex;gap:15px;align-items:center;background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 24%,transparent);border-radius:16px;padding:16px 20px;margin:0 0 clamp(20px,3vw,32px);}
+  .key .ki{flex:0 0 auto;width:40px;height:40px;border-radius:11px;background:var(--green);color:#03301d;display:grid;place-items:center;}
+  :root[data-theme="dark"] .key .ki{color:#042018;}
+  .key .ki svg{width:22px;height:22px;}
+  .key p{margin:0;font-family:var(--font-display);font-weight:600;font-size:var(--step-1);line-height:1.35;color:var(--green-deep);}
 
-/* ---------- Tarjetas detalladas por etapa ---------- */
-.stages{display:flex;flex-direction:column;gap:18px}
-.stage{--c:var(--brand);background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.45));
-  border:1px solid var(--line);border-left:4px solid var(--c);border-radius:16px;overflow:hidden;
-  transition:transform .18s ease,box-shadow .18s ease}
-.stage:hover{transform:translateY(-3px);box-shadow:0 16px 44px -18px color-mix(in srgb,var(--c) 50%,transparent)}
-.stage-head{display:flex;align-items:center;gap:14px;padding:20px 24px;
-  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 12%,transparent),transparent 70%)}
-.stage-ic{width:48px;height:48px;flex:none;display:grid;place-items:center;font-size:24px;border-radius:13px;
-  background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
-.stage-head h3{font-size:20px;font-weight:800;color:var(--c)}
-.stage-head .sub{font-size:12px;color:var(--mut);font-weight:700;margin-top:2px}
-.stage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
-@media(max-width:820px){.stage-grid{grid-template-columns:1fr}}
-.cell{background:var(--card2);padding:18px 22px}
-.cell .cl{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
-  display:flex;align-items:center;gap:6px;margin-bottom:9px}
-.cell p{font-size:13.5px;color:var(--ink2);line-height:1.55}
-.cell b{color:var(--ink)}
-.cell ul{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:2px}
-.cell ul li{font-size:13px;color:var(--ink2);padding-left:15px;position:relative;line-height:1.45}
-.cell ul li::before{content:"›";position:absolute;left:0;color:var(--c);font-weight:900}
-.cell.disq{background:rgba(255,113,137,.05)}
-.cell.disq .cl{color:var(--bad)}
-.cell.disq ul li::before{color:var(--bad)}
-.crit{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-.crit span{font-size:11.5px;font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--c) 14%,transparent);
-  border:1px solid color-mix(in srgb,var(--c) 38%,transparent);border-radius:999px;padding:4px 11px}
-.tag-na{font-size:11.5px;font-weight:700;color:var(--mut);background:rgba(255,255,255,.04);
-  border:1px dashed var(--line2);border-radius:999px;padding:4px 11px;display:inline-block}
+  /* HERO */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:radial-gradient(70% 55% at 50% -10%,color-mix(in srgb,var(--green) 18%,transparent),transparent 60%),linear-gradient(180deg,var(--surface),var(--surface-2));}
+  #net{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.5;}
+  .hero .wrap{position:relative;z-index:1;}
+  .brandbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0 0;gap:16px;flex-wrap:wrap;}
+  .wordmark{font-family:var(--font-display);font-weight:600;font-size:1.28rem;text-transform:lowercase;letter-spacing:-.02em;color:var(--ink);display:inline-flex;align-items:baseline;}
+  .tag-doc{font-size:var(--step--1);color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:6px 14px;background:color-mix(in srgb,var(--surface) 72%,transparent);backdrop-filter:blur(6px);}
+  .hero-inner{padding-block:clamp(26px,3.5vw,52px) clamp(44px,6.5vw,84px);text-align:center;display:flex;flex-direction:column;align-items:center;}
+  .verticals-pill{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:22px;}
+  .verticals-pill span{font-size:var(--step--1);font-weight:600;color:var(--green-deep);background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 24%,transparent);padding:5px 13px;border-radius:100px;font-family:var(--font-display);}
+  .hero h1{font-size:var(--step-4);max-width:16ch;}
+  .hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero-sub{font-size:var(--step-2);color:var(--ink);max-width:26ch;margin:22px auto 0;font-family:var(--font-display);font-weight:600;line-height:1.2;}
+  .hero-kicker{color:var(--muted);max-width:58ch;margin:16px auto 0;font-size:var(--step-1);line-height:1.5;}
 
-/* ---------- Idea importante (alerta) ---------- */
-.alert{background:linear-gradient(155deg,rgba(255,113,137,.12),rgba(40,15,20,.25));
-  border:1.5px solid #a53a4a;border-radius:20px;padding:32px 34px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start}
-@media(max-width:640px){.alert{grid-template-columns:1fr;gap:16px}}
-.alert .ai{font-size:46px;line-height:1}
-.alert h3{font-size:21px;font-weight:800;margin-bottom:10px;color:var(--ink)}
-.alert p{font-size:15px;color:var(--ink2);line-height:1.6;margin-bottom:10px}
-.alert p b{color:#ffd0d8}
-.nope{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
-.nope span{font-size:13px;font-weight:700;color:#ffbac4;background:rgba(255,113,137,.1);
-  border:1px solid #a53a4a;border-radius:10px;padding:7px 13px;text-decoration:line-through;text-decoration-color:rgba(255,113,137,.6)}
-.alert .foot{margin-top:16px;font-size:13.5px;color:var(--ink2);border-top:1px solid rgba(255,113,137,.3);padding-top:14px}
-.alert .foot b{color:var(--ink)}
+  /* NORTH STAR */
+  .northstar{background:var(--grad);color:#fff;border-radius:24px;padding:clamp(30px,4.5vw,58px);box-shadow:var(--shadow-lg);position:relative;overflow:hidden;}
+  .ns-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(22px,4vw,54px);align-items:center;position:relative;z-index:1;}
+  .northstar .eyebrow{color:#fff;opacity:.92;}
+  .northstar .eyebrow .ei{background:rgba(255,255,255,.16);color:#fff;}
+  .northstar .lead{font-family:var(--font-display);font-weight:600;font-size:var(--step-2);line-height:1.16;color:#fff;margin:0;}
+  .northstar .lead b{border-bottom:3px solid rgba(255,255,255,.5);}
+  .northstar .note{margin:0;color:rgba(255,255,255,.86);font-size:var(--step-1);line-height:1.5;}
+  .northstar .note strong{color:#053a24;font-weight:600;}
+  .ns-lead2{margin:0 0 16px;color:rgba(255,255,255,.9);font-size:var(--step-1);line-height:1.45;}
+  .ns-list{list-style:none;margin:0;padding:0;display:grid;gap:11px;}
+  .ns-list li{display:flex;align-items:center;gap:12px;color:#fff;font-family:var(--font-display);font-weight:600;font-size:var(--step-1);line-height:1.2;}
+  .ns-list .nsi{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;flex:0 0 auto;}
+  .ns-list .nsi svg{width:19px;height:19px;}
+  #objetivo{padding-block:clamp(32px,4.5vw,58px) clamp(20px,2.6vw,34px);}
+  .ns-dots{position:absolute;inset:0;opacity:.1;z-index:0;}
+  @media(max-width:820px){.ns-grid{grid-template-columns:1fr;gap:16px;}}
 
-/* ---------- Cómo identificamos (dos columnas) ---------- */
-.split{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px;align-items:start}
-@media(max-width:820px){.split{grid-template-columns:1fr}}
-.mini-funnel{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));
-  border:1px solid var(--line);border-radius:18px;padding:24px}
-.mini-funnel .h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin-bottom:16px}
-.mf-step{--c:var(--brand);display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;
-  background:color-mix(in srgb,var(--c) 10%,transparent);border:1px solid color-mix(in srgb,var(--c) 30%,transparent);margin-bottom:5px}
-.mf-step .d{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
-.mf-step .n{font-size:14px;font-weight:800;color:var(--c)}
-.mf-step .x{margin-left:auto;font-size:16px}
-.mf-ar{text-align:center;color:var(--line2);font-size:14px;line-height:1;margin:1px 0}
-.crm{background:linear-gradient(165deg,rgba(40,30,55,.42),rgba(25,20,40,.3));
-  border:1px solid #3f3560;border-radius:18px;padding:24px 26px}
-.crm .h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
-.crm .prop{margin-top:20px}
-.crm .prop:first-of-type{margin-top:14px}
-.crm .plabel{font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.crm .pdesc{font-size:12.5px;color:var(--mut);font-weight:500;margin-bottom:10px;line-height:1.5}
-.states{display:flex;flex-wrap:wrap;gap:8px}
-.states span{font-size:12.5px;font-weight:700;border-radius:999px;padding:5px 12px;border:1px solid}
-.states .s-pend{color:var(--mut);background:rgba(148,163,184,.1);border-color:var(--line2)}
-.states .s-ok{color:var(--brand);background:rgba(111,240,162,.12);border-color:var(--brand-d)}
-.states .s-no{color:var(--warn);background:rgba(255,202,92,.12);border-color:#a5741f}
-.states .s-rec{color:var(--sky);background:rgba(104,209,245,.12);border-color:#1f7f96}
-.states .s-lost{color:var(--bad);background:rgba(255,113,137,.12);border-color:#a53a4a}
-.reasons{display:flex;flex-wrap:wrap;gap:7px}
-.reasons span{font-size:12px;font-weight:600;color:var(--ink2);background:rgba(255,255,255,.04);
-  border:1px solid var(--line);border-radius:8px;padding:5px 11px}
-.crm .rev{margin-top:8px;font-size:13px;color:var(--ink2);background:rgba(104,209,245,.06);
-  border:1px solid rgba(104,209,245,.25);border-radius:11px;padding:12px 14px;line-height:1.5}
-.crm .rev b{color:var(--sky)}
+  /* FACTORES DECISIVOS */
+  .factors{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,1.8vw,20px);}
+  .factor{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(20px,2.2vw,28px);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;position:relative;transition:transform .3s ease,box-shadow .3s ease;}
+  .factor:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);}
+  .factor .fn{font-family:var(--font-display);font-weight:700;font-size:1.5rem;color:var(--green);opacity:.35;}
+  .factor .fic{width:44px;height:44px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;}
+  .factor .fic svg{width:23px;height:23px;}
+  .factor h3{font-size:var(--step-1);}
+  .factor p{margin:0;color:var(--muted);font-size:var(--step-0);line-height:1.45;}
+  @media(max-width:900px){.factors{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.factors{grid-template-columns:1fr;}}
 
-/* ---------- Principio estratégico ---------- */
-.principle{background:linear-gradient(120deg,#0f4a30 0%,#0e5136 45%,#0c3f56 100%);
-  border:1.5px solid var(--brand-d);border-radius:24px;padding:44px 40px;position:relative;overflow:hidden;
-  box-shadow:0 20px 60px -24px rgba(87,224,138,.4)}
-.principle::before{content:"";position:absolute;top:-40%;right:-10%;width:420px;height:420px;
-  background:radial-gradient(circle,rgba(111,240,162,.22),transparent 70%);pointer-events:none}
-.principle .k{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);margin-bottom:14px}
-.principle .quote{font-size:clamp(26px,4vw,40px);font-weight:800;line-height:1.12;color:#fff;
-  margin-bottom:20px;max-width:20ch;text-shadow:0 0 40px rgba(0,0,0,.3)}
-.principle .quote em{font-style:normal;color:var(--brand)}
-.principle p{font-size:15.5px;color:#dff6ea;line-height:1.65;max-width:70ch;margin-bottom:14px;position:relative}
-.principle p b{color:#fff}
-.twin{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px;position:relative}
-@media(max-width:640px){.twin{grid-template-columns:1fr}}
-.twin .t{background:rgba(0,0,0,.22);border:1px solid rgba(111,240,162,.3);border-radius:14px;padding:18px 20px}
-.twin .t .tt{font-size:13px;font-weight:800;color:var(--brand);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.twin .t p{font-size:13.5px;color:#dff6ea;margin:0;max-width:none}
-.principle .closer{margin-top:24px;font-size:14.5px;color:#eafff4;font-weight:600;border-top:1px solid rgba(111,240,162,.25);padding-top:18px;max-width:none}
+  /* PROBLEMS */
+  .problems{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:clamp(22px,3vw,34px);}
+  .prob{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm);}
+  .prob .px{flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:var(--salmon-soft);color:var(--salmon);display:grid;place-items:center;}
+  .prob .px svg{width:19px;height:19px;}
+  .prob .pt{font-weight:600;line-height:1.3;}
+  .prob .pd{color:var(--muted);font-size:var(--step--1);display:block;margin-top:2px;}
+  .prob .big{color:var(--salmon);font-weight:700;}
+  @media(max-width:820px){.problems{grid-template-columns:1fr;}}
 
-/* ---------- Footer ---------- */
-footer{border-top:1px solid var(--line);padding:34px 0 60px;text-align:center}
-footer .fb{font-size:18px;font-weight:800}
-footer .fb b{color:var(--brand)} footer .fb i{color:var(--brand);font-style:normal}
-footer .fn{font-size:12.5px;color:var(--mut);margin-top:8px}
+  /* PART BANNERS (positive / negative) */
+  .part-banner{display:flex;align-items:center;gap:14px;border-radius:14px;padding:13px 18px;margin:clamp(22px,3vw,32px) 0 16px;}
+  .part-banner.pos{margin-top:0;background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 26%,transparent);}
+  .part-banner.neg{background:var(--red-soft);border:1px solid color-mix(in srgb,var(--red) 30%,transparent);}
+  .part-banner .pbi{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;}
+  .part-banner .pbi svg{width:22px;height:22px;}
+  .part-banner.pos .pbi{background:var(--green);color:#03301d;}
+  :root[data-theme="dark"] .part-banner.pos .pbi{color:#042018;}
+  .part-banner.neg .pbi{background:var(--red);color:#fff;}
+  .part-banner .txt{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .part-banner .pbt{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);line-height:1.1;}
+  .part-banner.pos .pbt{color:var(--green-deep);}
+  .part-banner.neg .pbt{color:var(--red);}
+  .part-banner .pbs{color:var(--muted);font-size:var(--step--1);}
+
+  /* PAINS (red, 5 across) */
+  .pains{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .pain{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
+  .pain:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--red) 34%,var(--line));}
+  .pain .pi{width:40px;height:40px;border-radius:11px;background:var(--red-soft);color:var(--red);display:grid;place-items:center;}
+  .pain .pi svg{width:22px;height:22px;}
+  .pain h4{font-family:var(--font-display);font-weight:600;font-size:var(--step-0);margin:0;line-height:1.2;}
+  .pain p{margin:0;color:var(--muted);font-size:var(--step--1);line-height:1.4;}
+  .pain .num{color:var(--red);font-weight:700;}
+  @media(max-width:960px){.pains{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:600px){.pains{grid-template-columns:1fr;}}
+
+  /* node icons + team moment tag */
+  .node .nicon{width:34px;height:34px;border-radius:9px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;margin-bottom:2px;}
+  .node .nicon svg{width:18px;height:18px;}
+  .node.origin .nicon{background:rgba(255,255,255,.2);color:#fff;}
+  .node.hot .nicon{background:var(--green);color:#03301d;}
+  :root[data-theme="dark"] .node.hot .nicon{color:#042018;}
+  .moment{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-deep);background:var(--green-soft);padding:5px 12px;border-radius:100px;font-family:var(--font-display);}
+  .moment svg{width:13px;height:13px;}
+  .lever-kpi{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-size:var(--step--1);color:var(--green-deep);border:1px dashed color-mix(in srgb,var(--green) 42%,var(--line));border-radius:100px;padding:5px 12px;font-family:var(--font-display);font-weight:600;}
+  .lever-kpi svg{width:14px;height:14px;flex:0 0 auto;color:var(--green);}
+  .lever-kpi b{font-weight:700;color:var(--ink);}
+
+  /* LIFECYCLE / funnel */
+  .entry{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.6vw,18px);}
+  .lane{border-radius:16px;padding:18px 20px;display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-sm);}
+  .lane .li{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;}
+  .lane .li svg{width:23px;height:23px;}
+  .lane.inbound .li{background:var(--green-soft);color:var(--green-deep);}
+  .lane.outbound .li{background:var(--salmon-soft);color:var(--salmon);}
+  .lane .lk{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;font-family:var(--font-display);}
+  .lane.inbound .lk{color:var(--green-deep);}
+  .lane.outbound .lk{color:var(--salmon);}
+  .lane .lt{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);line-height:1.1;margin:1px 0;}
+  .lane .ld{color:var(--muted);font-size:var(--step--1);line-height:1.4;}
+  .merge{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted);font-size:var(--step--1);margin:14px 0;font-family:var(--font-display);font-weight:600;}
+  .merge svg{width:18px;height:18px;color:var(--green);}
+  .funnel-note{display:flex;gap:13px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:12px;padding:14px 18px;margin:14px 0 4px;}
+  .funnel-note svg{width:20px;height:20px;color:var(--green);flex:0 0 auto;margin-top:2px;}
+  .funnel-note p{margin:0;font-size:var(--step--1);line-height:1.55;color:var(--muted);}
+  .funnel-note b{color:var(--ink);font-weight:700;}
+  .stage-badge{margin-left:auto;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px;font-family:var(--font-display);white-space:nowrap;}
+  .stage-badge.now{background:var(--green);color:#03301d;}
+  :root[data-theme="dark"] .stage-badge.now{color:#042018;}
+  .stage-badge.future{background:var(--surface-2);color:var(--muted);border:1px solid var(--line);}
+  .stages{display:flex;flex-direction:column;gap:11px;}
+  .stage{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px clamp(16px,2vw,24px);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:13px;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;}
+  .stage:hover{transform:translateX(3px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--green) 30%,var(--line));}
+  .stage-head{display:flex;align-items:center;gap:13px;}
+  .stage-ico{width:46px;height:46px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;flex:0 0 auto;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--green) 20%,transparent);}
+  .stage-ico svg{width:24px;height:24px;}
+  .stage-name{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);line-height:1.1;}
+  .stage-sub{color:var(--muted);font-size:var(--step--1);}
+  .stage-step{margin-left:auto;font-family:var(--font-display);font-weight:700;color:var(--green);font-size:var(--step--1);letter-spacing:.08em;}
+  .stage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .sf{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:11px 13px;display:flex;flex-direction:column;gap:3px;}
+  .sf .sfl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--green-deep);font-family:var(--font-display);}
+  .sf .sfv{font-size:var(--step--1);line-height:1.4;color:var(--ink);}
+  .stage-note{display:flex;gap:11px;align-items:flex-start;background:var(--green-soft);border-radius:11px;padding:12px 14px;}
+  .stage-note svg{width:18px;height:18px;color:var(--green-deep);flex:0 0 auto;margin-top:2px;}
+  .stage-note p{margin:0;font-size:var(--step--1);line-height:1.45;color:var(--green-deep);}
+  .stage-note b{font-weight:700;}
+  .outcomes{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px;}
+  .outcome{border-radius:16px;padding:18px 20px;display:flex;gap:13px;align-items:flex-start;}
+  .outcome .oi{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;}
+  .outcome .oi svg{width:23px;height:23px;}
+  .outcome.win{background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 26%,transparent);}
+  .outcome.win .oi{background:var(--green);color:#03301d;}
+  :root[data-theme="dark"] .outcome.win .oi{color:#042018;}
+  .outcome.loss{background:var(--red-soft);border:1px solid color-mix(in srgb,var(--red) 26%,transparent);}
+  .outcome.loss .oi{background:var(--red);color:#fff;}
+  .outcome .ot{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);line-height:1.1;}
+  .outcome .od{color:var(--muted);font-size:var(--step--1);line-height:1.4;margin-top:3px;}
+  .outcome.win .ot{color:var(--green-deep);}
+  .outcome.loss .ot{color:var(--red);}
+  @media(max-width:720px){.entry{grid-template-columns:1fr;}.stage-grid{grid-template-columns:1fr;}.outcomes{grid-template-columns:1fr;}}
+
+  /* ICP + SECTORS */
+  .icp-general{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:clamp(22px,3vw,32px);}
+  .icp-stat{flex:1 1 200px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px;}
+  .icp-stat .n{font-family:var(--font-display);font-weight:700;font-size:var(--step-num);line-height:1;color:var(--green);letter-spacing:-.02em;}
+  .icp-stat .l{color:var(--muted);font-size:var(--step-0);}
+  .icp-stat .spark{width:78px;height:30px;display:block;margin-bottom:2px;}
+  .icp-stat.pain{border-color:color-mix(in srgb,#E8562A 34%,var(--line));background:color-mix(in srgb,#E8562A 7%,var(--surface));}
+  .icp-stat.pain .n,.icp-stat.pain .spark{color:#E8562A;}
+  @media(prefers-color-scheme:dark){.icp-stat.pain .n,.icp-stat.pain .spark{color:#FF7A45;}}
+  :root[data-theme="light"] .icp-stat.pain .n,:root[data-theme="light"] .icp-stat.pain .spark{color:#E8562A;}
+  :root[data-theme="dark"] .icp-stat.pain .n,:root[data-theme="dark"] .icp-stat.pain .spark{color:#FF7A45;}
+
+  /* ICP TIERS */
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.8vw,20px);}
+  .tier{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(20px,2.2vw,28px);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:12px;transition:transform .28s ease,box-shadow .28s ease;}
+  .tier:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+  .tier.t1{border-color:color-mix(in srgb,var(--green) 40%,var(--line));background:linear-gradient(180deg,var(--green-soft),var(--surface));}
+  .tier-top{display:flex;align-items:center;gap:11px;}
+  .tier-num{width:34px;height:34px;border-radius:9px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;flex:0 0 auto;}
+  .tier.t1 .tier-num{background:var(--green);color:#03301d;}
+  :root[data-theme="dark"] .tier.t1 .tier-num{color:#042018;}
+  .tier .lvl{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;font-family:var(--font-display);display:block;}
+  .tier h4{font-family:var(--font-display);font-weight:700;font-size:var(--step-0);margin:1px 0 0;line-height:1.15;}
+  .foco{display:flex;align-items:center;gap:5px;margin-left:auto;}
+  .foco .fd{width:9px;height:9px;border-radius:50%;background:var(--line);}
+  .foco .fd.on{background:var(--green);}
+  .tier ul{list-style:none;margin:0;padding:0;display:grid;gap:7px;}
+  .tier li{position:relative;padding-left:15px;font-size:var(--step--1);line-height:1.4;color:var(--muted);}
+  .tier li::before{content:"";position:absolute;left:0;top:.5em;width:5px;height:5px;border-radius:50%;background:var(--green);}
+  .tier .ex{margin-top:auto;padding-top:11px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px;}
+  .tier .ex .lbl{width:100%;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;font-family:var(--font-display);}
+  .tier .exc{font-size:.72rem;background:var(--surface-2);border:1px solid var(--line);border-radius:100px;padding:3px 9px;}
+  @media(max-width:820px){.tiers{grid-template-columns:1fr;}}
+
+  /* A QUIÉN DECIMOS QUE NO */
+  .no-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .no-item{display:flex;flex-direction:column;gap:8px;background:var(--red-soft);border:1px solid color-mix(in srgb,var(--red) 22%,transparent);border-radius:14px;padding:15px 16px;}
+  .no-item .nx{width:34px;height:34px;border-radius:9px;background:color-mix(in srgb,var(--red) 15%,transparent);color:var(--red);display:grid;place-items:center;}
+  .no-item .nx svg{width:19px;height:19px;}
+  .no-item .nt{font-family:var(--font-display);font-weight:700;font-size:var(--step-0);line-height:1.15;color:var(--ink);}
+  .no-item .nd{font-size:var(--step--1);line-height:1.4;color:var(--muted);}
+  @media(max-width:820px){.no-list{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.no-list{grid-template-columns:1fr;}}
+  .mcard.other{background:color-mix(in srgb,var(--muted) 7%,var(--surface));border-style:dashed;}
+  .mcard.other .mt,.mcard.other .mc,.mcard.other .md{color:var(--muted);}
+  .stage.dim{opacity:.6;border-style:dashed;}
+
+  /* DÓNDE ENCAJAMOS */
+  .market{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.8vw,20px);}
+  .mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(20px,2.2vw,26px);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:7px;}
+  .mcard.us{border-color:color-mix(in srgb,var(--green) 42%,var(--line));background:linear-gradient(180deg,var(--green-soft),var(--surface));box-shadow:var(--shadow);}
+  .mcard .mc{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:var(--font-display);}
+  .mcard .mt{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);}
+  .mcard.us .mt{color:var(--green-deep);}
+  .mcard .md{color:var(--muted);font-size:var(--step--1);line-height:1.45;margin:0;}
+  @media(max-width:820px){.market{grid-template-columns:1fr;}}
+  .sectors{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(14px,1.8vw,20px);}
+  .sector{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(22px,2.4vw,30px);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
+  .sector::before{content:"";position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--grad);transform:scaleY(0);transform-origin:top;transition:transform .35s ease;}
+  .sector:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--green) 34%,var(--line));}
+  .sector:hover::before{transform:scaleY(1);}
+  .sector-top{display:flex;align-items:center;gap:13px;}
+  .sector-ico{width:50px;height:50px;border-radius:14px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;flex:0 0 auto;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--green) 20%,transparent);}
+  .sector-ico svg{width:26px;height:26px;}
+  .sector h3{font-size:var(--step-1);}
+  .sector .newtag{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--salmon);padding:3px 9px;border-radius:100px;font-family:var(--font-display);}
+  .sector p{margin:0;color:var(--muted);font-size:var(--step-0);line-height:1.45;}
+  .sector .metrics-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:4px;}
+  .sector .mtag{font-size:var(--step--1);font-weight:600;color:var(--green-deep);background:var(--green-soft);padding:5px 11px;border-radius:100px;}
+  @media(max-width:820px){.sectors{grid-template-columns:1fr;}}
+
+  /* CHAIN (flows) */
+  .chain{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;}
+  .node{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:5px;position:relative;min-width:0;}
+  .node.origin{background:var(--grad);color:#fff;border:0;}
+  .node.origin .ntitle{color:#fff;}
+  .node.hot{background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 34%,transparent);}
+  .node .nstep{font-family:var(--font-display);font-weight:700;font-size:.72rem;color:var(--green);letter-spacing:.06em;}
+  .node.origin .nstep{color:rgba(255,255,255,.8);}
+  .node .ntitle{font-family:var(--font-display);font-weight:600;font-size:var(--step-0);line-height:1.25;}
+  .node .nsub{color:var(--muted);font-size:var(--step--1);}
+  .node.origin .nsub{color:rgba(255,255,255,.82);}
+  .node.hot .ntitle{color:var(--green-deep);}
+  .arrow{align-self:center;color:var(--green);flex:0 0 auto;display:grid;place-items:center;}
+  .arrow svg{width:20px;height:20px;}
+  @media(max-width:820px){.chain{flex-direction:column;}.arrow{transform:rotate(90deg);}}
+
+  /* PILLARS */
+  .pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(16px,2vw,22px);}
+  .pillar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(24px,2.6vw,34px);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s ease,border-color .3s ease;}
+  .pillar::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform .35s ease;}
+  .pillar:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--green) 40%,var(--line));}
+  .pillar:hover::before{transform:scaleX(1);}
+  .pillar-top{display:flex;align-items:center;gap:14px;}
+  .pillar-ico{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:var(--green-soft);color:var(--green-deep);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--green) 20%,transparent);flex:0 0 auto;}
+  .pillar-ico svg{width:26px;height:26px;}
+  .pillar-num{font-family:var(--font-display);font-weight:700;font-size:var(--step--1);color:var(--green);letter-spacing:.12em;margin-left:auto;}
+  .pillar h3{font-size:var(--step-1);}
+  .pillar .desc{color:var(--muted);margin:0;}
+  .field-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--green-deep);font-weight:700;margin:6px 0 0;font-family:var(--font-display);}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .chip{font-size:var(--step--1);padding:5px 12px;border-radius:100px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink);}
+  .chip--kpi{background:var(--green-soft);border-color:transparent;color:var(--green-deep);font-weight:600;}
+  .mt-auto{margin-top:auto;}
+
+  /* TACTICS */
+  .goal-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(14px,2vw,22px);margin-bottom:clamp(22px,3vw,32px);}
+  .goal-card{border-radius:var(--radius);padding:clamp(22px,2.4vw,30px);box-shadow:var(--shadow);}
+  .goal-card.goal{background:var(--grad);color:#fff;display:flex;flex-direction:column;gap:10px;justify-content:center;}
+  .goal-card.goal .lbl{font-family:var(--font-display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;opacity:.85;}
+  .goal-card.goal p{margin:0;font-family:var(--font-display);font-weight:600;font-size:var(--step-2);line-height:1.15;}
+  .goal-card.strat{background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:11px;}
+  .goal-card.strat .lbl{font-family:var(--font-display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;color:var(--green-deep);}
+  .strat-item{display:flex;gap:11px;align-items:flex-start;font-size:var(--step-0);line-height:1.4;}
+  .strat-item svg{flex:0 0 auto;width:20px;height:20px;color:var(--green);margin-top:2px;}
+  @media(max-width:820px){.goal-grid{grid-template-columns:1fr;}}
+
+  .tactics{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(16px,2vw,22px);}
+  .tactic{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(22px,2.4vw,32px);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:13px;}
+  .tactic-top{display:flex;align-items:center;gap:14px;}
+  .tactic-n{width:46px;height:46px;border-radius:13px;background:var(--grad);color:#fff;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:1.2rem;flex:0 0 auto;}
+  .tactic h3{font-size:var(--step-1);}
+  .tactic .td{color:var(--muted);margin:0;font-size:var(--step-0);line-height:1.45;}
+  .datastrip{display:flex;flex-wrap:wrap;gap:10px;}
+  .datacell{flex:1 1 120px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:2px;}
+  .datacell .dn{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);color:var(--green);line-height:1.05;letter-spacing:-.01em;}
+  .datacell .dl{color:var(--muted);font-size:var(--step--1);line-height:1.3;}
+  .subhead{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--green-deep);font-weight:700;font-family:var(--font-display);margin:2px 0 0;}
+  .cluster{display:flex;flex-direction:column;gap:9px;}
+  .cluster-row{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .cluster-row .cs{font-family:var(--font-display);font-weight:600;color:var(--green-deep);font-size:var(--step-0);display:block;margin-bottom:7px;}
+  .cluster-nodes{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+  .cluster-nodes .cn{font-size:var(--step--1);background:var(--surface);border:1px solid var(--line);border-radius:100px;padding:4px 11px;}
+  .cluster-nodes .clink{color:var(--green);font-weight:700;}
+  .mini3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .mini{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:5px;}
+  .mini .mh{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:var(--step-0);}
+  .mini .mh svg{width:18px;height:18px;color:var(--green);}
+  .mini p{margin:0;color:var(--muted);font-size:var(--step--1);line-height:1.4;}
+  .proof-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .proof-grid .pg{display:inline-flex;align-items:center;gap:7px;font-size:var(--step--1);font-weight:600;color:var(--green-deep);background:var(--green-soft);border-radius:100px;padding:6px 13px;}
+  .proof-grid .pg svg{width:15px;height:15px;}
+  @media(max-width:820px){.tactics{grid-template-columns:1fr;}.mini3{grid-template-columns:1fr;}}
+
+  /* DISTRIBUTION */
+  .dist{display:flex;flex-wrap:wrap;gap:12px;}
+  .dchan{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:9px;transition:transform .28s ease,box-shadow .28s ease;}
+  .dchan:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+  .dchan .di{width:42px;height:42px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;}
+  .dchan .di svg{width:22px;height:22px;}
+  .dchan .dt{font-family:var(--font-display);font-weight:600;font-size:var(--step-0);}
+  .dchan .dd{color:var(--muted);font-size:var(--step--1);line-height:1.4;}
+  .dchan.tentative{border-style:dashed;background:var(--surface-2);}
+  .dchan.tentative .di{background:var(--surface);color:var(--muted);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--muted) 30%,var(--line));}
+  .dchan.tentative .dt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);}
+  .dchan.tentative .valtag{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--muted);border:1px dashed color-mix(in srgb,var(--muted) 40%,var(--line));border-radius:100px;padding:2px 9px;font-family:var(--font-display);}
+
+  /* ROADMAP */
+  .band{background:var(--surface);border-block:1px solid var(--line);}
+  .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.8vw,20px);}
+  .tcard{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(20px,2vw,28px);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:11px;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
+  .band .tcard{background:var(--surface);}
+  .tcard:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--green) 34%,var(--line));}
+  .tcard-top{display:flex;align-items:center;gap:12px;}
+  .tstep{width:40px;height:40px;border-radius:50%;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:1.02rem;flex:0 0 auto;border:1px solid color-mix(in srgb,var(--green) 22%,transparent);}
+  .tcard.is-done .tstep{background:var(--grad);color:#fff;border:0;}
+  .tspan{font-family:var(--font-display);font-weight:600;color:var(--muted);font-size:var(--step--1);}
+  .tverb{font-family:var(--font-display);font-weight:600;font-size:var(--step-1);}
+  .tcard p{margin:0;color:var(--muted);font-size:var(--step-0);line-height:1.5;}
+  .tlist{list-style:none;margin:0;padding:0;display:grid;gap:7px;}
+  .tlist li{position:relative;padding-left:16px;color:var(--muted);font-size:var(--step-0);line-height:1.4;}
+  .tlist li::before{content:"";position:absolute;left:0;top:.5em;width:6px;height:6px;border-radius:50%;background:var(--green);}
+  .tlist li b{color:var(--ink);font-weight:600;}
+  .badge-done{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--green);padding:3px 10px;border-radius:100px;font-family:var(--font-display);}
+  .badge-done svg{width:12px;height:12px;}
+  .tchip{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;font-size:var(--step--1);font-weight:600;color:var(--green-deep);background:var(--green-soft);padding:5px 11px;border-radius:100px;}
+  .tchip svg{width:14px;height:14px;}
+  @media(max-width:820px){.timeline{grid-template-columns:1fr;}}
+
+  /* LEVERS */
+  .levers{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(16px,2vw,22px);}
+  .lever{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(22px,2.4vw,32px);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;}
+  .lever.feature{grid-column:1 / -1;background:linear-gradient(180deg,var(--green-soft),var(--surface));border-color:color-mix(in srgb,var(--green) 26%,transparent);}
+  .lever-top{display:flex;align-items:center;gap:13px;flex-wrap:wrap;}
+  .lever-ico{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;background:var(--green);color:#03301d;flex:0 0 auto;}
+  :root[data-theme="dark"] .lever-ico{color:#042018;}
+  .lever-ico svg{width:25px;height:25px;}
+  .lever h3{font-size:var(--step-1);}
+  .owner{font-size:var(--step--1);color:var(--muted);}
+  .owner b{color:var(--green-deep);font-family:var(--font-display);}
+  .lever p{margin:0;color:var(--muted);font-size:var(--step-0);line-height:1.5;}
+  .lever .hl{color:var(--ink);font-weight:600;}
+  .subcard{background:var(--surface);border:1px dashed color-mix(in srgb,var(--green) 40%,var(--line));border-radius:14px;padding:16px 18px;display:flex;gap:13px;align-items:flex-start;margin-top:4px;}
+  .subcard .yt{flex:0 0 auto;width:38px;height:38px;border-radius:10px;background:var(--salmon-soft);color:var(--salmon);display:grid;place-items:center;}
+  .subcard .yt svg{width:22px;height:22px;}
+  .subcard .st{font-family:var(--font-display);font-weight:600;color:var(--ink);display:block;margin-bottom:2px;}
+  .subcard .sd{color:var(--muted);font-size:var(--step--1);line-height:1.45;}
+  .supports{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .supports .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;font-family:var(--font-display);}
+  .supports .tag{font-size:var(--step--1);padding:3px 10px;border-radius:100px;background:var(--green-soft);color:var(--green-deep);font-weight:600;}
+  @media(max-width:820px){.levers{grid-template-columns:1fr;}}
+
+  /* METRICS */
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.8vw,20px);}
+  .metric{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm);transition:transform .28s ease,box-shadow .28s ease;}
+  .metric:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+  .metric .mi{width:44px;height:44px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;}
+  .metric .mi svg{width:23px;height:23px;}
+  .metric .m-obj{font-family:var(--font-display);font-weight:600;font-size:var(--step-1);}
+  @media(max-width:820px){.metrics{grid-template-columns:1fr;}}
+
+  /* PRINCIPLE */
+  .principle{background:var(--grad);color:#fff;border-radius:26px;padding:clamp(34px,5vw,68px);position:relative;overflow:hidden;box-shadow:var(--shadow-lg);}
+  .principle .inner{position:relative;z-index:1;max-width:62ch;}
+  .principle .eyebrow{color:rgba(255,255,255,.9);}
+  .principle .eyebrow .ei{background:rgba(255,255,255,.16);color:#fff;}
+  .principle .big{font-family:var(--font-display);font-weight:600;font-size:var(--step-3);line-height:1.1;color:#fff;margin:0;}
+  .principle .big b{border-bottom:4px solid rgba(255,255,255,.5);}
+  .principle .sm{margin:20px 0 0;color:rgba(255,255,255,.88);font-size:var(--step-1);line-height:1.5;}
+  .principle .ns-dots{opacity:.12;}
+
+  footer{padding:38px 0 54px;color:var(--muted);font-size:var(--step--1);border-top:1px solid var(--line);}
+  footer .fr{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+
+  @media(max-width:820px){.pillars{grid-template-columns:1fr;}}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}.factor,.sector,.pillar,.tcard,.metric,.dchan{transition:none;}}
 </style>
+
+<style>
+  /* --- extras específicos del Lifecycle (aditivos, mismo lenguaje visual) --- */
+  .chip--no{background:var(--red-soft);border-color:color-mix(in srgb,var(--red) 26%,transparent);color:var(--red);font-weight:600;}
+  .stage-note.warn{background:var(--red-soft);}
+  .stage-note.warn svg,.stage-note.warn p{color:var(--red);}
+  .stage-note.warn b{color:var(--red);}
+  .prop-tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-body);font-size:.72rem;font-weight:600;
+    color:var(--green-deep);background:var(--surface-2);border:1px solid var(--line);border-radius:100px;padding:3px 10px;}
+  .prop-tag code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;color:var(--ink);}
+  .stage-extra{display:flex;flex-direction:column;gap:8px;}
+  .stage-extra .field-label{margin:2px 0 0;}
+  .maturity-note{font-family:var(--font-display);font-weight:600;color:var(--green-deep);}
+  .route{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2vw,22px);}
+  @media(max-width:820px){.route{grid-template-columns:1fr;}}
+  .pillar.rec{background:linear-gradient(180deg,var(--green-soft),var(--surface));border-color:color-mix(in srgb,var(--green) 30%,var(--line));}
+  .pillar.tot{background:linear-gradient(180deg,var(--red-soft),var(--surface));border-color:color-mix(in srgb,var(--red) 26%,var(--line));}
+  .pillar.tot .pillar-ico{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--red) 20%,transparent);}
+  .pillar.tot .pillar-num{color:var(--red);}
+  .pillar.tot h3{color:var(--red);}
+  .pillar.tot .tlist li::before{background:var(--red);}
+</style>
+
 </head>
 <body>
 
-<div class="wrap">
+<div class="progress" id="progress"></div>
+<nav class="dotnav" aria-label="Secciones">
+  <a href="#proposito" data-label="Por qué existe"></a>
+  <a href="#recorrido" data-label="El recorrido"></a>
+  <a href="#aviso" data-label="Idea importante"></a>
+  <a href="#crm" data-label="Madurez vs CRM"></a>
+  <a href="#principio" data-label="Principio"></a>
+</nav>
 
-<!-- ===================== HERO ===================== -->
-<header class="xhead">
-  <div class="xtop">
-    <span class="xbrand"><b>gurus</b><i>•</i><b>up</b></span>
-    <span class="tag">📘 Documentación interna</span>
+<header class="hero">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="brandbar">
+      <span class="wordmark">gurusup<span class="dot"></span></span>
+      <span class="tag-doc">Ciclo de vida · Documentación interna</span>
+    </div>
+    <div class="hero-inner">
+      <div class="verticals-pill"><span>Marketing</span><span>Ventas</span><span>Customer Success</span><span>Producto</span><span>Dirección</span></div>
+      <h1>Lifecycle <span class="g">Funnel</span></h1>
+      <p class="hero-sub">La madurez del contacto, no su estado comercial.</p>
+      <p class="hero-kicker">Cómo gestionamos la madurez de un contacto desde que entra en GuruSup hasta convertirse en cliente.</p>
+    </div>
   </div>
-  <h1>Lifecycle <span>Funnel</span> de GuruSup</h1>
-  <p class="lead">Cómo gestionamos la madurez de un contacto desde que entra en GuruSup hasta convertirse en cliente.</p>
-  <div class="pill-note"><span class="em">🎯</span> El Lifecycle representa la <b>madurez del contacto</b>, no su estado comercial.</div>
 </header>
 
-<!-- ===================== 01 · POR QUÉ ===================== -->
-<section>
-  <div class="q">01 · El punto de partida</div>
-  <h2 class="sh">¿Por qué existe este funnel?</h2>
-  <p class="sd">Un proceso común para que Marketing, Ventas, Customer Success, Producto, Desarrollo y Dirección
-    hablen el mismo idioma sobre cada contacto: en qué momento está, qué sabemos de él y qué toca hacer a continuación.</p>
-  <div class="why">
-    <div class="panel">
-      <h3>🧭 Objetivo</h3>
-      <ul class="chk">
-        <li>Saber <b>en qué momento</b> se encuentra cada contacto.</li>
-        <li>Tener claro <b>qué información</b> conocemos de él.</li>
-        <li>Definir <b>qué acciones</b> debemos realizar en cada etapa.</li>
-        <li>Detectar <b>cuándo está preparado</b> para pasar a la siguiente etapa.</li>
-      </ul>
+<!-- POR QUÉ EXISTE -->
+<section id="proposito">
+  <div class="wrap">
+    <div class="northstar">
+      <svg class="ns-dots" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="#fff"><circle cx="30" cy="30" r="5"/><circle cx="110" cy="30" r="5"/><circle cx="190" cy="30" r="5"/><circle cx="270" cy="30" r="5"/><circle cx="350" cy="30" r="5"/><circle cx="30" cy="100" r="5"/><circle cx="110" cy="100" r="5"/><circle cx="190" cy="100" r="5"/><circle cx="270" cy="100" r="5"/><circle cx="350" cy="100" r="5"/><circle cx="30" cy="170" r="5"/><circle cx="110" cy="170" r="5"/><circle cx="190" cy="170" r="5"/><circle cx="270" cy="170" r="5"/><circle cx="350" cy="170" r="5"/></g></svg>
+      <div class="ns-grid">
+        <div>
+          <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>por qué existe este funnel</p>
+          <p class="lead">Un <b>proceso común</b> para que todos los equipos entiendan a cada contacto.</p>
+        </div>
+        <div class="ns-points">
+          <p class="ns-lead2">No es documentación técnica: es un mapa compartido entre Marketing, Ventas, CS, Producto y Dirección.</p>
+          <ul class="ns-list">
+            <li><span class="nsi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>En qué momento está cada contacto</li>
+            <li><span class="nsi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg></span>Qué información conocemos de él</li>
+            <li><span class="nsi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span>Qué acciones debemos realizar</li>
+            <li><span class="nsi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>Cuándo está listo para la siguiente etapa</li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <div class="idea">
-      <span class="badge">💡 Idea clave</span>
-      <div class="big">🔓</div>
-      <p>Un contacto puede dejar de estar preparado para comprar, pero eso <b>no significa que haya perdido toda la madurez</b> adquirida.</p>
-    </div>
-  </div>
-</section>
 
-<!-- ===================== 02 · LIFECYCLE COMPLETO ===================== -->
-<section>
-  <div class="q">02 · Visión de conjunto</div>
-  <h2 class="sh">Lifecycle completo</h2>
-  <p class="sd">El recorrido de madurez de un contacto, de principio a fin. Cada etapa tiene un color e icono propios
-    para reconocerla de un vistazo.</p>
-  <div class="flow">
-    <div class="fnode" style="--c:var(--st-lead)"><span class="fi">🌱</span><div class="fn-t">Lead</div><div class="fn-s">Entra en GuruSup</div></div>
-    <div class="farrow">→</div>
-    <div class="fnode" style="--c:var(--st-mql)"><span class="fi">🧲</span><div class="fn-t">MQL</div><div class="fn-s">Muestra interés</div></div>
-    <div class="farrow">→</div>
-    <div class="fnode" style="--c:var(--st-sql)"><span class="fi">🔎</span><div class="fn-t">SQL</div><div class="fn-s">Intención de compra</div></div>
-    <div class="farrow">→</div>
-    <div class="fnode" style="--c:var(--st-opp)"><span class="fi">🤝</span><div class="fn-t">Opportunity</div><div class="fn-s">Deal abierto</div></div>
-    <div class="farrow">→</div>
-    <div class="fnode" style="--c:var(--st-cus)"><span class="fi">🏆</span><div class="fn-t">Customer</div><div class="fn-s">Cliente activo</div></div>
-    <div class="farrow">→</div>
-    <div class="fnode" style="--c:var(--st-churn)"><span class="fi">📉</span><div class="fn-t">Churn</div><div class="fn-s">Deja de usarlo</div></div>
-  </div>
-</section>
-
-<!-- ===================== 03 · DETALLE POR ETAPA ===================== -->
-<section>
-  <div class="q">03 · El detalle</div>
-  <h2 class="sh">Cada etapa, en detalle</h2>
-  <p class="sd">Qué representa, qué buscamos, cómo avanza y qué ocurre cuando todavía no cualifica —
-    con la razón de descarte cuando aplica.</p>
-
-  <div class="stages">
-
-    <!-- LEAD -->
-    <article class="stage" style="--c:var(--st-lead)">
-      <div class="stage-head">
-        <div class="stage-ic">🌱</div>
-        <div><h3>Lead</h3><div class="sub">Contacto nuevo</div></div>
-      </div>
-      <div class="stage-grid">
-        <div class="cell">
-          <div class="cl">📄 Qué representa</div>
-          <p>Contacto del que todavía no tenemos la información clave para entenderlo: nos falta uno o varios de estos campos.</p>
-          <ul><li>Empresa</li><li>Volumen de consultas / mes</li><li>Tamaño del equipo de atención al cliente</li><li>Sector</li><li>Email corporativo</li></ul>
-        </div>
-        <div class="cell">
-          <div class="cl">🎯 Objetivo</div>
-          <p>Identificar interés y comenzar a conocer al contacto.</p>
-          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
-          <p>Cuando interactúa con GuruSup o aporta información.</p>
-        </div>
-        <div class="cell disq">
-          <div class="cl">⏸️ Si no cualifica</div>
-          <p>Permanece como <b>Lead</b>: aún no existe información suficiente. Es una etapa clave para futuras estrategias de captación y nurturing.</p>
-          <div class="cl" style="margin-top:16px">🏷️ Razón de descarte</div>
-          <span class="tag-na">No aplica</span>
-        </div>
-      </div>
-    </article>
-
-    <!-- MQL -->
-    <article class="stage" style="--c:var(--st-mql)">
-      <div class="stage-head">
-        <div class="stage-ic">🧲</div>
-        <div><h3>MQL</h3><div class="sub">Marketing Qualified Lead</div></div>
-      </div>
-      <div class="stage-grid">
-        <div class="cell">
-          <div class="cl">📄 Qué representa</div>
-          <p>Contacto que demuestra interés por los contenidos de marketing. Por ejemplo:</p>
-          <ul><li>Descarga un ebook</li><li>Se registra en un webinar</li><li>Visita repetidamente la web</li><li>Consume casos de éxito</li><li>Interactúa con emails</li></ul>
-        </div>
-        <div class="cell">
-          <div class="cl">🎯 Objetivo</div>
-          <p>Educar, generar confianza, recoger información e identificar potencial comercial.</p>
-          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
-          <p>Cuando solicita una demo o muestra intención comercial.</p>
-        </div>
-        <div class="cell disq">
-          <div class="cl">⏸️ Si no cualifica</div>
-          <p>Permanece como <b>MQL</b> y continúa recibiendo acciones de nurturing.</p>
-          <div class="cl" style="margin-top:16px">🏷️ Razones habituales</div>
-          <div class="crit"><span>Poco volumen</span><span>Empresa demasiado pequeña</span><span>Aún en investigación</span></div>
-        </div>
-      </div>
-    </article>
-
-    <!-- SQL -->
-    <article class="stage" style="--c:var(--st-sql)">
-      <div class="stage-head">
-        <div class="stage-ic">🔎</div>
-        <div><h3>SQL</h3><div class="sub">Sales Qualified Lead</div></div>
-      </div>
-      <div class="stage-grid">
-        <div class="cell">
-          <div class="cl">📄 Qué representa</div>
-          <p>Existe intención real de compra. El contacto identifica un problema y considera GuruSup una posible solución. Aquí se hace la <b>pre-cualificación</b>. Criterios actuales:</p>
-          <ul><li>Más de 3.000 consultas mensuales</li><li>Equipo de soporte de 5 personas o más</li></ul>
-        </div>
-        <div class="cell">
-          <div class="cl">🎯 Objetivo</div>
-          <p>Validar que existe una oportunidad comercial real.</p>
-          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
-          <p>Ventas valida el contacto y crea una <b>Opportunity</b>.</p>
-        </div>
-        <div class="cell disq">
-          <div class="cl">⏸️ Si no cualifica</div>
-          <p><b>No vuelve a Lead.</b> Mantiene la madurez adquirida y queda identificado mediante propiedades del CRM para futuras acciones.</p>
-          <div class="cl" style="margin-top:16px">🏷️ Razones habituales</div>
-          <div class="crit"><span>&lt; 3.000 consultas</span><span>Equipo &lt; 5 personas</span><span>Sin presupuesto</span><span>No es prioridad</span><span>Proyecto aplazado</span></div>
-        </div>
-      </div>
-    </article>
-
-    <!-- OPPORTUNITY -->
-    <article class="stage" style="--c:var(--st-opp)">
-      <div class="stage-head">
-        <div class="stage-ic">🤝</div>
-        <div><h3>Opportunity</h3><div class="sub">Oportunidad comercial abierta</div></div>
-      </div>
-      <div class="stage-grid">
-        <div class="cell">
-          <div class="cl">📄 Qué representa</div>
-          <p>Existe una oportunidad comercial abierta: hay reuniones, seguimiento y propuesta en marcha.</p>
-        </div>
-        <div class="cell">
-          <div class="cl">🎯 Objetivo</div>
-          <p>Cerrar la venta.</p>
-          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
-          <p>Convierte en <b>Customer</b>.</p>
-        </div>
-        <div class="cell disq">
-          <div class="cl">⏸️ Si no cualifica</div>
-          <p>Puede cerrarse como <b>Lost</b>. Se conserva el motivo para futuras acciones comerciales.</p>
-          <div class="cl" style="margin-top:16px">🏷️ Razones habituales</div>
-          <div class="crit"><span>Competencia</span><span>Presupuesto</span><span>Proyecto cancelado</span><span>No decisión</span></div>
-        </div>
-      </div>
-    </article>
-
-    <!-- CUSTOMER -->
-    <article class="stage" style="--c:var(--st-cus)">
-      <div class="stage-head">
-        <div class="stage-ic">🏆</div>
-        <div><h3>Customer</h3><div class="sub">Cliente activo</div></div>
-      </div>
-      <div class="stage-grid">
-        <div class="cell">
-          <div class="cl">📄 Qué representa</div>
-          <p>Cliente activo.</p>
-        </div>
-        <div class="cell">
-          <div class="cl">🎯 Objetivo</div>
-          <p>Fidelización, renovación, upselling y cross-selling.</p>
-          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
-          <p>Continúa siendo cliente y crece con nosotros.</p>
-        </div>
-        <div class="cell disq">
-          <div class="cl">⏸️ Si no cualifica</div>
-          <span class="tag-na">No aplica</span>
-          <div class="cl" style="margin-top:16px">🏷️ Razón de descarte</div>
-          <span class="tag-na">No aplica</span>
-        </div>
-      </div>
-    </article>
-
-    <!-- CHURN -->
-    <article class="stage" style="--c:var(--st-churn)">
-      <div class="stage-head">
-        <div class="stage-ic">📉</div>
-        <div><h3>Churn</h3><div class="sub">Cliente que deja de usar GuruSup</div></div>
-      </div>
-      <div class="stage-grid">
-        <div class="cell">
-          <div class="cl">📄 Qué representa</div>
-          <p>Cliente que deja de utilizar GuruSup.</p>
-        </div>
-        <div class="cell">
-          <div class="cl">🎯 Objetivo</div>
-          <p>Analizar los motivos, aprender y detectar oportunidades de recuperación.</p>
-          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
-          <span class="tag-na">No aplica</span>
-        </div>
-        <div class="cell disq">
-          <div class="cl">🏷️ Razones habituales</div>
-          <div class="crit"><span>Cambio de estrategia</span><span>Competencia</span><span>Coste</span><span>Baja utilización</span></div>
-        </div>
-      </div>
-    </article>
-
-  </div>
-</section>
-
-<!-- ===================== 04 · IDEA IMPORTANTE ===================== -->
-<section>
-  <div class="q">04 · Una idea importante</div>
-  <h2 class="sh">El Lifecycle no sirve para marcar descartes</h2>
-  <div class="alert">
-    <div class="ai">⚠️</div>
-    <div>
-      <h3>Madurez ≠ estado comercial</h3>
-      <p>El Lifecycle únicamente representa el <b>nivel de madurez</b> del contacto. La cualificación comercial debe almacenarse mediante <b>propiedades independientes del CRM</b>.</p>
-      <p>Por eso <b>no creamos etapas</b> como estas:</p>
-      <div class="nope"><span>Lead descartado</span><span>MQL descartado</span><span>SQL descartado</span></div>
-      <div class="foot">Mezclar madurez con estado comercial <b>dificulta los informes, las automatizaciones y las segmentaciones</b>. Mantener ambos conceptos separados es lo que permite escalar.</div>
+    <div class="key" style="margin-top:clamp(20px,3vw,32px)">
+      <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0"/></svg></span>
+      <p>Idea clave: un contacto puede dejar de estar preparado para comprar, pero eso <b>no significa que haya perdido la madurez</b> que ya había adquirido.</p>
     </div>
   </div>
 </section>
 
-<!-- ===================== 05 · CÓMO IDENTIFICAMOS ===================== -->
-<section>
-  <div class="q">05 · En la práctica</div>
-  <h2 class="sh">¿Cómo identificamos un contacto que hoy no cualifica?</h2>
-  <p class="sd">La respuesta está en separar dos planos: el <b>Lifecycle</b> refleja la madurez y no retrocede;
-    las <b>propiedades del CRM</b> reflejan la situación comercial actual y sí cambian.</p>
-  <div class="split">
-    <div class="mini-funnel">
-      <div class="h">🧬 Lifecycle · madurez</div>
-      <div class="mf-step" style="--c:var(--st-lead)"><span class="d"></span><span class="n">Lead</span><span class="x">🌱</span></div>
-      <div class="mf-ar">↓</div>
-      <div class="mf-step" style="--c:var(--st-mql)"><span class="d"></span><span class="n">MQL</span><span class="x">🧲</span></div>
-      <div class="mf-ar">↓</div>
-      <div class="mf-step" style="--c:var(--st-sql)"><span class="d"></span><span class="n">SQL</span><span class="x">🔎</span></div>
-      <div class="mf-ar">↓</div>
-      <div class="mf-step" style="--c:var(--st-opp)"><span class="d"></span><span class="n">Opportunity</span><span class="x">🤝</span></div>
-      <div class="mf-ar">↓</div>
-      <div class="mf-step" style="--c:var(--st-cus)"><span class="d"></span><span class="n">Customer</span><span class="x">🏆</span></div>
-      <div class="mf-ar">↓</div>
-      <div class="mf-step" style="--c:var(--st-churn)"><span class="d"></span><span class="n">Churn</span><span class="x">📉</span></div>
+<!-- RECORRIDO / FUNNEL -->
+<section id="recorrido" class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10"/><path d="M4 18h7"/><path d="M4 12h16"/><path d="M17 8l4 4-4 4"/></svg></span>el funnel · ciclo de vida</p>
+        <h2>Del primer contacto a cliente<span class="dot"></span></h2>
+      </div>
+      <p class="sh-intro">El contacto entra por <strong>inbound</strong> u <strong>outbound</strong> y recorre un ciclo de vida donde cambian su <strong>intención</strong>, sus <strong>datos</strong> y nuestro <strong>objetivo</strong>.</p>
     </div>
-    <div class="crm">
-      <div class="h">🗂️ Propiedades CRM · situación comercial</div>
-      <div class="prop">
-        <div class="plabel">🚦 Estado comercial</div>
-        <div class="states">
-          <span class="s-pend">Pendiente</span>
-          <span class="s-ok">Cualificado</span>
-          <span class="s-no">No cualificado</span>
-          <span class="s-rec">Recuperable</span>
-          <span class="s-lost">Perdido</span>
-        </div>
+
+    <div class="entry">
+      <div class="lane inbound">
+        <span class="li" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/></svg></span>
+        <div><span class="lk">orgánico · paid · acciones</span><div class="lt">Inbound</div><span class="ld">Nos encuentran: llegan por curiosidad o por una necesidad, según el contenido con el que interactúan.</span></div>
       </div>
-      <div class="prop">
-        <div class="plabel">📝 Motivo de descarte</div>
-        <div class="reasons">
-          <span>Volumen insuficiente</span><span>Equipo pequeño</span><span>Sin presupuesto</span>
-          <span>Proyecto parado</span><span>Sin prioridad</span><span>Competencia</span>
-        </div>
+      <div class="lane outbound">
+        <span class="li" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
+        <div><span class="lk">cuentas ABM</span><div class="lt">Outbound</div><span class="ld">Los buscamos: cuentas seleccionadas que abordamos directamente.</span></div>
       </div>
-      <div class="prop">
-        <div class="plabel">📅 Fecha próxima revisión</div>
-        <div class="rev">Permite <b>volver a trabajar el contacto</b> automáticamente cuando cambie su situación.</div>
+    </div>
+
+    <div class="funnel-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+      <p>El <b>Lifecycle refleja la madurez</b> del contacto y avanza hacia delante. La <b>situación comercial</b> (si hoy cualifica o no) vive aparte, en propiedades del CRM. Aquí no marcamos descartes.</p>
+    </div>
+
+    <div class="stages">
+
+      <!-- LEAD -->
+      <article class="stage">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><div><span class="stage-name">Lead</span><span class="stage-sub">Contacto nuevo</span></div><span class="stage-step">01</span></div>
+        <div class="stage-grid">
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Aún nos faltan datos clave para entenderlo.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Identificar interés y empezar a conocerlo.</span></div>
+          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Cuando interactúa con GuruSup o aporta información.</span></div>
+        </div>
+        <div class="stage-extra">
+          <p class="field-label">Datos que aún nos faltan (uno o varios)</p>
+          <div class="chips"><span class="chip">Empresa</span><span class="chip">Volumen de consultas / mes</span><span class="chip">Tamaño del equipo de soporte</span><span class="chip">Sector</span><span class="chip">Email corporativo</span></div>
+        </div>
+        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M5 12H2"/><path d="M22 12h-3"/><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg><p><b>Si no cualifica:</b> permanece como Lead. Es una base clave para futuras estrategias de captación y nurturing.</p></div>
+      </article>
+
+      <!-- MQL -->
+      <article class="stage">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg></span><div><span class="stage-name">MQL</span><span class="stage-sub">Marketing Qualified Lead</span></div><span class="stage-step">02</span></div>
+        <div class="stage-grid">
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Muestra interés por nuestros contenidos de marketing.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Educar, generar confianza y detectar potencial.</span></div>
+          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Cuando pide demo o muestra intención comercial.</span></div>
+        </div>
+        <div class="stage-extra">
+          <p class="field-label">Señales de interés</p>
+          <div class="chips"><span class="chip">Descarga un ebook</span><span class="chip">Webinar</span><span class="chip">Visitas repetidas</span><span class="chip">Casos de éxito</span><span class="chip">Interacción con emails</span></div>
+          <p class="field-label">Si no cualifica · razones habituales</p>
+          <div class="chips"><span class="chip chip--no">Poco volumen</span><span class="chip chip--no">Empresa muy pequeña</span><span class="chip chip--no">Aún en investigación</span></div>
+        </div>
+        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg><p><b>Si no cualifica:</b> sigue como MQL y continúa recibiendo acciones de nurturing.</p></div>
+      </article>
+
+      <!-- SQL -->
+      <article class="stage">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></span><div><span class="stage-name">SQL</span><span class="stage-sub">Sales Qualified Lead</span></div><span class="stage-step">03</span></div>
+        <div class="stage-grid">
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Intención real de compra: identifica un dolor y nos ve como solución.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Validar que existe una oportunidad comercial.</span></div>
+          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Ventas valida el contacto y crea una Oportunidad.</span></div>
+        </div>
+        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg><p><b>Pre-cualificación:</b> ≥ 3.000 consultas/mes o equipo de soporte ≥ 5 personas → pasa a revisión comercial.</p></div>
+        <div class="stage-extra">
+          <p class="field-label">Si no cualifica · no vuelve a Lead</p>
+          <div class="chips">
+            <span class="prop-tag">Motivo <code>razon_descarte_sql</code> · lo rellena Ventas (o la IA) tras la 1ª reunión</span>
+          </div>
+          <div class="chips">
+            <span class="chip chip--no">Lead accidental</span>
+            <span class="chip chip--no">Volumen &lt; 3k consultas</span>
+            <span class="chip chip--no">Timing — "ahora no es prioridad"</span>
+            <span class="chip chip--no">Caso de uso equivocado (mensajería masiva)</span>
+            <span class="chip chip--no">Competidor con integración vertical nativa</span>
+            <span class="chip chip--no">Intención no cualificada / sin autoridad</span>
+            <span class="chip chip--no">Build vs buy ("lo hacemos nosotros")</span>
+            <span class="chip chip--no">Precio</span>
+            <span class="chip chip--no">No responde</span>
+            <span class="chip chip--no">Datos falsos</span>
+            <span class="chip chip--no">Empresa no existe</span>
+            <span class="chip chip--no">Eligió competidor</span>
+          </div>
+        </div>
+        <div class="stage-note warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg><p>Mantiene la madurez adquirida: queda identificado por la razón de descarte y, según cuál sea, entra en un flujo de reactivación o queda descalificado.</p></div>
+      </article>
+
+      <!-- OPORTUNIDAD -->
+      <article class="stage">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span><div><span class="stage-name">Oportunidad</span><span class="stage-sub">Pipeline · negocio activo</span></div><span class="stage-step">04</span></div>
+        <div class="stage-grid">
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Oportunidad comercial abierta: reuniones, seguimiento y propuesta.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Cerrar la venta.</span></div>
+          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Convierte en Cliente.</span></div>
+        </div>
+        <div class="stage-extra">
+          <p class="field-label">Si se pierde (Lost) · razones habituales</p>
+          <div class="chips"><span class="chip chip--no">Competencia</span><span class="chip chip--no">Presupuesto</span><span class="chip chip--no">Proyecto cancelado</span><span class="chip chip--no">No decisión</span></div>
+        </div>
+        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg><p><b>Si se pierde:</b> se cierra como Lost y se conserva el motivo para futuras acciones comerciales.</p></div>
+      </article>
+
+      <!-- CLIENTE -->
+      <article class="stage">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M2.5 21c0-4.1 3.4-7.5 7.5-7.5"/><path d="M15 16l2 2 4-4"/></svg></span><div><span class="stage-name">Cliente</span><span class="stage-sub">Cliente activo</span></div><span class="stage-step">05</span></div>
+        <div class="stage-grid">
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Cliente activo.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Fidelización, renovación y expansión.</span></div>
+          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Upselling y cross-selling.</span></div>
+        </div>
+        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V4h12v5a6 6 0 0 1-12 0z"/><path d="M6 6H3v2a3 3 0 0 0 3 3"/><path d="M18 6h3v2a3 3 0 0 1-3 3"/><path d="M9 21h6"/><path d="M12 15v6"/></svg><p><b>Fase de crecimiento:</b> casos de éxito, apoyo y base para upsell.</p></div>
+      </article>
+
+      <!-- CHURN -->
+      <article class="stage">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 12H3"/><path d="M6 9l-3 3 3 3"/></svg></span><div><span class="stage-name">Churn</span><span class="stage-sub">Deja de usar GuruSup</span></div><span class="stage-step">06</span></div>
+        <div class="stage-grid">
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Cliente que deja de utilizar GuruSup.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Analizar motivos, aprender y detectar recuperación.</span></div>
+          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">No aplica.</span></div>
+        </div>
+        <div class="stage-extra">
+          <p class="field-label">Razones habituales</p>
+          <div class="chips"><span class="chip chip--no">Cambio de estrategia</span><span class="chip chip--no">Competencia</span><span class="chip chip--no">Coste</span><span class="chip chip--no">Baja utilización</span></div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- IDEA IMPORTANTE -->
+<section id="aviso">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>una idea importante</p>
+        <h2>El Lifecycle no sirve para marcar descartes<span class="dot"></span></h2>
+      </div>
+      <p class="sh-intro">El Lifecycle únicamente representa el <strong>nivel de madurez</strong> del contacto. La cualificación comercial se guarda en <strong>propiedades independientes del CRM</strong>.</p>
+    </div>
+
+    <div class="part-banner neg">
+      <span class="pbi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></span>
+      <div class="txt"><span class="pbt">No creamos etapas de descarte</span><span class="pbs">Mezclar madurez con estado comercial rompe informes, automatizaciones y segmentaciones.</span></div>
+    </div>
+
+    <div class="no-list">
+      <div class="no-item"><span class="nx" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></span><span class="nt">Lead descartado</span><span class="nd">Mezcla madurez con estado comercial.</span></div>
+      <div class="no-item"><span class="nx" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></span><span class="nt">MQL descartado</span><span class="nd">Dificulta el nurturing y los informes.</span></div>
+      <div class="no-item"><span class="nx" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></span><span class="nt">SQL descartado</span><span class="nd">Se pierde la madurez ya adquirida.</span></div>
+    </div>
+
+    <div class="key" style="margin-top:clamp(20px,3vw,30px)">
+      <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span>
+      <p>En su lugar: la etapa mantiene la madurez y el descarte se registra en la propiedad <b>razon_descarte_sql</b>, que decide qué hacemos después con el contacto.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MADUREZ VS CRM -->
+<section id="crm" class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg></span>en la práctica</p>
+        <h2>¿Qué hacemos con quien hoy no cualifica?<span class="dot"></span></h2>
+      </div>
+      <p class="sh-intro">El <strong>Lifecycle</strong> refleja la madurez y no retrocede. La <strong>razón de descarte</strong> vive en el CRM y decide el siguiente paso: <strong>reactivar</strong> el contacto o dejarlo <strong>identificado</strong>.</p>
+    </div>
+
+    <div class="key">
+      <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5"/><path d="M20 12a8 8 0 0 1-14 5"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg></span>
+      <p>Los SQL que llegan a Ventas ya han pasado la <b>pre-cualificación</b> (≥ 3.000 consultas/mes y equipo de soporte ≥ 5). En la primera reunión se extrae la <b>razón de descarte</b> —incluso de forma automatizada con IA— y se guarda en <b>razon_descarte_sql</b>.</p>
+    </div>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-top">
+          <span class="pillar-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M6 8l6-5 6 5"/><path d="M6 8v9a6 6 0 0 0 12 0V8"/></svg></span>
+          <span class="pillar-num">MADUREZ</span>
+        </div>
+        <h3>Lifecycle</h3>
+        <p class="desc">Avanza hacia delante y <b>no retrocede</b>. Refleja lo que el contacto ha llegado a ser.</p>
+        <p class="field-label">Etapas</p>
+        <div class="chips"><span class="chip">Lead</span><span class="chip">MQL</span><span class="chip">SQL</span><span class="chip">Oportunidad</span><span class="chip">Cliente</span><span class="chip">Churn</span></div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-top">
+          <span class="pillar-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 8.6l-8-5.2a1 1 0 0 0-1.1 0l-8 5.2a1 1 0 0 0-.5.9v6a1 1 0 0 0 .5.9l8 5.2a1 1 0 0 0 1.1 0l8-5.2a1 1 0 0 0 .5-.9v-6a1 1 0 0 0-.5-.9z"/><path d="M12 12l8-5"/><path d="M12 12v9"/><path d="M12 12L4 7"/></svg></span>
+          <span class="pillar-num">SITUACIÓN COMERCIAL</span>
+        </div>
+        <h3>Razón de descarte</h3>
+        <p class="desc">Propiedad <code style="font-family:ui-monospace,monospace;font-size:.85em">razon_descarte_sql</code>. La rellena Ventas (o la IA) con el feedback de la primera reunión.</p>
+        <p class="field-label">12 motivos tipificados</p>
+        <div class="chips"><span class="chip">Volumen &lt; 3k</span><span class="chip">Timing</span><span class="chip">Precio</span><span class="chip">Sin autoridad</span><span class="chip">Build vs buy</span><span class="chip">Competencia</span><span class="chip">No responde</span><span class="chip">Datos falsos</span><span class="chip">…</span></div>
+      </div>
+    </div>
+
+    <p class="field-label" style="margin:clamp(24px,3vw,34px) 0 12px">Qué hacemos según la razón · propuesta a validar internamente</p>
+    <div class="route">
+      <div class="pillar rec">
+        <div class="pillar-top">
+          <span class="pillar-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5"/><path d="M20 12a8 8 0 0 1-14 5"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg></span>
+          <span class="pillar-num">RECUPERABLES</span>
+        </div>
+        <h3>Reactivación automatizada</h3>
+        <p class="desc">Son campos que pueden cambiar con el tiempo → el contacto entra en un flujo de recontacto automático.</p>
+        <ul class="tlist">
+          <li><b>Volumen &lt; 3k consultas</b> → recontacto en ~6 meses para comprobar si ha crecido.</li>
+          <li><b>Timing — "ahora no es prioridad"</b> → recontacto programado.</li>
+          <li><b>Precio / presupuesto</b> → revisar en el siguiente ciclo.</li>
+          <li><b>Intención no cualificada / sin autoridad</b> → nurturing hasta el decisor.</li>
+          <li><b>Build vs buy</b> → recontacto a medio plazo.</li>
+        </ul>
+      </div>
+      <div class="pillar tot">
+        <div class="pillar-top">
+          <span class="pillar-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg></span>
+          <span class="pillar-num">DESCALIFICACIÓN TOTAL</span>
+        </div>
+        <h3>Sin acción · queda identificado</h3>
+        <p class="desc">No aplican (test, fuera de target, datos erróneos o descarte definitivo). No hace falta hacer nada más.</p>
+        <ul class="tlist">
+          <li><b>Empresa no existe · Datos falsos · Lead accidental</b></li>
+          <li><b>Caso de uso equivocado</b> (esperan mensajería masiva)</li>
+          <li><b>Competidor con integración vertical nativa · Eligió competidor</b></li>
+          <li><b>No responde</b></li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== 06 · PRINCIPIO ESTRATÉGICO ===================== -->
-<section>
-  <div class="principle">
-    <div class="k">06 · Principio estratégico</div>
-    <div class="quote">Un <em>"No ahora"</em> no significa <em>"No nunca"</em>.</div>
-    <p>Si un contacto ya ha mostrado interés y conocemos su empresa, su necesidad y su contexto,
-      <b>no debe volver a comportarse como un Lead nuevo</b>. Ha ganado madurez. Lo único que ha cambiado es que hoy
-      todavía no está preparado para comprar.</p>
-    <div class="twin">
-      <div class="t"><div class="tt">🧬 Lifecycle</div><p>Refleja la <b>madurez</b> del contacto. Avanza y no retrocede.</p></div>
-      <div class="t"><div class="tt">🗂️ Propiedades CRM</div><p>Reflejan su <b>situación comercial</b> actual. Cambian con el tiempo.</p></div>
+<!-- PRINCIPIO -->
+<section id="principio">
+  <div class="wrap">
+    <div class="principle">
+      <svg class="ns-dots" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="#fff"><circle cx="30" cy="30" r="5"/><circle cx="110" cy="30" r="5"/><circle cx="190" cy="30" r="5"/><circle cx="270" cy="30" r="5"/><circle cx="350" cy="30" r="5"/><circle cx="30" cy="100" r="5"/><circle cx="110" cy="100" r="5"/><circle cx="190" cy="100" r="5"/><circle cx="270" cy="100" r="5"/><circle cx="350" cy="100" r="5"/><circle cx="30" cy="170" r="5"/><circle cx="110" cy="170" r="5"/><circle cx="190" cy="170" r="5"/><circle cx="270" cy="170" r="5"/><circle cx="350" cy="170" r="5"/></g></svg>
+      <div class="inner">
+        <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M5 12H2"/><path d="M22 12h-3"/><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg></span>principio estratégico</p>
+        <p class="big">Un <b>"No ahora"</b> no significa <b>"No nunca"</b>.</p>
+        <p class="sm">Si un contacto ya ha mostrado interés y conocemos su empresa, su necesidad y su contexto, no debe volver a comportarse como un Lead nuevo. Ha ganado madurez; lo único que ha cambiado es que hoy todavía no está preparado para comprar.</p>
+        <p class="sm">Por eso el <b>Lifecycle refleja la madurez</b> y las <b>propiedades del CRM reflejan la situación comercial</b>. Separar ambos conceptos mantiene un CRM limpio, informes fiables y automatizaciones mucho más escalables.</p>
+      </div>
     </div>
-    <div class="closer">Separar ambos conceptos permite mantener un <b>CRM limpio</b>, <b>informes fiables</b> y <b>automatizaciones mucho más escalables</b>.</div>
   </div>
 </section>
-
-</div>
 
 <footer>
-  <div class="fb"><b>gurus</b><i>•</i><b>up</b></div>
-  <div class="fn">Lifecycle Funnel · Documentación interna · Un proceso diseñado para escalar el CRM y la colaboración entre equipos</div>
+  <div class="wrap">
+    <div class="fr">
+      <span class="wordmark">gurusup<span class="dot"></span></span>
+      <span>Lifecycle Funnel · Documentación interna · La madurez del contacto, no su estado comercial</span>
+    </div>
+  </div>
 </footer>
 
+<script>
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Scroll progress
+    var progress = document.getElementById('progress');
+    function onScroll(){
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+    }
+    document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+    // Dot nav active state
+    var navLinks = Array.prototype.slice.call(document.querySelectorAll('.dotnav a'));
+    var sections = navLinks.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+    var navIo = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var i = sections.indexOf(e.target);
+          navLinks.forEach(function(l){ l.classList.remove('active'); });
+          if(i>=0) navLinks[i].classList.add('active');
+        }
+      });
+    }, {rootMargin:'-45% 0px -50% 0px'});
+    sections.forEach(function(s){ if(s) navIo.observe(s); });
+
+    // Reveal
+    if (!reduce) {
+      var groups = document.querySelectorAll('.factors, .pains, .sectors, .pillars, .timeline, .metrics, .levers, .tactics, .dist, .chain, .icp-general, .goal-grid, .stages, .entry, .outcomes, .tiers, .no-list, .market');
+      groups.forEach(function (grp) {
+        Array.prototype.forEach.call(grp.children, function (el, i) {
+          if(el.classList.contains('arrow')) return;
+          el.style.opacity = '0'; el.style.transform = 'translateY(16px)';
+          el.style.transition = 'opacity .5s ease ' + (i * 55) + 'ms, transform .5s ease ' + (i * 55) + 'ms';
+        });
+      });
+      var solo = document.querySelectorAll('.northstar, .principle, .key, .sec-head, .part-banner');
+      solo.forEach(function (el) { el.style.opacity='0'; el.style.transform='translateY(16px)'; el.style.transition='opacity .55s ease, transform .55s ease'; });
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          if (e.target.matches('.factors, .pains, .sectors, .pillars, .timeline, .metrics, .levers, .tactics, .dist, .chain, .icp-general, .goal-grid, .stages, .entry, .outcomes, .tiers, .no-list, .market')) {
+            Array.prototype.forEach.call(e.target.children, function (c) { c.style.opacity='1'; c.style.transform='none'; });
+          } else { e.target.style.opacity='1'; e.target.style.transform='none'; }
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.12 });
+      groups.forEach(function (g) { io.observe(g); });
+      solo.forEach(function (s) { io.observe(s); });
+    }
+
+    // Hero dot network
+    var canvas = document.getElementById('net');
+    if (!canvas || reduce) { if (canvas) canvas.style.display='none'; return; }
+    var ctx = canvas.getContext('2d'), W, H, DPR, pts, raf;
+    function accent(){ return (getComputedStyle(document.documentElement).getPropertyValue('--green')||'#0FA968').trim(); }
+    function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); var n=Math.max(16,Math.min(42,Math.floor(W/42))); pts=[]; for(var i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22}); }
+    function hexA(hex,a){ hex=hex.replace('#',''); if(hex.length===3) hex=hex.split('').map(function(c){return c+c;}).join(''); var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16); return 'rgba('+r+','+g+','+b+','+a+')'; }
+    function draw(){ ctx.clearRect(0,0,W,H); var color=accent(); for(var i=0;i<pts.length;i++){ var p=pts[i]; p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; for(var j=i+1;j<pts.length;j++){ var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy); if(d<125){ ctx.strokeStyle=hexA(color,(1-d/125)*.26); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); } } } for(var k=0;k<pts.length;k++){ ctx.fillStyle=hexA(color,.65); ctx.beginPath(); ctx.arc(pts[k].x,pts[k].y,2.1,0,Math.PI*2); ctx.fill(); } raf=requestAnimationFrame(draw); }
+    resize(); draw();
+    var t; window.addEventListener('resize', function(){ clearTimeout(t); t=setTimeout(function(){ cancelAnimationFrame(raf); resize(); draw(); }, 200); });
+  })();
+</script>
 </body>
 </html>
