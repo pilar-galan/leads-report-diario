@@ -1333,9 +1333,15 @@ def main():
     ch_mqlc = series(hist, lambda c: not is_free(c) and rank(c["lc"]) >= 1
                      and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
     ch_sqls = series(hist, lambda c: c["lc"] in SQL_STAGES)
+    # SQL = etapa EXACTA «salesqualifiedlead» (SQL-Consultoría/Demo), TODAS las fuentes
+    # (coincide con el filtro verificable en HubSpot; no incluye precualificación ni oport./cliente).
+    ch_sql_stage = series(_hist_all, lambda c: c["lc"] == "salesqualifiedlead")
+    exec_extra["sql_stage_total"] = ch_sql_stage[0][-1] if ch_sql_stage[0] else 0
+    exec_extra["sql_stage_in"] = sum(1 for c in hist if c["lc"] == "salesqualifiedlead")
+    exec_extra["sql_stage_out"] = sum(1 for c in hist_out if c["lc"] == "salesqualifiedlead")
     # Comparativa semanal: alinear MQL/SQL con el dato mostrado (de facto / etapa consultoría)
     trends["mql"] = trend7(ch_mqlc[1])
-    trends["sql"] = trend7(ch_sqls[1])
+    trends["sql"] = trend7(ch_sql_stage[1])
     # Gráficos evolutivos: TODAS las fuentes (inbound + outbound + importaciones)
     exec_extra["svg_mql_m"] = svg_exec_month(*ch_mql_all, labels, "#57e08a")
     exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql_all, labels, "#f5b544")
@@ -2871,7 +2877,12 @@ def render_exec(d):
     g_lead = cum["lead"] + ob["lead"]
     # SQL inbound coherente con la matriz/embudo (sin freemium): usa el total por canal
     mx_in_sql = sum(e["sql"] for _, e in ex.get("chan_matrix", [])) or sql_d
-    g_mql = mql_d + ob["mql"]; g_sql = mx_in_sql + ob["sql"]
+    g_mql = mql_d + ob["mql"]
+    # SQL «alcanzado» (rank>=SQL, incluye precualif./oport./cliente): SOLO para tasas de conversión de embudo
+    g_sql_reached = mx_in_sql + ob["sql"]
+    # SQL visible (KPI headline + tendencia) = etapa EXACTA «salesqualifiedlead», todas las fuentes
+    g_sql = ex.get("sql_stage_total", g_sql_reached)
+    _sql_in_disp = ex.get("sql_stage_in", mx_in_sql); _sql_out_disp = ex.get("sql_stage_out", ob["sql"])
     g_opp = opp_ci + ob["opp"]; g_cli = cli_ci + ob["cli"]
     g_opp_e = opp_ei + ob["opp_emp"]; g_cli_e = cli_ei + ob["cli_emp"]
     # ── Oportunidades REALES = negocios con deal asociado (no el lifecycle "opportunity" inflado por
@@ -2924,7 +2935,7 @@ def render_exec(d):
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(total_nf)} · out {fmt(ob["contactos"])} · 🧠 brain {fmt(brain_ct)}</span></div></div>' +
         kpi_io("Leads", g_lead, tr["leads"], cum["lead"], ob["lead"]) +
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
-        kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]))
+        kpi_io("SQL", g_sql, tr["sql"], _sql_in_disp, _sql_out_disp))
     # ── 2ª fila (3 tarjetas a ancho completo) ──
     kpi_html2 = (
         f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
@@ -2942,7 +2953,7 @@ def render_exec(d):
     # contactos por etapa (reales)
     _cli_emp = ex.get("clientes_activos", 0)      # empresas cliente activas
     _opp_emp = ex.get("opp_empresas", 0) or opp_real   # empresas con negocio (oportunidad)
-    _sql_emp = ex.get("sql_empresas", 0) or g_sql      # empresas con SQL
+    _sql_emp = ex.get("sql_empresas", 0) or g_sql_reached   # empresas con SQL
     _churn_emp = ex.get("churn", {}).get("empresas", 0)
     _churn_pct = pvf(_churn_emp, _churn_emp + _cli_emp)
     # todas las tasas del embudo sobre CONTACTOS (volumen total), etapa a etapa
@@ -2950,8 +2961,8 @@ def render_exec(d):
     _cli_ct = ex.get("cli_split", {}).get("contactos", 0)
     rates = [
         ("Lead → MQL", pv(g_mql, g_lead), "volumen de contactos"),
-        ("MQL → SQL", pv(g_sql, g_mql), "volumen de contactos"),
-        ("SQL → Oportunidad", pv(_opp_ct, g_sql), "volumen de contactos"),
+        ("MQL → SQL", pv(g_sql_reached, g_mql), "volumen de contactos · alcanzaron SQL"),
+        ("SQL → Oportunidad", pv(_opp_ct, g_sql_reached), "volumen de contactos · alcanzaron SQL"),
         ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "sobre empresas · cliente / oportunidad"),
         ("Cliente → Churn", _churn_pct, "sobre empresas · desde 1 ene"),
     ]
@@ -3006,7 +3017,7 @@ def render_exec(d):
     # ---------- 3 · FUNNEL ----------
     # Oportunidad = reales (con deal); Cliente = cuentas activas del pipeline Clientes
     stages = [("Contactos", g_contactos, None), ("Leads", g_lead, None), ("MQL", g_mql, None),
-              ("SQL", g_sql, None), ("Oportunidad", opp_real, None), ("Cliente", ex.get("clientes_activos", 0), None)]
+              ("SQL", g_sql_reached, None), ("Oportunidad", opp_real, None), ("Cliente", ex.get("clientes_activos", 0), None)]
     top = stages[0][1] or 1
     fn_rows = ""
     for i, (lab, val, emp) in enumerate(stages):
