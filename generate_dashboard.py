@@ -3851,7 +3851,7 @@ def render_exec(d):
       document.getElementById('cacLtv').textContent=money(ltv)+' €';
       document.querySelectorAll('#cacTbody tr[data-cost]').forEach(function(tr){{
         var b=tr.querySelector('.cac-badge'); if(!b)return;
-        var c=+tr.getAttribute('data-cost'), cliCell=tr.children[3], cli=parseInt((cliCell?cliCell.textContent:'0').replace(/\\D/g,''))||0;
+        var c=+tr.getAttribute('data-cost'), cliCell=tr.children[4], cli=parseInt((cliCell?cliCell.textContent:'0').replace(/\\D/g,''))||0;
         if(!c){{b.textContent='—';b.className='cac-badge';return;}}
         var cpc = cli>0 ? c/cli : Infinity;   // coste por cliente
         if(cli===0){{b.textContent='sin cliente';b.className='cac-badge warn';}}
