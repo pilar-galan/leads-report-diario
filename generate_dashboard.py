@@ -4021,14 +4021,6 @@ def render_exec(d):
         <li>Cuando encaja con el <b>perfil target</b>, salta <b>alerta a ventas</b> con la necesidad detectada.</li>
       </ul>
     </div>
-    <div class="ls-col b">
-      <div class="ls-h">🎯 Scoring · <span style="color:var(--warn)">en implementación</span></div>
-      <ul class="ls-list">
-        <li><b>Lead score</b> (interés/engagement) + <b>Fit score</b> (encaje con el cliente ideal).</li>
-        <li>Cada acción suma puntos: <b>abrir un mail</b>, <b>visitar la web</b>, <b>asistir a un webinar</b>…</li>
-        <li>Al llegar al <b>umbral</b>, el contacto <b>avanza de etapa</b> con criterio y de forma trazable.</li>
-      </ul>
-    </div>
   </div>
 </section>
 
