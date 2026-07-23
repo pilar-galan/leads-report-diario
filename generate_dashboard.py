@@ -2593,6 +2593,8 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .rbc .rbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:#1f7a4d}
 .rbc .rbv{font-size:34px;font-weight:800;color:#0e3d2a;line-height:1;margin:8px 0 3px;letter-spacing:-.02em}
 .rbc .rbs{font-size:10px;color:#3a6b54}
+.rbe{display:block;margin-top:5px;font-size:10px;font-weight:800}
+.rbe.up{color:var(--brand)} .rbe.down{color:var(--bad)} .rbe.flat{color:var(--mut)}
 @media(max-width:560px){.rbc:not(:last-child)::after{display:none}}
 .fnhead2{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--mut);margin-bottom:10px;font-weight:700}
 .fnhead2 .rr{color:var(--sky)}
@@ -3115,17 +3117,44 @@ def render_exec(d):
     # todas las tasas del embudo sobre CONTACTOS (volumen total), etapa a etapa
     _opp_ct = ex.get("opp_contactos", 0)
     _cli_ct = ex.get("cli_split", {}).get("contactos", 0)
+    # ── Referencia mensual de tasas de conversión: se guarda una foto por mes y se compara con el mes anterior ──
+    import json as _json, os as _os
+    def _rp(n, dd):
+        try: return round(n / dd * 100) if dd else 0
+        except Exception: return 0
+    _cur_mo = datetime.now(timezone.utc).astimezone(tz).strftime("%Y-%m")
+    _cur_rates = {
+        "lead_mql": _rp(g_mql, g_lead), "mql_sql": _rp(g_sql_reached, g_mql),
+        "sql_opp": _rp(_opp_ct, g_sql_reached), "opp_cli": _rp(_cli_emp, _opp_emp),
+        "cli_churn": _rp(_churn_emp, _churn_emp + _cli_emp),
+    }
+    _HIST_PATH = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "conversion_history.json")
+    try:
+        with open(_HIST_PATH, encoding="utf-8") as _f: _hist = _json.load(_f)
+    except Exception: _hist = {}
+    _prev_key = max([k for k in _hist if k < _cur_mo], default=None)
+    _prev_rates = _hist.get(_prev_key, {}) if _prev_key else {}
+    _hist[_cur_mo] = {**_cur_rates, "captured": datetime.now(timezone.utc).astimezone(tz).strftime("%Y-%m-%d")}
+    try:
+        with open(_HIST_PATH, "w", encoding="utf-8") as _f: _json.dump(_hist, _f, ensure_ascii=False, indent=2)
+    except Exception: pass
+    def _evo(key):
+        if not _prev_rates or key not in _prev_rates: return ''
+        d = _cur_rates.get(key, 0) - _prev_rates.get(key, 0)
+        if d == 0: return '<span class="rbe flat">= vs mes ant.</span>'
+        cls = "up" if d > 0 else "down"; sym = "▲" if d > 0 else "▼"
+        return f'<span class="rbe {cls}">{sym} {abs(d)} pp vs mes ant.</span>'
     rates = [
-        ("Lead → MQL", pv(g_mql, g_lead), "volumen de contactos"),
-        ("MQL → SQL", pv(g_sql_reached, g_mql), "volumen de contactos · alcanzaron SQL"),
-        ("SQL → Oportunidad", pv(_opp_ct, g_sql_reached), "volumen de contactos · alcanzaron SQL"),
-        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "sobre empresas · cliente / oportunidad"),
-        ("Cliente → Churn", _churn_pct, "sobre empresas · desde 1 ene"),
+        ("Lead → MQL", pv(g_mql, g_lead), "volumen de contactos", "lead_mql"),
+        ("MQL → SQL", pv(g_sql_reached, g_mql), "volumen de contactos · alcanzaron SQL", "mql_sql"),
+        ("SQL → Oportunidad", pv(_opp_ct, g_sql_reached), "volumen de contactos · alcanzaron SQL", "sql_opp"),
+        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "sobre empresas · cliente / oportunidad", "opp_cli"),
+        ("Cliente → Churn", _churn_pct, "sobre empresas · desde 1 ene", "cli_churn"),
     ]
     rate_html = "".join(
         f'<div class="rbc"><div class="rbl">{lab}</div><div class="rbv tnum">{val}</div>'
-        f'<div class="rbs">{sub}</div></div>'
-        for lab, val, sub in rates)
+        f'<div class="rbs">{sub}</div>{_evo(key)}</div>'
+        for lab, val, sub, key in rates)
 
     # ---------- INBOUND vs OUTBOUND · dos columnas ----------
     def mini_funnel(st, opp_names=None):
