@@ -2551,6 +2551,11 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .brow .bt{background:rgba(255,255,255,.05);border-radius:6px;height:20px;overflow:hidden}
 .brow .bf{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--brand-d),var(--brand));min-width:3px}
 .brow .bn{text-align:right;font-weight:800} .brow .bn small{color:var(--mut);font-weight:600;font-size:10.5px}
+/* Dentro de las tarjetas de nivel (columnas estrechas): barras flexibles, sin overflow ni scroll, número con margen */
+.lvl .bars{padding-right:4px}
+.lvl .brow{grid-template-columns:minmax(0,1.5fr) minmax(16px,1fr) auto;gap:8px}
+.lvl .brow .bl{font-size:12px}
+.lvl .brow .bn{padding-right:2px;white-space:nowrap}
 /* Calculadora de CAC */
 .cac-wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;margin-top:20px;position:relative;left:50%;transform:translateX(-50%);width:min(1280px,calc(100vw - 32px))}
 .cac-left{background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:18px;padding:20px 22px}
@@ -2715,7 +2720,15 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
-.sqlvl3{display:flex;flex-direction:column;gap:14px}
+.sqlvl3{display:grid;grid-template-columns:.82fr .82fr 1.55fr;gap:14px;align-items:start}
+.evo-flow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:2px 0 16px;font-size:11px}
+.evo-step{padding:5px 11px;border-radius:999px;font-weight:700}
+.evo-step.prev{background:rgba(148,163,184,.1);color:var(--mut);border:1px solid var(--line2)}
+.evo-step.new{background:rgba(111,240,162,.1);color:var(--brand);border:1px solid var(--brand-d)}
+.evo-arrow{color:var(--mut);font-weight:600;font-style:italic}
+.lvl-tag{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:8px;vertical-align:middle}
+.lvl-tag.prev{background:rgba(148,163,184,.14);color:var(--mut)}
+.lvl-tag.new{background:rgba(111,240,162,.14);color:var(--brand)}
 .lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
 .lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
 .lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
@@ -3945,13 +3958,14 @@ def render_exec(d):
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> en tres bloques: ① los de <b>paid media</b> (Agustín), ② los <b>descartados</b> y ③ la <b>precualificación automatizada desde el 9 jul</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
+  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> en tres bloques. <b>Cómo evolucionó:</b> ① y ② son el <b>seguimiento manual previo</b> (Agustín revisaba y descartaba SQL uno a uno); al ver que se colaban muchos <b>sin volumen real</b> y se perdía tiempo, se <b>automatizó la precualificación por formulario</b> → ③, en marcha <b>desde el 9 jul</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
+  <div class="evo-flow"><span class="evo-step prev">① ② Seguimiento manual previo</span><span class="evo-arrow">— se detectan gaps →</span><span class="evo-step new">③ Precualificación automatizada · desde 9 jul</span></div>
 
   <div class="sqlvl3">
-    <details class="lvl">
+    <details class="lvl" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
-        <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de paid media</small></span>
+        <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de paid media</small><span class="lvl-tag prev">previo · manual</span></span>
         <span class="lvl-n">{fmt(n1)}</span>
         <span class="chev">▶</span>
       </summary>
@@ -3961,10 +3975,10 @@ def render_exec(d):
       </div>
     </details>
 
-    <details class="lvl lvl-bad">
+    <details class="lvl lvl-bad" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b2">②</span>
-        <span class="lvl-tit">Descartados <small>· descualificados + razón</small></span>
+        <span class="lvl-tit">Descartados <small>· descualificados + razón</small><span class="lvl-tag prev">previo · manual</span></span>
         <span class="lvl-n">{fmt(n2)}</span>
         <span class="chev">▶</span>
       </summary>
@@ -3978,7 +3992,7 @@ def render_exec(d):
     <details class="lvl lvl3" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b3">③</span>
-        <span class="lvl-tit">Precualificación auto <small>· desde 9 jul</small></span>
+        <span class="lvl-tit">Precualificación auto <small>· desde 9 jul</small><span class="lvl-tag new">nuevo · automatizado</span></span>
         <span class="lvl-n">{fmt(n3)}</span>
         <span class="chev">▶</span>
       </summary>
