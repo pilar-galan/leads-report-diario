@@ -2913,11 +2913,11 @@ def render_exec(d):
     _opp_ct = ex.get("opp_contactos", 0)
     _cli_ct = ex.get("cli_split", {}).get("contactos", 0)
     rates = [
-        ("Lead → MQL", pv(g_mql, g_lead), "global · sobre contactos"),
-        ("MQL → SQL", pv(g_sql, g_mql), "global · sobre contactos"),
-        ("SQL → Oportunidad", pv(_opp_ct, g_sql), "contactos · oportunidad / SQL"),
-        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "empresas · cliente / oportunidad"),
-        ("Cliente → Churn", _churn_pct, "empresas · desde 1 ene"),
+        ("Lead → MQL", pv(g_mql, g_lead), "volumen de contactos"),
+        ("MQL → SQL", pv(g_sql, g_mql), "volumen de contactos"),
+        ("SQL → Oportunidad", pv(_opp_ct, g_sql), "volumen de contactos"),
+        ("Oportunidad → Cliente", pvf(_cli_emp, _opp_emp), "sobre empresas · cliente / oportunidad"),
+        ("Cliente → Churn", _churn_pct, "sobre empresas · desde 1 ene"),
     ]
     rate_html = "".join(
         f'<div class="rbc"><div class="rbl">{lab}</div><div class="rbv tnum">{val}</div>'
@@ -3700,7 +3700,7 @@ def render_exec(d):
   <div class="kg">{kpi_html}</div>
   <div class="kg kg3">{kpi_html2}</div>
   <div style="height:26px"></div>
-  <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
+  <div class="rb-title">📊 Tasas de conversión del embudo <span>· Lead→SQL sobre contactos · Oportunidad→Churn sobre empresas · ver nota *</span></div>
   <div class="ratesbanner">
     <div class="rb-grid">{rate_html}</div>
   </div>
