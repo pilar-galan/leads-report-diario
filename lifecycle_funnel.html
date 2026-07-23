@@ -467,7 +467,7 @@
   .pillar.tot .pillar-num{color:var(--red);}
   .pillar.tot h3{color:var(--red);}
   .pillar.tot .tlist li::before{background:var(--red);}
-  .stage.dim{opacity:.55;}
+  .stage.dim{opacity:.72;}
   .lead-plan{display:flex;gap:15px;align-items:flex-start;background:var(--surface-2);border:1px dashed color-mix(in srgb,var(--green) 40%,var(--line));border-radius:16px;padding:18px 20px;margin-top:clamp(18px,2.5vw,26px);}
   .lead-plan .lpi{flex:0 0 auto;width:42px;height:42px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;}
   .lead-plan .lpi svg{width:22px;height:22px;}
@@ -485,6 +485,10 @@
   /* Churn: caja en rosa suave (no éxito, sin connotación de fracaso) */
   .stage.churn{background:linear-gradient(180deg,var(--red-soft),var(--surface));border-color:color-mix(in srgb,var(--red) 22%,var(--line));}
   .stage.churn .stage-ico{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--red) 18%,transparent);}
+  /* Lead: sección de datos aún más discreta (no es foco de adquisición) */
+  .stage-plain{margin:6px 0 0;font-size:.78rem;color:var(--muted);line-height:1.45;}
+  .lead-faint{opacity:.85;}
+  .lead-faint .rsn{opacity:1;}
 </style>
 
 </head>
@@ -586,11 +590,11 @@
           <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Identificar interés y empezar a conocerlo.</span></div>
           <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Pasa a MQL al descargar contenido o asistir a un webinar.</span></div>
         </div>
-        <div class="stage-extra">
+        <div class="stage-extra lead-faint">
           <p class="field-label">Cómo ha entrado</p>
-          <div class="chips"><span class="chip">Visita a la web</span><span class="chip">Redes sociales</span><span class="chip">Primer contacto (sin intención)</span></div>
+          <p class="stage-plain">Un contacto sin intención conocida.</p>
           <p class="field-label">Información que nos falta</p>
-          <div class="chips"><span class="chip">Empresa</span><span class="chip">Volumen de consultas / mes</span><span class="chip">Tamaño del equipo de soporte</span><span class="chip">Sector</span><span class="chip">Email corporativo</span><span class="chip">Intención</span></div>
+          <ul class="rsn"><li>Empresa</li><li>Volumen de consultas/mes</li><li>Tamaño del equipo de soporte</li><li>Sector</li><li>Email corporativo</li><li>Intención</li></ul>
         </div>
       </article>
 
