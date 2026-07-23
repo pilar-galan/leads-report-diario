@@ -1311,7 +1311,12 @@ def main():
     # SQL = etapa EXACTA «salesqualifiedlead» (unificado con el KPI y la matriz: no cuenta
     # oportunidad/cliente ni precualificación, para que el mismo mes dé el mismo número en todas partes)
     ch_sql_all = series(_hist_all, lambda c: c["lc"] == "salesqualifiedlead")
-    ch_opp_all = series(_hist_all, lambda c: rank(c["lc"]) >= 4, compkey)
+    # Oportunidades = NEGOCIOS (deals) abiertos creados cada mes, por todas las fuentes (inbound+outbound+brain)
+    # → cuadra con el KPI de oportunidades (negocios con deal), no con contactos en etapa oportunidad.
+    _opp_deal_recs = ([{"created": d["created"]} for d in chan_deals_in]
+                      + [{"created": d["created"]} for d in chan_deals_out]
+                      + [{"created": r["created"]} for r in brain_month_recs if r.get("opp")])
+    ch_opp_all = series(_opp_deal_recs, lambda x: True)
     ch_cli_all = series(_hist_all, lambda c: c["lc"] == "customer", compkey)
 
     # ── Ventana MES-HASTA-HOY (MTD): el mes en curso (1 → hoy) vs el mismo tramo del mes anterior ──
@@ -3094,8 +3099,9 @@ def render_exec(d):
     _out_opp_names = sorted({nm for items in ex.get("deals_by_chan_out", {}).values() for nm, _ in items}, key=str.lower)
     _brain_opp_names = sorted(set(ex.get("brain_opp_names", [])), key=str.lower)
     # Oportunidad = negocios reales con deal (por vía); Cliente = cuentas de cliente por fuente
-    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", mx_in_sql), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
-    out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", ob["sql"]), ("Oportunidad (negocio)", opp_out_real), ("Cliente", ex.get("cli_split",{}).get("outbound",0))]
+    # SQL en los embudos = etapa EXACTA salesqualifiedlead (inbound + outbound suman el KPI principal)
+    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", _sql_in_disp), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
+    out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", _sql_out_disp), ("Oportunidad (negocio)", opp_out_real), ("Cliente", ex.get("cli_split",{}).get("outbound",0))]
     inb_fn = mini_funnel(inb_st, _inb_opp_names); out_fn = mini_funnel(out_st, _out_opp_names)
 
     # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
@@ -3104,8 +3110,8 @@ def render_exec(d):
                  'eliminan, se descartan o no cualifican). El dato vivo real es el de los KPIs de arriba.')
     charts = [
         ("MQL", mql_d, ex["svg_mql_m"], ex.get("note_mql", "")),
-        ("SQL", ex.get("sql_stage_total", cum["sql"]), ex["svg_sql_m"], ex.get("note_sql", "") + _imp_note),
-        ("Oportunidades", opp_e, ex["svg_opp_m"], ex.get("note_opp", "") + _imp_note),
+        ("SQL", ex.get("sql_stage_total", cum["sql"]), ex["svg_sql_m"], ex.get("note_sql", "") + '<br>ℹ️ Etapa <b>exacta</b> SQL por mes de creación (mismo criterio que el KPI). Los meses antiguos salen a <b>0</b> porque esos contactos ya <b>avanzaron</b> a oportunidad/cliente o se descartaron: hoy no están en etapa SQL. El acumulado (total) coincide con el KPI de arriba.'),
+        ("Oportunidades", opp_real, ex["svg_opp_m"], '📈 <b>Negocios (deals) abiertos</b> creados cada mes en el pipeline, por todas las fuentes. El acumulado cuadra con el KPI de oportunidades.'),
         ("Clientes", cli_e, ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
     charts_html = "".join(
@@ -3911,7 +3917,7 @@ def render_exec(d):
   <h2 class="sh">Evolución acumulada</h2>
   <div class="sd">Crecimiento día a día <b style="color:var(--brand)">desde el 1 de enero</b>, de <b>todas las fuentes</b> (inbound + outbound + importaciones). Sobre cada línea, el total acumulado al cierre de cada mes y, más pequeño, lo generado ese mes. Bajo cada gráfico se identifica el <b>pico más significativo</b> y de qué fuente viene.</div>
   <div class="cg">{charts_html}</div>
-  <div class="note">⚠️ <b>Por qué el total del gráfico no coincide con el KPI:</b> estos evolutivos cuentan contactos que <b>alcanzaron</b> cada etapa por su fecha de creación (<b>generación acumulada</b>), no el estado actual — si un contacto avanzó de etapa, sigue contando aquí. El KPI de arriba muestra el <b>estado a día de hoy</b>. Por eso difieren.
+  <div class="note">ℹ️ <b>Cómo se relacionan con los KPIs:</b> <b>SQL</b> (etapa exacta) y <b>Oportunidades</b> (negocios/deals) usan la <b>misma definición que los KPIs</b>, así que su <b>acumulado coincide</b> con el dato de arriba. <b>MQL</b> y <b>Clientes</b> pueden tener un <b>margen pequeño</b> (MQL cuenta por consumo de contenido; Clientes por empresa con ciclo de vida «cliente», mientras el KPI mide la cartera activa del pipeline «Clientes»). Eje por <b>mes de creación</b>.
   <br><br>🔎 <b>Dos picos revisados:</b> el de <b>MQL en junio</b> viene sobre todo de fuente <b>OFFLINE / importación</b> (etiqueta «Otros»), no de un canal inbound real. El de <b>Oportunidades en marzo (+50)</b> son contactos <b>marcados como «oportunidad» sin negocio (deal) asociado</b> — importación/automatismo, no oportunidades reales del pipeline (conviene limpiarlos).</div>
 </section>
 
