@@ -1537,6 +1537,7 @@ def main():
     exec_extra["pipeline_value"] = sum(dl.get("amount", 0) for dl in exec_opp)
     exec_extra["pipeline_count"] = len(exec_opp)
     exec_extra["pipeline_value_known"] = sum(1 for dl in exec_opp if dl.get("amount", 0) > 0)
+    exec_extra["inb_no_amt"] = sum(1 for dl in exec_opp if dl.get("amount", 0) <= 0)
     deals_by_chan = {}
     for dl in exec_opp:
         deals_by_chan.setdefault(dl.get("channel", "—"), []).append((dl.get("name", "—"), dl.get("stage_label", "—")))
@@ -2341,7 +2342,8 @@ h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
 .tag{font-size:11px;color:var(--ink2);border:1px solid var(--line2);padding:6px 12px;border-radius:999px;background:rgba(111,240,162,.05)}
 .xhead h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;margin-bottom:9px}
 .xhead h1 span{color:var(--brand);text-shadow:0 0 30px rgba(111,240,162,.35)}
-.xhead p{color:var(--ink2);font-size:15.5px;line-height:1.6;max-width:900px;text-wrap:pretty}
+.xhead p{color:var(--ink2);font-size:15.5px;line-height:1.62;max-width:1040px;text-align:justify;text-justify:inter-word;text-wrap:pretty}
+@media(max-width:640px){.xhead p{text-align:left}}
 .xhead p.hero-1l{max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
 @media(max-width:920px){.xhead p.hero-1l{white-space:normal}}
 .xhead .upd{margin-top:10px;font-size:12px;color:var(--mut)}
@@ -2359,8 +2361,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .q{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
 .sh{font-size:clamp(21px,3vw,28px);font-weight:800;margin:7px 0 5px}
 .sh .tot{color:var(--brand);font-weight:800}
-.sd{color:var(--ink2);font-size:13.5px;max-width:74ch;margin-bottom:18px}
+.sd{color:var(--ink2);font-size:13.5px;max-width:92ch;margin-bottom:18px;line-height:1.65;text-align:justify;text-justify:inter-word;text-wrap:pretty}
 .sd.wide{max-width:none}
+@media(max-width:640px){.sd{text-align:left}}
 .kg-trendlab{font-size:11px;color:var(--mut);line-height:1.5;margin:0 0 12px;padding-left:11px;border-left:2px solid var(--brand-d)}
 .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
 .kg3{grid-template-columns:repeat(3,1fr);margin-top:13px}
@@ -2429,6 +2432,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .iocol.out .io-val{background:rgba(255,202,92,.09);border-color:#a5741f}
 .iocol.brain .io-val{background:rgba(200,166,255,.09);border-color:#6a4fa0}
 .iocol.out .io-val span{color:var(--warn)} .iocol.brain .io-val span{color:var(--violet)}
+.io-pend{margin-top:7px;font-size:10.5px;color:var(--mut);text-align:center;font-weight:600}
 @media(max-width:820px){.io3{grid-template-columns:1fr}}
 .io3grp{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-top:22px;position:relative;left:50%;transform:translateX(-50%);width:min(1280px,calc(100vw - 32px));align-items:start}
 .iogrp{border-radius:18px;padding:14px}
@@ -3720,6 +3724,7 @@ def render_exec(d):
       <div class="io-h">🟢 Pipeline de Inbound <span class="io-tot tnum">{fmt(total_nf)}<small>contactos</small></span></div>
       <div class="mf">{inb_fn}</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("inb_value",0)))) if ex.get("inb_value") else "— (importes sin cargar)"}</span></div>
+      {(f'<div class="io-pend">📝 {ex.get("inb_no_amt",0)} negocios pendientes de enviar propuesta</div>') if ex.get("inb_no_amt",0) else ""}
     </div>
     <div class="iocol out">
       <div class="io-h">🟠 Pipeline de Outbound <span class="io-tot tnum">{fmt(ob["contactos"])}<small>contactos</small></span></div>
