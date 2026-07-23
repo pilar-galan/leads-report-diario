@@ -3691,7 +3691,7 @@ def render_exec(d):
       <div class="cat brain"><div class="cat-h">🧠 GuruSup Brain <span class="cat-sub">outbound directo (Alex)</span></div>
         <div class="cat-body"><span class="src-chip br">🧠 Brain</span></div></div>
     </div>
-    El número grande es el total de contactos; debajo, <b>inb</b> (inbound) y <b>out</b> (outbound). En Oportunidades el número grande es <b>volumen de contactos</b> y el nº de <b>empresas / negocios</b> va debajo; en Clientes se muestran las <b>cuentas activas</b> del pipeline «Clientes».</div>
+    Cifra grande = total de contactos; debajo, <b>inb</b> / <b>out</b>. En Oportunidades el pequeño es nº de <b>empresas / negocios</b>; en Clientes, <b>cuentas activas</b> del pipeline «Clientes».</div>
   <div class="kg-trendlab">📈 Las flechas de cada KPI comparan los <b>últimos 30 días</b> con los <b>30 anteriores</b> (tendencia del <b>último mes vs el mes previo</b>, aunque el mes en curso no haya terminado).</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
