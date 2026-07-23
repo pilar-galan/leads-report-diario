@@ -4002,8 +4002,14 @@ def render_exec(d):
 
 <section>
   <div class="q">06 · ¿Qué pasa con los contactos en etapa lead?</div>
-  <h2 class="sh">Estado de los contactos · etapa lead <span class="tot">· {fmt(d["origin"]["total"])}</span></h2>
-  <div class="sd">Por qué origen / contenido han entrado (blog, calculadora, webinar, formulario, app…), con % sobre el total. «Lead Ads (paid)» es desplegable por red.</div>
+  <h2 class="sh">Estado de los contactos · etapa lead <span class="tot">· {fmt(g_lead)}</span></h2>
+  <div class="sd">Total de leads (alcanzaron al menos etapa lead) = <b>{fmt(g_lead)}</b>, mismo dato que el KPI principal. Desglose por vía: <b style="color:var(--brand)">🟢 Inbound {fmt(cum["lead"])}</b> ({pv(cum["lead"], g_lead)}) · <b style="color:var(--warn)">🟠 Outbound {fmt(ob["lead"])}</b> ({pv(ob["lead"], g_lead)}). Abajo, el origen/contenido de los <b>inbound</b> (los outbound entran por prospección/importación, sin contenido). «Lead Ads (paid)» es desplegable por red.</div>
+  <div class="cards" style="margin-bottom:16px">
+    <div class="stat"><div class="sv tnum">{fmt(g_lead)}</div><div class="sl">Leads totales · 100%<br><span style="color:var(--mut)">inbound + outbound</span></div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(cum["lead"])}</div><div class="sl">🟢 Inbound<br><span style="color:var(--mut)">{pv(cum["lead"], g_lead)} del total</span></div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(ob["lead"])}</div><div class="sl">🟠 Outbound / comercial<br><span style="color:var(--mut)">{pv(ob["lead"], g_lead)} del total</span></div></div>
+  </div>
+  <div class="section-label" style="margin:4px 0 10px">Origen / contenido de los leads inbound <small>· {fmt(cum["lead"])}</small></div>
   <div class="bars">{leads_html}</div>
   <div class="lead-strat">
     <div class="ls-col">
