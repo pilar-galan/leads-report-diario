@@ -2663,6 +2663,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .agfdet{flex:1} .agfdet>summary{list-style:none;cursor:pointer;height:100%} .agfdet>summary::-webkit-details-marker{display:none}
 .agfinfo{display:inline-block;font-size:9px;font-weight:800;color:var(--sky);background:rgba(34,211,238,.14);border-radius:6px;padding:1px 6px;margin-top:3px}
 .agfpop{margin-top:8px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.55;text-align:left}
+.mailkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mk{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:9px 8px;text-align:center}
+.mk-v{font-size:19px;font-weight:900;color:var(--sky);line-height:1}
+.mk-l{font-size:9.5px;color:var(--mut);font-weight:700;margin-top:3px;line-height:1.3} .mk-l small{font-weight:600;opacity:.85}
+@media(max-width:520px){.mailkpis{grid-template-columns:1fr 1fr}}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -3372,16 +3377,19 @@ def render_exec(d):
     #   ≥3.000 consultas → Agustín (ag_sql) · <3.000 → mail de descalificación + listas (ag_lt3000)
     ag_lt3000 = pq.get("ag_lt3000", 0)
     n3 = pq.get("ag_sql", 0) + ag_lt3000
+    # Métricas del mail de descalificación (HubSpot, desde el 9 jul · excluyendo bots)
     email_flow_html = (
-        '<div class="emailbox">'
-        f'<div class="eb tnum">{fmt(ag_lt3000)}</div>'
-        '<div style="font-size:12px;color:var(--ink2);margin-top:6px">contactos con &lt;3.000 consultas/mes (desde 9 jul)</div>'
+        '<ul class="elist" style="margin-bottom:12px">'
+        '<li>Los que <b>no cualifican</b> reciben un <b>mail automático de descalificación</b></li>'
+        '<li>Se añaden a <b>listas de HubSpot</b> para reevaluar si su volumen crece</li>'
+        '</ul>'
+        '<div class="mailkpis">'
+        '<div class="mk"><div class="mk-v">75%</div><div class="mk-l">Apertura<br><small>6 únicas · 10 total</small></div></div>'
+        '<div class="mk"><div class="mk-v">25%</div><div class="mk-l">Clics<br><small>2 clics únicos</small></div></div>'
+        '<div class="mk"><div class="mk-v">33,3%</div><div class="mk-l">Clickthrough<br><small>clics / aperturas</small></div></div>'
+        '<div class="mk"><div class="mk-v">0%</div><div class="mk-l">Respuesta<br><small>0 respuestas</small></div></div>'
         '</div>'
-        '<ul class="elist" style="margin-top:14px">'
-        '<li>Mail automático de <b>descalificación</b></li>'
-        '<li>Se añaden a <b>listas de HubSpot</b> para reevaluar</li>'
-        '<li>Reactivables si su volumen de consultas crece</li>'
-        '</ul>')
+        '<div class="sd" style="font-size:10.5px;color:var(--mut);margin-top:8px">Métricas del mail de descalificación · HubSpot · desde el 9 jul (excluyendo bots).</div>')
 
     # ---------- 10 · OPORTUNIDADES abiertas (pipeline real, sin clientes) ----------
     dbc = ex.get("deals_by_chan", {})   # {canal: [(nombre, etapa), ...]} solo abiertas inbound
