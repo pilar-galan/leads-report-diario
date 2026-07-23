@@ -1306,15 +1306,33 @@ def main():
     # Series de TODAS las fuentes (inbound + outbound + importaciones) para los gráficos evolutivos
     _hist_all = hist + hist_out
     ch_mql_all = series(_hist_all, lambda c: rank(c["lc"]) >= 2)
-    ch_sql_all = series(_hist_all, lambda c: rank(c["lc"]) >= 3)
+    # SQL = etapa EXACTA «salesqualifiedlead» (unificado con el KPI y la matriz: no cuenta
+    # oportunidad/cliente ni precualificación, para que el mismo mes dé el mismo número en todas partes)
+    ch_sql_all = series(_hist_all, lambda c: c["lc"] == "salesqualifiedlead")
     ch_opp_all = series(_hist_all, lambda c: rank(c["lc"]) >= 4, compkey)
     ch_cli_all = series(_hist_all, lambda c: c["lc"] == "customer", compkey)
 
+    # ── Ventana MES-HASTA-HOY (MTD): el mes en curso (1 → hoy) vs el mismo tramo del mes anterior ──
+    # (coherente con la matriz «mes actual» y los gráficos, que también son de julio natural)
+    _mtd_end = dN                                   # hoy
+    _mtd_start = _mtd_end.replace(day=1)            # 1 del mes actual
+    _dom = _mtd_end.day                             # días transcurridos del mes (p. ej. 23)
+    _prev_m_end = _mtd_start - timedelta(days=1)    # último día del mes anterior
+    _prev_m_start = _prev_m_end.replace(day=1)      # 1 del mes anterior
+    _prev_span_end = _prev_m_start + timedelta(days=_dom - 1)   # mismo nº de días del mes anterior
+    def _sum_range(daily_inc, d0, d1):
+        s = 0; dd = d0
+        while dd <= d1:
+            k = dd.isoformat()
+            if k in idx:
+                s += daily_inc[idx[k]]
+            dd += timedelta(days=1)
+        return s
     def trend7(daily_inc):
-        """Tendencia: suma últimos 30 días vs los 30 previos (comparativa mensual). dir + delta.
-        (Las claves last7/prev7 se mantienen por compatibilidad, pero contienen sumas de 30 días.)"""
-        W = 30
-        last = sum(daily_inc[-W:]); prev = sum(daily_inc[-2 * W:-W])
+        """Tendencia MES-HASTA-HOY: nuevos del mes en curso (1 → hoy) vs el mismo tramo del mes anterior.
+        (Las claves last7/prev7 se mantienen por compatibilidad.)"""
+        last = _sum_range(daily_inc, _mtd_start, _mtd_end)
+        prev = _sum_range(daily_inc, _prev_m_start, _prev_span_end)
         d = last - prev
         return {"dir": "up" if d > 0 else ("down" if d < 0 else "flat"), "delta": d, "last7": last, "prev7": prev}
     ch_free = series(hist_fun, is_free)
@@ -1414,7 +1432,7 @@ def main():
         return "📈 Crecimiento sostenido, sin picos marcados."
     # Notas de pico: TODAS las fuentes, coherentes con las líneas de los gráficos
     exec_extra["note_mql"] = spike_note(lambda c: rank(c["lc"]) >= 2, recs=_hist_all)
-    exec_extra["note_sql"] = spike_note(lambda c: rank(c["lc"]) >= 3, recs=_hist_all)
+    exec_extra["note_sql"] = spike_note(lambda c: c["lc"] == "salesqualifiedlead", recs=_hist_all)
     exec_extra["note_opp"] = spike_note(lambda c: rank(c["lc"]) >= 4, compkey, recs=_hist_all)
     exec_extra["note_cli"] = spike_note(lambda c: c["lc"] == "customer", compkey, recs=_hist_all)
     # Calidad del dato (sobre contactos desde 1 ene): email corporativo, teléfono, empresa
@@ -2929,9 +2947,9 @@ def render_exec(d):
         sym = "▲" if up else "▼"; cls = "up" if up else "down"
         pct_txt = f"{(last7 - prev7) / prev7 * 100:+.0f}%" if prev7 > 0 else "nuevo"
         numcls = "zero" if last7 == 0 else ("up" if up else "down")
-        return (f'<span class="trend {cls}" title="Variación de los últimos 30 días frente a los 30 días anteriores">{sym} {pct_txt}</span>'
+        return (f'<span class="trend {cls}" title="Variación de lo que va de mes (1 → hoy) frente al mismo tramo del mes anterior">{sym} {pct_txt}</span>'
                 f'<span class="trend {numcls}">+{last7}</span>'
-                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">últimos 30 d · vs mes anterior</span>')
+                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">en lo que va de mes · vs mismo tramo mes anterior</span>')
 
     opp_c = ex["opp_contacts"]; cli_c = ex["cli_contacts"]
     opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
@@ -3083,7 +3101,7 @@ def render_exec(d):
                  'eliminan, se descartan o no cualifican). El dato vivo real es el de los KPIs de arriba.')
     charts = [
         ("MQL", mql_d, ex["svg_mql_m"], ex.get("note_mql", "")),
-        ("SQL alcanzados", cum["sql"], ex["svg_sql_m"], ex.get("note_sql", "") + _imp_note),
+        ("SQL", ex.get("sql_stage_total", cum["sql"]), ex["svg_sql_m"], ex.get("note_sql", "") + _imp_note),
         ("Oportunidades", opp_e, ex["svg_opp_m"], ex.get("note_opp", "") + _imp_note),
         ("Clientes", cli_e, ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
@@ -3630,10 +3648,10 @@ def render_exec(d):
         insights.append(("", f'El contenido que más leads de consideración genera es <b>{esc(content_rows[0][0])}</b> ({content_rows[0][1]}).'))
     grow = max(tr.items(), key=lambda x: x[1].get("delta", 0))
     if grow[1].get("delta", 0) > 0:
-        insights.append(("", f'Tendencia al alza en <b>{grow[0]}</b>: +{grow[1]["delta"]} en los últimos 30 días vs los 30 previos.'))
+        insights.append(("", f'Tendencia al alza en <b>{grow[0]}</b>: +{grow[1]["delta"]} en lo que va de mes vs el mismo tramo del mes anterior.'))
     drop = min(tr.items(), key=lambda x: x[1].get("delta", 0))
     if drop[1].get("delta", 0) < 0:
-        insights.append(("bad", f'Atención: <b>{drop[0]}</b> baja {drop[1]["delta"]} en los últimos 30 días respecto a los 30 previos.'))
+        insights.append(("bad", f'Atención: <b>{drop[0]}</b> baja {drop[1]["delta"]} en lo que va de mes respecto al mismo tramo del mes anterior.'))
     insights = insights[:5]
     ins_html = "".join(f'<div class="i {c}"><span class="dot"></span><p>{txt}</p></div>' for c, txt in insights) \
         or '<p class="sd">Sin señales suficientes para generar insights hoy.</p>'
@@ -3834,7 +3852,7 @@ def render_exec(d):
         <div class="cat-body"><span class="src-chip br">🧠 Brain</span></div></div>
     </div>
     Cifra grande = total de contactos; debajo, <b>inb</b> / <b>out</b>. En Oportunidades el pequeño es nº de <b>empresas / negocios</b>; en Clientes, <b>cuentas activas</b> del pipeline «Clientes».</div>
-  <div class="kg-trendlab">📈 Las flechas de cada KPI comparan los <b>últimos 30 días</b> con los <b>30 anteriores</b> (tendencia del <b>último mes vs el mes previo</b>, aunque el mes en curso no haya terminado).</div>
+  <div class="kg-trendlab">📈 Las flechas de cada KPI comparan <b>lo que va de mes</b> (del 1 a hoy) con el <b>mismo tramo del mes anterior</b> — misma ventana que la matriz por canal y los gráficos, aunque el mes en curso no haya terminado, para que los números cuadren en todas las secciones.</div>
   <div class="kg">{kpi_html}</div>
   <div class="kg kg3">{kpi_html2}</div>
   <div style="height:26px"></div>
