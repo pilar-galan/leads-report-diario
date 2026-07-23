@@ -2363,6 +2363,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .sd.wide{max-width:none}
 .kg-trendlab{font-size:11px;color:var(--mut);line-height:1.5;margin:0 0 12px;padding-left:11px;border-left:2px solid var(--brand-d)}
 .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.kg3{grid-template-columns:repeat(3,1fr);margin-top:13px}
+.kg3 .kc{display:flex;flex-direction:column}
+.kg3 .kc .emprow{margin-top:auto}
 .kc{background:linear-gradient(165deg,rgba(24,52,38,.9),rgba(19,41,30,.7));border:1px solid var(--line);
   border-radius:16px;padding:18px 16px;position:relative;overflow:hidden}
 .kc::after{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(111,240,162,.4),transparent)}
@@ -2885,8 +2888,9 @@ def render_exec(d):
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(total_nf)} · out {fmt(ob["contactos"])} · 🧠 brain {fmt(brain_ct)}</span></div></div>' +
         kpi_io("Leads", g_lead, tr["leads"], cum["lead"], ob["lead"]) +
         kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
-        kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]) +
-        # ── 2ª fila ──
+        kpi_io("SQL", g_sql, tr["sql"], mx_in_sql, ob["sql"]))
+    # ── 2ª fila (3 tarjetas a ancho completo) ──
+    kpi_html2 = (
         f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
         f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos en etapa oportunidad con negocio asociado · ventas o Brain (sin cerrados)</div>'
@@ -3694,6 +3698,7 @@ def render_exec(d):
     Cifra grande = total de contactos; debajo, <b>inb</b> / <b>out</b>. En Oportunidades el pequeño es nº de <b>empresas / negocios</b>; en Clientes, <b>cuentas activas</b> del pipeline «Clientes».</div>
   <div class="kg-trendlab">📈 Las flechas de cada KPI comparan los <b>últimos 30 días</b> con los <b>30 anteriores</b> (tendencia del <b>último mes vs el mes previo</b>, aunque el mes en curso no haya terminado).</div>
   <div class="kg">{kpi_html}</div>
+  <div class="kg kg3">{kpi_html2}</div>
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
   <div class="ratesbanner">
