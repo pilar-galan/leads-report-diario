@@ -1406,6 +1406,8 @@ def main():
     # SQL = etapa EXACTA «salesqualifiedlead» (SQL-Consultoría/Demo), TODAS las fuentes
     # (coincide con el filtro verificable en HubSpot; no incluye precualificación ni oport./cliente).
     ch_sql_stage = series(_hist_all, lambda c: c["lc"] == "salesqualifiedlead")
+    # Split de los SQL (etapa exacta) en las dos fases: manual (<9 jul) vs automatizada (>=9 jul)
+    exec_extra["sql_f2"] = sum(1 for c in _hist_all if c["lc"] == "salesqualifiedlead" and (c.get("created") or "") >= "2026-07-09")
     exec_extra["sql_stage_total"] = ch_sql_stage[0][-1] if ch_sql_stage[0] else 0
     exec_extra["sql_stage_in"] = sum(1 for c in hist if c["lc"] == "salesqualifiedlead")
     exec_extra["sql_stage_out"] = sum(1 for c in hist_out if c["lc"] == "salesqualifiedlead")
@@ -4033,13 +4035,13 @@ def render_exec(d):
 
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
-  <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> (etapa exacta <code>salesqualifiedlead</code>, misma definición que el KPI principal; prácticamente todos de <b>inbound</b>). Se muestran en <b>dos fases</b> según cómo se han trabajado. <i>Pulsa cada bloque para desplegar el detalle.</i></div>
+  <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(ex.get("sql_stage_total",0))}</span></h2>
+  <div class="sd wide">Los <b>{fmt(ex.get("sql_stage_total",0))} SQL</b> (etapa exacta <code>salesqualifiedlead</code>, igual que el KPI). Se reparten en <b>dos fases</b>: <b>{fmt(max(0, ex.get("sql_stage_total",0) - ex.get("sql_f2",0)))}</b> de seguimiento <b>manual</b> (creados antes del 9 jul) + <b>{fmt(ex.get("sql_f2",0))}</b> por <b>precualificación automatizada</b> (desde el 9 jul). <i>Pulsa cada bloque para el detalle.</i></div>
   <div class="evo-flow"><span class="evo-step prev">Fase 1 · Manual (antes 9 jul)</span><span class="evo-arrow">— se detectan gaps → se automatiza →</span><span class="evo-step new">Fase 2 · Precualificación automatizada (desde 9 jul)</span></div>
 
   <div class="sqlvl3 two">
     <div class="lvl-col">
-      <div class="phase-head prev">Fase 1 · Seguimiento manual <small>· antes del 9 jul</small></div>
+      <div class="phase-head prev">Fase 1 · Seguimiento manual <small>· antes del 9 jul · {fmt(max(0, ex.get("sql_stage_total",0) - ex.get("sql_f2",0)))} SQL</small></div>
       <div class="phase-desc">Se hacía un <b>seguimiento casi diario</b> de una lista de SQLs. Funcionaba, pero <b>dificultaba el follow-up y aprender de los descartes</b>, y hacía <b>perder tiempo a ventas</b>. Se creó una <b>razón de descarte</b> manual para ordenarlo, pero seguía siendo lento → se decidió <b>automatizar</b> (Fase 2).</div>
     <details class="lvl" open>
       <summary class="lvl-sum">
@@ -4069,7 +4071,7 @@ def render_exec(d):
     </details>
     </div>
     <div class="lvl-col">
-      <div class="phase-head new">Fase 2 · Precualificación automatizada <small>· desde el 9 jul</small></div>
+      <div class="phase-head new">Fase 2 · Precualificación automatizada <small>· desde el 9 jul · {fmt(ex.get("sql_f2",0))} SQL</small></div>
       <div class="phase-desc">Para que <b>ventas no pierda tiempo</b>, el <b>formulario de solicitar demo</b> precualifica solo: pregunta por el <b>volumen de consultas (≥3.000)</b> y el <b>tamaño del equipo de soporte (&gt;5 personas)</b>. Quien no cumple recibe un <b>mail de agradecimiento/descarte</b> automático y <b>no llega a Agustín</b>; el resto sí avanza.</div>
     <details class="lvl lvl3" open>
       <summary class="lvl-sum">
@@ -4085,7 +4087,9 @@ def render_exec(d):
           <div class="agf-node top"><b>{fmt(ag_top)}</b><span>piden demo<br><small>precualificación automática por formulario · desde 9 jul</small></span></div>
           <div class="agf-branch">
             <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_entered, ag_top or 1)}</span><span class="agf-lbl">pasan a Agustín</span></div>
-            <div class="agf-right"><b>{fmt(ag_mail)}</b><span>descalificados por mail<br><small>{pv(ag_mail, ag_top or 1)} · volumen &lt;3.000 declarado en el formulario</small></span></div>
+            <details class="agf-right bad"><summary><b>{fmt(ag_mail)}</b><span>descalificados por mail<br><small>{pv(ag_mail, ag_top or 1)} · no cumplen criterios (volumen &lt;3.000) · ▾ detalle</small></span></summary>
+              <div class="razbox" style="margin-top:8px;font-size:11px;color:var(--ink2)">No cumplen los criterios del formulario (≥3.000 consultas o equipo de soporte &gt;5 personas), así que <b>no pasan a Agustín</b>: reciben un <b>mail automático de agradecimiento/descarte</b> y quedan en una <b>lista de descartados identificados</b>, por si en el futuro decidimos reactivarlos.</div>
+              <div style="margin-top:8px">{email_flow_html}</div></details>
           </div>
           <div class="agf-node"><b>{fmt(ag_entered)}</b><span>pasan a Agustín<br><small>precualifican · Agustín contacta (tel./mail según preferencia)</small></span></div>
           <div class="agf-branch">
@@ -4107,10 +4111,6 @@ def render_exec(d):
           </div>
         </div>
         <div class="sd" style="margin-top:10px;font-size:11.5px;color:var(--mut)">Reparto: de <b>{fmt(ag_top)}</b> que piden demo → <b>{fmt(ag_mail)}</b> por mail (formulario) + <b>{fmt(ag_entered)}</b> a Agustín. De esos <b>{fmt(ag_entered)}</b>: <b>{fmt(ag_vol)}</b> descarte por volumen + <b>{fmt(ag_gest)}</b> gestionados (= <b>{fmt(ag_gestdesc)}</b> descartados en gestión + <b>{fmt(ag_adv)}</b> en curso → <b>{fmt(ag_opp_n)}</b> oportunidad + <b>{fmt(ag_proc)}</b> en proceso). 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
-        <div class="lvl-subh">Descalificación automática por mail <small>· contactos que declaran &lt;3.000 en el formulario</small></div>
-        <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
-          {email_flow_html}
-        </div>
         <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización del workflow · 22 jul 2026:</b> a <b>Agustín</b> solo llegan los contactos que han <b>solicitado demo</b> y tienen <b>≥3.000 consultas/mes</b> o un <b>equipo de soporte de &gt;5 personas</b>. El resto se <b>descalifica automáticamente por mail</b>.</div>
       </div>
     </details>
