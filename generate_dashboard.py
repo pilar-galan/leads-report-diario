@@ -3411,7 +3411,9 @@ def render_exec(d):
     # ── Embudo de Agustín · DOS MOMENTOS de descarte (por razón real) ──
     #   entran → [1] descarte volumen <3.000 (precualif) → gestionados → [2] descarte en gestión → en curso → {oport · proceso}
     ag_opp_n = pq.get("ag_opp", 0)
-    ag_entered = pq.get("ag_cohort", pq.get("ag_sql", 0))   # entran a Agustín (≥9 jul, etapas SQL)
+    ag_mail = 8                                             # descalificados por mail automático (formulario · <3.000 declarado) · dato aportado por ventas (no accesible por API)
+    ag_entered = pq.get("ag_cohort", pq.get("ag_sql", 0))   # pasan a Agustín (≥9 jul, etapas SQL)
+    ag_top = ag_entered + ag_mail                            # total que pide demo (precualificación por formulario)
     ag_vol = pq.get("ag_vol_desc", 0)                        # [momento 1] descartados por volumen <3.000
     ag_gest = max(0, ag_entered - ag_vol)                    # gestionados (superan el filtro de volumen)
     ag_gestdesc = min(pq.get("ag_gestdesc", 0), ag_gest)     # [momento 2] descartados en gestión (otras razones)
@@ -3984,13 +3986,19 @@ def render_exec(d):
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
         <div class="lvl-subh">Flujo de gestión de Agustín <small>· embudo a la izquierda · descartes a la derecha</small></div>
         <div class="agflow">
-          <div class="agf-node top"><b>{fmt(ag_entered)}</b><span>entran a Agustín<br><small>pidieron demo · precualificados por formulario · desde 9 jul</small></span></div>
+          <div class="agf-node top"><b>{fmt(ag_top)}</b><span>piden demo<br><small>precualificación automática por formulario · desde 9 jul</small></span></div>
+          <div class="agf-branch">
+            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_entered, ag_top or 1)}</span><span class="agf-lbl">pasan a Agustín</span></div>
+            <div class="agf-right"><b>{fmt(ag_mail)}</b><span>descalificados por mail<br><small>{pv(ag_mail, ag_top or 1)} · volumen &lt;3.000 declarado en el formulario</small></span></div>
+          </div>
+          <div class="agf-node"><b>{fmt(ag_entered)}</b><span>pasan a Agustín<br><small>precualifican · Agustín contacta (tel./mail según preferencia)</small></span></div>
           <div class="agf-branch">
             <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_gest, ag_entered or 1)}</span><span class="agf-lbl">pasan el filtro de volumen</span></div>
-            <details class="agf-right bad"><summary><b>{fmt(ag_vol)}</b><span>descartados · volumen &lt;3.000<br><small>{pv(ag_vol, ag_entered or 1)} · detectado en precualificación · ▾ ver</small></span></summary>
+            <details class="agf-right bad"><summary><b>{fmt(ag_vol)}</b><span>descartados · volumen &lt;3.000<br><small>{pv(ag_vol, ag_entered or 1)} · Agustín lo detecta* · ▾ ver</small></span></summary>
+              <div class="razbox" style="margin-top:8px;font-size:10.5px;color:var(--mut)">* Contactos que en el formulario marcaron «no sé mi volumen» — Jonathan pidió que entraran igualmente a precualificar. Agustín detecta que son &lt;3.000.</div>
               <div class="agopp-list" style="margin-top:8px">{_agvol_items or '<span>—</span>'}</div></details>
           </div>
-          <div class="agf-node"><b>{fmt(ag_gest)}</b><span>gestionados<br><small>Agustín contacta (tel./mail según preferencia)</small></span></div>
+          <div class="agf-node"><b>{fmt(ag_gest)}</b><span>gestionados<br><small>superan el filtro de volumen</small></span></div>
           <div class="agf-branch">
             <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_adv, ag_base)}</span><span class="agf-lbl">avanzan / en curso</span></div>
             <details class="agf-right bad"><summary><b>{fmt(ag_gestdesc)}</b><span>descartados en gestión · {pv(ag_gestdesc, ag_base)}<br><small>tras contacto/reunión · ▾ razones (IA)</small></span></summary>
@@ -4002,7 +4010,7 @@ def render_exec(d):
             <div class="agf-proc"><b>{fmt(ag_proc)}</b><span>en proceso / pendientes<br><small>{pv(ag_proc, ag_adv or 1)} de los que avanzan · sin deal aún</small></span></div>
           </div>
         </div>
-        <div class="sd" style="margin-top:10px;font-size:11.5px;color:var(--mut)">Reparto de los <b>{fmt(ag_entered)}</b> que entran: <b>{fmt(ag_vol)}</b> descarte por volumen + <b>{fmt(ag_gest)}</b> gestionados (= <b>{fmt(ag_gestdesc)}</b> descartados en gestión + <b>{fmt(ag_adv)}</b> en curso). 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
+        <div class="sd" style="margin-top:10px;font-size:11.5px;color:var(--mut)">Reparto: de <b>{fmt(ag_top)}</b> que piden demo → <b>{fmt(ag_mail)}</b> por mail (formulario) + <b>{fmt(ag_entered)}</b> a Agustín. De esos <b>{fmt(ag_entered)}</b>: <b>{fmt(ag_vol)}</b> descarte por volumen + <b>{fmt(ag_gest)}</b> gestionados (= <b>{fmt(ag_gestdesc)}</b> descartados en gestión + <b>{fmt(ag_adv)}</b> en curso → <b>{fmt(ag_opp_n)}</b> oportunidad + <b>{fmt(ag_proc)}</b> en proceso). 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
         <div class="lvl-subh">Descalificación automática por mail <small>· contactos que declaran &lt;3.000 en el formulario</small></div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
