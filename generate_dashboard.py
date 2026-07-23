@@ -2722,11 +2722,42 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .agfdet{flex:1} .agfdet>summary{list-style:none;cursor:pointer;height:100%} .agfdet>summary::-webkit-details-marker{display:none}
 .agfinfo{display:inline-block;font-size:9px;font-weight:800;color:var(--sky);background:rgba(34,211,238,.14);border-radius:6px;padding:1px 6px;margin-top:3px}
 .agfpop{margin-top:8px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.55;text-align:left}
+/* Embudo rediseñado ≥3.000: vertical (abajo = cualifica/avanza) con ramas a la derecha (se pierde) */
+.agflow{display:flex;flex-direction:column;gap:0;margin:8px 0 4px}
+.agf-node{background:rgba(12,27,21,.55);border:1px solid var(--line);border-radius:14px;padding:13px 16px;display:flex;align-items:baseline;gap:12px;align-self:center;min-width:min(360px,100%);justify-content:center}
+.agf-node b{font-size:27px;font-weight:900;color:var(--ink);line-height:1}
+.agf-node span{font-size:11.5px;color:var(--mut);line-height:1.4;text-align:left}
+.agf-node.ok{border-color:var(--brand-d);background:rgba(111,240,162,.07)} .agf-node.ok b{color:var(--brand)}
+.agf-node.top{border-color:var(--line2)} .agf-node.top b{color:var(--sky)}
+.agf-branch{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;padding:7px 0}
+.agf-down{display:flex;flex-direction:column;align-items:center;justify-self:end}
+.agf-pct{font-size:16px;font-weight:900} .agf-pct.ok{color:var(--brand)}
+.agf-lbl{font-size:10px;color:var(--mut);font-weight:700;margin-top:1px}
+.agf-right{justify-self:start;background:rgba(148,163,184,.06);border:1px solid var(--line);border-radius:12px;padding:9px 13px;display:flex;align-items:baseline;gap:10px;max-width:300px}
+.agf-right b{font-size:21px;font-weight:900;line-height:1}
+.agf-right span{font-size:10.5px;color:var(--mut);line-height:1.35}
+.agf-right.limbo b{color:#94a3b8}
+.agf-right.bad{background:rgba(255,107,107,.06);border-color:#a53a3a;cursor:pointer} .agf-right.bad b{color:var(--bad)}
+.agf-right.bad summary{display:flex;align-items:baseline;gap:10px;list-style:none} .agf-right.bad summary::-webkit-details-marker{display:none}
+.agf-leaf{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:7px;align-self:center;min-width:min(360px,100%)}
+.agf-opp{background:rgba(111,240,162,.07);border:1px solid var(--brand-d);border-radius:12px;padding:10px 13px}
+.agf-opp summary{display:flex;align-items:baseline;gap:9px;cursor:pointer;list-style:none} .agf-opp summary::-webkit-details-marker{display:none}
+.agf-opp b{font-size:21px;font-weight:900;color:var(--brand);line-height:1}
+.agf-opp span{font-size:10.5px;color:var(--ink2);line-height:1.35}
+.agf-opp.empty{opacity:.7}
+.agf-proc{background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:10px 13px;display:flex;align-items:baseline;gap:9px}
+.agf-proc b{font-size:21px;font-weight:900;color:var(--ink);line-height:1}
+.agf-proc span{font-size:10.5px;color:var(--mut);line-height:1.35}
+@media(max-width:640px){.agf-branch,.agf-leaf{grid-template-columns:1fr}.agf-down{justify-self:center}.agf-right{justify-self:center}}
 .mailkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .mk{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:9px 8px;text-align:center}
 .mk-v{font-size:19px;font-weight:900;color:var(--sky);line-height:1}
 .mk-l{font-size:9.5px;color:var(--mut);font-weight:700;margin-top:3px;line-height:1.3} .mk-l small{font-weight:600;opacity:.85}
 @media(max-width:520px){.mailkpis{grid-template-columns:1fr 1fr}}
+.descal-box{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.22);border-radius:12px;padding:13px 15px}
+.descal-big{display:flex;align-items:center;gap:14px}
+.descal-big b{font-size:34px;font-weight:900;color:var(--sky);line-height:1}
+.descal-big span{font-size:12.5px;color:var(--ink2);line-height:1.4} .descal-big small{color:var(--mut)}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -3355,11 +3386,16 @@ def render_exec(d):
     # Embudo ≥3.000: entrados (mail) → tratados → {oportunidad · en proceso · descartados}
     ag_desc = pq.get("ag_descartados", 0)
     ag_opp_n = pq.get("ag_opp", 0)
-    ag_entered = pq.get("ag_sql", 0)                 # SQL que entraron (llegaron al mail)
-    ag_treated = ag_contact                          # tratados (contactados/gestionados)
-    ag_gap = max(0, ag_entered - ag_treated)         # entraron pero aún sin tratar
-    ag_base = ag_treated or 1                         # base de la bifurcación = tratados
-    ag_proc = max(0, ag_treated - ag_opp_n - ag_desc)  # tratados que siguen en proceso
+    ag_entered = pq.get("ag_sql", 0)                 # entraron (solicitaron demo ≥3.000 → Agustín)
+    ag_treated = ag_contact                          # gestionados (contactados/agendados)
+    ag_gap = max(0, ag_entered - ag_treated)         # entraron pero aún sin gestionar
+    ag_base = ag_treated or 1                         # base de la bifurcación = gestionados
+    # ── Modelo de embudo (la suma cuadra con los que entraron) ──
+    #   entraron = avanzan (↓ cualifican) + descartados (→ se pierden) + limbo (sin gestionar)
+    ag_limbo = ag_gap                                 # sin gestionar / en el limbo
+    ag_desc_eff = min(ag_desc, ag_treated)           # descartados (de los gestionados)
+    ag_adv = max(0, ag_treated - ag_desc_eff)        # avanzan y cualifican (siguen en venta)
+    ag_proc = max(0, ag_adv - ag_opp_n)              # avanzan que aún están en proceso (sin deal)
     ag_split = ag_base                                # compat
     # Lista clicable de las oportunidades de Agustín (nombre · canal · etapa)
     _agopps = pq.get("ag_opp_list", []) or []
@@ -3375,6 +3411,17 @@ def render_exec(d):
     else:
         ag_opp_step = (f'<div class="vstep ok"><b>🎯 {ag_opp_n}</b>'
                        f'<span>oportunidad · {pv(ag_opp_n, ag_contact or 1)} de los gestionados</span></div>')
+    # Caja-hoja de oportunidades para el embudo rediseñado (clicable · % sobre los que avanzan)
+    _ags = "es" if ag_opp_n != 1 else ""
+    if ag_opp_n and _agopps:
+        ag_opp_leaf = (
+            f'<details class="agf-opp"><summary><b>🎯 {fmt(ag_opp_n)}</b>'
+            f'<span>oportunidad{_ags} · {pv(ag_opp_n, ag_adv or 1)} de los que avanzan<br>'
+            f'<small>▾ ver negocios y etapa</small></span></summary>'
+            f'<div class="agopp-list">{_ag_opp_items}</div></details>')
+    else:
+        ag_opp_leaf = (f'<div class="agf-opp empty"><b>🎯 {fmt(ag_opp_n)}</b>'
+                       f'<span>oportunidad{_ags}<br><small>sin negocios todavía</small></span></div>')
 
     # ---------- 9 · MOTIVOS DESCARTE ----------
     desc = d["descarte"]
@@ -3454,19 +3501,18 @@ def render_exec(d):
     #   ≥3.000 consultas → Agustín (ag_sql) · <3.000 → mail de descalificación + listas (ag_lt3000)
     ag_lt3000 = pq.get("ag_lt3000", 0)
     n3 = pq.get("ag_sql", 0) + ag_lt3000
-    # Métricas del mail de descalificación (HubSpot, desde el 9 jul · excluyendo bots)
+    # Descalificados por mail (<3.000 consultas): volumen de personas que han recibido el mail
+    # y entrado en la lista de descualificados. Se rastrea por LISTA de HubSpot (no por etapa del
+    # ciclo de vida, que aquí queda a 0), por lo que se fija manualmente. Actualizar cuando cambie.
+    _mail_descal = 8
     email_flow_html = (
-        '<ul class="elist" style="margin-bottom:12px">'
-        '<li>Los que <b>no cualifican</b> reciben un <b>mail automático de descalificación</b></li>'
-        '<li>Se añaden a <b>listas de HubSpot</b> para reevaluar si su volumen crece</li>'
-        '</ul>'
-        '<div class="mailkpis">'
-        '<div class="mk"><div class="mk-v">75%</div><div class="mk-l">Apertura<br><small>6 únicas · 10 total</small></div></div>'
-        '<div class="mk"><div class="mk-v">25%</div><div class="mk-l">Clics<br><small>2 clics únicos</small></div></div>'
-        '<div class="mk"><div class="mk-v">33,3%</div><div class="mk-l">Clickthrough<br><small>clics / aperturas</small></div></div>'
-        '<div class="mk"><div class="mk-v">0%</div><div class="mk-l">Respuesta<br><small>0 respuestas</small></div></div>'
-        '</div>'
-        '<div class="sd" style="font-size:10.5px;color:var(--mut);margin-top:8px">Métricas del mail de descalificación · HubSpot · desde el 9 jul (excluyendo bots).</div>')
+        '<div class="descal-box">'
+        f'<div class="descal-big"><b>{fmt(_mail_descal)}</b><span>personas han recibido el <b>mail de descalificación</b><br>'
+        '<small>&lt;3.000 consultas · desde el 9 jul</small></span></div>'
+        '<ul class="elist" style="margin:10px 0 0">'
+        '<li>Han entrado en la <b>lista de descualificados</b> de HubSpot</li>'
+        '<li>Se <b>reevalúan</b> automáticamente si su volumen de consultas crece</li>'
+        '</ul></div>')
 
     # ---------- 10 · OPORTUNIDADES abiertas (pipeline real, sin clientes) ----------
     dbc = ex.get("deals_by_chan", {})   # {canal: [(nombre, etapa), ...]} solo abiertas inbound
@@ -3907,29 +3953,25 @@ def render_exec(d):
       <div class="lvl-body">
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
         <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
-        <div class="agftop">
-          <div class="agfstep"><b>{fmt(ag_entered)}</b><span>SQL entraron<br><small>≥3.000 · al mail</small></span></div>
-          <div class="agfarr">→ <span>{pv(ag_treated, ag_entered or 1)}</span></div>
-          <details class="agfdet"><summary class="agfstep ok"><b>{fmt(ag_treated)}</b><span>tratados <span class="agfinfo">ⓘ ¿y los {fmt(ag_gap)} restantes?</span></span></summary>
-            <div class="agfpop">De los <b>{fmt(ag_entered)}</b> que entraron, <b>{fmt(ag_gap)}</b> aún <b>no se han tratado</b>: sin respuesta o pendientes de contacto. La bifurcación de abajo se calcula sobre los <b>{fmt(ag_treated)} tratados</b> (base 100%).</div>
-          </details>
-        </div>
-        <div class="vfork">
-          <div class="vfork-col left">
-            <div class="vfork-tag ok">✅ Gestionados · <b>{fmt(ag_treated)}</b> (100% de tratados)</div>
-            <div class="vstep"><b>{fmt(ag_proc)}</b><span>en proceso · {pv(ag_proc, ag_base)} de los tratados</span></div>
-            <div class="varr">↓ <span>{pv(ag_opp_n, ag_base)} → oportunidad</span></div>
-            {ag_opp_step}
+        <div class="agflow">
+          <div class="agf-node top"><b>{fmt(ag_entered)}</b><span>solicitaron demo · entraron<br><small>≥3.000 consultas · a Agustín</small></span></div>
+          <div class="agf-branch">
+            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_treated, ag_entered or 1)}</span><span class="agf-lbl">gestionados</span></div>
+            <div class="agf-right limbo"><b>{fmt(ag_limbo)}</b><span>sin gestionar · en el limbo<br><small>{pv(ag_limbo, ag_entered or 1)} · sin respuesta o pendientes</small></span></div>
           </div>
-          <div class="vfork-col right">
-            <div class="vfork-tag bad">🔴 Descartados · <b>{pv(ag_desc, ag_base)}</b> de los tratados</div>
-            <details class="vdet">
-              <summary class="vstep bad"><b>{fmt(ag_desc)}</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
-              <div class="razbox" style="margin-top:6px">{raz_rows}</div>
-            </details>
+          <div class="agf-node"><b>{fmt(ag_treated)}</b><span>gestionados<br><small>contactados / agendados</small></span></div>
+          <div class="agf-branch">
+            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_adv, ag_base)}</span><span class="agf-lbl">avanzan y cualifican</span></div>
+            <details class="agf-right bad"><summary><b>{fmt(ag_desc_eff)}</b><span>descartados · {pv(ag_desc_eff, ag_base)}<br><small>no pasaron a ventas · ▾ razones</small></span></summary>
+              <div class="razbox" style="margin-top:8px">{raz_rows}</div></details>
+          </div>
+          <div class="agf-node ok"><b>{fmt(ag_adv)}</b><span>avanzan y cualifican<br><small>siguen en el proceso de venta</small></span></div>
+          <div class="agf-leaf">
+            {ag_opp_leaf}
+            <div class="agf-proc"><b>{fmt(ag_proc)}</b><span>en proceso<br><small>{pv(ag_proc, ag_adv or 1)} de los que avanzan · sin deal aún</small></span></div>
           </div>
         </div>
-        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">Flujo: <b>{fmt(ag_entered)}</b> entraron → <b>{fmt(ag_treated)}</b> tratados ({pv(ag_treated, ag_entered or 1)}) → <b>{fmt(ag_opp_n)}</b> oportunidad ({pv(ag_opp_n, ag_base)} de tratados). 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
+        <div class="sd" style="margin-top:10px;font-size:11.5px;color:var(--mut)">Reparto de los <b>{fmt(ag_entered)}</b> que entraron: <b>{fmt(ag_adv)}</b> avanzan + <b>{fmt(ag_desc_eff)}</b> descartados + <b>{fmt(ag_limbo)}</b> sin gestionar = <b>{fmt(ag_adv + ag_desc_eff + ag_limbo)}</b>. 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
