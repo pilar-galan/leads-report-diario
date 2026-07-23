@@ -1319,9 +1319,11 @@ def main():
     def _is_mql_defacto(c):
         if is_free(c) or rank(c["lc"]) < 1:
             return False
-        if c.get("web_asis"):
-            return True
-        return classify_origin(c.get("conv"), c.get("webinar")) in CONTENT_ORIGINS
+        # Inbound (fuente de marketing): MQL «de facto» = consumió contenido / asistió a webinar.
+        # Outbound (prospección, sin contenido): MQL = alcanzó la etapa (rank>=MQL).
+        if is_marketing(c.get("src"), c.get("d1")):
+            return bool(c.get("web_asis")) or classify_origin(c.get("conv"), c.get("webinar")) in CONTENT_ORIGINS
+        return rank(c["lc"]) >= 2
     ch_mql_all = series(_hist_all, _is_mql_defacto)
     # SQL = etapa EXACTA «salesqualifiedlead» (unificado con el KPI y la matriz: no cuenta
     # oportunidad/cliente ni precualificación, para que el mismo mes dé el mismo número en todas partes)
