@@ -3866,10 +3866,10 @@ def render_exec(d):
   <div class="sd"><b>Oportunidades totales</b> (negocios abiertos) sumando las tres vías: <b style="color:var(--brand)">🟢 Inbound</b> + <b style="color:var(--warn)">🟠 Outbound</b> + <b style="color:var(--violet)">🧠 Brain</b>. Debajo, el desglose por vía y el detalle del <b>pipeline de inbound</b> (pulsa un canal para ver los negocios y su etapa).</div>
   <div class="note" style="margin-bottom:16px">💡 <b>Qué cuenta como oportunidad y por qué mejora el dato.</b> Todo lo que entra en el <b>pipeline de ventas</b> se cuenta como oportunidad — es su función (proceso comercial). La fase previa (descubrir la necesidad, validar el encaje, confirmar presupuesto y decisor) se trabaja por otras vías, p. ej. <b>Brain</b>: un contacto ahí <b>no es oportunidad</b> hasta que está validado y pasa a ventas. Antes se mezclaban como «oportunidad» contactos que aún no lo eran (e <b>importaciones</b> sin la etapa de ciclo de vida correcta), lo que inflaba el volumen y sesgaba la conversión. Ya está depurado, así que verás <b>menos oportunidades pero más fiables</b>. Es un <b>evolutivo</b>: la clave es mantener el proceso estable para poder comparar y aprender mes a mes.</div>
   <div class="cards" style="margin-bottom:18px">
-    <div class="stat"><div class="sv tnum">{fmt(opp_real)}</div><div class="sl">🎯 Oportunidades totales<br><span style="color:var(--mut)">inbound + outbound + brain</span></div></div>
-    <div class="stat ok"><div class="sv tnum">{fmt(opp_inb_real)}</div><div class="sl">🟢 Inbound</div></div>
-    <div class="stat warn"><div class="sv tnum">{fmt(opp_out_real)}</div><div class="sl">🟠 Outbound / comercial</div></div>
-    <div class="stat"><div class="sv tnum">{fmt(opp_brain_real)}</div><div class="sl">🧠 Brain</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(opp_real)}</div><div class="sl">🎯 Oportunidades totales<br><span style="color:var(--mut)">inbound + outbound + brain · 100%</span></div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(opp_inb_real)}</div><div class="sl">🟢 Inbound<br><span style="color:var(--mut)">{pv(opp_inb_real, opp_real)} del total</span></div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(opp_out_real)}</div><div class="sl">🟠 Outbound / comercial<br><span style="color:var(--mut)">{pv(opp_out_real, opp_real)} del total</span></div></div>
+    <div class="stat"><div class="sv tnum">{fmt(opp_brain_real)}</div><div class="sl">🧠 Brain<br><span style="color:var(--mut)">{pv(opp_brain_real, opp_real)} del total</span></div></div>
   </div>
   <div class="section-label" style="margin:6px 0 12px">Detalle del pipeline de inbound · {fmt(pipe_cnt)} negocios abiertos</div>
   <div class="cards" style="margin-bottom:18px">
@@ -3886,9 +3886,10 @@ def render_exec(d):
   <h2 class="sh">Clientes <span class="tot">· {fmt(ex.get("cli_split",{}).get("contactos",0))} contactos · {fmt(ex.get("cli_split",{}).get("total",0))} empresas</span></h2>
   <div class="sd"><b>Cartera real</b> del pipeline «Clientes» (excluye Churn/Dormidos y las altas freemium de la app). Cifra grande = <b>contactos</b>; empresas = cuentas. Fuente real del negocio (por <code>hs_analytics_source</code>): el total es la <b>suma de inbound + outbound</b>.</div>
   <div class="cards">
-    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Cuentas de cliente activas · {fmt(ex.get("cli_split",{}).get("contactos",0))} contactos</div></div>
-    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · orgánico / paid / social</div></div>
-    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound / otros · offline · importación · integración · tráfico directo</div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("total",0))}</div><div class="sl">Cuentas de cliente activas · 100%<br><span style="color:var(--mut)">{fmt(ex.get("cli_split",{}).get("contactos",0))} contactos</span></div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound · orgánico / paid / social<br><span style="color:var(--mut)">{pv(ex.get("cli_split",{}).get("inbound",0), ex.get("cli_split",{}).get("total",0))} del total</span></div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound / offline / importación / integración<br><span style="color:var(--mut)">{pv(ex.get("cli_split",{}).get("outbound",0), ex.get("cli_split",{}).get("total",0))} del total</span></div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("cli_split",{}).get("brain",0))}</div><div class="sl">🧠 Brain<br><span style="color:var(--mut)">{pv(ex.get("cli_split",{}).get("brain",0), ex.get("cli_split",{}).get("total",0))} del total</span></div></div>
   </div>
   <div class="note">Dato real del pipeline «Clientes» ({fmt(ex.get("cli_split",{}).get("total",0))} cuentas). La mayoría entran por <b>outbound / offline / importación / integración de la app</b>; muy pocas por canales de <b>inbound</b> de marketing. Se cuenta por <b>cuenta/empresa</b> (los contactos con ciclo de vida «cliente» incluyen altas freemium de la app y no reflejan la cartera real).</div>
 </section>
