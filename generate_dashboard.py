@@ -2543,10 +2543,10 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .cac-foot{font-size:10px;color:var(--mut);line-height:1.55;margin-top:12px}
 @media(max-width:860px){.cac-wrap{grid-template-columns:1fr}}
 /* matriz por fuente */
-.mxwrap{overflow-x:auto}
+.mxwrap{overflow:auto;max-height:78vh;border-radius:12px}
 .matrix{min-width:720px;display:flex;flex-direction:column;gap:7px}
 .mx-head,.mx-row{display:grid;grid-template-columns:1.8fr .9fr .75fr .75fr .85fr 1fr 1fr;gap:8px;align-items:center}
-.mx-head{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:800;padding:0 12px 4px}
+.mx-head{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:800;padding:10px 12px 8px;position:sticky;top:0;z-index:6;background:var(--bg);box-shadow:0 6px 10px -6px rgba(0,0,0,.6)}
 .mx-head span{text-align:right} .mx-head span:first-child{text-align:left}
 .mx-row{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:12px;padding:11px 12px}
 .mx-row .c1{display:flex;flex-direction:column;gap:5px}
@@ -2561,12 +2561,18 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .mx-cell.mut .v{color:var(--mut);font-weight:700}
 .mx-row.mx-tot{background:rgba(148,163,184,.14);border-color:var(--line2)}
 .mx-row.mx-tot .c1 .nm{color:var(--ink);font-weight:800}
+.mx-row.mx-tot.st-in{background:rgba(111,240,162,.13);border-color:var(--brand-d)}
+.mx-row.mx-tot.st-in .c1 .nm{color:var(--brand)}
+.mx-row.mx-tot.st-out{background:rgba(255,202,92,.12);border-color:#a5741f}
+.mx-row.mx-tot.st-out .c1 .nm{color:var(--warn)}
 .mx-row.mx-gtot{background:linear-gradient(120deg,rgba(111,240,162,.20),rgba(34,211,238,.16));border:1.5px solid var(--brand);border-radius:12px;padding-top:15px;padding-bottom:15px;margin-top:6px}
 .mx-row.mx-gtot .c1 .nm{color:var(--brand);font-weight:900;font-size:15px}
 .mx-row.mx-gtot .gsub{display:block;font-size:9.5px;color:var(--mut);font-weight:600;margin-top:2px}
 .mx-row.mx-gtot .mx-cell .v{font-size:18px}
 .mx-row.mx-gtot .mx-cell.hi .v{color:var(--brand)}
-.mx-cat{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:11px 12px;margin:14px 0 2px;border-radius:11px}
+.mx-cat{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:11px 12px;margin:14px 0 2px;border-radius:11px;position:sticky;top:38px;z-index:5}
+.mx-cat.cx{background:linear-gradient(180deg,#0c1b15,rgba(104,209,245,.06))}
+.mx-cat.brain{background:linear-gradient(180deg,#0c1b15,rgba(200,166,255,.06))}
 .mx-cat span{font-size:10px;font-weight:600;opacity:.65;text-transform:none;letter-spacing:0}
 .mx-cat.cx{color:var(--sky);border:1.5px solid #1f7f96;background:rgba(104,209,245,.06)}
 .mx-cat.brain{color:var(--violet);border:1.5px solid #6a4fa0;background:rgba(200,166,255,.06)}
@@ -3086,10 +3092,28 @@ def render_exec(d):
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
                 f'{c_cell}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{_mcell(e["o"], pe, "o")}'
                 f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
+        # Subtotales de grupo (inbound / outbound) con flecha MoM vs mismo grupo del mes anterior
+        def _sumrows(rows):
+            t = {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0}
+            for _, e in rows:
+                for k in t: t[k] += e.get(k, 0)
+            return t
+        tin = _sumrows(mo["rows_in"]); tout = _sumrows(mo["rows_out"])
+        pin = _sumrows(prev_snap["rows_in"]) if prev_snap else None
+        pout = _sumrows(prev_snap["rows_out"]) if prev_snap else None
+        def _subrow(lbl, t, pt, cls):
+            def cc(v, k, extra=""):
+                arrow = _mom(v, pt[k]) if pt else ''
+                return f'<div class="mx-cell {extra}"><span class="v tnum">{fmt(v)}</span>{arrow}</div>'
+            return (f'<div class="mx-row mx-tot {cls}"><div class="c1"><span class="nm">{lbl}</span></div>'
+                    f'{cc(t["c"], "c")}{cc(t["l"], "l")}{cc(t["m"], "m")}{cc(t["s"], "s", "hi")}{cc(t["o"], "o")}'
+                    f'<div class="mx-cell cv"><span class="v tnum">{pvf(t["o"], t["c"])}</span></div></div>')
         rows_h = ('<div class="mx-cat cx">🚀 GuruSup CX <span>Customer Experience · inbound + outbound</span></div>'
-                  '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"]))
+                  '<div class="mx-sep in">🟢 Inbound</div>' + "".join(_mrow(l, e) for l, e in mo["rows_in"])
+                  + _subrow("Total inbound", tin, pin, "st-in"))
         if mo["rows_out"]:
-            rows_h += '<div class="mx-sep out">🟠 Outbound</div>' + "".join(_mrow(l, e, "mx-ob") for l, e in mo["rows_out"])
+            rows_h += ('<div class="mx-sep out">🟠 Outbound</div>' + "".join(_mrow(l, e, "mx-ob") for l, e in mo["rows_out"])
+                       + _subrow("Total outbound", tout, pout, "st-out"))
         if mo["brain"]["c"]:
             rows_h += ('<div class="mx-cat brain">🧠 GuruSup Brain <span>outbound directo (Alex)</span></div>'
                        '<div class="mx-sep br">🧠 Brain</div>' + _mrow("🧠 Brain", mo["brain"], "mx-br"))
