@@ -351,6 +351,14 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
 .sqlvl3{display:grid;grid-template-columns:.82fr .82fr 1.55fr;gap:14px;align-items:start}
+.sqlvl3.two{grid-template-columns:1fr 1.18fr}
+.lvl-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.phase-head{font-size:13px;font-weight:800;letter-spacing:.01em;padding:8px 12px;border-radius:10px}
+.phase-head small{font-weight:600;opacity:.8}
+.phase-head.prev{background:rgba(148,163,184,.1);color:var(--ink2);border:1px solid var(--line2)}
+.phase-head.new{background:rgba(111,240,162,.1);color:var(--brand);border:1px solid var(--brand-d)}
+.phase-desc{font-size:11.5px;color:var(--mut);line-height:1.55;padding:0 2px}
+@media(max-width:860px){.sqlvl3.two{grid-template-columns:1fr}}
 .evo-flow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:2px 0 16px;font-size:11px}
 .evo-step{padding:5px 11px;border-radius:999px;font-weight:700}
 .evo-step.prev{background:rgba(148,163,184,.1);color:var(--mut);border:1px solid var(--line2)}
@@ -549,7 +557,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>23 Jul 2026 · 16:09</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>23 Jul 2026 · 16:14</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -591,7 +599,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
     </div>
     <div class="iocol out">
       <div class="io-h">🟠 Pipeline de Outbound <span class="io-tot tnum">406<small>contactos</small></span></div>
-      <div class="mf"><div class="mf-row"><div class="mf-l"><b class="tnum">406</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div></div><div class="mf-row"><div class="mf-l"><b class="tnum">391</b> Leads</div><div class="mf-bar"><div class="mf-fill" style="width:96%"></div></div><span class="mf-c">96%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">47</b> MQL</div><div class="mf-bar"><div class="mf-fill" style="width:12%"></div></div><span class="mf-c">12%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">0</b> SQL</div><div class="mf-bar"><div class="mf-fill" style="width:5%"></div></div><span class="mf-c">0%</span></div><details class="mf-det"><summary class="mf-row"><div class="mf-l"><b class="tnum">30</b> Oportunidad (negocio) <span class="mf-see">🎯 ver</span></div><div class="mf-bar"><div class="mf-fill" style="width:7%"></div></div><span class="mf-c">7%</span></summary><div class="mf-deals"><span>Apeteat</span><span>Asociacion Española Contra el Cancer</span><span>Ayete Partners</span><span>Azora Real Estate</span><span>Bluespace</span><span>BlueSpace</span><span>CABE Trasteros</span><span>COS Global</span><span>COSG Ayuntamiento</span><span>Delaight</span><span>Equipzilla</span><span>Gam Rentals</span><span>GasLiquide</span><span>GlowWhite</span><span>GreenHome Finance</span><span>Grupo Alsea</span><span>Grupo Proeduca</span><span>Incapto - CAFE DTC</span><span>Leganes Club de Futbol</span><span>Linkia FP</span><span>PC Componentes</span><span>Planeta Huerto</span><span>Redexis</span><span>Reload</span><span>Rusticae</span><span>Telefónica B2B</span><span>WeWoW</span><span>Wikend Smile</span><span>Wingo</span></div></details><div class="mf-row"><div class="mf-l"><b class="tnum">25</b> Cliente</div><div class="mf-bar"><div class="mf-fill" style="width:6%"></div></div><span class="mf-c">6%</span></div></div>
+      <div class="mf"><div class="mf-row"><div class="mf-l"><b class="tnum">406</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div></div><div class="mf-row"><div class="mf-l"><b class="tnum">391</b> Leads</div><div class="mf-bar"><div class="mf-fill" style="width:96%"></div></div><span class="mf-c">96%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">47</b> MQL</div><div class="mf-bar"><div class="mf-fill" style="width:12%"></div></div><span class="mf-c">12%</span></div><div class="mf-row"><div class="mf-l"><b class="tnum">0</b> SQL</div><div class="mf-bar"><div class="mf-fill" style="width:5%"></div></div><span class="mf-c">0%</span></div><details class="mf-det"><summary class="mf-row"><div class="mf-l"><b class="tnum">30</b> Oportunidad (negocio) <span class="mf-see">🎯 ver</span></div><div class="mf-bar"><div class="mf-fill" style="width:7%"></div></div><span class="mf-c">7%</span></summary><div class="mf-deals"><span>Apeteat</span><span>Asociacion Española Contra el Cancer</span><span>Ayete Partners</span><span>Azora Real Estate</span><span>BlueSpace</span><span>Bluespace</span><span>CABE Trasteros</span><span>COS Global</span><span>COSG Ayuntamiento</span><span>Delaight</span><span>Equipzilla</span><span>Gam Rentals</span><span>GasLiquide</span><span>GlowWhite</span><span>GreenHome Finance</span><span>Grupo Alsea</span><span>Grupo Proeduca</span><span>Incapto - CAFE DTC</span><span>Leganes Club de Futbol</span><span>Linkia FP</span><span>PC Componentes</span><span>Planeta Huerto</span><span>Redexis</span><span>Reload</span><span>Rusticae</span><span>Telefónica B2B</span><span>WeWoW</span><span>Wikend Smile</span><span>Wingo</span></div></details><div class="mf-row"><div class="mf-l"><b class="tnum">25</b> Cliente</div><div class="mf-bar"><div class="mf-fill" style="width:6%"></div></div><span class="mf-c">6%</span></div></div>
       <div class="io-val">💰 Valor estimado pipeline<span>€59.191</span></div>
     </div>
     </div>
@@ -777,10 +785,13 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· 91</span></h2>
-  <div class="sd wide">Los <b>91 SQL</b> (etapa exacta <code>salesqualifiedlead</code>, misma definición que el KPI principal) en tres bloques. <b>Cómo evolucionó:</b> ① y ② son el <b>seguimiento manual previo</b> (Agustín revisaba y descartaba SQL uno a uno); al ver que se colaban muchos <b>sin volumen real</b> y se perdía tiempo, se <b>automatizó la precualificación por formulario</b> → ③, en marcha <b>desde el 9 jul</b>. Los contactos <b>en precualificación</b> («no sé volumen» / &gt;3.000) todavía <b>no son SQL confirmados</b> y se contabilizan en el bloque ③, no en este total. <i>Pulsa cada columna para desplegar el detalle.</i></div>
-  <div class="evo-flow"><span class="evo-step prev">① ② Seguimiento manual previo</span><span class="evo-arrow">— se detectan gaps →</span><span class="evo-step new">③ Precualificación automatizada · desde 9 jul</span></div>
+  <div class="sd wide">Los <b>91 SQL</b> (etapa exacta <code>salesqualifiedlead</code>, misma definición que el KPI principal; prácticamente todos de <b>inbound</b>). Se muestran en <b>dos fases</b> según cómo se han trabajado. <i>Pulsa cada bloque para desplegar el detalle.</i></div>
+  <div class="evo-flow"><span class="evo-step prev">Fase 1 · Manual (antes 9 jul)</span><span class="evo-arrow">— se detectan gaps → se automatiza →</span><span class="evo-step new">Fase 2 · Precualificación automatizada (desde 9 jul)</span></div>
 
-  <div class="sqlvl3">
+  <div class="sqlvl3 two">
+    <div class="lvl-col">
+      <div class="phase-head prev">Fase 1 · Seguimiento manual <small>· antes del 9 jul</small></div>
+      <div class="phase-desc">Se hacía un <b>seguimiento casi diario</b> de una lista de SQLs. Funcionaba, pero <b>dificultaba el follow-up y aprender de los descartes</b>, y hacía <b>perder tiempo a ventas</b>. Se creó una <b>razón de descarte</b> manual para ordenarlo, pero seguía siendo lento → se decidió <b>automatizar</b> (Fase 2).</div>
     <details class="lvl" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
@@ -807,7 +818,10 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
         <div class="note">El <b>63%</b> de los descartes con motivo son por «Volumen insuficiente (&lt;3.000 consultas/mes)». Total con razón registrada: <b>68</b>.</div>
       </div>
     </details>
-
+    </div>
+    <div class="lvl-col">
+      <div class="phase-head new">Fase 2 · Precualificación automatizada <small>· desde el 9 jul</small></div>
+      <div class="phase-desc">Para que <b>ventas no pierda tiempo</b>, el <b>formulario de solicitar demo</b> precualifica solo: pregunta por el <b>volumen de consultas (≥3.000)</b> y el <b>tamaño del equipo de soporte (&gt;5 personas)</b>. Quien no cumple recibe un <b>mail de agradecimiento/descarte</b> automático y <b>no llega a Agustín</b>; el resto sí avanza.</div>
     <details class="lvl lvl3" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b3">③</span>
@@ -827,9 +841,9 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
           <div class="agf-node"><b>40</b><span>pasan a Agustín<br><small>precualifican · Agustín contacta (tel./mail según preferencia)</small></span></div>
           <div class="agf-branch">
             <div class="agf-down"><span class="agf-pct ok">↓ 38%</span><span class="agf-lbl">pasan el filtro de volumen</span></div>
-            <details class="agf-right bad"><summary><b>25</b><span>descartados · volumen &lt;3.000<br><small>62% · Agustín lo detecta* · ▾ ver</small></span></summary>
-              <div class="razbox" style="margin-top:8px;font-size:10.5px;color:var(--mut)">* Contactos que en el formulario marcaron «no sé mi volumen» — Jonathan pidió que entraran igualmente a precualificar. Agustín detecta que son &lt;3.000.</div>
-              <div class="agopp-list" style="margin-top:8px"><span>Johana Castrillon</span><span>Comparaofertas</span><span>marvic properties</span><span>Elitte Reformas Integrales, S.L.</span><span>Tienda Enma</span><span>New kebab &amp; coffe</span><span>Gestoria</span><span>Oxynova</span><span>Online service</span><span>Coolia Agency</span><span>Controlgps</span><span>testinggooooo</span><span>Aguanatural</span><span>Franc</span><span>YASHI STORE</span><span>Freedog</span><span>Viluria</span><span>St Mary's Pharmacy</span><span>Riseup Real Estate</span><span>manael alwady</span><span>RACSO PARTNERS SONUSLTING SLU</span><span>Sevel</span><span>Upyard vibes restaurants management llc</span><span>Cescartuja</span><span>inmobiliaria locativo</span></div></details>
+            <details class="agf-right bad"><summary><b>25</b><span>descartados · volumen &lt;3.000<br><small>62% · Agustín lo detecta* · ▾ razón</small></span></summary>
+              <div class="razbox" style="margin-top:8px"><div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">25</span></div></div>
+              <div class="razbox" style="margin-top:8px;font-size:10.5px;color:var(--mut)">* Marcaron «no sé mi volumen» en el formulario — Jonathan pidió que entraran igualmente a precualificar; Agustín detecta que son &lt;3.000.</div></details>
           </div>
           <div class="agf-node"><b>15</b><span>gestionados<br><small>superan el filtro de volumen</small></span></div>
           <div class="agf-branch">
@@ -851,6 +865,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
         <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización del workflow · 22 jul 2026:</b> a <b>Agustín</b> solo llegan los contactos que han <b>solicitado demo</b> y tienen <b>≥3.000 consultas/mes</b> o un <b>equipo de soporte de &gt;5 personas</b>. El resto se <b>descalifica automáticamente por mail</b>.</div>
       </div>
     </details>
+    </div>
   </div>
 </section>
 
@@ -884,14 +899,19 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
 <section>
   <div class="q">11 · ¿Perdemos clientes?</div>
   <h2 class="sh">Churn <span class="tot">· 20 contactos · 6 empresas</span></h2>
-  <div class="sd"><b>Clientes que lo fueron desde el 1 de enero y hoy ya no lo son</b>: cuentas del pipeline «Clientes» que han pasado a etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>. Cifra grande = contactos; empresas = cuentas.</div>
+  <div class="sd"><b>Clientes que lo fueron desde el 1 de enero y hoy ya no lo son</b>: cuentas del pipeline «Clientes» en etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>. Desglose por <b>vía de origen</b> del negocio (misma lógica que Clientes).</div>
+  <div class="cards" style="margin-bottom:18px">
+    <div class="stat bad"><div class="sv tnum">6</div><div class="sl">🔻 Empresas en churn · 100%<br><span style="color:var(--mut)">20 contactos · Churned / Dormidos</span></div></div>
+    <div class="stat ok"><div class="sv tnum">1</div><div class="sl">🟢 Inbound<br><span style="color:var(--mut)">17% del churn</span></div></div>
+    <div class="stat warn"><div class="sv tnum">5</div><div class="sl">🟠 Outbound / offline / importación<br><span style="color:var(--mut)">83% del churn</span></div></div>
+    <div class="stat"><div class="sv tnum">0</div><div class="sl">🧠 Brain<br><span style="color:var(--mut)">0% del churn</span></div></div>
+  </div>
   <div class="cards">
-    <div class="stat bad"><div class="sv tnum">20</div><div class="sl">🔻 Churn · contactos<br><span style="color:var(--mut)">6 empresas · Churned / Dormidos</span></div></div>
-    <div class="stat"><div class="sv tnum">14%</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">churn / (churn + clientes activos)</span></div></div>
+    <div class="stat"><div class="sv tnum">14%</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">empresas churn / (churn + clientes activos)</span></div></div>
   </div>
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 16:09 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 16:14 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
