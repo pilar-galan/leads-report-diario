@@ -1083,16 +1083,18 @@ def main():
     ag_vol_names = []           # descartados por volumen <3.000 (momento 1)
     ag_gestdesc = {}            # razones de descarte en gestión (momento 2)
     ag_gestdesc_names = []      # (nombre, razón) para el desplegable
+    def _agname(c):
+        return (c.get("company") or c.get("firstname") or c.get("email") or "—").strip() or "—"
     for c in ag_sql_contacts:
         parts = [UNIFY_DESCARTE.get(x.strip(), x.strip()) for x in (c["razon"] or "").split(";") if x.strip()]
         if not parts:
             continue            # sin razón registrada → sigue en curso (no descartado)
         if any("Volumen insuficiente" in p for p in parts):
-            ag_vol_names.append(_cname(c))
+            ag_vol_names.append(_agname(c))
         else:
             lbl = parts[0]
             ag_gestdesc[lbl] = ag_gestdesc.get(lbl, 0) + 1
-            ag_gestdesc_names.append((_cname(c), lbl))
+            ag_gestdesc_names.append((_agname(c), lbl))
     preq["ag_vol_desc"] = len(ag_vol_names)
     preq["ag_vol_names"] = ag_vol_names
     preq["ag_gestdesc"] = len(ag_gestdesc_names)
