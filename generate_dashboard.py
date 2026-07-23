@@ -2543,10 +2543,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .cac-foot{font-size:10px;color:var(--mut);line-height:1.55;margin-top:12px}
 @media(max-width:860px){.cac-wrap{grid-template-columns:1fr}}
 /* matriz por fuente */
-.mxwrap{overflow:auto;max-height:78vh;border-radius:12px}
+.mxwrap{overflow:visible}
 .matrix{min-width:720px;display:flex;flex-direction:column;gap:7px}
 .mx-head,.mx-row{display:grid;grid-template-columns:1.8fr .9fr .75fr .75fr .85fr 1fr 1fr;gap:8px;align-items:center}
-.mx-head{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:800;padding:10px 12px 8px;position:sticky;top:0;z-index:6;background:var(--bg);box-shadow:0 6px 10px -6px rgba(0,0,0,.6)}
+.mx-head{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);font-weight:800;padding:10px 12px 8px;position:sticky;top:0;z-index:6;background:var(--bg);box-shadow:0 6px 12px -6px rgba(0,0,0,.7);border-radius:8px}
+@media(max-width:760px){.mxpanel{overflow-x:auto}}
 .mx-head span{text-align:right} .mx-head span:first-child{text-align:left}
 .mx-row{background:linear-gradient(165deg,rgba(24,52,38,.6),rgba(19,41,30,.4));border:1px solid var(--line);border-radius:12px;padding:11px 12px}
 .mx-row .c1{display:flex;flex-direction:column;gap:5px}
@@ -2570,9 +2571,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .mx-row.mx-gtot .gsub{display:block;font-size:9.5px;color:var(--mut);font-weight:600;margin-top:2px}
 .mx-row.mx-gtot .mx-cell .v{font-size:18px}
 .mx-row.mx-gtot .mx-cell.hi .v{color:var(--brand)}
-.mx-cat{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:11px 12px;margin:14px 0 2px;border-radius:11px;position:sticky;top:38px;z-index:5}
-.mx-cat.cx{background:linear-gradient(180deg,#0c1b15,rgba(104,209,245,.06))}
-.mx-cat.brain{background:linear-gradient(180deg,#0c1b15,rgba(200,166,255,.06))}
+.mx-cat{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:11px 12px;margin:14px 0 2px;border-radius:11px}
 .mx-cat span{font-size:10px;font-weight:600;opacity:.65;text-transform:none;letter-spacing:0}
 .mx-cat.cx{color:var(--sky);border:1.5px solid #1f7f96;background:rgba(104,209,245,.06)}
 .mx-cat.brain{color:var(--violet);border:1.5px solid #6a4fa0;background:rgba(200,166,255,.06)}
@@ -3083,15 +3082,31 @@ def render_exec(d):
         def _mcell(v, pe, key, cls=""):
             arrow = _mom(v, pe[key]) if pe is not None else ''
             return f'<div class="mx-cell {cls}"><span class="v tnum">{fmt(v)}</span>{arrow}</div>'
+        # Oportunidades por canal (para desplegar nombres al pulsar la celda)
+        opp_by_lbl = {}
+        for _l, _nm in mo["opp_list"]:
+            opp_by_lbl.setdefault(_l, []).append(_nm)
         def _mrow(lbl, e, cls=""):
             bw = round(e["c"] / mmax * 100)
             pe = prev_map.get(lbl)
             c_cell = f'<div class="mx-cell"><span class="v tnum">{fmt(e["c"])}</span><span class="p">{pv(e["c"], _tc_all)}</span></div>'
-            return (
-                f'<div class="mx-row {cls}"><div class="c1"><span class="nm">{esc(lbl)}</span>'
+            onames = opp_by_lbl.get(lbl, [])
+            _oarrow = _mom(e["o"], pe["o"]) if pe is not None else ''
+            if e["o"] > 0 and onames:
+                o_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{fmt(e["o"])}</span>'
+                          f'<span class="emp">🎯 ver ▾</span></div>')
+            else:
+                o_cell = _mcell(e["o"], pe, "o")
+            inner = (
+                f'<div class="c1"><span class="nm">{esc(lbl)}</span>'
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
-                f'{c_cell}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{_mcell(e["o"], pe, "o")}'
-                f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div></div>')
+                f'{c_cell}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{o_cell}'
+                f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div>')
+            if e["o"] > 0 and onames:
+                deals = "".join(f'<span>{esc(nm)}</span>' for nm in onames)
+                return (f'<details class="mxd"><summary class="mx-row {cls}">{inner}</summary>'
+                        f'<div class="mx-deals"><b>Oportunidades de {esc(lbl)}:</b> {deals}</div></details>')
+            return f'<div class="mx-row {cls}">{inner}</div>'
         # Subtotales de grupo (inbound / outbound) con flecha MoM vs mismo grupo del mes anterior
         def _sumrows(rows):
             t = {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0}
