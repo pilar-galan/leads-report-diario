@@ -851,10 +851,12 @@ def main():
     cli_inb_ct = 0; cli_out_ct = 0     # contactos de cliente por vía (inbound / outbound)
     CLIENTES_PL = "724590933"
     CLI_CHURN_STAGES = ("1367778337", "1177859668")   # Churned · Dormidos/Inactivos
+    cli_deal_recs = []     # cuentas de cliente activas (empresa única) con su fecha de creación → gráfico evolutivo
     for dl in all_deals:
         p = dl["properties"]
         if p.get("pipeline") == CLIENTES_PL and p.get("dealstage") not in CLI_CHURN_STAGES:
             clientes_activos += 1
+            cli_deal_recs.append({"created": (p.get("createdate") or "")[:10]})
             try: _nc = int(p.get("num_associated_contacts") or 0)
             except (TypeError, ValueError): _nc = 0
             cli_contactos += _nc
@@ -1322,7 +1324,9 @@ def main():
                       + [{"created": d["created"]} for d in chan_deals_out]
                       + [{"created": r["created"]} for r in brain_month_recs if r.get("opp")])
     ch_opp_all = series(_opp_deal_recs, lambda x: True)
-    ch_cli_all = series(_hist_all, lambda c: c["lc"] == "customer", compkey)
+    # Clientes = cuentas ACTIVAS del pipeline «Clientes» (empresa única), por fecha de creación de la cuenta
+    # → cuadra con el KPI de clientes (no cuenta todos los contactos asociados a cada cliente).
+    ch_cli_all = series(cli_deal_recs, lambda x: True)
 
     # ── Ventana MES-HASTA-HOY (MTD): el mes en curso (1 → hoy) vs el mismo tramo del mes anterior ──
     # (coherente con la matriz «mes actual» y los gráficos, que también son de julio natural)
@@ -3132,7 +3136,7 @@ def render_exec(d):
         ("MQL", ex.get("cum_mql_m", mql_d), ex["svg_mql_m"], ex.get("note_mql", "")),
         ("SQL", ex.get("cum_sql_m", ex.get("sql_stage_total", cum["sql"])), ex["svg_sql_m"], ex.get("note_sql", "") + '<br>ℹ️ Etapa <b>exacta</b> SQL por mes de creación (mismo criterio que el KPI). Los meses antiguos salen a <b>0</b> porque esos contactos ya <b>avanzaron</b> a oportunidad/cliente o se descartaron: hoy no están en etapa SQL. El acumulado (total) coincide con el KPI de arriba.'),
         ("Oportunidades", ex.get("cum_opp_m", opp_real), ex["svg_opp_m"], '📈 <b>Negocios (deals) creados cada mes</b> en el pipeline, por todas las fuentes (ventas + Brain).<br>⚠️ Antes se colaban <b>muchas importaciones</b> en la etapa de ciclo de vida «oportunidad» que inflaban el dato. Aquí contamos <b>solo los que tienen un negocio asociado</b> en el pipeline de ventas o de Brain y están <b>abiertos</b> (excluye cerrados/perdidos). Por eso el <b>acumulado cuadra</b> con el KPI de oportunidades y con los pipelines inbound/outbound/brain.'),
-        ("Clientes", ex.get("cum_cli_m", cli_e), ex["svg_cli_m"], ex.get("note_cli", "")),
+        ("Clientes", ex.get("cum_cli_m", cli_e), ex["svg_cli_m"], '📈 <b>Cuentas de cliente activas</b> (empresa única) del pipeline «Clientes», por fecha de creación de la cuenta. Cuenta por <b>empresa</b>, no por los contactos asociados a cada cliente. El acumulado cuadra con el KPI de clientes.'),
     ]
     charts_html = "".join(
         f'<div class="chartc"><div class="chd"><h3>{lab}</h3><span class="cbig tnum">{fmt(val)}</span></div>'
