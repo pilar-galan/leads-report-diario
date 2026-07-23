@@ -1401,6 +1401,12 @@ def main():
     exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql_all, labels, "#f5b544")
     exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp_all, labels, "#5bc8f2")
     exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli_all, labels, "#c084fc")
+    # Totales acumulados de CADA gráfico = último punto de su propia línea (para que el número grande
+    # del gráfico coincida exactamente con lo que dibuja la línea, sin descuadres)
+    exec_extra["cum_mql_m"] = ch_mql_all[0][-1] if ch_mql_all[0] else 0
+    exec_extra["cum_sql_m"] = ch_sql_all[0][-1] if ch_sql_all[0] else 0
+    exec_extra["cum_opp_m"] = ch_opp_all[0][-1] if ch_opp_all[0] else 0
+    exec_extra["cum_cli_m"] = ch_cli_all[0][-1] if ch_cli_all[0] else 0
     # Nota de pico estacional: si un mes supera claramente la mediana, ¿de qué canal vino?
     from collections import Counter as _Ctr
     def spike_note(pred, keyf=None, recs=None):
@@ -3057,11 +3063,11 @@ def render_exec(d):
         kpi_io("SQL", g_sql, tr["sql"], _sql_in_disp, _sql_out_disp))
     # ── 2ª fila (3 tarjetas a ancho completo) ──
     kpi_html2 = (
-        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">contactos con negocio</span></div>'
-        f'<div class="kv tnum">{fmt(ex.get("opp_contactos",0))}</div>'
-        f'<div class="kt" style="color:var(--mut)">contactos en etapa oportunidad con negocio asociado · ventas o Brain (sin cerrados)</div>'
-        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">negocios: inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
-        f'<div class="emprow">🏢 <span class="eb tnum">{fmt(ex.get("opp_empresas",0) or opp_real)}</span> empresas / negocios</div></div>'
+        f'<div class="kc"><div class="kl">Oportunidades <span style="color:var(--mut);font-weight:600;font-size:10px">negocios en pipeline</span></div>'
+        f'<div class="kv tnum">{fmt(opp_real)}</div>'
+        f'<div class="kt" style="color:var(--mut)">negocios (deals) abiertos en el pipeline · ventas o Brain (sin cerrados)</div>'
+        f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(opp_inb_real)} · out {fmt(opp_out_real)} · 🧠 brain {fmt(opp_brain_real)}</span></div>'
+        f'<div class="emprow">👥 <span class="eb tnum">{fmt(ex.get("opp_contactos",0))}</span> contactos asociados</div></div>'
         + f'<div class="kc"><div class="kl">Clientes <span style="color:var(--mut);font-weight:600;font-size:10px">por contactos</span></div><div class="kv tnum">{fmt(ex.get("cli_split",{}).get("contactos",0))}</div>'
         f'<div class="kt" style="color:var(--mut)">contactos de la cartera real (excl. churn/dormidos)</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(ex.get("cli_split",{}).get("inbound_ct",0))} · out {fmt(ex.get("cli_split",{}).get("outbound_ct",0))} · 🧠 brain 0</span></div>'
@@ -3123,10 +3129,10 @@ def render_exec(d):
                  '<b>importaciones automáticas</b> que generaron SQLs/oportunidades de golpe (y no descuenta los que se '
                  'eliminan, se descartan o no cualifican). El dato vivo real es el de los KPIs de arriba.')
     charts = [
-        ("MQL", mql_d, ex["svg_mql_m"], ex.get("note_mql", "")),
-        ("SQL", ex.get("sql_stage_total", cum["sql"]), ex["svg_sql_m"], ex.get("note_sql", "") + '<br>ℹ️ Etapa <b>exacta</b> SQL por mes de creación (mismo criterio que el KPI). Los meses antiguos salen a <b>0</b> porque esos contactos ya <b>avanzaron</b> a oportunidad/cliente o se descartaron: hoy no están en etapa SQL. El acumulado (total) coincide con el KPI de arriba.'),
-        ("Oportunidades", opp_real, ex["svg_opp_m"], '📈 <b>Negocios (deals) abiertos</b> creados cada mes en el pipeline, por todas las fuentes. El acumulado cuadra con el KPI de oportunidades.'),
-        ("Clientes", cli_e, ex["svg_cli_m"], ex.get("note_cli", "")),
+        ("MQL", ex.get("cum_mql_m", mql_d), ex["svg_mql_m"], ex.get("note_mql", "")),
+        ("SQL", ex.get("cum_sql_m", ex.get("sql_stage_total", cum["sql"])), ex["svg_sql_m"], ex.get("note_sql", "") + '<br>ℹ️ Etapa <b>exacta</b> SQL por mes de creación (mismo criterio que el KPI). Los meses antiguos salen a <b>0</b> porque esos contactos ya <b>avanzaron</b> a oportunidad/cliente o se descartaron: hoy no están en etapa SQL. El acumulado (total) coincide con el KPI de arriba.'),
+        ("Oportunidades", ex.get("cum_opp_m", opp_real), ex["svg_opp_m"], '📈 <b>Negocios (deals) abiertos</b> creados cada mes en el pipeline, por todas las fuentes. El acumulado coincide con el KPI de oportunidades (negocios).'),
+        ("Clientes", ex.get("cum_cli_m", cli_e), ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
     charts_html = "".join(
         f'<div class="chartc"><div class="chd"><h3>{lab}</h3><span class="cbig tnum">{fmt(val)}</span></div>'
