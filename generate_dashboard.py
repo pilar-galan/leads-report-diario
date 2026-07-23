@@ -1077,6 +1077,28 @@ def main():
                 lbl = UNIFY_DESCARTE.get(x, x)
                 ag_raz[lbl] = ag_raz.get(lbl, 0) + 1
     preq["ag_razones"] = sorted(ag_raz.items(), key=lambda x: -x[1])
+    # ── Embudo de Agustín en DOS MOMENTOS de descarte (por razón real de razon_descarte_sql) ──
+    #   1) Precualificación de volumen: «Volumen insuficiente (<3.000)» → se caen de entrada
+    #   2) Gestión (llamada/mail/reunión): resto de razones (no responde, datos falsos, accidental, caso de uso…)
+    ag_vol_names = []           # descartados por volumen <3.000 (momento 1)
+    ag_gestdesc = {}            # razones de descarte en gestión (momento 2)
+    ag_gestdesc_names = []      # (nombre, razón) para el desplegable
+    for c in ag_sql_contacts:
+        parts = [UNIFY_DESCARTE.get(x.strip(), x.strip()) for x in (c["razon"] or "").split(";") if x.strip()]
+        if not parts:
+            continue            # sin razón registrada → sigue en curso (no descartado)
+        if any("Volumen insuficiente" in p for p in parts):
+            ag_vol_names.append(_cname(c))
+        else:
+            lbl = parts[0]
+            ag_gestdesc[lbl] = ag_gestdesc.get(lbl, 0) + 1
+            ag_gestdesc_names.append((_cname(c), lbl))
+    preq["ag_vol_desc"] = len(ag_vol_names)
+    preq["ag_vol_names"] = ag_vol_names
+    preq["ag_gestdesc"] = len(ag_gestdesc_names)
+    preq["ag_gestdesc_razones"] = sorted(ag_gestdesc.items(), key=lambda x: -x[1])
+    preq["ag_gestdesc_names"] = ag_gestdesc_names
+    preq["ag_cohort"] = len(ag_sql_contacts)
     preq["ag_descartados"] = sum(1 for c in ag_sql_contacts
                                  if c["lead_state"] in ("UNQUALIFIED", "Mareado") or c["rev"] == "No aplica / Descartado")
     # Desglose de volumen de consultas de los SQL de Agustín (≥3.000 / no lo sé / <3.000 / sin dato)
@@ -3386,20 +3408,25 @@ def render_exec(d):
     raz_rows = "".join(
         f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n} <small>{pv(n, raz_tot)}</small></span></div>'
         for r, n in raz[:6]) or '<div class="mrow"><span class="ml">Sin razones registradas</span><span class="mn">—</span></div>'
-    # Embudo ≥3.000: entrados (mail) → tratados → {oportunidad · en proceso · descartados}
-    ag_desc = pq.get("ag_descartados", 0)
+    # ── Embudo de Agustín · DOS MOMENTOS de descarte (por razón real) ──
+    #   entran → [1] descarte volumen <3.000 (precualif) → gestionados → [2] descarte en gestión → en curso → {oport · proceso}
     ag_opp_n = pq.get("ag_opp", 0)
-    ag_entered = pq.get("ag_sql", 0)                 # entraron (solicitaron demo ≥3.000 → Agustín)
-    ag_treated = ag_contact                          # gestionados (contactados/agendados)
-    ag_gap = max(0, ag_entered - ag_treated)         # entraron pero aún sin gestionar
-    ag_base = ag_treated or 1                         # base de la bifurcación = gestionados
-    # ── Modelo de embudo (la suma cuadra con los que entraron) ──
-    #   entraron = avanzan (↓ cualifican) + descartados (→ se pierden) + limbo (sin gestionar)
-    ag_limbo = ag_gap                                 # sin gestionar / en el limbo
-    ag_desc_eff = min(ag_desc, ag_treated)           # descartados (de los gestionados)
-    ag_adv = max(0, ag_treated - ag_desc_eff)        # avanzan y cualifican (siguen en venta)
-    ag_proc = max(0, ag_adv - ag_opp_n)              # avanzan que aún están en proceso (sin deal)
-    ag_split = ag_base                                # compat
+    ag_entered = pq.get("ag_cohort", pq.get("ag_sql", 0))   # entran a Agustín (≥9 jul, etapas SQL)
+    ag_vol = pq.get("ag_vol_desc", 0)                        # [momento 1] descartados por volumen <3.000
+    ag_gest = max(0, ag_entered - ag_vol)                    # gestionados (superan el filtro de volumen)
+    ag_gestdesc = min(pq.get("ag_gestdesc", 0), ag_gest)     # [momento 2] descartados en gestión (otras razones)
+    ag_adv = max(0, ag_gest - ag_gestdesc)                   # en curso / avanzan
+    ag_proc = max(0, ag_adv - ag_opp_n)                      # avanzan sin deal aún (pendientes / en proceso)
+    ag_base = ag_gest or 1
+    # Desplegable · descartados por volumen (momento 1)
+    _agvol_names = pq.get("ag_vol_names", []) or []
+    _agvol_items = "".join(f'<span>{esc(str(nm))}</span>' for nm in _agvol_names[:40])
+    # Desplegable · razones de descarte en gestión (momento 2)
+    _aggd_raz = pq.get("ag_gestdesc_razones", []) or []
+    _aggd_tot = sum(n for _, n in _aggd_raz) or 1
+    _aggd_rows = "".join(
+        f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n} <small>{pv(n, _aggd_tot)}</small></span></div>'
+        for r, n in _aggd_raz) or '<div class="mrow"><span class="ml">Sin razones registradas</span><span class="mn">—</span></div>'
     # Lista clicable de las oportunidades de Agustín (nombre · canal · etapa)
     _agopps = pq.get("ag_opp_list", []) or []
     _ag_opp_items = "".join(
@@ -3955,27 +3982,28 @@ def render_exec(d):
       </summary>
       <div class="lvl-body">
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
-        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
+        <div class="lvl-subh">Flujo de gestión de Agustín <small>· embudo a la izquierda · descartes a la derecha</small></div>
         <div class="agflow">
-          <div class="agf-node top"><b>{fmt(ag_entered)}</b><span>solicitaron demo · entraron<br><small>≥3.000 consultas · a Agustín</small></span></div>
+          <div class="agf-node top"><b>{fmt(ag_entered)}</b><span>entran a Agustín<br><small>pidieron demo · precualificados por formulario · desde 9 jul</small></span></div>
           <div class="agf-branch">
-            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_treated, ag_entered or 1)}</span><span class="agf-lbl">gestionados</span></div>
-            <div class="agf-right limbo"><b>{fmt(ag_limbo)}</b><span>sin gestionar · en el limbo<br><small>{pv(ag_limbo, ag_entered or 1)} · sin respuesta o pendientes</small></span></div>
+            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_gest, ag_entered or 1)}</span><span class="agf-lbl">pasan el filtro de volumen</span></div>
+            <details class="agf-right bad"><summary><b>{fmt(ag_vol)}</b><span>descartados · volumen &lt;3.000<br><small>{pv(ag_vol, ag_entered or 1)} · detectado en precualificación · ▾ ver</small></span></summary>
+              <div class="agopp-list" style="margin-top:8px">{_agvol_items or '<span>—</span>'}</div></details>
           </div>
-          <div class="agf-node"><b>{fmt(ag_treated)}</b><span>gestionados<br><small>contactados / agendados</small></span></div>
+          <div class="agf-node"><b>{fmt(ag_gest)}</b><span>gestionados<br><small>Agustín contacta (tel./mail según preferencia)</small></span></div>
           <div class="agf-branch">
-            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_adv, ag_base)}</span><span class="agf-lbl">avanzan y cualifican</span></div>
-            <details class="agf-right bad"><summary><b>{fmt(ag_desc_eff)}</b><span>descartados · {pv(ag_desc_eff, ag_base)}<br><small>no pasaron a ventas · ▾ razones</small></span></summary>
-              <div class="razbox" style="margin-top:8px">{raz_rows}</div></details>
+            <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_adv, ag_base)}</span><span class="agf-lbl">avanzan / en curso</span></div>
+            <details class="agf-right bad"><summary><b>{fmt(ag_gestdesc)}</b><span>descartados en gestión · {pv(ag_gestdesc, ag_base)}<br><small>tras contacto/reunión · ▾ razones (IA)</small></span></summary>
+              <div class="razbox" style="margin-top:8px">{_aggd_rows}</div></details>
           </div>
-          <div class="agf-node ok"><b>{fmt(ag_adv)}</b><span>avanzan y cualifican<br><small>siguen en el proceso de venta</small></span></div>
+          <div class="agf-node ok"><b>{fmt(ag_adv)}</b><span>avanzan / en curso<br><small>siguen en el proceso de venta</small></span></div>
           <div class="agf-leaf">
             {ag_opp_leaf}
-            <div class="agf-proc"><b>{fmt(ag_proc)}</b><span>en proceso<br><small>{pv(ag_proc, ag_adv or 1)} de los que avanzan · sin deal aún</small></span></div>
+            <div class="agf-proc"><b>{fmt(ag_proc)}</b><span>en proceso / pendientes<br><small>{pv(ag_proc, ag_adv or 1)} de los que avanzan · sin deal aún</small></span></div>
           </div>
         </div>
-        <div class="sd" style="margin-top:10px;font-size:11.5px;color:var(--mut)">Reparto de los <b>{fmt(ag_entered)}</b> que entraron: <b>{fmt(ag_adv)}</b> avanzan + <b>{fmt(ag_desc_eff)}</b> descartados + <b>{fmt(ag_limbo)}</b> sin gestionar = <b>{fmt(ag_adv + ag_desc_eff + ag_limbo)}</b>. 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
-        <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
+        <div class="sd" style="margin-top:10px;font-size:11.5px;color:var(--mut)">Reparto de los <b>{fmt(ag_entered)}</b> que entran: <b>{fmt(ag_vol)}</b> descarte por volumen + <b>{fmt(ag_gest)}</b> gestionados (= <b>{fmt(ag_gestdesc)}</b> descartados en gestión + <b>{fmt(ag_adv)}</b> en curso). 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
+        <div class="lvl-subh">Descalificación automática por mail <small>· contactos que declaran &lt;3.000 en el formulario</small></div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
         </div>
