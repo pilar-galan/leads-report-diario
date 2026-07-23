@@ -4029,7 +4029,7 @@ def render_exec(d):
   <h2 class="sh">Estado de los MQL <span class="tot">· {fmt(ctot)}</span> · contenido consumido</h2>
   <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars">{content_html}</div>
-  <div class="note" style="margin-top:14px">🌱 <b>Nurturing de MQL (medio plazo).</b> Los MQL también se trabajan con <b>nurturing</b>, pero con menos urgencia que los SQL: <b>secuencias y enriquecimiento de contenido</b> con acciones específicas (eventos, webinars, documentos y contenidos) <b>alineadas con ventas, tendencias del mercado y propuesta de valor</b>, para ir todos a una e ir <b>sacando patrones</b> de lo que mejor convierte.</div>
+  <div class="note" style="margin-top:14px">🌱 <b>Nurturing de MQL (medio plazo).</b> Los MQL se trabajan con <b>nurturing</b> (con menos urgencia que los SQL): <b>secuencias y enriquecimiento de contenido</b> con acciones específicas (eventos, webinars, documentos) <b>alineadas con ventas, tendencias del mercado y propuesta de valor</b>. <b>Objetivo:</b> llevarlos al <b>formulario de precualificación para agendar demo</b> (donde pasan a la precualificación automatizada). Además, ir <b>sacando patrones</b> de lo que mejor convierte.</div>
 </section>
 
 <section>
