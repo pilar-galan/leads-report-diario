@@ -1521,9 +1521,11 @@ def main():
                 # se quedaran en «lead» por no haberse etiquetado. Solo sube leads, no baja etapas altas.
                 if c.get("web_asis") and r < 2:
                     r = 2
-                # Buckets de CONTACTOS por etapa alcanzada (los de etapa oportunidad cuentan como SQL;
-                # el volumen de oportunidad se mide aparte, sobre NEGOCIOS/deals, no sobre contactos).
-                if r >= 3: e["s"] += 1
+                # SQL = etapa EXACTA «salesqualifiedlead» (igual que el KPI principal, sin duplicar):
+                # los que ya avanzaron a oportunidad/cliente y las etapas de precualificación NO cuentan
+                # como SQL (van en la columna de oportunidad/negocios o quedan fuera de lead/mql/sql).
+                if c.get("lc") == "salesqualifiedlead": e["s"] += 1
+                elif r >= 3: pass    # precualif (>3000/no sé) u oport./cliente ya alcanzados: no es «solo SQL»
                 elif r == 2: e["m"] += 1
                 else: e["l"] += 1   # r<=1: lead o contacto en bruto sin etapa registrada → cuenta como lead
         _acc(hist_nf, _chl)          # inbound
