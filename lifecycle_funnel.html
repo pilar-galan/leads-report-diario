@@ -489,6 +489,13 @@
   .stage-plain{margin:6px 0 0;font-size:.78rem;color:var(--muted);line-height:1.45;}
   .lead-faint{opacity:.85;}
   .lead-faint .rsn{opacity:1;}
+  /* Viñetas de mensajes clave: escaneables, cortas */
+  .keypoints{list-style:none;margin:13px 0 0;padding:0;display:grid;gap:7px;}
+  .keypoints li{position:relative;padding-left:19px;font-size:var(--step--1);line-height:1.5;color:var(--ink);}
+  .keypoints li::before{content:"";position:absolute;left:2px;top:.52em;width:6px;height:6px;border-radius:50%;background:var(--green);}
+  /* Etapas foco (MQL/SQL): fondo destacado */
+  .stage.focus{background:linear-gradient(180deg,var(--green-soft),var(--surface));border-color:color-mix(in srgb,var(--green) 32%,var(--line));box-shadow:var(--shadow);}
+  .fl-prop{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;font-size:.82em;margin-left:6px;}
 </style>
 
 </head>
@@ -575,61 +582,54 @@
       </div>
     </div>
 
-    <div class="funnel-note">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
-      <p>No siempre es el momento: un contacto puede no tener hoy la necesidad o el encaje con nosotros. El ciclo de vida marca <b>dónde está</b>; si hoy cualifica o no —y por qué— se guarda aparte, en el CRM. Aquí no marcamos descartes.</p>
-    </div>
-
     <div class="stages">
 
       <!-- LEAD -->
       <article class="stage dim">
-        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><div><span class="stage-name">Lead</span><span class="stage-sub">Contacto nuevo</span></div><span class="stage-step">01</span></div>
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><div><span class="stage-name">Lead</span><span class="stage-sub">Contacto nuevo</span></div><span class="stage-badge future">No es foco hoy</span><span class="stage-step">01</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Contacto nuevo: no lo conocemos ni tenemos información.</span></div>
-          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Identificar interés y empezar a conocerlo.</span></div>
-          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Pasa a MQL al descargar contenido o asistir a un webinar.</span></div>
+          <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Contacto nuevo del que no tenemos información.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Empezar a conocerlo.</span></div>
+          <div class="sf"><span class="sfl">Avanza cuando</span><span class="sfv">Descarga contenido o asiste a un webinar → MQL.</span></div>
         </div>
         <div class="stage-extra lead-faint">
-          <p class="field-label">Cómo ha entrado</p>
-          <p class="stage-plain">Un contacto sin intención conocida.</p>
-          <p class="field-label">Información que nos falta</p>
+          <p class="stage-plain"><b>Cómo ha entrado:</b> un contacto sin intención conocida.</p>
+          <p class="field-label">Nos falta</p>
           <ul class="rsn"><li>Empresa</li><li>Volumen de consultas/mes</li><li>Tamaño del equipo de soporte</li><li>Sector</li><li>Email corporativo</li><li>Intención</li></ul>
         </div>
       </article>
 
       <!-- MQL -->
-      <article class="stage">
-        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg></span><div><span class="stage-name">MQL</span><span class="stage-sub">Marketing Qualified Lead</span></div><span class="stage-step">02</span></div>
+      <article class="stage focus">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg></span><div><span class="stage-name">MQL</span><span class="stage-sub">Marketing Qualified Lead</span></div><span class="stage-badge now">Foco</span><span class="stage-step">02</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Ya está investigando: quiere más información y puede intuir una necesidad, aunque aún sin un dolor claro.</span></div>
-          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Educar, generar confianza y detectar potencial.</span></div>
-          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Pide una demo (muestra un dolor) y completa el formulario de pre-cualificación → pasa a SQL.</span></div>
+          <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Ya investiga y quiere más info; intuye una necesidad, aún sin dolor claro.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Educar, generar confianza y despertar la intención.</span></div>
+          <div class="sf"><span class="sfl">Avanza cuando</span><span class="sfv">Pide demo + pre-cualificación → SQL.</span></div>
         </div>
-        <div class="stage-extra">
-          <p class="field-label">Cómo ha entrado / señales</p>
-          <div class="chips"><span class="chip">Descarga de un ebook</span><span class="chip">Descarga de contenido</span><span class="chip">Asistencia a webinar</span><span class="chip">Contacto en un evento (primera aproximación)</span></div>
-          <p class="field-label">Información que tenemos</p>
-          <div class="chips"><span class="chip">Email corporativo</span><span class="chip">Empresa</span><span class="chip">Volumen de consultas (a veces)</span><span class="chip">Equipo de soporte (a veces)</span></div>
-          <p class="field-label">Lo que nos falta</p>
-          <div class="chips"><span class="chip">La intención</span></div>
-        </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg><p><b>La etapa con más push:</b> proponemos secuencias de nurturing que enriquecen con contenido y empujan a <b>agendar una demo</b>. El paso final es un <b>formulario de pre-cualificación</b> (volumen de consultas y tamaño del equipo); el email y la empresa ya los tenemos.</p></div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5"/><path d="M20 12a8 8 0 0 1-14 5"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><p><b>Sin razón de descarte:</b> si todavía no muestra intención, no pasa a SQL y sigue en nurturing hasta que la haya.</p></div>
+        <ul class="keypoints">
+          <li><b>Cómo entra:</b> ebook, descarga de contenido, webinar o contacto en un evento.</li>
+          <li><b>Ya tenemos</b> email y empresa (a veces volumen y equipo); <b>falta la intención</b>.</li>
+          <li><b>Más push:</b> nurturing de menos a más contenido que empuja a <b>agendar una demo</b>.</li>
+          <li>Sin razón de descarte: si aún no hay intención, sigue en nurturing.</li>
+        </ul>
       </article>
 
       <!-- SQL -->
-      <article class="stage">
-        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></span><div><span class="stage-name">SQL</span><span class="stage-sub">Sales Qualified Lead</span></div><span class="stage-step">03</span></div>
+      <article class="stage focus">
+        <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></span><div><span class="stage-name">SQL</span><span class="stage-sub">Sales Qualified Lead</span></div><span class="stage-badge now">Foco</span><span class="stage-step">03</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Ya tiene el dolor identificado y nos ve como posible solución.</span></div>
-          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Validar que existe una oportunidad comercial.</span></div>
-          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Si supera la pre-cualificación, Ventas valida y crea una Oportunidad (o pide más info).</span></div>
+          <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Ya tiene el dolor identificado y nos ve como posible solución.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Validar que hay oportunidad comercial.</span></div>
+          <div class="sf"><span class="sfl">Avanza cuando</span><span class="sfv">Supera la pre-cualificación → Ventas crea la Oportunidad.</span></div>
         </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg><p><b>Pre-cualificación:</b> ≥ 3.000 consultas/mes o equipo de soporte ≥ 5 personas → pasa a revisión comercial.</p></div>
+        <ul class="keypoints">
+          <li><b>Pre-cualificación:</b> ≥ 3.000 consultas/mes o equipo de soporte ≥ 5 personas.</li>
+          <li><b>Si no cualifica:</b> no vuelve a Lead; se guarda el motivo y puede reactivarse.</li>
+          <li>Lo rellena la <b>IA</b> por automatización; si no encuentra motivo, avisa a Ventas para crear uno.</li>
+        </ul>
         <div class="stage-extra">
-          <p class="field-label">Si no cualifica · no vuelve a Lead</p>
-          <div class="chips"><span class="prop-tag">Motivo <code>razon_descarte_sql</code> · lo rellena la IA por automatización tras la 1ª reunión</span></div>
+          <p class="field-label">Motivos de descarte <span class="fl-prop">razon_descarte_sql</span></p>
           <ul class="rsn">
             <li>Lead accidental</li>
             <li>Volumen &lt; 3k consultas</li>
@@ -645,20 +645,21 @@
             <li>Eligió competidor</li>
           </ul>
         </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg><p>Queda identificado por la razón de descarte y, según cuál sea, entra en un flujo de reactivación o queda descalificado. Si más adelante cambia su situación, podemos retomarlo.</p></div>
       </article>
 
       <!-- OPORTUNIDAD -->
       <article class="stage">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span><div><span class="stage-name">Oportunidad</span><span class="stage-sub">Pipeline · negocio activo</span></div><span class="stage-step">04</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Oportunidad comercial abierta: reuniones, seguimiento y propuesta.</span></div>
+          <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Oportunidad comercial abierta: reuniones, seguimiento y propuesta.</span></div>
           <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Cerrar la venta.</span></div>
-          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Convierte en Cliente.</span></div>
+          <div class="sf"><span class="sfl">Avanza cuando</span><span class="sfv">Se gana → Cliente.</span></div>
         </div>
+        <ul class="keypoints">
+          <li>Si se pierde (Lost), se conserva el motivo para futuras acciones comerciales.</li>
+        </ul>
         <div class="stage-extra">
-          <p class="field-label">Si se pierde (Lost) · razón de pérdida</p>
-          <div class="chips"><span class="prop-tag">Pipeline de ventas <code>razon_de_perdida</code></span></div>
+          <p class="field-label">Razón de pérdida <span class="fl-prop">razon_de_perdida</span></p>
           <ul class="rsn soft-red">
             <li>Desaparecido / Sin respuesta</li>
             <li>No es el momento (timing)</li>
@@ -668,27 +669,28 @@
             <li>Duplicado / Error</li>
           </ul>
         </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg><p><b>Si se pierde:</b> se cierra como Lost y se conserva el motivo para futuras acciones comerciales.</p></div>
       </article>
 
       <!-- CLIENTE -->
       <article class="stage">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M2.5 21c0-4.1 3.4-7.5 7.5-7.5"/><path d="M15 16l2 2 4-4"/></svg></span><div><span class="stage-name">Cliente</span><span class="stage-sub">Cliente activo</span></div><span class="stage-step">05</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Cliente activo.</span></div>
-          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Fidelización, renovación y expansión.</span></div>
-          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Upselling y cross-selling.</span></div>
+          <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Cliente activo.</span></div>
+          <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Fidelización, crecimiento y expansión.</span></div>
+          <div class="sf"><span class="sfl">Avanza cuando</span><span class="sfv">Upselling y cross-selling.</span></div>
         </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V4h12v5a6 6 0 0 1-12 0z"/><path d="M6 6H3v2a3 3 0 0 0 3 3"/><path d="M18 6h3v2a3 3 0 0 1-3 3"/><path d="M9 21h6"/><path d="M12 15v6"/></svg><p><b>El mejor resultado:</b> fidelización, crecimiento y, sobre todo, <b>referencias y recomendaciones</b>.</p></div>
+        <ul class="keypoints">
+          <li><b>Mejor resultado:</b> referencias y recomendaciones.</li>
+        </ul>
       </article>
 
       <!-- CHURN -->
       <article class="stage churn">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 12H3"/><path d="M6 9l-3 3 3 3"/></svg></span><div><span class="stage-name">Churn</span><span class="stage-sub">Deja de usar GuruSup</span></div><span class="stage-step">06</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Cliente que deja de utilizar GuruSup.</span></div>
+          <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Cliente que deja de utilizar GuruSup.</span></div>
           <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Analizar motivos, aprender y detectar recuperación.</span></div>
-          <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">No aplica.</span></div>
+          <div class="sf"><span class="sfl">Avanza cuando</span><span class="sfv">—</span></div>
         </div>
         <div class="stage-extra">
           <p class="field-label">Razones habituales</p>
