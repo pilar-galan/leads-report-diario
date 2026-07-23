@@ -1003,7 +1003,9 @@ def main():
         if r in ("Duplicado", "Test"):
             return "excluido"
         return "pendiente"   # «Pendiente de revisión» o sin asignar
-    sql_stage_contacts = [c for c in hist_fun if c["lc"] in SQL_STAGES]
+    # SQL = etapa EXACTA «salesqualifiedlead» (unificado con el KPI/matriz/gráfico). Los contactos
+    # en precualificación (>3000 / «no sé volumen») NO son SQL confirmados: van en el nivel ③ (Agustín).
+    sql_stage_contacts = [c for c in hist_fun if c["lc"] == "salesqualifiedlead"]
     sql_disp = {"total": len(sql_stage_contacts), "gestionado": 0,
                 "pendiente": 0, "descartado": 0, "excluido": 0}
     for c in sql_stage_contacts:
@@ -2595,8 +2597,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .cac-pay button{font-size:12px;font-weight:800;padding:9px 4px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--ink2);cursor:pointer}
 .cac-pay button.on{background:var(--brand);color:#04120b;border-color:var(--brand)}
 .cac-topcap{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-.cac-big{font-size:clamp(46px,7vw,72px);font-weight:900;color:var(--brand);line-height:1.02;margin:2px 0;text-shadow:0 0 30px rgba(111,240,162,.25)}
-.cac-big em{font-size:26px;font-style:normal;color:var(--ink2)}
+.cac-big{font-size:clamp(34px,4.6vw,48px);font-weight:900;color:var(--brand);line-height:1.02;margin:2px 0;text-shadow:0 0 22px rgba(111,240,162,.2)}
+.cac-big em{font-size:20px;font-style:normal;color:var(--ink2)}
+.cac-estim{font-size:11.5px;color:var(--mut);margin-top:4px;font-weight:600}
 .cac-formula{font-size:12px;color:var(--ink2);margin-bottom:16px;font-weight:600}
 .cac-mini{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:6px}
 .cac-mcard{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:12px;padding:12px 13px}
@@ -3749,6 +3752,7 @@ def render_exec(d):
     <div class="cac-right">
       <div class="cac-topcap">CAC máximo permitido</div>
       <div class="cac-big"><span id="cacBig">0</span> <em>€</em></div>
+      <div class="cac-estim">Estimación de referencia: el corte razonable está <b>entre 1.800 y 2.000 €</b>.</div>
       <div class="cac-formula" id="cacFormula"></div>
       <div class="cac-mini">
         <div class="cac-mcard"><div class="cac-mcap">Suelo (breakeven mes 1)</div><div class="cac-mval" id="cacFloor">0 €</div></div>
@@ -3976,7 +3980,7 @@ def render_exec(d):
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> en tres bloques. <b>Cómo evolucionó:</b> ① y ② son el <b>seguimiento manual previo</b> (Agustín revisaba y descartaba SQL uno a uno); al ver que se colaban muchos <b>sin volumen real</b> y se perdía tiempo, se <b>automatizó la precualificación por formulario</b> → ③, en marcha <b>desde el 9 jul</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
+  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> (etapa exacta <code>salesqualifiedlead</code>, misma definición que el KPI principal) en tres bloques. <b>Cómo evolucionó:</b> ① y ② son el <b>seguimiento manual previo</b> (Agustín revisaba y descartaba SQL uno a uno); al ver que se colaban muchos <b>sin volumen real</b> y se perdía tiempo, se <b>automatizó la precualificación por formulario</b> → ③, en marcha <b>desde el 9 jul</b>. Los contactos <b>en precualificación</b> («no sé volumen» / &gt;3.000) todavía <b>no son SQL confirmados</b> y se contabilizan en el bloque ③, no en este total. <i>Pulsa cada columna para desplegar el detalle.</i></div>
   <div class="evo-flow"><span class="evo-step prev">① ② Seguimiento manual previo</span><span class="evo-arrow">— se detectan gaps →</span><span class="evo-step new">③ Precualificación automatizada · desde 9 jul</span></div>
 
   <div class="sqlvl3">
