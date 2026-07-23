@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuruSup · Lifecycle Funnel</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c1b15; --bg2:#10251b; --card:#183426; --card2:#13291e;
+  --line:#2c5443; --line2:#3a6b54;
+  --ink:#f2fff8; --ink2:#bcdccd; --mut:#83a593;
+  --brand:#6ff0a2; --brand-2:#57e08a; --brand-d:#2bb673; --brand-deep:#0f4a30;
+  --ok:#57e08a; --warn:#ffca5c; --bad:#ff7189; --sky:#68d1f5; --violet:#c8a6ff;
+  /* colores por etapa del lifecycle */
+  --st-lead:#6ff0a2; --st-mql:#68d1f5; --st-sql:#ffca5c;
+  --st-opp:#c8a6ff; --st-cus:#34d399; --st-churn:#ff7189;
+}
+html{font-size:15px;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);line-height:1.55;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  background-image:
+    radial-gradient(1200px 560px at 80% -12%,rgba(111,240,162,.16),transparent 62%),
+    radial-gradient(900px 500px at 2% 3%,rgba(104,209,245,.08),transparent 55%),
+    linear-gradient(180deg,#0e2019 0%,#0c1b15 40%);
+  background-attachment:fixed}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+h1,h2,h3{line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
+
+/* ---------- Header / hero ---------- */
+.xhead{padding:34px 0 8px}
+.xtop{display:flex;align-items:center;gap:14px;margin-bottom:26px;flex-wrap:wrap}
+.xbrand{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.xbrand b{color:var(--brand)} .xbrand i{color:var(--brand);font-style:normal}
+.tag{font-size:11px;color:var(--ink2);border:1px solid var(--line2);padding:6px 12px;border-radius:999px;background:rgba(111,240,162,.05);font-weight:600}
+.xhead h1{font-size:clamp(30px,5vw,50px);font-weight:800;margin-bottom:12px}
+.xhead h1 span{color:var(--brand);text-shadow:0 0 34px rgba(111,240,162,.4)}
+.xhead .lead{color:var(--ink2);font-size:clamp(15px,1.9vw,18px);line-height:1.62;max-width:760px;
+  text-align:justify;text-justify:inter-word;text-wrap:pretty}
+@media(max-width:640px){.xhead .lead{text-align:left}}
+.pill-note{display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:12px 18px;border-radius:14px;
+  background:linear-gradient(120deg,rgba(111,240,162,.14),rgba(104,209,245,.08));
+  border:1px solid var(--brand-d);font-size:14px;font-weight:700;color:var(--ink);box-shadow:0 0 34px rgba(111,240,162,.1)}
+.pill-note .em{font-size:19px}
+
+/* ---------- Secciones ---------- */
+section{padding:44px 0;border-top:1px solid var(--line)}
+.q{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
+.sh{font-size:clamp(23px,3.2vw,32px);font-weight:800;margin:8px 0 6px}
+.sd{color:var(--ink2);font-size:15px;max-width:88ch;margin-bottom:26px;line-height:1.66;
+  text-align:justify;text-justify:inter-word;text-wrap:pretty}
+@media(max-width:640px){.sd{text-align:left}}
+
+/* ---------- Por qué existe ---------- */
+.why{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:stretch}
+@media(max-width:820px){.why{grid-template-columns:1fr}}
+.panel{background:linear-gradient(165deg,rgba(24,52,38,.9),rgba(19,41,30,.6));
+  border:1px solid var(--line);border-radius:18px;padding:26px 28px}
+.panel h3{font-size:18px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.chk{list-style:none;display:flex;flex-direction:column;gap:12px}
+.chk li{display:flex;gap:12px;font-size:14.5px;color:var(--ink2);line-height:1.5}
+.chk li::before{content:"✓";color:var(--brand);font-weight:900;flex:none;margin-top:1px}
+.idea{background:linear-gradient(155deg,rgba(255,202,92,.12),rgba(40,30,15,.2));
+  border:1.5px solid #a5741f;border-radius:18px;padding:26px 28px;display:flex;flex-direction:column;justify-content:center}
+.idea .badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:900;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--warn);margin-bottom:14px}
+.idea p{font-size:16px;line-height:1.6;color:var(--ink);font-weight:600}
+.idea .big{font-size:30px;line-height:1;margin-bottom:12px}
+
+/* ---------- Flujo horizontal del lifecycle ---------- */
+.flow{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;justify-content:center}
+.fnode{--c:var(--brand);flex:1 1 150px;min-width:140px;text-align:center;padding:22px 14px 20px;border-radius:16px;
+  background:linear-gradient(165deg,rgba(24,52,38,.72),rgba(19,41,30,.5));
+  border:1px solid var(--line);position:relative;overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.fnode::after{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c)}
+.fnode:hover{transform:translateY(-6px);border-color:var(--c);box-shadow:0 14px 40px -12px color-mix(in srgb,var(--c) 55%,transparent)}
+.fnode .fi{font-size:32px;line-height:1;margin-bottom:12px;display:block}
+.fnode .fn-t{font-size:16px;font-weight:800;color:var(--c);letter-spacing:-.01em}
+.fnode .fn-s{font-size:11.5px;color:var(--mut);margin-top:6px;font-weight:600}
+.farrow{display:flex;align-items:center;color:var(--line2);font-size:22px;font-weight:800;flex:none}
+@media(max-width:900px){.farrow{transform:rotate(90deg)}.flow{flex-direction:column;align-items:stretch}.fnode{flex:none}}
+
+/* ---------- Tarjetas detalladas por etapa ---------- */
+.stages{display:flex;flex-direction:column;gap:18px}
+.stage{--c:var(--brand);background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.45));
+  border:1px solid var(--line);border-left:4px solid var(--c);border-radius:16px;overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease}
+.stage:hover{transform:translateY(-3px);box-shadow:0 16px 44px -18px color-mix(in srgb,var(--c) 50%,transparent)}
+.stage-head{display:flex;align-items:center;gap:14px;padding:20px 24px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 12%,transparent),transparent 70%)}
+.stage-ic{width:48px;height:48px;flex:none;display:grid;place-items:center;font-size:24px;border-radius:13px;
+  background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.stage-head h3{font-size:20px;font-weight:800;color:var(--c)}
+.stage-head .sub{font-size:12px;color:var(--mut);font-weight:700;margin-top:2px}
+.stage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+@media(max-width:820px){.stage-grid{grid-template-columns:1fr}}
+.cell{background:var(--card2);padding:18px 22px}
+.cell .cl{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
+  display:flex;align-items:center;gap:6px;margin-bottom:9px}
+.cell p{font-size:13.5px;color:var(--ink2);line-height:1.55}
+.cell b{color:var(--ink)}
+.cell ul{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.cell ul li{font-size:13px;color:var(--ink2);padding-left:15px;position:relative;line-height:1.45}
+.cell ul li::before{content:"›";position:absolute;left:0;color:var(--c);font-weight:900}
+.cell.disq{background:rgba(255,113,137,.05)}
+.cell.disq .cl{color:var(--bad)}
+.cell.disq ul li::before{color:var(--bad)}
+.crit{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.crit span{font-size:11.5px;font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--c) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 38%,transparent);border-radius:999px;padding:4px 11px}
+.tag-na{font-size:11.5px;font-weight:700;color:var(--mut);background:rgba(255,255,255,.04);
+  border:1px dashed var(--line2);border-radius:999px;padding:4px 11px;display:inline-block}
+
+/* ---------- Idea importante (alerta) ---------- */
+.alert{background:linear-gradient(155deg,rgba(255,113,137,.12),rgba(40,15,20,.25));
+  border:1.5px solid #a53a4a;border-radius:20px;padding:32px 34px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start}
+@media(max-width:640px){.alert{grid-template-columns:1fr;gap:16px}}
+.alert .ai{font-size:46px;line-height:1}
+.alert h3{font-size:21px;font-weight:800;margin-bottom:10px;color:var(--ink)}
+.alert p{font-size:15px;color:var(--ink2);line-height:1.6;margin-bottom:10px}
+.alert p b{color:#ffd0d8}
+.nope{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.nope span{font-size:13px;font-weight:700;color:#ffbac4;background:rgba(255,113,137,.1);
+  border:1px solid #a53a4a;border-radius:10px;padding:7px 13px;text-decoration:line-through;text-decoration-color:rgba(255,113,137,.6)}
+.alert .foot{margin-top:16px;font-size:13.5px;color:var(--ink2);border-top:1px solid rgba(255,113,137,.3);padding-top:14px}
+.alert .foot b{color:var(--ink)}
+
+/* ---------- Cómo identificamos (dos columnas) ---------- */
+.split{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px;align-items:start}
+@media(max-width:820px){.split{grid-template-columns:1fr}}
+.mini-funnel{background:linear-gradient(165deg,rgba(24,52,38,.7),rgba(19,41,30,.5));
+  border:1px solid var(--line);border-radius:18px;padding:24px}
+.mini-funnel .h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin-bottom:16px}
+.mf-step{--c:var(--brand);display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;
+  background:color-mix(in srgb,var(--c) 10%,transparent);border:1px solid color-mix(in srgb,var(--c) 30%,transparent);margin-bottom:5px}
+.mf-step .d{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.mf-step .n{font-size:14px;font-weight:800;color:var(--c)}
+.mf-step .x{margin-left:auto;font-size:16px}
+.mf-ar{text-align:center;color:var(--line2);font-size:14px;line-height:1;margin:1px 0}
+.crm{background:linear-gradient(165deg,rgba(40,30,55,.42),rgba(25,20,40,.3));
+  border:1px solid #3f3560;border-radius:18px;padding:24px 26px}
+.crm .h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
+.crm .prop{margin-top:20px}
+.crm .prop:first-of-type{margin-top:14px}
+.crm .plabel{font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.crm .pdesc{font-size:12.5px;color:var(--mut);font-weight:500;margin-bottom:10px;line-height:1.5}
+.states{display:flex;flex-wrap:wrap;gap:8px}
+.states span{font-size:12.5px;font-weight:700;border-radius:999px;padding:5px 12px;border:1px solid}
+.states .s-pend{color:var(--mut);background:rgba(148,163,184,.1);border-color:var(--line2)}
+.states .s-ok{color:var(--brand);background:rgba(111,240,162,.12);border-color:var(--brand-d)}
+.states .s-no{color:var(--warn);background:rgba(255,202,92,.12);border-color:#a5741f}
+.states .s-rec{color:var(--sky);background:rgba(104,209,245,.12);border-color:#1f7f96}
+.states .s-lost{color:var(--bad);background:rgba(255,113,137,.12);border-color:#a53a4a}
+.reasons{display:flex;flex-wrap:wrap;gap:7px}
+.reasons span{font-size:12px;font-weight:600;color:var(--ink2);background:rgba(255,255,255,.04);
+  border:1px solid var(--line);border-radius:8px;padding:5px 11px}
+.crm .rev{margin-top:8px;font-size:13px;color:var(--ink2);background:rgba(104,209,245,.06);
+  border:1px solid rgba(104,209,245,.25);border-radius:11px;padding:12px 14px;line-height:1.5}
+.crm .rev b{color:var(--sky)}
+
+/* ---------- Principio estratégico ---------- */
+.principle{background:linear-gradient(120deg,#0f4a30 0%,#0e5136 45%,#0c3f56 100%);
+  border:1.5px solid var(--brand-d);border-radius:24px;padding:44px 40px;position:relative;overflow:hidden;
+  box-shadow:0 20px 60px -24px rgba(87,224,138,.4)}
+.principle::before{content:"";position:absolute;top:-40%;right:-10%;width:420px;height:420px;
+  background:radial-gradient(circle,rgba(111,240,162,.22),transparent 70%);pointer-events:none}
+.principle .k{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);margin-bottom:14px}
+.principle .quote{font-size:clamp(26px,4vw,40px);font-weight:800;line-height:1.12;color:#fff;
+  margin-bottom:20px;max-width:20ch;text-shadow:0 0 40px rgba(0,0,0,.3)}
+.principle .quote em{font-style:normal;color:var(--brand)}
+.principle p{font-size:15.5px;color:#dff6ea;line-height:1.65;max-width:70ch;margin-bottom:14px;position:relative}
+.principle p b{color:#fff}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px;position:relative}
+@media(max-width:640px){.twin{grid-template-columns:1fr}}
+.twin .t{background:rgba(0,0,0,.22);border:1px solid rgba(111,240,162,.3);border-radius:14px;padding:18px 20px}
+.twin .t .tt{font-size:13px;font-weight:800;color:var(--brand);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.twin .t p{font-size:13.5px;color:#dff6ea;margin:0;max-width:none}
+.principle .closer{margin-top:24px;font-size:14.5px;color:#eafff4;font-weight:600;border-top:1px solid rgba(111,240,162,.25);padding-top:18px;max-width:none}
+
+/* ---------- Footer ---------- */
+footer{border-top:1px solid var(--line);padding:34px 0 60px;text-align:center}
+footer .fb{font-size:18px;font-weight:800}
+footer .fb b{color:var(--brand)} footer .fb i{color:var(--brand);font-style:normal}
+footer .fn{font-size:12.5px;color:var(--mut);margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- ===================== HERO ===================== -->
+<header class="xhead">
+  <div class="xtop">
+    <span class="xbrand"><b>gurus</b><i>•</i><b>up</b></span>
+    <span class="tag">📘 Documentación interna</span>
+  </div>
+  <h1>Lifecycle <span>Funnel</span> de GuruSup</h1>
+  <p class="lead">Cómo gestionamos la madurez de un contacto desde que entra en GuruSup hasta convertirse en cliente.</p>
+  <div class="pill-note"><span class="em">🎯</span> El Lifecycle representa la <b>madurez del contacto</b>, no su estado comercial.</div>
+</header>
+
+<!-- ===================== 01 · POR QUÉ ===================== -->
+<section>
+  <div class="q">01 · El punto de partida</div>
+  <h2 class="sh">¿Por qué existe este funnel?</h2>
+  <p class="sd">Un proceso común para que Marketing, Ventas, Customer Success, Producto, Desarrollo y Dirección
+    hablen el mismo idioma sobre cada contacto: en qué momento está, qué sabemos de él y qué toca hacer a continuación.</p>
+  <div class="why">
+    <div class="panel">
+      <h3>🧭 Objetivo</h3>
+      <ul class="chk">
+        <li>Saber <b>en qué momento</b> se encuentra cada contacto.</li>
+        <li>Tener claro <b>qué información</b> conocemos de él.</li>
+        <li>Definir <b>qué acciones</b> debemos realizar en cada etapa.</li>
+        <li>Detectar <b>cuándo está preparado</b> para pasar a la siguiente etapa.</li>
+      </ul>
+    </div>
+    <div class="idea">
+      <span class="badge">💡 Idea clave</span>
+      <div class="big">🔓</div>
+      <p>Un contacto puede dejar de estar preparado para comprar, pero eso <b>no significa que haya perdido toda la madurez</b> adquirida.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 02 · LIFECYCLE COMPLETO ===================== -->
+<section>
+  <div class="q">02 · Visión de conjunto</div>
+  <h2 class="sh">Lifecycle completo</h2>
+  <p class="sd">El recorrido de madurez de un contacto, de principio a fin. Cada etapa tiene un color e icono propios
+    para reconocerla de un vistazo.</p>
+  <div class="flow">
+    <div class="fnode" style="--c:var(--st-lead)"><span class="fi">🌱</span><div class="fn-t">Lead</div><div class="fn-s">Entra en GuruSup</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode" style="--c:var(--st-mql)"><span class="fi">🧲</span><div class="fn-t">MQL</div><div class="fn-s">Muestra interés</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode" style="--c:var(--st-sql)"><span class="fi">🔎</span><div class="fn-t">SQL</div><div class="fn-s">Intención de compra</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode" style="--c:var(--st-opp)"><span class="fi">🤝</span><div class="fn-t">Opportunity</div><div class="fn-s">Deal abierto</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode" style="--c:var(--st-cus)"><span class="fi">🏆</span><div class="fn-t">Customer</div><div class="fn-s">Cliente activo</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode" style="--c:var(--st-churn)"><span class="fi">📉</span><div class="fn-t">Churn</div><div class="fn-s">Deja de usarlo</div></div>
+  </div>
+</section>
+
+<!-- ===================== 03 · DETALLE POR ETAPA ===================== -->
+<section>
+  <div class="q">03 · El detalle</div>
+  <h2 class="sh">Cada etapa, en detalle</h2>
+  <p class="sd">Qué representa, qué buscamos, cómo avanza y qué ocurre cuando todavía no cualifica —
+    con la razón de descarte cuando aplica.</p>
+
+  <div class="stages">
+
+    <!-- LEAD -->
+    <article class="stage" style="--c:var(--st-lead)">
+      <div class="stage-head">
+        <div class="stage-ic">🌱</div>
+        <div><h3>Lead</h3><div class="sub">Contacto nuevo</div></div>
+      </div>
+      <div class="stage-grid">
+        <div class="cell">
+          <div class="cl">📄 Qué representa</div>
+          <p>Contacto nuevo del que conocemos muy poca información. Todavía no sabemos:</p>
+          <ul><li>Empresa</li><li>Tamaño</li><li>Necesidad</li><li>Intención</li></ul>
+        </div>
+        <div class="cell">
+          <div class="cl">🎯 Objetivo</div>
+          <p>Identificar interés y comenzar a conocer al contacto.</p>
+          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
+          <p>Cuando interactúa con GuruSup o aporta información.</p>
+        </div>
+        <div class="cell disq">
+          <div class="cl">⏸️ Si no cualifica</div>
+          <p>Permanece como <b>Lead</b>: aún no existe información suficiente. Es una etapa clave para futuras estrategias de captación y nurturing.</p>
+          <div class="cl" style="margin-top:16px">🏷️ Razón de descarte</div>
+          <span class="tag-na">No aplica</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- MQL -->
+    <article class="stage" style="--c:var(--st-mql)">
+      <div class="stage-head">
+        <div class="stage-ic">🧲</div>
+        <div><h3>MQL</h3><div class="sub">Marketing Qualified Lead</div></div>
+      </div>
+      <div class="stage-grid">
+        <div class="cell">
+          <div class="cl">📄 Qué representa</div>
+          <p>Contacto que demuestra interés por los contenidos de marketing. Por ejemplo:</p>
+          <ul><li>Descarga un ebook</li><li>Se registra en un webinar</li><li>Visita repetidamente la web</li><li>Consume casos de éxito</li><li>Interactúa con emails</li></ul>
+        </div>
+        <div class="cell">
+          <div class="cl">🎯 Objetivo</div>
+          <p>Educar, generar confianza, recoger información e identificar potencial comercial.</p>
+          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
+          <p>Cuando solicita una demo o muestra intención comercial.</p>
+        </div>
+        <div class="cell disq">
+          <div class="cl">⏸️ Si no cualifica</div>
+          <p>Permanece como <b>MQL</b> y continúa recibiendo acciones de nurturing.</p>
+          <div class="cl" style="margin-top:16px">🏷️ Razones habituales</div>
+          <div class="crit"><span>Poco volumen</span><span>Empresa demasiado pequeña</span><span>Aún en investigación</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- SQL -->
+    <article class="stage" style="--c:var(--st-sql)">
+      <div class="stage-head">
+        <div class="stage-ic">🔎</div>
+        <div><h3>SQL</h3><div class="sub">Sales Qualified Lead</div></div>
+      </div>
+      <div class="stage-grid">
+        <div class="cell">
+          <div class="cl">📄 Qué representa</div>
+          <p>Existe intención real de compra. El contacto identifica un problema y considera GuruSup una posible solución. Aquí se hace la <b>pre-cualificación</b>. Criterios actuales:</p>
+          <ul><li>Más de 3.000 consultas mensuales</li><li>Equipo de soporte de 5 personas o más</li></ul>
+        </div>
+        <div class="cell">
+          <div class="cl">🎯 Objetivo</div>
+          <p>Validar que existe una oportunidad comercial real.</p>
+          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
+          <p>Ventas valida el contacto y crea una <b>Opportunity</b>.</p>
+        </div>
+        <div class="cell disq">
+          <div class="cl">⏸️ Si no cualifica</div>
+          <p><b>No vuelve a Lead.</b> Mantiene la madurez adquirida y queda identificado mediante propiedades del CRM para futuras acciones.</p>
+          <div class="cl" style="margin-top:16px">🏷️ Razones habituales</div>
+          <div class="crit"><span>&lt; 3.000 consultas</span><span>Equipo &lt; 5 personas</span><span>Sin presupuesto</span><span>No es prioridad</span><span>Proyecto aplazado</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- OPPORTUNITY -->
+    <article class="stage" style="--c:var(--st-opp)">
+      <div class="stage-head">
+        <div class="stage-ic">🤝</div>
+        <div><h3>Opportunity</h3><div class="sub">Oportunidad comercial abierta</div></div>
+      </div>
+      <div class="stage-grid">
+        <div class="cell">
+          <div class="cl">📄 Qué representa</div>
+          <p>Existe una oportunidad comercial abierta: hay reuniones, seguimiento y propuesta en marcha.</p>
+        </div>
+        <div class="cell">
+          <div class="cl">🎯 Objetivo</div>
+          <p>Cerrar la venta.</p>
+          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
+          <p>Convierte en <b>Customer</b>.</p>
+        </div>
+        <div class="cell disq">
+          <div class="cl">⏸️ Si no cualifica</div>
+          <p>Puede cerrarse como <b>Lost</b>. Se conserva el motivo para futuras acciones comerciales.</p>
+          <div class="cl" style="margin-top:16px">🏷️ Razones habituales</div>
+          <div class="crit"><span>Competencia</span><span>Presupuesto</span><span>Proyecto cancelado</span><span>No decisión</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- CUSTOMER -->
+    <article class="stage" style="--c:var(--st-cus)">
+      <div class="stage-head">
+        <div class="stage-ic">🏆</div>
+        <div><h3>Customer</h3><div class="sub">Cliente activo</div></div>
+      </div>
+      <div class="stage-grid">
+        <div class="cell">
+          <div class="cl">📄 Qué representa</div>
+          <p>Cliente activo.</p>
+        </div>
+        <div class="cell">
+          <div class="cl">🎯 Objetivo</div>
+          <p>Fidelización, renovación, upselling y cross-selling.</p>
+          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
+          <p>Continúa siendo cliente y crece con nosotros.</p>
+        </div>
+        <div class="cell disq">
+          <div class="cl">⏸️ Si no cualifica</div>
+          <span class="tag-na">No aplica</span>
+          <div class="cl" style="margin-top:16px">🏷️ Razón de descarte</div>
+          <span class="tag-na">No aplica</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- CHURN -->
+    <article class="stage" style="--c:var(--st-churn)">
+      <div class="stage-head">
+        <div class="stage-ic">📉</div>
+        <div><h3>Churn</h3><div class="sub">Cliente que deja de usar GuruSup</div></div>
+      </div>
+      <div class="stage-grid">
+        <div class="cell">
+          <div class="cl">📄 Qué representa</div>
+          <p>Cliente que deja de utilizar GuruSup.</p>
+        </div>
+        <div class="cell">
+          <div class="cl">🎯 Objetivo</div>
+          <p>Analizar los motivos, aprender y detectar oportunidades de recuperación.</p>
+          <div class="cl" style="margin-top:16px">🚀 Cómo avanza</div>
+          <span class="tag-na">No aplica</span>
+        </div>
+        <div class="cell disq">
+          <div class="cl">🏷️ Razones habituales</div>
+          <div class="crit"><span>Cambio de estrategia</span><span>Competencia</span><span>Coste</span><span>Baja utilización</span></div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ===================== 04 · IDEA IMPORTANTE ===================== -->
+<section>
+  <div class="q">04 · Una idea importante</div>
+  <h2 class="sh">El Lifecycle no sirve para marcar descartes</h2>
+  <div class="alert">
+    <div class="ai">⚠️</div>
+    <div>
+      <h3>Madurez ≠ estado comercial</h3>
+      <p>El Lifecycle únicamente representa el <b>nivel de madurez</b> del contacto. La cualificación comercial debe almacenarse mediante <b>propiedades independientes del CRM</b>.</p>
+      <p>Por eso <b>no creamos etapas</b> como estas:</p>
+      <div class="nope"><span>Lead descartado</span><span>MQL descartado</span><span>SQL descartado</span></div>
+      <div class="foot">Mezclar madurez con estado comercial <b>dificulta los informes, las automatizaciones y las segmentaciones</b>. Mantener ambos conceptos separados es lo que permite escalar.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 05 · CÓMO IDENTIFICAMOS ===================== -->
+<section>
+  <div class="q">05 · En la práctica</div>
+  <h2 class="sh">¿Cómo identificamos un contacto que hoy no cualifica?</h2>
+  <p class="sd">La respuesta está en separar dos planos: el <b>Lifecycle</b> refleja la madurez y no retrocede;
+    las <b>propiedades del CRM</b> reflejan la situación comercial actual y sí cambian.</p>
+  <div class="split">
+    <div class="mini-funnel">
+      <div class="h">🧬 Lifecycle · madurez</div>
+      <div class="mf-step" style="--c:var(--st-lead)"><span class="d"></span><span class="n">Lead</span><span class="x">🌱</span></div>
+      <div class="mf-ar">↓</div>
+      <div class="mf-step" style="--c:var(--st-mql)"><span class="d"></span><span class="n">MQL</span><span class="x">🧲</span></div>
+      <div class="mf-ar">↓</div>
+      <div class="mf-step" style="--c:var(--st-sql)"><span class="d"></span><span class="n">SQL</span><span class="x">🔎</span></div>
+      <div class="mf-ar">↓</div>
+      <div class="mf-step" style="--c:var(--st-opp)"><span class="d"></span><span class="n">Opportunity</span><span class="x">🤝</span></div>
+      <div class="mf-ar">↓</div>
+      <div class="mf-step" style="--c:var(--st-cus)"><span class="d"></span><span class="n">Customer</span><span class="x">🏆</span></div>
+      <div class="mf-ar">↓</div>
+      <div class="mf-step" style="--c:var(--st-churn)"><span class="d"></span><span class="n">Churn</span><span class="x">📉</span></div>
+    </div>
+    <div class="crm">
+      <div class="h">🗂️ Propiedades CRM · situación comercial</div>
+      <div class="prop">
+        <div class="plabel">🚦 Estado comercial</div>
+        <div class="states">
+          <span class="s-pend">Pendiente</span>
+          <span class="s-ok">Cualificado</span>
+          <span class="s-no">No cualificado</span>
+          <span class="s-rec">Recuperable</span>
+          <span class="s-lost">Perdido</span>
+        </div>
+      </div>
+      <div class="prop">
+        <div class="plabel">📝 Motivo de descarte</div>
+        <div class="reasons">
+          <span>Volumen insuficiente</span><span>Equipo pequeño</span><span>Sin presupuesto</span>
+          <span>Proyecto parado</span><span>Sin prioridad</span><span>Competencia</span>
+        </div>
+      </div>
+      <div class="prop">
+        <div class="plabel">📅 Fecha próxima revisión</div>
+        <div class="rev">Permite <b>volver a trabajar el contacto</b> automáticamente cuando cambie su situación.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 06 · PRINCIPIO ESTRATÉGICO ===================== -->
+<section>
+  <div class="principle">
+    <div class="k">06 · Principio estratégico</div>
+    <div class="quote">Un <em>"No ahora"</em> no significa <em>"No nunca"</em>.</div>
+    <p>Si un contacto ya ha mostrado interés y conocemos su empresa, su necesidad y su contexto,
+      <b>no debe volver a comportarse como un Lead nuevo</b>. Ha ganado madurez. Lo único que ha cambiado es que hoy
+      todavía no está preparado para comprar.</p>
+    <div class="twin">
+      <div class="t"><div class="tt">🧬 Lifecycle</div><p>Refleja la <b>madurez</b> del contacto. Avanza y no retrocede.</p></div>
+      <div class="t"><div class="tt">🗂️ Propiedades CRM</div><p>Reflejan su <b>situación comercial</b> actual. Cambian con el tiempo.</p></div>
+    </div>
+    <div class="closer">Separar ambos conceptos permite mantener un <b>CRM limpio</b>, <b>informes fiables</b> y <b>automatizaciones mucho más escalables</b>.</div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="fb"><b>gurus</b><i>•</i><b>up</b></div>
+  <div class="fn">Lifecycle Funnel · Documentación interna · Un proceso diseñado para escalar el CRM y la colaboración entre equipos</div>
+</footer>
+
+</body>
+</html>
