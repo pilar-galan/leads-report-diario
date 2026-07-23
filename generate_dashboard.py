@@ -3801,11 +3801,11 @@ def render_exec(d):
     <details class="dictx"><summary><span class="chev">▶</span>📖 Diccionario</summary>
       <div class="dwrap">
         <div class="dhdr">Etapas del ciclo de vida del contacto (en orden)</div>
-        <div class="d"><b>1 · Lead</b><span>Etapa del ciclo de vida del contacto. Es la <b>primera etapa</b>, la más alta del funnel. <b>Intención:</b> aún no la conocemos.</span></div>
-        <div class="d"><b>2 · MQL</b><span>Etapa del ciclo de vida del contacto. Es la <b>evolución del lead</b>: ya tenemos algo de información y está <b>investigando/informándose</b> (consume contenido de valor). <b>Intención:</b> investigar e informarse.</span></div>
-        <div class="d"><b>3 · SQL</b><span>Etapa del ciclo de vida del contacto. Ya tiene una <b>necesidad y un dolor identificados</b> y está haciendo <b>match</b> a ver si encaja con nosotros. <b>Intención:</b> validar el encaje; pendiente de cualificar el volumen.</span></div>
-        <div class="d"><b>4 · Oportunidad</b><span>Etapa del ciclo de vida del contacto con <b>negocio (deal) asociado</b>. Hay presupuesto y tomador de decisión, se ha hecho <b>match</b>, ventas lo ha <b>precualificado</b> y avanzamos: ya se ha <b>generado un negocio en el pipeline de ventas</b>. Varios contactos pueden compartir el mismo negocio, pero es un único deal.</span></div>
-        <div class="d"><b>5 · Cliente</b><span>Etapa del ciclo de vida del contacto: ha <b>firmado el contrato</b> y quiere trabajar con nosotros (negocio ganado). Varios contactos pueden pertenecer al mismo negocio de cliente.</span></div>
+        <div class="d"><b>1 · Lead</b><span>Aún <b>no conocemos su intención</b> ni tenemos información suficiente para cualificarlo. Primera etapa del funnel.</span></div>
+        <div class="d"><b>2 · MQL</b><span>Ya tenemos <b>algo de información</b> (ha descargado contenido de marketing). Está <b>investigando y formándose</b> — fase de información, no de compra.</span></div>
+        <div class="d"><b>3 · SQL</b><span>Tiene un <b>dolor real identificado</b> y busca solución. Aquí se valida, con los <b>criterios de precualificación</b>, si pasa a ventas o no (puede cualificar o no).</span></div>
+        <div class="d"><b>4 · Oportunidad</b><span>SQL que <b>ventas ha cualificado</b>: ha hecho <b>match</b> con los criterios y se ha <b>agendado una reunión</b> en la primera etapa del pipeline de ventas para ver el encaje. Lleva <b>negocio (deal) asociado</b>.</span></div>
+        <div class="d"><b>5 · Cliente</b><span>Ha <b>firmado el contrato</b> y quiere trabajar con nosotros (negocio ganado). Varios contactos pueden pertenecer al mismo negocio.</span></div>
         <div class="d"><b>Otros</b><span>Etapa del ciclo de vida fuera del proceso comercial: correos <b>@gurusup.com</b>, proveedores, gente externa o quien pide trabajar con nosotros. Incluye también algunas pruebas/test (para no crear más etapas).</span></div>
         <div class="dhdr">Otros conceptos</div>
         <div class="d"><b>Churn</b><span>Cliente que se da de baja en el periodo.</span></div>
