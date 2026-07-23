@@ -1314,7 +1314,15 @@ def main():
     ch_cli   = series(hist, lambda c: c["lc"] == "customer", compkey)     # empresas cliente
     # Series de TODAS las fuentes (inbound + outbound + importaciones) para los gráficos evolutivos
     _hist_all = hist + hist_out
-    ch_mql_all = series(_hist_all, lambda c: rank(c["lc"]) >= 2)
+    # MQL = «de facto»: consumió contenido de marketing (ebook, blog, webinar, calculadora…) o asistió a webinar.
+    # Es la definición útil (la etapa MQL casi no se marca en el CRM). Coherente en KPI, gráfico y matriz.
+    def _is_mql_defacto(c):
+        if is_free(c) or rank(c["lc"]) < 1:
+            return False
+        if c.get("web_asis"):
+            return True
+        return classify_origin(c.get("conv"), c.get("webinar")) in CONTENT_ORIGINS
+    ch_mql_all = series(_hist_all, _is_mql_defacto)
     # SQL = etapa EXACTA «salesqualifiedlead» (unificado con el KPI y la matriz: no cuenta
     # oportunidad/cliente ni precualificación, para que el mismo mes dé el mismo número en todas partes)
     ch_sql_all = series(_hist_all, lambda c: c["lc"] == "salesqualifiedlead")
@@ -1412,6 +1420,8 @@ def main():
     # Totales acumulados de CADA gráfico = último punto de su propia línea (para que el número grande
     # del gráfico coincida exactamente con lo que dibuja la línea, sin descuadres)
     exec_extra["cum_mql_m"] = ch_mql_all[0][-1] if ch_mql_all[0] else 0
+    exec_extra["mql_in_defacto"] = sum(1 for c in hist if _is_mql_defacto(c))
+    exec_extra["mql_out_defacto"] = sum(1 for c in hist_out if _is_mql_defacto(c))
     exec_extra["cum_sql_m"] = ch_sql_all[0][-1] if ch_sql_all[0] else 0
     exec_extra["cum_opp_m"] = ch_opp_all[0][-1] if ch_opp_all[0] else 0
     exec_extra["cum_cli_m"] = ch_cli_all[0][-1] if ch_cli_all[0] else 0
@@ -1572,8 +1582,8 @@ def main():
                 # como SQL (van en la columna de oportunidad/negocios o quedan fuera de lead/mql/sql).
                 if c.get("lc") == "salesqualifiedlead": e["s"] += 1
                 elif r >= 3: pass    # precualif (>3000/no sé) u oport./cliente ya alcanzados: no es «solo SQL»
-                elif r == 2: e["m"] += 1
-                else: e["l"] += 1   # r<=1: lead o contacto en bruto sin etapa registrada → cuenta como lead
+                elif _is_mql_defacto(c): e["m"] += 1   # MQL de facto = consumió contenido / asistió a webinar
+                else: e["l"] += 1   # resto → lead
         _acc(hist_nf, _chl)          # inbound
         inb_labels = set(dd.keys())
         _acc(hist_out_fun, _ochl)    # outbound
@@ -2716,6 +2726,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
 .nm-tag{display:inline-block;margin-left:7px;font-size:9px;font-weight:700;color:#c9a56b;background:rgba(180,130,70,.14);border:1px solid rgba(180,130,70,.3);border-radius:6px;padding:1px 6px;vertical-align:middle;white-space:nowrap}
+.nm-ast{color:#c9a56b;font-weight:800;margin-left:2px}
+.mx-otros-note{font-size:10.5px;color:#c9a56b;margin-top:8px;padding-left:2px}
 /* Celda de oportunidad clicable de forma aislada (dropdown flotante · no toggle de toda la fila) */
 .opd{position:relative;display:block}
 .opd>summary{list-style:none;cursor:pointer} .opd>summary::-webkit-details-marker{display:none}
@@ -3013,8 +3025,8 @@ def render_exec(d):
     # MQL = «alcanzaron la etapa MQL» (rank>=MQL, todas las fuentes) → mismo dato que el gráfico evolutivo,
     # para que KPI, gráfico y pipelines cuadren. (Antes el KPI usaba «contenido consumido», que difería.)
     g_mql = ex.get("cum_mql_m", mql_d + ob["mql"])
-    _mql_out = ob["mql"]                       # outbound alcanzó MQL (rank>=2)
-    _mql_in = max(0, g_mql - _mql_out)         # inbound alcanzó MQL
+    _mql_in = ex.get("mql_in_defacto", mql_d)   # inbound MQL de facto (contenido)
+    _mql_out = ex.get("mql_out_defacto", ob["mql"])   # outbound MQL de facto
     # SQL «alcanzado» (rank>=SQL, incluye precualif./oport./cliente): SOLO para tasas de conversión de embudo
     g_sql_reached = mx_in_sql + ob["sql"]
     # SQL visible (KPI headline + tendencia) = etapa EXACTA «salesqualifiedlead», todas las fuentes
@@ -3192,7 +3204,7 @@ def render_exec(d):
                         f'<div class="opd-pop"><b>Oportunidades de {esc(lbl)}:</b>{deals_list}</div></details>')
         else:
             opp_cell = cell(opp_deals, '<span class="p">—</span>')
-        nm_tag = '<span class="nm-tag">🍪 no aceptaron cookies</span>' if lbl == "Otros" else ''
+        nm_tag = '<sup class="nm-ast">*</sup>' if lbl == "Otros" else ''
         row_inner = (
             f'<div class="c1"><span class="nm">{esc(lbl)}{nm_tag}</span>'
             f'<div class="bt"><div class="bf" style="width:{bar_w}%"></div></div></div>'
@@ -3278,7 +3290,8 @@ def render_exec(d):
         + sep_in + mx_rows + mx_total
         + sep_out + mx_rows_out + mx_total_out
         + (cat_brain + sep_brain + mx_brain if brain_o else '')
-        + g_total + '</div></div>')
+        + g_total + '</div></div>'
+        + '<div class="mx-otros-note">* «Otros»: contactos que <b>no han aceptado cookies</b>, por lo que no se puede rastrear su canal de origen.</div>')
 
     # ---------- Pestañas: ACUMULATIVO + snapshots mensuales estáticos ----------
     def _mom(cur, prev):
