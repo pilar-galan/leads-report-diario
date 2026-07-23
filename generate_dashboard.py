@@ -805,7 +805,7 @@ def main():
         _churn_client_deals = fetch_all("deals", [
             {"propertyName": "pipeline", "operator": "EQ", "value": "724590933"},
             {"propertyName": "dealstage", "operator": "IN", "values": ["1367778337", "1177859668"]},
-        ], ["dealname", "dealstage", "num_associated_contacts"])
+        ], ["dealname", "dealstage", "num_associated_contacts", "hs_analytics_source", "hs_analytics_source_data_1"])
     except Exception as e:
         print(f"[churn] error: {e}", file=sys.stderr); _churn_client_deals = []
     cli_churn_n = len(_churn_client_deals)
@@ -813,6 +813,11 @@ def main():
         try: return int(dl["properties"].get("num_associated_contacts") or 0)
         except (TypeError, ValueError): return 0
     churn_contactos = sum(_nac(dl) for dl in _churn_client_deals)
+    # Desglose de churn por vía (misma lógica que clientes: inbound = fuente de marketing, resto outbound)
+    churn_inb = sum(1 for dl in _churn_client_deals
+                    if is_marketing(dl["properties"].get("hs_analytics_source") or "",
+                                    dl["properties"].get("hs_analytics_source_data_1") or ""))
+    churn_out = cli_churn_n - churn_inb
     OWNER_NAME = {"92703778": "Agustín", "92703779": "Juanma", "81606279": "Alex", "82823543": "Álvaro"}
     reun_owner = {}      # reuniones/negocios vivos en pipeline (ventas+brain) por persona
     brain_open = 0; brain_value = 0.0   # oportunidades REALES del pipeline Brain (demo/validación/best case)
@@ -1690,7 +1695,8 @@ def main():
         "inbound_ct": cli_inb_ct, "outbound_ct": cli_out_ct,
     }
     # ── Churn REAL = cuentas de cliente que ya no lo son (etapa Churned/Dormidos del pipeline Clientes) ──
-    exec_extra["churn"] = {"empresas": cli_churn_n, "contactos": churn_contactos}
+    exec_extra["churn"] = {"empresas": cli_churn_n, "contactos": churn_contactos,
+                           "inbound": churn_inb, "outbound": churn_out, "brain": 0}
     exec_extra["clientes_activos"] = clientes_activos
 
     def peak_insight(items, pred, origin=True):
@@ -2757,6 +2763,14 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
 .sqlvl3{display:grid;grid-template-columns:.82fr .82fr 1.55fr;gap:14px;align-items:start}
+.sqlvl3.two{grid-template-columns:1fr 1.18fr}
+.lvl-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.phase-head{font-size:13px;font-weight:800;letter-spacing:.01em;padding:8px 12px;border-radius:10px}
+.phase-head small{font-weight:600;opacity:.8}
+.phase-head.prev{background:rgba(148,163,184,.1);color:var(--ink2);border:1px solid var(--line2)}
+.phase-head.new{background:rgba(111,240,162,.1);color:var(--brand);border:1px solid var(--brand-d)}
+.phase-desc{font-size:11.5px;color:var(--mut);line-height:1.55;padding:0 2px}
+@media(max-width:860px){.sqlvl3.two{grid-template-columns:1fr}}
 .evo-flow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:2px 0 16px;font-size:11px}
 .evo-step{padding:5px 11px;border-radius:999px;font-weight:700}
 .evo-step.prev{background:rgba(148,163,184,.1);color:var(--mut);border:1px solid var(--line2)}
@@ -3986,10 +4000,13 @@ def render_exec(d):
 <section>
   <div class="q">08 · ¿Qué ocurre con los SQL?</div>
   <h2 class="sh">Estado de los SQL <span class="tot">· {fmt(d["sql_disp"]["total"])}</span></h2>
-  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> (etapa exacta <code>salesqualifiedlead</code>, misma definición que el KPI principal) en tres bloques. <b>Cómo evolucionó:</b> ① y ② son el <b>seguimiento manual previo</b> (Agustín revisaba y descartaba SQL uno a uno); al ver que se colaban muchos <b>sin volumen real</b> y se perdía tiempo, se <b>automatizó la precualificación por formulario</b> → ③, en marcha <b>desde el 9 jul</b>. Los contactos <b>en precualificación</b> («no sé volumen» / &gt;3.000) todavía <b>no son SQL confirmados</b> y se contabilizan en el bloque ③, no en este total. <i>Pulsa cada columna para desplegar el detalle.</i></div>
-  <div class="evo-flow"><span class="evo-step prev">① ② Seguimiento manual previo</span><span class="evo-arrow">— se detectan gaps →</span><span class="evo-step new">③ Precualificación automatizada · desde 9 jul</span></div>
+  <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> (etapa exacta <code>salesqualifiedlead</code>, misma definición que el KPI principal; prácticamente todos de <b>inbound</b>). Se muestran en <b>dos fases</b> según cómo se han trabajado. <i>Pulsa cada bloque para desplegar el detalle.</i></div>
+  <div class="evo-flow"><span class="evo-step prev">Fase 1 · Manual (antes 9 jul)</span><span class="evo-arrow">— se detectan gaps → se automatiza →</span><span class="evo-step new">Fase 2 · Precualificación automatizada (desde 9 jul)</span></div>
 
-  <div class="sqlvl3">
+  <div class="sqlvl3 two">
+    <div class="lvl-col">
+      <div class="phase-head prev">Fase 1 · Seguimiento manual <small>· antes del 9 jul</small></div>
+      <div class="phase-desc">Se hacía un <b>seguimiento casi diario</b> de una lista de SQLs. Funcionaba, pero <b>dificultaba el follow-up y aprender de los descartes</b>, y hacía <b>perder tiempo a ventas</b>. Se creó una <b>razón de descarte</b> manual para ordenarlo, pero seguía siendo lento → se decidió <b>automatizar</b> (Fase 2).</div>
     <details class="lvl" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
@@ -4016,7 +4033,10 @@ def render_exec(d):
         {desc_interp}
       </div>
     </details>
-
+    </div>
+    <div class="lvl-col">
+      <div class="phase-head new">Fase 2 · Precualificación automatizada <small>· desde el 9 jul</small></div>
+      <div class="phase-desc">Para que <b>ventas no pierda tiempo</b>, el <b>formulario de solicitar demo</b> precualifica solo: pregunta por el <b>volumen de consultas (≥3.000)</b> y el <b>tamaño del equipo de soporte (&gt;5 personas)</b>. Quien no cumple recibe un <b>mail de agradecimiento/descarte</b> automático y <b>no llega a Agustín</b>; el resto sí avanza.</div>
     <details class="lvl lvl3" open>
       <summary class="lvl-sum">
         <span class="lvl-badge b3">③</span>
@@ -4036,9 +4056,9 @@ def render_exec(d):
           <div class="agf-node"><b>{fmt(ag_entered)}</b><span>pasan a Agustín<br><small>precualifican · Agustín contacta (tel./mail según preferencia)</small></span></div>
           <div class="agf-branch">
             <div class="agf-down"><span class="agf-pct ok">↓ {pv(ag_gest, ag_entered or 1)}</span><span class="agf-lbl">pasan el filtro de volumen</span></div>
-            <details class="agf-right bad"><summary><b>{fmt(ag_vol)}</b><span>descartados · volumen &lt;3.000<br><small>{pv(ag_vol, ag_entered or 1)} · Agustín lo detecta* · ▾ ver</small></span></summary>
-              <div class="razbox" style="margin-top:8px;font-size:10.5px;color:var(--mut)">* Contactos que en el formulario marcaron «no sé mi volumen» — Jonathan pidió que entraran igualmente a precualificar. Agustín detecta que son &lt;3.000.</div>
-              <div class="agopp-list" style="margin-top:8px">{_agvol_items or '<span>—</span>'}</div></details>
+            <details class="agf-right bad"><summary><b>{fmt(ag_vol)}</b><span>descartados · volumen &lt;3.000<br><small>{pv(ag_vol, ag_entered or 1)} · Agustín lo detecta* · ▾ razón</small></span></summary>
+              <div class="razbox" style="margin-top:8px"><div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">{fmt(ag_vol)}</span></div></div>
+              <div class="razbox" style="margin-top:8px;font-size:10.5px;color:var(--mut)">* Marcaron «no sé mi volumen» en el formulario — Jonathan pidió que entraran igualmente a precualificar; Agustín detecta que son &lt;3.000.</div></details>
           </div>
           <div class="agf-node"><b>{fmt(ag_gest)}</b><span>gestionados<br><small>superan el filtro de volumen</small></span></div>
           <div class="agf-branch">
@@ -4060,6 +4080,7 @@ def render_exec(d):
         <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización del workflow · 22 jul 2026:</b> a <b>Agustín</b> solo llegan los contactos que han <b>solicitado demo</b> y tienen <b>≥3.000 consultas/mes</b> o un <b>equipo de soporte de &gt;5 personas</b>. El resto se <b>descalifica automáticamente por mail</b>.</div>
       </div>
     </details>
+    </div>
   </div>
 </section>
 
@@ -4093,10 +4114,15 @@ def render_exec(d):
 <section>
   <div class="q">11 · ¿Perdemos clientes?</div>
   <h2 class="sh">Churn <span class="tot">· {fmt(ex.get("churn",{}).get("contactos",0))} contactos · {fmt(ex.get("churn",{}).get("empresas",0))} empresas</span></h2>
-  <div class="sd"><b>Clientes que lo fueron desde el 1 de enero y hoy ya no lo son</b>: cuentas del pipeline «Clientes» que han pasado a etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>. Cifra grande = contactos; empresas = cuentas.</div>
+  <div class="sd"><b>Clientes que lo fueron desde el 1 de enero y hoy ya no lo son</b>: cuentas del pipeline «Clientes» en etapa <b>Churned</b> o <b>Dormidos / Inactivos</b>. Desglose por <b>vía de origen</b> del negocio (misma lógica que Clientes).</div>
+  <div class="cards" style="margin-bottom:18px">
+    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("empresas",0))}</div><div class="sl">🔻 Empresas en churn · 100%<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("contactos",0))} contactos · Churned / Dormidos</span></div></div>
+    <div class="stat ok"><div class="sv tnum">{fmt(ex.get("churn",{}).get("inbound",0))}</div><div class="sl">🟢 Inbound<br><span style="color:var(--mut)">{pv(ex.get("churn",{}).get("inbound",0), ex.get("churn",{}).get("empresas",0))} del churn</span></div></div>
+    <div class="stat warn"><div class="sv tnum">{fmt(ex.get("churn",{}).get("outbound",0))}</div><div class="sl">🟠 Outbound / offline / importación<br><span style="color:var(--mut)">{pv(ex.get("churn",{}).get("outbound",0), ex.get("churn",{}).get("empresas",0))} del churn</span></div></div>
+    <div class="stat"><div class="sv tnum">{fmt(ex.get("churn",{}).get("brain",0))}</div><div class="sl">🧠 Brain<br><span style="color:var(--mut)">{pv(ex.get("churn",{}).get("brain",0), ex.get("churn",{}).get("empresas",0))} del churn</span></div></div>
+  </div>
   <div class="cards">
-    <div class="stat bad"><div class="sv tnum">{fmt(ex.get("churn",{}).get("contactos",0))}</div><div class="sl">🔻 Churn · contactos<br><span style="color:var(--mut)">{fmt(ex.get("churn",{}).get("empresas",0))} empresas · Churned / Dormidos</span></div></div>
-    <div class="stat"><div class="sv tnum">{_churn_pct}</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">churn / (churn + clientes activos)</span></div></div>
+    <div class="stat"><div class="sv tnum">{_churn_pct}</div><div class="sl">Tasa de churn<br><span style="color:var(--mut)">empresas churn / (churn + clientes activos)</span></div></div>
   </div>
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
