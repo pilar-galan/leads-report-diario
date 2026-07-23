@@ -3131,7 +3131,8 @@ def render_exec(d):
         rows = ""
         for i, (lab, val) in enumerate(st):
             w = max(5, round(val / top * 100))
-            conv = "" if i == 0 else f'<span class="mf-c">{pv(val, top)}</span>'
+            # Conversión ETAPA A ETAPA (respecto a la etapa anterior), no sobre el total
+            conv = "" if i == 0 else f'<span class="mf-c">↳ {pvf(val, st[i-1][1])} <small>de la etapa previa</small></span>'
             # La fila de Oportunidad se despliega con los nombres de los negocios
             if lab.startswith("Oportunidad") and opp_names:
                 deals = "".join(f'<span>{esc(n)}</span>' for n in opp_names)
