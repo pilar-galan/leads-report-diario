@@ -3495,15 +3495,23 @@ def render_exec(d):
         items = "".join(f'<div class="cac-li">{esc(nm)}</div>' for nm in names)
         return (f'<td class="cac-num"><details class="cac-det"><summary>{fmt(n)} <span class="cac-see">ver</span></summary>'
                 f'<div class="cac-names">{items}</div></details></td>')
+    def _cpo_cell(p):
+        # Coste por oportunidad = gasto / nº oportunidades
+        opp = p.get("opp"); spend = p.get("spend", 0)
+        if opp is None:
+            return '<td class="cac-num"><span class="cac-comb" style="opacity:.55">incl. Social*</span></td>'
+        if not opp:
+            return '<td class="cac-num"><span class="cac-noc">— sin oport.</span></td>'
+        return f'<td class="cac-num"><b>{fmt(round(spend/opp))} €</b></td>'
     def _cac_row(p):
         nm = p.get("name", "")
-        cli_extra = ' · Social = Meta+LinkedIn*' if p.get("name") == "Meta Ads" else ''
         label = esc(nm) + ('<span class="cac-sub">agrupa Meta + LinkedIn (CRM)</span>' if p.get("name") == "Meta Ads" else '')
         return (
             f'<tr data-cost="{round(p.get("spend",0))}">'
             f'<td class="cac-ch"><b>{p.get("icon","")} {label}</b></td>'
             f'<td class="cac-num">{fmt(round(p.get("spend",0)))} €</td>'
             f'{_cac_cell(p.get("opp"), p.get("opp_list", []), "opp")}'
+            f'{_cpo_cell(p)}'
             f'{_cac_cell(p.get("cli"), p.get("cli_list", []), "cli")}'
             f'<td class="cac-verd"><span class="cac-badge">—</span></td></tr>')
     _rows_cac = "".join(_cac_row(p) for p in _plats)
@@ -3549,13 +3557,13 @@ def render_exec(d):
       <div class="cac-ak"><div class="cac-ak-v">{fmt(_ads_cli)}</div><div class="cac-ak-l">Clientes generados</div></div>
     </div>
     <table class="cac-tbl">
-      <thead><tr><th>Plataforma</th><th class="cac-num">Gasto</th><th class="cac-num">Oportunidades</th><th class="cac-num">Clientes</th><th class="cac-num">¿Cabe en CAC?</th></tr></thead>
+      <thead><tr><th>Plataforma</th><th class="cac-num">Gasto</th><th class="cac-num">Oportunidades</th><th class="cac-num">€ / oportunidad</th><th class="cac-num">Clientes</th><th class="cac-num">¿Cabe en CAC?</th></tr></thead>
       <tbody id="cacTbody">{_rows_cac}
-        <tr class="cac-tot-row" data-cost="0"><td class="cac-ch"><b>TOTAL Ads</b></td><td class="cac-num">{fmt(round(_ads_total))} €</td><td class="cac-num">{fmt(_ads_opp)}</td><td class="cac-num">{fmt(_ads_cli)}</td><td></td></tr>
+        <tr class="cac-tot-row" data-cost="0"><td class="cac-ch"><b>TOTAL Ads</b></td><td class="cac-num">{fmt(round(_ads_total))} €</td><td class="cac-num">{fmt(_ads_opp)}</td><td class="cac-num">{(fmt(round(_ads_total/_ads_opp))+" €") if _ads_opp else "—"}</td><td class="cac-num">{fmt(_ads_cli)}</td><td></td></tr>
       </tbody>
     </table>
     <div class="cac-reach" id="cacReach"></div>
-    <div class="cac-foot">* <b>Meta + LinkedIn</b> se agrupan como «Social Ads» en el CRM: sus oportunidades y clientes van <b>combinados</b> en la fila de Meta. <b>Pulsa un número</b> para ver los nombres. <b>Oportunidades</b> = contactos en etapa oportunidad con negocio · <b>Clientes</b> = contactos atribuidos al canal de pago que han llegado a etapa cliente en el CRM (no el conteo de la plataforma de Ads, que puede diferir). El veredicto <b>¿Cabe en CAC?</b> compara el <b>coste por cliente</b> de cada plataforma con el techo de CAC que fijas arriba.</div>
+    <div class="cac-foot">* <b>Meta + LinkedIn</b> se agrupan como «Social Ads» en el CRM: sus oportunidades y clientes van <b>combinados</b> en la fila de Meta. <b>Pulsa un número</b> para ver los nombres. <b>Oportunidades</b> = contactos en etapa oportunidad con negocio · <b>€ / oportunidad</b> = gasto de la campaña ÷ nº de oportunidades · <b>Clientes</b> = contactos atribuidos al canal de pago que han llegado a etapa cliente en el CRM (no el conteo de la plataforma de Ads, que puede diferir). El veredicto <b>¿Cabe en CAC?</b> compara el <b>coste por cliente</b> de cada plataforma con el techo de CAC que fijas arriba.</div>
   </div>
   <script>(function(){{
     var t=document.getElementById('cacTicket'),m=document.getElementById('cacMargin'),pay=document.getElementById('cacPay');
@@ -3750,6 +3758,7 @@ def render_exec(d):
   <h2 class="sh">Estado de los MQL <span class="tot">· {fmt(ctot)}</span> · contenido consumido</h2>
   <div class="sd">Qué activos de contenido consumen los leads de consideración (MQL de facto) antes de pasar a SQL.</div>
   <div class="bars">{content_html}</div>
+  <div class="note" style="margin-top:14px">🌱 <b>Nurturing de MQL (medio plazo).</b> Los MQL también se trabajan con <b>nurturing</b>, pero con menos urgencia que los SQL: <b>secuencias y enriquecimiento de contenido</b> con acciones específicas (eventos, webinars, documentos y contenidos) <b>alineadas con ventas, tendencias del mercado y propuesta de valor</b>, para ir todos a una e ir <b>sacando patrones</b> de lo que mejor convierte.</div>
 </section>
 
 <section>
