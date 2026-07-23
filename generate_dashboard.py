@@ -2665,7 +2665,13 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .mx-sep{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:10px 4px 4px;color:var(--brand)}
 .mx-sep.out{color:var(--warn)}
 .mx-row.mx-ob{background:linear-gradient(165deg,rgba(52,42,24,.35),rgba(41,30,19,.25));border-color:#4a3b22}
-.nm-tag{display:inline-block;margin-left:7px;font-size:9px;font-weight:700;color:var(--mut);background:rgba(148,163,184,.14);border-radius:6px;padding:1px 6px;vertical-align:middle;white-space:nowrap}
+.nm-tag{display:inline-block;margin-left:7px;font-size:9px;font-weight:700;color:#c9a56b;background:rgba(180,130,70,.14);border:1px solid rgba(180,130,70,.3);border-radius:6px;padding:1px 6px;vertical-align:middle;white-space:nowrap}
+/* Celda de oportunidad clicable de forma aislada (dropdown flotante · no toggle de toda la fila) */
+.opd{position:relative;display:block}
+.opd>summary{list-style:none;cursor:pointer} .opd>summary::-webkit-details-marker{display:none}
+.opd-pop{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:230px;max-width:320px;padding:10px 13px;background:#0c1b15;border:1px solid rgba(104,209,245,.25);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.5);display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--ink2);text-align:left}
+.opd-pop b{width:100%;color:var(--sky);font-size:11px;margin-bottom:2px}
+.opd-pop span{background:rgba(104,209,245,.1);border:1px solid rgba(104,209,245,.25);padding:3px 9px;border-radius:6px}
 .mxtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .mxtab{font-size:11.5px;font-weight:800;letter-spacing:.02em;padding:7px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--ink2);cursor:pointer}
 .mxtab.active{background:var(--brand);color:#04120b;border-color:var(--brand)}
@@ -3117,9 +3123,13 @@ def render_exec(d):
         pct_c = f'<span class="p">{pv(e["contactos"], cm_tot)}</span>'
         bar_w = round(e["contactos"] / cmax * 100)
         conv_o = pvf(opp_deals, e["contactos"])
-        opp_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{opp_deals}</span><span class="emp">🏢 ver ▾</span></div>'
-                    if items else cell(opp_deals, '<span class="p">—</span>'))
-        nm_tag = '<span class="nm-tag">🍪 sin cookies · no rastreable</span>' if lbl == "Otros" else ''
+        if items:
+            deals_list = "".join(f'<span>{esc(nm)} · {esc(sl)}</span>' for nm, sl in items)
+            opp_cell = (f'<details class="opd"><summary class="mx-cell op-clk"><span class="v tnum">{opp_deals}</span><span class="emp">🏢 ver ▾</span></summary>'
+                        f'<div class="opd-pop"><b>Oportunidades de {esc(lbl)}:</b>{deals_list}</div></details>')
+        else:
+            opp_cell = cell(opp_deals, '<span class="p">—</span>')
+        nm_tag = '<span class="nm-tag">🍪 no aceptaron cookies</span>' if lbl == "Otros" else ''
         row_inner = (
             f'<div class="c1"><span class="nm">{esc(lbl)}{nm_tag}</span>'
             f'<div class="bt"><div class="bf" style="width:{bar_w}%"></div></div></div>'
@@ -3127,12 +3137,7 @@ def render_exec(d):
             + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
             + opp_cell
             + f'<div class="mx-cell cv"><span class="v tnum">{conv_o}</span><span class="p">contacto→op.</span></div>')
-        if items:
-            deals_list = "".join(f'<span>{esc(nm)} · {esc(sl)}</span>' for nm, sl in items)
-            mx_rows += (f'<details class="mxd"><summary class="mx-row">{row_inner}</summary>'
-                        f'<div class="mx-deals"><b>Oportunidades de {esc(lbl)}:</b> {deals_list}</div></details>')
-        else:
-            mx_rows += f'<div class="mx-row">{row_inner}</div>'
+        mx_rows += f'<div class="mx-row">{row_inner}</div>'
     # fila TOTAL (suma = total de contactos)
     t_c = sum(e["contactos"] for _, e in cm); t_l = sum(e["leads"] for _, e in cm)
     t_m = sum(e["mql"] for _, e in cm); t_s = sum(e["sql"] for _, e in cm)
@@ -3159,19 +3164,18 @@ def render_exec(d):
         items = dbco_m.get(lbl, [])
         opp_deals = len(items)   # oportunidades OUTBOUND = negocios asociados en pipeline
         conv_o = pvf(opp_deals, e["contactos"])
-        opp_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{opp_deals}</span><span class="emp">🏢 ver ▾</span></div>'
-                    if items else cell(opp_deals, '<span class="p">—</span>'))
+        if items:
+            deals_list = "".join(f'<span>{esc(nm)} · {esc(sl)}</span>' for nm, sl in items)
+            opp_cell = (f'<details class="opd"><summary class="mx-cell op-clk"><span class="v tnum">{opp_deals}</span><span class="emp">🏢 ver ▾</span></summary>'
+                        f'<div class="opd-pop"><b>Oportunidades de {esc(lbl)}:</b>{deals_list}</div></details>')
+        else:
+            opp_cell = cell(opp_deals, '<span class="p">—</span>')
         row_inner = (
             f'<div class="c1"><span class="nm">{esc(lbl)}</span></div>'
             + cell(e["contactos"]) + cell(e["leads"]) + cell(e["mql"]) + cell(e["sql"], cls="hi")
             + opp_cell
             + f'<div class="mx-cell cv"><span class="v tnum">{conv_o}</span><span class="p">contacto→op.</span></div>')
-        if items:
-            deals_list = "".join(f'<span>{esc(nm)} · {esc(sl)}</span>' for nm, sl in items)
-            mx_rows_out += (f'<details class="mxd"><summary class="mx-row mx-ob">{row_inner}</summary>'
-                            f'<div class="mx-deals"><b>Oportunidades de {esc(lbl)}:</b> {deals_list}</div></details>')
-        else:
-            mx_rows_out += f'<div class="mx-row mx-ob">{row_inner}</div>'
+        mx_rows_out += f'<div class="mx-row mx-ob">{row_inner}</div>'
     oc_c = sum(e["contactos"] for _, e in cmo); oc_l = sum(e["leads"] for _, e in cmo)
     oc_m = sum(e["mql"] for _, e in cmo); oc_s = sum(e["sql"] for _, e in cmo)
     oc_o = sum(len(v) for v in dbco_m.values())   # TODAS las oportunidades outbound con negocio (cuadra con el KPI)
@@ -3254,8 +3258,10 @@ def render_exec(d):
             onames = opp_by_lbl.get(lbl, [])
             _oarrow = _mom(e["o"], pe["o"]) if pe is not None else ''
             if e["o"] > 0 and onames:
-                o_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{fmt(e["o"])}</span>{_oarrow}'
-                          f'<span class="emp">🎯 ver ▾</span></div>')
+                deals = "".join(f'<span>{esc(nm)}</span>' for nm in onames)
+                o_cell = (f'<details class="opd"><summary class="mx-cell op-clk"><span class="v tnum">{fmt(e["o"])}</span>{_oarrow}'
+                          f'<span class="emp">🎯 ver ▾</span></summary>'
+                          f'<div class="opd-pop"><b>Oportunidades de {esc(lbl)}:</b>{deals}</div></details>')
             else:
                 o_cell = _mcell(e["o"], pe, "o")
             inner = (
@@ -3263,10 +3269,6 @@ def render_exec(d):
                 f'<div class="bt"><div class="bf" style="width:{bw}%"></div></div></div>'
                 f'{c_cell}{_mcell(e["l"], pe, "l")}{_mcell(e["m"], pe, "m")}{_mcell(e["s"], pe, "s", "hi")}{o_cell}'
                 f'<div class="mx-cell cv"><span class="v tnum">{pvf(e["o"], e["c"])}</span></div>')
-            if e["o"] > 0 and onames:
-                deals = "".join(f'<span>{esc(nm)}</span>' for nm in onames)
-                return (f'<details class="mxd"><summary class="mx-row {cls}">{inner}</summary>'
-                        f'<div class="mx-deals"><b>Oportunidades de {esc(lbl)}:</b> {deals}</div></details>')
             return f'<div class="mx-row {cls}">{inner}</div>'
         # Subtotales de grupo (inbound / outbound) con flecha MoM vs mismo grupo del mes anterior
         def _sumrows(rows):
@@ -3307,18 +3309,12 @@ def render_exec(d):
             imp = "importaci" in lbl.lower()
             star = ' <b style="color:var(--warn)">*importación</b>' if imp else ''
             return f'<span>{esc(nm)} <small>· {esc(lbl)}</small>{star}</span>'
-        opp_items = "".join(_oppitem(lbl, nm) for lbl, nm in mo["opp_list"])
-        imp_note = (f'<div class="mx-imp-note">* {fmt(_n_imp)} de estas «oportunidades» son <b>importaciones</b> '
-                    f'(datos cargados en bloque, no oportunidades reales de venta): conviene depurarlas.</div>') if _n_imp else ''
-        opp_det = (f'<details class="razd" style="margin-top:12px"><summary><span class="chev">▶</span> '
-                   f'🎯 Ver las {fmt(len(mo["opp_list"]))} oportunidades generadas en {esc(label)}</summary>'
-                   f'<div class="mx-deals">{opp_items or "—"}</div>{imp_note}</details>') if mo["opp_list"] else ''
         return (
             f'<div class="mxpanel{" active" if active else ""}" id="mx-{pid}">'
             f'<div class="mxwrap"><div class="matrix">'
             f'<div class="mx-head"><span>{head_lbl}</span><span>Contactos</span><span>Solo Lead</span>'
             '<span>Solo MQL</span><span>Solo SQL</span><span>Oport. (deal)</span><span>Contacto→Op.</span></div>'
-            + rows_h + tot_row + '</div></div>' + opp_det + '</div>')
+            + rows_h + tot_row + '</div></div></div>')
     # Pestaña 1 = MES ACTUAL (contactos nuevos del mes en curso, buckets exclusivos)
     tabs_btns = '<button class="mxtab active" data-mx="acum">MES ACTUAL{}</button>'.format(
         f' · {esc(_cur_lbl)}' if _cur_lbl else '')
