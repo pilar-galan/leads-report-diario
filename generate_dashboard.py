@@ -1272,12 +1272,12 @@ def main():
     ch_cli   = series(hist, lambda c: c["lc"] == "customer", compkey)     # empresas cliente
 
     def trend7(daily_inc):
-        """Tendencia: suma últimos 7 días vs 7 previos. dir: up/down/flat + delta."""
-        if len(daily_inc) < 14:
-            return {"dir": "flat", "delta": 0, "last7": sum(daily_inc[-7:])}
-        last7 = sum(daily_inc[-7:]); prev7 = sum(daily_inc[-14:-7])
-        d = last7 - prev7
-        return {"dir": "up" if d > 0 else ("down" if d < 0 else "flat"), "delta": d, "last7": last7, "prev7": prev7}
+        """Tendencia: suma últimos 30 días vs los 30 previos (comparativa mensual). dir + delta.
+        (Las claves last7/prev7 se mantienen por compatibilidad, pero contienen sumas de 30 días.)"""
+        W = 30
+        last = sum(daily_inc[-W:]); prev = sum(daily_inc[-2 * W:-W])
+        d = last - prev
+        return {"dir": "up" if d > 0 else ("down" if d < 0 else "flat"), "delta": d, "last7": last, "prev7": prev}
     ch_free = series(hist_fun, is_free)
     trends = {
         "contactos": trend7(ch_contactos[1]), "leads": trend7(ch_leads[1]),
@@ -1523,6 +1523,7 @@ def main():
     exec_extra["opp_emp_inb"] = len({dl.get("name") for dl in exec_opp})
     exec_extra["opp_emp_out"] = len({dl.get("name") for dl in exec_opp_out})
     exec_extra["opp_emp_brain"] = len(set(brain_names))
+    exec_extra["brain_opp_names"] = [n.replace("GuruSup Brain · ", "") for n in brain_names]
     exec_extra["opp_emp_total"] = len({dl.get("name") for dl in exec_opp}
                                       | {dl.get("name") for dl in exec_opp_out}
                                       | set(brain_names))
@@ -2354,6 +2355,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .sh .tot{color:var(--brand);font-weight:800}
 .sd{color:var(--ink2);font-size:13.5px;max-width:74ch;margin-bottom:18px}
 .sd.wide{max-width:none}
+.kg-trendlab{font-size:11px;color:var(--mut);line-height:1.5;margin:0 0 12px;padding-left:11px;border-left:2px solid var(--brand-d)}
 .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
 .kc{background:linear-gradient(165deg,rgba(24,52,38,.9),rgba(19,41,30,.7));border:1px solid var(--line);
   border-radius:16px;padding:18px 16px;position:relative;overflow:hidden}
@@ -2407,6 +2409,12 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mf-fill{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand))}
 .iocol.out .mf-fill{background:linear-gradient(90deg,#a5741f,var(--warn))}
 .mf-c{font-size:10.5px;color:var(--mut);font-weight:700;text-align:right}
+.mf-det>summary{list-style:none;cursor:pointer} .mf-det>summary::-webkit-details-marker{display:none}
+.mf-see{font-size:9px;font-weight:800;color:var(--brand);background:rgba(111,240,162,.14);border-radius:5px;padding:1px 5px;margin-left:4px}
+.iocol.out .mf-see{color:var(--warn);background:rgba(255,202,92,.14)} .iocol.brain .mf-see{color:var(--violet);background:rgba(200,166,255,.14)}
+.mf-det[open] .mf-see::after{content:" ▾"}
+.mf-deals{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 2px;padding-left:2px}
+.mf-deals span{font-size:10.5px;font-weight:600;color:var(--ink2);background:rgba(255,255,255,.05);border-radius:6px;padding:2px 8px}
 .io-val{margin-top:14px;padding:11px 13px;border-radius:12px;background:rgba(111,240,162,.09);border:1px solid var(--brand-d);font-size:11.5px;color:var(--ink2);font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .io-val span{font-size:21px;font-weight:900;color:var(--brand)}
 .iocol.out .io-val{background:rgba(255,202,92,.09);border-color:#a5741f}
@@ -2791,9 +2799,9 @@ def render_exec(d):
         sym = "▲" if up else "▼"; cls = "up" if up else "down"
         pct_txt = f"{(last7 - prev7) / prev7 * 100:+.0f}%" if prev7 > 0 else "nuevo"
         numcls = "zero" if last7 == 0 else ("up" if up else "down")
-        return (f'<span class="trend {cls}">{sym} {pct_txt}</span>'
+        return (f'<span class="trend {cls}" title="Variación de los últimos 30 días frente a los 30 días anteriores">{sym} {pct_txt}</span>'
                 f'<span class="trend {numcls}">+{last7}</span>'
-                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">nuevos · 7d</span>')
+                f'<span style="color:var(--mut);font-weight:600;font-size:10.5px">últimos 30 d · vs mes anterior</span>')
 
     opp_c = ex["opp_contacts"]; cli_c = ex["cli_contacts"]
     opp_e = d["opp_companies"]; cli_e = d["cli_companies"]
@@ -2907,19 +2915,31 @@ def render_exec(d):
         for lab, val, sub in rates)
 
     # ---------- INBOUND vs OUTBOUND · dos columnas ----------
-    def mini_funnel(st):
+    def mini_funnel(st, opp_names=None):
         top = st[0][1] or 1
         rows = ""
         for i, (lab, val) in enumerate(st):
             w = max(5, round(val / top * 100))
             conv = "" if i == 0 else f'<span class="mf-c">{pv(val, top)}</span>'
-            rows += (f'<div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(val)}</b> {lab}</div>'
-                     f'<div class="mf-bar"><div class="mf-fill" style="width:{w}%"></div></div>{conv}</div>')
+            # La fila de Oportunidad se despliega con los nombres de los negocios
+            if lab.startswith("Oportunidad") and opp_names:
+                deals = "".join(f'<span>{esc(n)}</span>' for n in opp_names)
+                rows += (f'<details class="mf-det"><summary class="mf-row">'
+                         f'<div class="mf-l"><b class="tnum">{fmt(val)}</b> {lab} <span class="mf-see">🎯 ver</span></div>'
+                         f'<div class="mf-bar"><div class="mf-fill" style="width:{w}%"></div></div>{conv}</summary>'
+                         f'<div class="mf-deals">{deals}</div></details>')
+            else:
+                rows += (f'<div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(val)}</b> {lab}</div>'
+                         f'<div class="mf-bar"><div class="mf-fill" style="width:{w}%"></div></div>{conv}</div>')
         return rows
+    # Nombres de oportunidades por vía (negocios reales con deal)
+    _inb_opp_names = sorted({nm for items in ex.get("deals_by_chan", {}).values() for nm, _ in items}, key=str.lower)
+    _out_opp_names = sorted({nm for items in ex.get("deals_by_chan_out", {}).values() for nm, _ in items}, key=str.lower)
+    _brain_opp_names = sorted(set(ex.get("brain_opp_names", [])), key=str.lower)
     # Oportunidad = negocios reales con deal (por vía); Cliente = cuentas de cliente por fuente
     inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", mx_in_sql), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
     out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", ob["sql"]), ("Oportunidad (negocio)", opp_out_real), ("Cliente", ex.get("cli_split",{}).get("outbound",0))]
-    inb_fn = mini_funnel(inb_st); out_fn = mini_funnel(out_st)
+    inb_fn = mini_funnel(inb_st, _inb_opp_names); out_fn = mini_funnel(out_st, _out_opp_names)
 
     # ---------- 2 · EVOLUCIÓN (4 gráficos con total por mes) ----------
     _imp_note = ('<br>⚠️ El total infla porque cuenta por <b>fecha de creación</b>, no por evolución real: ha habido '
@@ -3462,10 +3482,10 @@ def render_exec(d):
         insights.append(("", f'El contenido que más leads de consideración genera es <b>{esc(content_rows[0][0])}</b> ({content_rows[0][1]}).'))
     grow = max(tr.items(), key=lambda x: x[1].get("delta", 0))
     if grow[1].get("delta", 0) > 0:
-        insights.append(("", f'Tendencia al alza en <b>{grow[0]}</b>: +{grow[1]["delta"]} en los últimos 7 días vs los 7 previos.'))
+        insights.append(("", f'Tendencia al alza en <b>{grow[0]}</b>: +{grow[1]["delta"]} en los últimos 30 días vs los 30 previos.'))
     drop = min(tr.items(), key=lambda x: x[1].get("delta", 0))
     if drop[1].get("delta", 0) < 0:
-        insights.append(("bad", f'Atención: <b>{drop[0]}</b> baja {drop[1]["delta"]} en los últimos 7 días respecto a los 7 previos.'))
+        insights.append(("bad", f'Atención: <b>{drop[0]}</b> baja {drop[1]["delta"]} en los últimos 30 días respecto a los 30 previos.'))
     insights = insights[:5]
     ins_html = "".join(f'<div class="i {c}"><span class="dot"></span><p>{txt}</p></div>' for c, txt in insights) \
         or '<p class="sd">Sin señales suficientes para generar insights hoy.</p>'
@@ -3666,6 +3686,7 @@ def render_exec(d):
         <div class="cat-body"><span class="src-chip br">🧠 Brain</span></div></div>
     </div>
     El número grande es el total de contactos; debajo, <b>inb</b> (inbound) y <b>out</b> (outbound). En Oportunidades el número grande es <b>volumen de contactos</b> y el nº de <b>empresas / negocios</b> va debajo; en Clientes se muestran las <b>cuentas activas</b> del pipeline «Clientes».</div>
+  <div class="kg-trendlab">📈 Las flechas de cada KPI comparan los <b>últimos 30 días</b> con los <b>30 anteriores</b> (tendencia del <b>último mes vs el mes previo</b>, aunque el mes en curso no haya terminado).</div>
   <div class="kg">{kpi_html}</div>
   <div style="height:26px"></div>
   <div class="rb-title">📊 Tasas de conversión del embudo <span>· todas sobre contactos, comparable etapa a etapa · ver nota *</span></div>
@@ -3703,7 +3724,7 @@ def render_exec(d):
       <div class="io-h">🧠 Pipeline de Brain <span class="io-tot tnum">{fmt(brain_ct)}<small>contactos</small></span></div>
       <div class="mf">
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(brain_ct)}</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
-        <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidad (negocio)</div><div class="mf-bar"><div class="mf-fill" style="width:{max(5, round(ex.get("brain_open",0)/(brain_ct or 1)*100))}%"></div></div><span class="mf-c">{pv(ex.get("brain_open",0), brain_ct or 1)}</span></div>
+        <details class="mf-det"><summary class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidad (negocio) <span class="mf-see">🎯 ver</span></div><div class="mf-bar"><div class="mf-fill" style="width:{max(5, round(ex.get("brain_open",0)/(brain_ct or 1)*100))}%"></div></div><span class="mf-c">{pv(ex.get("brain_open",0), brain_ct or 1)}</span></summary><div class="mf-deals">{"".join(f'<span>{esc(n)}</span>' for n in _brain_opp_names) or "—"}</div></details>
       </div>
       <div class="pend" style="margin-top:12px">⏳ Embudo intermedio de <b>Brain</b> (lead→MQL→SQL) pendiente de conectar; hoy se ven contactos y oportunidades.</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("brain_value",0)))) if ex.get("brain_value") else "— (importes sin cargar)"}</span></div>
