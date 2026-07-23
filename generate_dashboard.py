@@ -1270,6 +1270,12 @@ def main():
     ch_reun  = series(deals, lambda x: x["stage"] in DEMO_PLUS)           # deals que alcanzaron demo+
     ch_opp   = series(hist, lambda c: c["lc"] == "opportunity", compkey)  # empresas oportunidad
     ch_cli   = series(hist, lambda c: c["lc"] == "customer", compkey)     # empresas cliente
+    # Series de TODAS las fuentes (inbound + outbound + importaciones) para los gráficos evolutivos
+    _hist_all = hist + hist_out
+    ch_mql_all = series(_hist_all, lambda c: rank(c["lc"]) >= 2)
+    ch_sql_all = series(_hist_all, lambda c: rank(c["lc"]) >= 3)
+    ch_opp_all = series(_hist_all, lambda c: rank(c["lc"]) >= 4, compkey)
+    ch_cli_all = series(_hist_all, lambda c: c["lc"] == "customer", compkey)
 
     def trend7(daily_inc):
         """Tendencia: suma últimos 30 días vs los 30 previos (comparativa mensual). dir + delta.
@@ -1321,10 +1327,11 @@ def main():
     # Comparativa semanal: alinear MQL/SQL con el dato mostrado (de facto / etapa consultoría)
     trends["mql"] = trend7(ch_mqlc[1])
     trends["sql"] = trend7(ch_sqls[1])
-    exec_extra["svg_mql_m"] = svg_exec_month(*ch_mqlc, labels, "#57e08a")
-    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql, labels, "#f5b544")   # SQL alcanzados (rank>=3) · crece todo el año
-    exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp, labels, "#5bc8f2")
-    exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli, labels, "#c084fc")
+    # Gráficos evolutivos: TODAS las fuentes (inbound + outbound + importaciones)
+    exec_extra["svg_mql_m"] = svg_exec_month(*ch_mql_all, labels, "#57e08a")
+    exec_extra["svg_sql_m"] = svg_exec_month(*ch_sql_all, labels, "#f5b544")
+    exec_extra["svg_opp_m"] = svg_exec_month(*ch_opp_all, labels, "#5bc8f2")
+    exec_extra["svg_cli_m"] = svg_exec_month(*ch_cli_all, labels, "#c084fc")
     # Nota de pico estacional: si un mes supera claramente la mediana, ¿de qué canal vino?
     from collections import Counter as _Ctr
     def spike_note(pred, keyf=None, recs=None):
@@ -1366,12 +1373,11 @@ def main():
             return (f'📈 <b>Pico en {mes}</b> (+{n}, ~{round(n/med,1)}× la media), sobre todo por '
                     f'<b>{esc(ch)}</b> ({round(cn/n*100)}%).')
         return "📈 Crecimiento sostenido, sin picos marcados."
-    exec_extra["note_mql"] = spike_note(lambda c: not is_free(c) and rank(c["lc"]) >= 1
-                                        and classify_origin(c["conv"], c["webinar"]) in CONTENT_ORIGINS)
-    # SQL y Oportunidades: incluir también outbound/importaciones (el pico may→jun viene de ahí)
-    exec_extra["note_sql"] = spike_note(lambda c: rank(c["lc"]) >= 3, recs=hist + hist_out)
-    exec_extra["note_opp"] = spike_note(lambda c: rank(c["lc"]) >= 4, compkey, recs=hist + hist_out)
-    exec_extra["note_cli"] = spike_note(lambda c: c["lc"] == "customer", compkey)
+    # Notas de pico: TODAS las fuentes, coherentes con las líneas de los gráficos
+    exec_extra["note_mql"] = spike_note(lambda c: rank(c["lc"]) >= 2, recs=_hist_all)
+    exec_extra["note_sql"] = spike_note(lambda c: rank(c["lc"]) >= 3, recs=_hist_all)
+    exec_extra["note_opp"] = spike_note(lambda c: rank(c["lc"]) >= 4, compkey, recs=_hist_all)
+    exec_extra["note_cli"] = spike_note(lambda c: c["lc"] == "customer", compkey, recs=_hist_all)
     # Calidad del dato (sobre contactos desde 1 ene): email corporativo, teléfono, empresa
     FREE_MAIL = {"gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "yahoo.es", "icloud.com",
                  "hotmail.es", "live.com", "outlook.es", "protonmail.com", "gmx.com", "aol.com",
@@ -3737,7 +3743,7 @@ def render_exec(d):
 <section>
   <div class="q">03 · ¿Estamos creciendo?</div>
   <h2 class="sh">Evolución acumulada</h2>
-  <div class="sd">Crecimiento día a día <b style="color:var(--brand)">desde el 1 de enero</b>. Sobre cada línea, el total acumulado al cierre de cada mes y, más pequeño, lo generado ese mes.</div>
+  <div class="sd">Crecimiento día a día <b style="color:var(--brand)">desde el 1 de enero</b>, de <b>todas las fuentes</b> (inbound + outbound + importaciones). Sobre cada línea, el total acumulado al cierre de cada mes y, más pequeño, lo generado ese mes. Bajo cada gráfico se identifica el <b>pico más significativo</b> y de qué fuente viene.</div>
   <div class="cg">{charts_html}</div>
   <div class="note">⚠️ <b>Por qué el total del gráfico no coincide con el KPI:</b> estos evolutivos cuentan contactos que <b>alcanzaron</b> cada etapa por su fecha de creación (<b>generación acumulada</b>), no el estado actual — si un contacto avanzó de etapa, sigue contando aquí. El KPI de arriba muestra el <b>estado a día de hoy</b>. Por eso difieren.
   <br><br>🔎 <b>Dos picos revisados:</b> el de <b>MQL en junio</b> viene sobre todo de fuente <b>OFFLINE / importación</b> (etiqueta «Otros»), no de un canal inbound real. El de <b>Oportunidades en marzo (+50)</b> son contactos <b>marcados como «oportunidad» sin negocio (deal) asociado</b> — importación/automatismo, no oportunidades reales del pipeline (conviene limpiarlos).</div>
