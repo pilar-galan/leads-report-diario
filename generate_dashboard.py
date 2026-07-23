@@ -834,6 +834,8 @@ def main():
     reun_pipe = {}        # reuniones VIVAS en el pipeline de ventas, por etapa (a día de hoy, cualquier fuente)
     exec_opp = []         # oportunidades abiertas de INBOUND en el pipeline de ventas (sin filtro de fecha)
     exec_opp_out = []     # oportunidades abiertas OUTBOUND (fuentes no-inbound) en el pipeline de ventas
+    chan_deals_in = []    # negocios abiertos INBOUND por canal y fecha (para la matriz mensual): {created, chl, name}
+    chan_deals_out = []   # negocios abiertos OUTBOUND por canal y fecha (para la matriz mensual): {created, chl, name}
     opp_ct_inb = 0; opp_ct_out = 0   # contactos con negocio asociado (ventas), por vía
     opp_neg_out = 0                  # nº de negocios outbound reales (excluye importaciones/freemium)
     _EXC_STG_PIPE = ("freemium", "onboarding", "cliente", "customer", "ganad", "won", "post", "daily", "descart", "perdid", "lost")
@@ -900,6 +902,7 @@ def main():
                 _ic, _lb = classify_channel(src, d1)[1], classify_channel(src, d1)[0]
                 exec_opp.append({"name": name, "stage_label": _sl, "amount": _amt, "channel": _lb, "icon": _ic})
                 opp_ct_inb += _nac_d
+                chan_deals_in.append({"created": created, "chl": _lb, "name": name})
             else:
                 out_value += _amt   # valor de oportunidades outbound (no-inbound) en ventas
                 # Clasificar la fuente outbound del negocio (misma lógica que la matriz outbound)
@@ -910,6 +913,12 @@ def main():
                 elif not _os:                 _olb = "Comercial / prospección"
                 else:                          _olb = classify_channel(src, d1)[0]
                 exec_opp_out.append({"name": name, "stage_label": _sl, "channel": _olb})
+                # Etiqueta de canal para la matriz mensual (misma lógica que _ochl, sin «Integración de la app»)
+                if is_import(src, d1):        _mlb = "Importaciones"
+                elif _os == "OFFLINE":        _mlb = "Offline / manual"
+                elif not _os:                 _mlb = "Comercial / prospección"
+                else:                          _mlb = classify_channel(src, d1)[0]
+                chan_deals_out.append({"created": created, "chl": _mlb, "name": name})
                 # Oportunidades REALES de outbound = campañas/prospección (excluye importaciones directas y freemium)
                 if not is_import(src, d1) and _os != "INTEGRATION":
                     opp_ct_out += _nac_d
@@ -1484,14 +1493,37 @@ def main():
                 # se quedaran en «lead» por no haberse etiquetado. Solo sube leads, no baja etapas altas.
                 if c.get("web_asis") and r < 2:
                     r = 2
-                if r >= 4 and c.get("deals", 0) > 0:
-                    e["o"] += 1; opp_list.append((lbl, _cname(c)))
-                elif r >= 3: e["s"] += 1
+                # Buckets de CONTACTOS por etapa alcanzada (los de etapa oportunidad cuentan como SQL;
+                # el volumen de oportunidad se mide aparte, sobre NEGOCIOS/deals, no sobre contactos).
+                if r >= 3: e["s"] += 1
                 elif r == 2: e["m"] += 1
                 else: e["l"] += 1   # r<=1: lead o contacto en bruto sin etapa registrada → cuenta como lead
         _acc(hist_nf, _chl)          # inbound
         inb_labels = set(dd.keys())
         _acc(hist_out_fun, _ochl)    # outbound
+        # ── Oportunidades = NEGOCIOS (deals) abiertos por canal, creados en la ventana del mes ──
+        # (no contactos en etapa oportunidad). Inbound → canales inbound; outbound → canales outbound.
+        def _in_win(dt):
+            return bool(dt) and dt <= T and (not since or dt >= since)
+        deal_o_in = {}; deal_o_out = {}
+        for _d in chan_deals_in:
+            if _in_win(_d["created"]):
+                deal_o_in.setdefault(_d["chl"], []).append(_d["name"])
+        for _d in chan_deals_out:
+            if _in_win(_d["created"]):
+                deal_o_out.setdefault(_d["chl"], []).append(_d["name"])
+        # Asegurar fila para canales con negocios aunque no tengan contactos nuevos ese mes
+        for _lbl in deal_o_in:
+            dd.setdefault(_lbl, {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0}); inb_labels.add(_lbl)
+        for _lbl in deal_o_out:
+            if _lbl not in inb_labels:
+                dd.setdefault(_lbl, {"c": 0, "l": 0, "m": 0, "s": 0, "o": 0})
+        # Asignar el volumen de negocios a cada fila y construir la lista de oportunidades (nombre del negocio)
+        for _lbl, _e in dd.items():
+            _names = deal_o_in.get(_lbl, []) if _lbl in inb_labels else deal_o_out.get(_lbl, [])
+            _e["o"] = len(_names)
+            for _nm in _names:
+                opp_list.append((_lbl, _nm))
         # Brain (relaciones estratégicas): contactos y oportunidad real por fecha de creación del negocio
         def _bwin(r):
             return r["created"] and r["created"] <= T and (not since or r["created"] >= since)
@@ -3142,7 +3174,7 @@ def render_exec(d):
             onames = opp_by_lbl.get(lbl, [])
             _oarrow = _mom(e["o"], pe["o"]) if pe is not None else ''
             if e["o"] > 0 and onames:
-                o_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{fmt(e["o"])}</span>'
+                o_cell = (f'<div class="mx-cell op-clk"><span class="v tnum">{fmt(e["o"])}</span>{_oarrow}'
                           f'<span class="emp">🎯 ver ▾</span></div>')
             else:
                 o_cell = _mcell(e["o"], pe, "o")
