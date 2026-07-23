@@ -3131,7 +3131,7 @@ def render_exec(d):
     charts = [
         ("MQL", ex.get("cum_mql_m", mql_d), ex["svg_mql_m"], ex.get("note_mql", "")),
         ("SQL", ex.get("cum_sql_m", ex.get("sql_stage_total", cum["sql"])), ex["svg_sql_m"], ex.get("note_sql", "") + '<br>ℹ️ Etapa <b>exacta</b> SQL por mes de creación (mismo criterio que el KPI). Los meses antiguos salen a <b>0</b> porque esos contactos ya <b>avanzaron</b> a oportunidad/cliente o se descartaron: hoy no están en etapa SQL. El acumulado (total) coincide con el KPI de arriba.'),
-        ("Oportunidades", ex.get("cum_opp_m", opp_real), ex["svg_opp_m"], '📈 <b>Negocios (deals) abiertos</b> creados cada mes en el pipeline, por todas las fuentes. El acumulado coincide con el KPI de oportunidades (negocios).'),
+        ("Oportunidades", ex.get("cum_opp_m", opp_real), ex["svg_opp_m"], '📈 <b>Negocios (deals) creados cada mes</b> en el pipeline, por todas las fuentes (ventas + Brain).<br>⚠️ Antes se colaban <b>muchas importaciones</b> en la etapa de ciclo de vida «oportunidad» que inflaban el dato. Aquí contamos <b>solo los que tienen un negocio asociado</b> en el pipeline de ventas o de Brain y están <b>abiertos</b> (excluye cerrados/perdidos). Por eso el <b>acumulado cuadra</b> con el KPI de oportunidades y con los pipelines inbound/outbound/brain.'),
         ("Clientes", ex.get("cum_cli_m", cli_e), ex["svg_cli_m"], ex.get("note_cli", "")),
     ]
     charts_html = "".join(
