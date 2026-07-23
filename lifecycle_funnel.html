@@ -467,7 +467,12 @@
   .pillar.tot .pillar-num{color:var(--red);}
   .pillar.tot h3{color:var(--red);}
   .pillar.tot .tlist li::before{background:var(--red);}
-  .stage.dim{opacity:.72;}
+  .stage.dim{opacity:.6;}
+  /* Canales de entrada: diferenciados de las etapas y con aire respecto a Lead */
+  .entry{gap:clamp(16px,2vw,22px);margin-bottom:clamp(22px,3vw,32px);}
+  .lane{border-width:1.5px;box-shadow:var(--shadow);}
+  .lane.inbound{border-color:color-mix(in srgb,var(--green) 65%,var(--line));}
+  .lane.outbound{border-color:color-mix(in srgb,var(--salmon) 60%,var(--line));}
   .lead-plan{display:flex;gap:15px;align-items:flex-start;background:var(--surface-2);border:1px dashed color-mix(in srgb,var(--green) 40%,var(--line));border-radius:16px;padding:18px 20px;margin-top:clamp(18px,2.5vw,26px);}
   .lead-plan .lpi{flex:0 0 auto;width:42px;height:42px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;}
   .lead-plan .lpi svg{width:22px;height:22px;}
