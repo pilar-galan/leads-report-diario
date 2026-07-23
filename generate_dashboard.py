@@ -3991,8 +3991,8 @@ def render_exec(d):
 
 <div class="divbanner">
   <div class="db-l">🔎</div>
-  <div><div class="db-t">Estado y desglose de contactos · <span>Inbound</span></div>
-  <div class="db-s">A partir de aquí, el detalle del embudo de inbound marketing: calidad del dato, origen, contenido, SQL, pipeline y cierre.</div></div>
+  <div><div class="db-t">Estado y desglose de contactos · <span>CRM</span></div>
+  <div class="db-s">A partir de aquí, el detalle del embudo: calidad del dato, origen, contenido, SQL, pipeline y cierre — con <b>inbound y outbound</b>.</div></div>
 </div>
 
 <section>
