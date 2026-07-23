@@ -4166,11 +4166,11 @@ def render_exec(d):
 """
     # Puerta de contraseña (ligera, del lado cliente) para compartir el informe
     pw_gate = (
-        '<div id="pwg" style="position:fixed;inset:0;z-index:99999;background:#0a1712;display:flex;align-items:center;justify-content:center">'
-        '<div style="text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#e8f5ee;width:320px;max-width:88vw;padding:28px">'
+        '<div id="pwg" style="position:fixed;inset:0;z-index:99999;background:#0a1712;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box">'
+        '<div style="text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#e8f5ee;width:340px;max-width:100%;margin:auto;padding:32px 26px;background:#0f241b;border:1px solid #2b4a3c;border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.5)">'
         '<div style="font-size:34px;margin-bottom:6px">🔒</div>'
-        '<div style="font-size:17px;font-weight:800;margin-bottom:4px">Informe protegido</div>'
-        '<div style="font-size:12.5px;color:#8fb3a4;margin-bottom:18px">Introduce la contraseña para ver el dashboard.</div>'
+        '<div style="font-size:17px;font-weight:800;margin-bottom:6px">Informe protegido</div>'
+        '<div style="font-size:12.5px;color:#8fb3a4;margin-bottom:18px;line-height:1.5">Introduce la contraseña para ver el dashboard.</div>'
         '<input id="pwi" type="password" placeholder="Contraseña" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #2b4a3c;background:#0f241b;color:#e8f5ee;font-size:14px;outline:none">'
         '<button id="pwb" style="margin-top:12px;width:100%;padding:11px;border:none;border-radius:10px;background:#6ff0a2;color:#04120b;font-weight:800;font-size:14px;cursor:pointer">Entrar</button>'
         '<div id="pwe" style="display:none;color:#ff6b5b;font-size:12px;margin-top:10px">Contraseña incorrecta</div>'
