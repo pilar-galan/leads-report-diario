@@ -354,6 +354,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .agfdet{flex:1} .agfdet>summary{list-style:none;cursor:pointer;height:100%} .agfdet>summary::-webkit-details-marker{display:none}
 .agfinfo{display:inline-block;font-size:9px;font-weight:800;color:var(--sky);background:rgba(34,211,238,.14);border-radius:6px;padding:1px 6px;margin-top:3px}
 .agfpop{margin-top:8px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.55;text-align:left}
+.mailkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mk{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:9px 8px;text-align:center}
+.mk-v{font-size:19px;font-weight:900;color:var(--sky);line-height:1}
+.mk-l{font-size:9.5px;color:var(--mut);font-weight:700;margin-top:3px;line-height:1.3} .mk-l small{font-weight:600;opacity:.85}
+@media(max-width:520px){.mailkpis{grid-template-columns:1fr 1fr}}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -477,7 +482,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>23 Jul 2026 · 10:45</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>23 Jul 2026 · 10:48</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -766,7 +771,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
         <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">Flujo: <b>39</b> entraron → <b>18</b> tratados (46%) → <b>3</b> oportunidad (17% de tratados). 📞 17 tel. · 📅 1 agendadas.</div>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
-          <div class="emailbox"><div class="eb tnum">0</div><div style="font-size:12px;color:var(--ink2);margin-top:6px">contactos con &lt;3.000 consultas/mes (desde 9 jul)</div></div><ul class="elist" style="margin-top:14px"><li>Mail automático de <b>descalificación</b></li><li>Se añaden a <b>listas de HubSpot</b> para reevaluar</li><li>Reactivables si su volumen de consultas crece</li></ul>
+          <ul class="elist" style="margin-bottom:12px"><li>Los que <b>no cualifican</b> reciben un <b>mail automático de descalificación</b></li><li>Se añaden a <b>listas de HubSpot</b> para reevaluar si su volumen crece</li></ul><div class="mailkpis"><div class="mk"><div class="mk-v">75%</div><div class="mk-l">Apertura<br><small>6 únicas · 10 total</small></div></div><div class="mk"><div class="mk-v">25%</div><div class="mk-l">Clics<br><small>2 clics únicos</small></div></div><div class="mk"><div class="mk-v">33,3%</div><div class="mk-l">Clickthrough<br><small>clics / aperturas</small></div></div><div class="mk"><div class="mk-v">0%</div><div class="mk-l">Respuesta<br><small>0 respuestas</small></div></div></div><div class="sd" style="font-size:10.5px;color:var(--mut);margin-top:8px">Métricas del mail de descalificación · HubSpot · desde el 9 jul (excluyendo bots).</div>
         </div>
         <div class="note" style="margin-top:10px;font-size:11px"><b>🗓️ Actualización del workflow · 22 jul 2026:</b> a <b>Agustín</b> solo llegan los contactos que han <b>solicitado demo</b> y tienen <b>≥3.000 consultas/mes</b> o un <b>equipo de soporte de &gt;5 personas</b>. El resto se <b>descalifica automáticamente por mail</b>.</div>
       </div>
@@ -818,6 +823,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 10:45 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 10:48 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
