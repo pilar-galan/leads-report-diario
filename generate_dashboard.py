@@ -1326,7 +1326,11 @@ def main():
     ch_opp_all = series(_opp_deal_recs, lambda x: True)
     # Clientes = cuentas ACTIVAS del pipeline «Clientes» (empresa única), por fecha de creación de la cuenta
     # → cuadra con el KPI de clientes (no cuenta todos los contactos asociados a cada cliente).
-    ch_cli_all = series(cli_deal_recs, lambda x: True)
+    # Las cuentas creadas ANTES del inicio del gráfico (1 ene) se siembran en el primer punto,
+    # para que el acumulado del gráfico llegue al total real de clientes activos (no solo los de este año).
+    _cli_base = sum(1 for r in cli_deal_recs if r.get("created") and r["created"] < d0.isoformat())
+    _ch_cli_raw = series(cli_deal_recs, lambda x: True)
+    ch_cli_all = ([v + _cli_base for v in _ch_cli_raw[0]], _ch_cli_raw[1])
 
     # ── Ventana MES-HASTA-HOY (MTD): el mes en curso (1 → hoy) vs el mismo tramo del mes anterior ──
     # (coherente con la matriz «mes actual» y los gráficos, que también son de julio natural)
