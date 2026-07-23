@@ -325,10 +325,10 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
-.sqlvl3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.sqlvl3{display:grid;grid-template-columns:.82fr .82fr 1.55fr;gap:14px;align-items:start}
 .lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
 .lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
-.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28);grid-column:1/-1}
+.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
 .lvl .ph{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 .lvl-subh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin:16px 0 4px}
 .vflow{display:flex;flex-direction:column;gap:5px;margin-top:6px}
@@ -344,6 +344,16 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 @media(max-width:640px){.vfork{grid-template-columns:1fr}}
 .vdet>summary{list-style:none;cursor:pointer} .vdet>summary::-webkit-details-marker{display:none}
 .vdet>summary .vchev{margin-left:auto;color:var(--bad);font-weight:800;font-size:10px} .vdet[open]>summary .vchev::after{content:" ▾"}
+/* Embudo superior ≥3.000: entrados → tratados */
+.agftop{display:flex;align-items:stretch;gap:8px;margin:6px 0 10px}
+.agfstep{flex:1;background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:11px 13px;text-align:center}
+.agfstep b{display:block;font-size:24px;font-weight:900;color:var(--ink);line-height:1} .agfstep span{font-size:11px;color:var(--mut);display:block;margin-top:4px;line-height:1.3}
+.agfstep.ok b{color:var(--sky)}
+.agfarr{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);font-weight:800;font-size:16px;min-width:44px}
+.agfarr span{font-size:11px;color:var(--sky);font-weight:800}
+.agfdet{flex:1} .agfdet>summary{list-style:none;cursor:pointer;height:100%} .agfdet>summary::-webkit-details-marker{display:none}
+.agfinfo{display:inline-block;font-size:9px;font-weight:800;color:var(--sky);background:rgba(34,211,238,.14);border-radius:6px;padding:1px 6px;margin-top:3px}
+.agfpop{margin-top:8px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.55;text-align:left}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -467,7 +477,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>23 Jul 2026 · 10:40</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>23 Jul 2026 · 10:45</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -730,23 +740,30 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
       </summary>
       <div class="lvl-body">
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
-        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín · <b>31</b> gestionados (base 100%)</div>
+        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
+        <div class="agftop">
+          <div class="agfstep"><b>39</b><span>SQL entraron<br><small>≥3.000 · al mail</small></span></div>
+          <div class="agfarr">→ <span>46%</span></div>
+          <details class="agfdet"><summary class="agfstep ok"><b>18</b><span>tratados <span class="agfinfo">ⓘ ¿y los 21 restantes?</span></span></summary>
+            <div class="agfpop">De los <b>39</b> que entraron, <b>21</b> aún <b>no se han tratado</b>: sin respuesta o pendientes de contacto. La bifurcación de abajo se calcula sobre los <b>18 tratados</b> (base 100%).</div>
+          </details>
+        </div>
         <div class="vfork">
           <div class="vfork-col left">
-            <div class="vfork-tag ok">✅ En proceso de contacto · <b>58%</b></div>
-            <div class="vstep"><b>18</b><span>contactados · aún sin oportunidad</span></div>
-            <div class="varr">↓ <span>17% conversión</span></div>
+            <div class="vfork-tag ok">✅ Gestionados · <b>18</b> (100% de tratados)</div>
+            <div class="vstep"><b>2</b><span>en proceso · 11% de los tratados</span></div>
+            <div class="varr">↓ <span>17% → oportunidad</span></div>
             <details class="vdet vopp"><summary class="vstep ok"><b>🎯 3</b><span>oportunidades · 17% de los gestionados</span><span class="vchev">▶ ver</span></summary><div class="agopp-list"><div class="agopp-item"><span class="agopp-nm">Skydive Spain</span><span class="agopp-st">🔍 Google Ads · NEGOCIACION</span></div><div class="agopp-item"><span class="agopp-nm">Youtax</span><span class="agopp-st">📣 Social Ads · DISCOVERY &amp; LEAD QUALIFICATION</span></div><div class="agopp-item"><span class="agopp-nm">Ole energia</span><span class="agopp-st">📣 Social Ads · DISCOVERY &amp; LEAD QUALIFICATION</span></div></div></details>
           </div>
           <div class="vfork-col right">
-            <div class="vfork-tag bad">🔴 Descartados · <b>42%</b></div>
+            <div class="vfork-tag bad">🔴 Descartados · <b>72%</b> de los tratados</div>
             <details class="vdet">
               <summary class="vstep bad"><b>13</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
               <div class="razbox" style="margin-top:6px"><div class="mrow"><span class="ml">Volumen insuficiente (&lt;3.000 consultas/mes)</span><span class="mn">25 <small>78%</small></span></div><div class="mrow"><span class="ml">Caso de uso / no target</span><span class="mn">2 <small>6%</small></span></div><div class="mrow"><span class="ml">Lead accidental / no recuerda</span><span class="mn">2 <small>6%</small></span></div><div class="mrow"><span class="ml">NO responde</span><span class="mn">2 <small>6%</small></span></div><div class="mrow"><span class="ml">Datos Falsos</span><span class="mn">1 <small>3%</small></span></div></div>
             </details>
           </div>
         </div>
-        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 17 por teléfono · 📅 1 agendadas · los porcentajes de gestionados y descartados son sobre su suma (31)</div>
+        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">Flujo: <b>39</b> entraron → <b>18</b> tratados (46%) → <b>3</b> oportunidad (17% de tratados). 📞 17 tel. · 📅 1 agendadas.</div>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           <div class="emailbox"><div class="eb tnum">0</div><div style="font-size:12px;color:var(--ink2);margin-top:6px">contactos con &lt;3.000 consultas/mes (desde 9 jul)</div></div><ul class="elist" style="margin-top:14px"><li>Mail automático de <b>descalificación</b></li><li>Se añaden a <b>listas de HubSpot</b> para reevaluar</li><li>Reactivables si su volumen de consultas crece</li></ul>
@@ -801,6 +818,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 10:40 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 10:45 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
