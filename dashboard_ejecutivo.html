@@ -559,7 +559,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   </div>
   <h1>Dashboard <span>ejecutivo</span> global</h1>
   <p class="hero-1l">Qué entra, cómo evoluciona y dónde se pierde negocio. Datos en vivo desde HubSpot; embudo acumulado desde el 1 de enero de 2026.</p>
-  <div class="upd">Última actualización: <b>23 Jul 2026 · 22:01</b> (hora España) · se refresca automáticamente</div>
+  <div class="upd">Última actualización: <b>23 Jul 2026 · 22:04</b> (hora España) · se refresca automáticamente</div>
 </header>
 
 <section style="padding-top:30px;margin-top:16px">
@@ -711,7 +711,7 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
       document.getElementById('cacLtv').textContent=money(ltv)+' €';
       document.querySelectorAll('#cacTbody tr[data-cost]').forEach(function(tr){
         var b=tr.querySelector('.cac-badge'); if(!b)return;
-        var c=+tr.getAttribute('data-cost'), cliCell=tr.children[3], cli=parseInt((cliCell?cliCell.textContent:'0').replace(/\D/g,''))||0;
+        var c=+tr.getAttribute('data-cost'), cliCell=tr.children[4], cli=parseInt((cliCell?cliCell.textContent:'0').replace(/\D/g,''))||0;
         if(!c){b.textContent='—';b.className='cac-badge';return;}
         var cpc = cli>0 ? c/cli : Infinity;   // coste por cliente
         if(cli===0){b.textContent='sin cliente';b.className='cac-badge warn';}
@@ -769,14 +769,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
         <li><b>Nurturing</b> con contenido de GuruSup (ebooks, webinars, artículos) en <b>secuencias</b>.</li>
         <li>Objetivo: <b>identificar y generar la necesidad</b> según lo que consume cada contacto.</li>
         <li>Cuando encaja con el <b>perfil target</b>, salta <b>alerta a ventas</b> con la necesidad detectada.</li>
-      </ul>
-    </div>
-    <div class="ls-col b">
-      <div class="ls-h">🎯 Scoring · <span style="color:var(--warn)">en implementación</span></div>
-      <ul class="ls-list">
-        <li><b>Lead score</b> (interés/engagement) + <b>Fit score</b> (encaje con el cliente ideal).</li>
-        <li>Cada acción suma puntos: <b>abrir un mail</b>, <b>visitar la web</b>, <b>asistir a un webinar</b>…</li>
-        <li>Al llegar al <b>umbral</b>, el contacto <b>avanza de etapa</b> con criterio y de forma trazable.</li>
       </ul>
     </div>
   </div>
@@ -911,6 +903,6 @@ footer{padding:34px 0 56px;text-align:center;color:var(--mut);font-size:12px;bor
   <div class="note">Churn real medido por <b>cuenta de cliente</b> en el pipeline «Clientes» (etapas Churned + Dormidos/Inactivos). La <b>tasa de churn</b> = cuentas perdidas / (perdidas + activas). La etapa «Churn» del <i>ciclo de vida del contacto</i> casi no se usa en el CRM (solo la tienen contactos sueltos), por eso el churn fiable es el de cuentas del pipeline.</div>
 </section>
 
-<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 22:01 (hora España) · documento confidencial</footer>
+<footer>GuruSup · Dashboard ejecutivo · datos HubSpot en vivo · 23 Jul 2026 · 22:04 (hora España) · documento confidencial</footer>
 </div>
 </body></html>
