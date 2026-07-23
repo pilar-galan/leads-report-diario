@@ -1808,7 +1808,8 @@ def main():
     try:
         for c in fetch_all("contacts",
                            [{"propertyName": "razon_descarte_sql", "operator": "HAS_PROPERTY"},
-                            {"propertyName": "createdate", "operator": "GTE", "value": chart_iso}],
+                            {"propertyName": "createdate", "operator": "GTE", "value": chart_iso},
+                            {"propertyName": "createdate", "operator": "LT", "value": ag_iso}],
                            ["razon_descarte_sql"]):
             add_reason(c["properties"].get("razon_descarte_sql"))
     except Exception as e:
@@ -1816,11 +1817,13 @@ def main():
     try:
         for dl in fetch_all("deals",
                             [{"propertyName": "motivo_de_descalificacion", "operator": "HAS_PROPERTY"},
-                             {"propertyName": "createdate", "operator": "GTE", "value": chart_iso}],
+                             {"propertyName": "createdate", "operator": "GTE", "value": chart_iso},
+                             {"propertyName": "createdate", "operator": "LT", "value": ag_iso}],
                             ["motivo_de_descalificacion"]):
             add_reason(dl["properties"].get("motivo_de_descalificacion"))
     except Exception as e:
         print(f"  motivo_de_descalificacion error: {e}")
+    # Fase 1 = seguimiento MANUAL (contactos creados antes del 9 jul, cuando arrancó la automatización)
     descarte = sorted(drz.items(), key=lambda x: -x[1])
 
     # ── Pipeline (deals abiertos, solo marketing) ──
