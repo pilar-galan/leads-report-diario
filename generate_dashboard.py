@@ -1398,7 +1398,7 @@ def main():
     exec_extra["sql_stage_in"] = sum(1 for c in hist if c["lc"] == "salesqualifiedlead")
     exec_extra["sql_stage_out"] = sum(1 for c in hist_out if c["lc"] == "salesqualifiedlead")
     # Comparativa semanal: alinear MQL/SQL con el dato mostrado (de facto / etapa consultoría)
-    trends["mql"] = trend7(ch_mqlc[1])
+    trends["mql"] = trend7(ch_mql_all[1])   # alineado con el KPI/gráfico (alcanzaron MQL, todas las fuentes)
     trends["sql"] = trend7(ch_sql_stage[1])
     # Gráficos evolutivos: TODAS las fuentes (inbound + outbound + importaciones)
     exec_extra["svg_mql_m"] = svg_exec_month(*ch_mql_all, labels, "#57e08a")
@@ -3006,7 +3006,11 @@ def render_exec(d):
     g_lead = cum["lead"] + ob["lead"]
     # SQL inbound coherente con la matriz/embudo (sin freemium): usa el total por canal
     mx_in_sql = sum(e["sql"] for _, e in ex.get("chan_matrix", [])) or sql_d
-    g_mql = mql_d + ob["mql"]
+    # MQL = «alcanzaron la etapa MQL» (rank>=MQL, todas las fuentes) → mismo dato que el gráfico evolutivo,
+    # para que KPI, gráfico y pipelines cuadren. (Antes el KPI usaba «contenido consumido», que difería.)
+    g_mql = ex.get("cum_mql_m", mql_d + ob["mql"])
+    _mql_out = ob["mql"]                       # outbound alcanzó MQL (rank>=2)
+    _mql_in = max(0, g_mql - _mql_out)         # inbound alcanzó MQL
     # SQL «alcanzado» (rank>=SQL, incluye precualif./oport./cliente): SOLO para tasas de conversión de embudo
     g_sql_reached = mx_in_sql + ob["sql"]
     # SQL visible (KPI headline + tendencia) = etapa EXACTA «salesqualifiedlead», todas las fuentes
@@ -3063,7 +3067,7 @@ def render_exec(d):
         f'<div class="kt">{arrow(tr["contactos"])}</div>'
         f'<div class="kt" style="margin-top:5px"><span style="color:var(--mut)">inb {fmt(total_nf)} · out {fmt(ob["contactos"])} · 🧠 brain {fmt(brain_ct)}</span></div></div>' +
         kpi_io("Leads", g_lead, tr["leads"], cum["lead"], ob["lead"]) +
-        kpi_io("MQL", g_mql, tr["mql"], mql_d, ob["mql"]) +
+        kpi_io("MQL", g_mql, tr["mql"], _mql_in, _mql_out) +
         kpi_io("SQL", g_sql, tr["sql"], _sql_in_disp, _sql_out_disp))
     # ── 2ª fila (3 tarjetas a ancho completo) ──
     kpi_html2 = (
@@ -3124,7 +3128,7 @@ def render_exec(d):
     _brain_opp_names = sorted(set(ex.get("brain_opp_names", [])), key=str.lower)
     # Oportunidad = negocios reales con deal (por vía); Cliente = cuentas de cliente por fuente
     # SQL en los embudos = etapa EXACTA salesqualifiedlead (inbound + outbound suman el KPI principal)
-    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", mql_d), ("SQL", _sql_in_disp), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
+    inb_st = [("Contactos", total_nf), ("Leads", cum["lead"]), ("MQL", _mql_in), ("SQL", _sql_in_disp), ("Oportunidad (negocio)", opp_inb_real), ("Cliente", ex.get("cli_split",{}).get("inbound",0))]
     out_st = [("Contactos", ob["contactos"]), ("Leads", ob["lead"]), ("MQL", ob["mql"]), ("SQL", _sql_out_disp), ("Oportunidad (negocio)", opp_out_real), ("Cliente", ex.get("cli_split",{}).get("outbound",0))]
     inb_fn = mini_funnel(inb_st, _inb_opp_names); out_fn = mini_funnel(out_st, _out_opp_names)
 
