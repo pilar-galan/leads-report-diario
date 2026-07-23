@@ -2693,7 +2693,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
-.sqlvl3{display:grid;grid-template-columns:.82fr .82fr 1.55fr;gap:14px;align-items:start}
+.sqlvl3{display:flex;flex-direction:column;gap:14px}
 .lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
 .lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
 .lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
@@ -3919,7 +3919,7 @@ def render_exec(d):
   <div class="sd wide">Los <b>{fmt(sql_total)} SQL</b> en tres bloques: ① los de <b>paid media</b> (Agustín), ② los <b>descartados</b> y ③ la <b>precualificación automatizada desde el 9 jul</b>. <i>Pulsa cada columna para desplegar el detalle.</i></div>
 
   <div class="sqlvl3">
-    <details class="lvl" open>
+    <details class="lvl">
       <summary class="lvl-sum">
         <span class="lvl-badge b1">①</span>
         <span class="lvl-tit">Tratados por Agustín <small>· seguimiento de SQLs de paid media</small></span>
@@ -3932,7 +3932,7 @@ def render_exec(d):
       </div>
     </details>
 
-    <details class="lvl lvl-bad" open>
+    <details class="lvl lvl-bad">
       <summary class="lvl-sum">
         <span class="lvl-badge b2">②</span>
         <span class="lvl-tit">Descartados <small>· descualificados + razón</small></span>
