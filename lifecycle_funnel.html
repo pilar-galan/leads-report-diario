@@ -496,6 +496,8 @@
   /* Etapas foco (MQL/SQL): fondo destacado */
   .stage.focus{background:linear-gradient(180deg,var(--green-soft),var(--surface));border-color:color-mix(in srgb,var(--green) 32%,var(--line));box-shadow:var(--shadow);}
   .fl-prop{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;font-size:.82em;margin-left:6px;}
+  /* Separación entre el nombre de la etapa y su descripción */
+  .stage-head > div{display:flex;flex-direction:column;gap:4px;}
 </style>
 
 </head>
@@ -648,7 +650,7 @@
       </article>
 
       <!-- OPORTUNIDAD -->
-      <article class="stage">
+      <article class="stage focus">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span><div><span class="stage-name">Oportunidad</span><span class="stage-sub">Pipeline · negocio activo</span></div><span class="stage-step">04</span></div>
         <div class="stage-grid">
           <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Oportunidad comercial abierta: reuniones, seguimiento y propuesta.</span></div>
@@ -672,7 +674,7 @@
       </article>
 
       <!-- CLIENTE -->
-      <article class="stage">
+      <article class="stage focus">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M2.5 21c0-4.1 3.4-7.5 7.5-7.5"/><path d="M15 16l2 2 4-4"/></svg></span><div><span class="stage-name">Cliente</span><span class="stage-sub">Cliente activo</span></div><span class="stage-step">05</span></div>
         <div class="stage-grid">
           <div class="sf"><span class="sfl">Qué es</span><span class="sfv">Cliente activo.</span></div>
