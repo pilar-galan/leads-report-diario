@@ -467,6 +467,14 @@
   .pillar.tot .pillar-num{color:var(--red);}
   .pillar.tot h3{color:var(--red);}
   .pillar.tot .tlist li::before{background:var(--red);}
+  .stage.dim{opacity:.55;}
+  .lead-plan{display:flex;gap:15px;align-items:flex-start;background:var(--surface-2);border:1px dashed color-mix(in srgb,var(--green) 40%,var(--line));border-radius:16px;padding:18px 20px;margin-top:clamp(18px,2.5vw,26px);}
+  .lead-plan .lpi{flex:0 0 auto;width:42px;height:42px;border-radius:12px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;}
+  .lead-plan .lpi svg{width:22px;height:22px;}
+  .lead-plan h3{font-family:var(--font-display);font-weight:700;font-size:var(--step-1);display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 5px;}
+  .lead-plan .fut{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:100px;padding:3px 10px;font-family:var(--font-display);}
+  .lead-plan p{margin:0;color:var(--muted);font-size:var(--step-0);line-height:1.5;}
+  .lead-plan p b{color:var(--ink);}
 </style>
 
 </head>
@@ -477,7 +485,7 @@
   <a href="#proposito" data-label="Por qué existe"></a>
   <a href="#recorrido" data-label="El recorrido"></a>
   <a href="#aviso" data-label="Idea importante"></a>
-  <a href="#crm" data-label="Madurez vs CRM"></a>
+  <a href="#crm" data-label="Qué hacemos"></a>
   <a href="#principio" data-label="Principio"></a>
 </nav>
 
@@ -491,8 +499,8 @@
     <div class="hero-inner">
       <div class="verticals-pill"><span>Marketing</span><span>Ventas</span><span>Customer Success</span><span>Producto</span><span>Dirección</span></div>
       <h1>Lifecycle <span class="g">Funnel</span></h1>
-      <p class="hero-sub">La madurez del contacto, no su estado comercial.</p>
-      <p class="hero-kicker">Cómo gestionamos la madurez de un contacto desde que entra en GuruSup hasta convertirse en cliente.</p>
+      <p class="hero-sub">Dónde está cada contacto y qué hacer en cada momento.</p>
+      <p class="hero-kicker">Cómo evoluciona un contacto desde que entra en GuruSup hasta convertirse en cliente.</p>
     </div>
   </div>
 </header>
@@ -520,8 +528,8 @@
     </div>
 
     <div class="key" style="margin-top:clamp(20px,3vw,32px)">
-      <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0"/></svg></span>
-      <p>Idea clave: un contacto puede dejar de estar preparado para comprar, pero eso <b>no significa que haya perdido la madurez</b> que ya había adquirido.</p>
+      <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></span>
+      <p>A veces no es el momento: hoy quizá no tiene la necesidad, o no encaja con nosotros todavía. No pasa nada —lo importante es <b>tenerlo bien identificado</b>, porque puede serlo más adelante.</p>
     </div>
   </div>
 </section>
@@ -537,6 +545,11 @@
       <p class="sh-intro">El contacto entra por <strong>inbound</strong> u <strong>outbound</strong> y recorre un ciclo de vida donde cambian su <strong>intención</strong>, sus <strong>datos</strong> y nuestro <strong>objetivo</strong>.</p>
     </div>
 
+    <div class="key">
+      <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
+      <p>Hoy el foco es <b>MQL y SQL</b>: en vez de generar demanda desde cero, vamos directos a quienes <b>ya están investigando</b> (MQL) o <b>ya tienen el dolor</b> y nos ven como posible solución (SQL). Así impactamos de forma directa y aceleramos el proceso.</p>
+    </div>
+
     <div class="entry">
       <div class="lane inbound">
         <span class="li" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/></svg></span>
@@ -550,32 +563,30 @@
 
     <div class="funnel-note">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
-      <p>El <b>Lifecycle refleja la madurez</b> del contacto y avanza hacia delante. La <b>situación comercial</b> (si hoy cualifica o no) vive aparte, en propiedades del CRM. Aquí no marcamos descartes.</p>
+      <p>No siempre es el momento: un contacto puede no tener hoy la necesidad o el encaje con nosotros. El ciclo de vida marca <b>dónde está</b>; si hoy cualifica o no —y por qué— se guarda aparte, en el CRM. Aquí no marcamos descartes.</p>
     </div>
 
     <div class="stages">
 
       <!-- LEAD -->
-      <article class="stage">
+      <article class="stage dim">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><div><span class="stage-name">Lead</span><span class="stage-sub">Contacto nuevo</span></div><span class="stage-step">01</span></div>
         <div class="stage-grid">
           <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Aún nos faltan datos clave para entenderlo.</span></div>
           <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Identificar interés y empezar a conocerlo.</span></div>
           <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Pasa a MQL (vía workflow) al descargar contenido o asistir a un webinar.</span></div>
         </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg><p><b>Workflow Lead → MQL:</b> se activa con una descarga de contenido, un webinar o una acción de marketing con intención —confirmando que ha visto el contenido—. Una simple visita a la web o a redes no cuenta.</p></div>
         <div class="stage-extra">
           <p class="field-label">Datos que aún nos faltan (uno o varios)</p>
           <div class="chips"><span class="chip">Empresa</span><span class="chip">Volumen de consultas / mes</span><span class="chip">Tamaño del equipo de soporte</span><span class="chip">Sector</span><span class="chip">Email corporativo</span></div>
         </div>
-        <div class="stage-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M5 12H2"/><path d="M22 12h-3"/><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg><p><b>Si no cualifica:</b> permanece como Lead. Es una base clave para futuras estrategias de captación y nurturing.</p></div>
       </article>
 
       <!-- MQL -->
       <article class="stage">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg></span><div><span class="stage-name">MQL</span><span class="stage-sub">Marketing Qualified Lead</span></div><span class="stage-step">02</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Muestra interés por nuestros contenidos de marketing.</span></div>
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Ya está investigando: quiere más información y puede intuir una necesidad, aunque aún sin un dolor claro.</span></div>
           <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Educar, generar confianza y detectar potencial.</span></div>
           <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Secuencias de nurturing de menos a más contenido → cerrar reunión con Ventas.</span></div>
         </div>
@@ -593,7 +604,7 @@
       <article class="stage">
         <div class="stage-head"><span class="stage-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></span><div><span class="stage-name">SQL</span><span class="stage-sub">Sales Qualified Lead</span></div><span class="stage-step">03</span></div>
         <div class="stage-grid">
-          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Intención real de compra: identifica un dolor y nos ve como solución.</span></div>
+          <div class="sf"><span class="sfl">Qué representa</span><span class="sfv">Ya tiene el dolor identificado y nos ve como posible solución.</span></div>
           <div class="sf"><span class="sfl">Objetivo</span><span class="sfv">Validar que existe una oportunidad comercial.</span></div>
           <div class="sf"><span class="sfl">Cómo avanza</span><span class="sfv">Ventas valida el contacto y crea una Oportunidad.</span></div>
         </div>
@@ -618,7 +629,7 @@
             <span class="chip chip--no">Eligió competidor</span>
           </div>
         </div>
-        <div class="stage-note warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg><p>Mantiene la madurez adquirida: queda identificado por la razón de descarte y, según cuál sea, entra en un flujo de reactivación o queda descalificado.</p></div>
+        <div class="stage-note warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg><p>Queda identificado por la razón de descarte y, según cuál sea, entra en un flujo de reactivación o queda descalificado. Si más adelante cambia su situación, podemos retomarlo.</p></div>
       </article>
 
       <!-- OPORTUNIDAD -->
@@ -662,6 +673,14 @@
       </article>
 
     </div>
+
+    <div class="lead-plan">
+      <span class="lpi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg></span>
+      <div>
+        <h3>Con los leads que ya tenemos <span class="fut">No es foco de adquisición hoy</span></h3>
+        <p>Hoy <b>no atacamos la adquisición de leads</b>. A los leads actuales los enriquecemos con <b>nurturing vía workflows</b>: cuando descargan o consumen un contenido de marketing, pasan a <b>MQL</b> —porque ya han mostrado interés por un contenido—. Una simple visita a la web o a redes no cuenta.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -673,7 +692,7 @@
         <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>una idea importante</p>
         <h2>El Lifecycle no sirve para marcar descartes<span class="dot"></span></h2>
       </div>
-      <p class="sh-intro">El Lifecycle únicamente representa el <strong>nivel de madurez</strong> del contacto. La cualificación comercial se guarda en <strong>propiedades independientes del CRM</strong>.</p>
+      <p class="sh-intro">El ciclo de vida indica <strong>en qué punto está</strong> el contacto. Si hoy encaja o no —y por qué— se guarda en <strong>propiedades del CRM</strong>, no en la etapa.</p>
     </div>
 
     <div class="part-banner neg">
@@ -689,12 +708,12 @@
 
     <div class="key" style="margin-top:clamp(20px,3vw,30px)">
       <span class="ki" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span>
-      <p>En su lugar: la etapa mantiene la madurez y el descarte se registra en la propiedad <b>razon_descarte_sql</b>, que decide qué hacemos después con el contacto.</p>
+      <p>En su lugar: la etapa se mantiene y el motivo por el que hoy no encaja se registra en <b>razon_descarte_sql</b>, que decide qué hacemos después con el contacto.</p>
     </div>
   </div>
 </section>
 
-<!-- MADUREZ VS CRM -->
+<!-- EN LA PRÁCTICA · QUÉ HACEMOS -->
 <section id="crm" class="band">
   <div class="wrap">
     <div class="sec-head">
@@ -702,7 +721,7 @@
         <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg></span>en la práctica</p>
         <h2>¿Qué hacemos con quien hoy no cualifica?<span class="dot"></span></h2>
       </div>
-      <p class="sh-intro">El <strong>Lifecycle</strong> refleja la madurez y no retrocede. La <strong>razón de descarte</strong> vive en el CRM y decide el siguiente paso: <strong>reactivar</strong> el contacto o dejarlo <strong>identificado</strong>.</p>
+      <p class="sh-intro">El <strong>ciclo de vida</strong> marca dónde está el contacto y avanza hacia delante. La <strong>razón de descarte</strong> vive en el CRM y decide el siguiente paso: <strong>reactivar</strong> el contacto o dejarlo <strong>identificado</strong>.</p>
     </div>
 
     <div class="key">
@@ -714,10 +733,10 @@
       <div class="pillar">
         <div class="pillar-top">
           <span class="pillar-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M6 8l6-5 6 5"/><path d="M6 8v9a6 6 0 0 0 12 0V8"/></svg></span>
-          <span class="pillar-num">MADUREZ</span>
+          <span class="pillar-num">CICLO DE VIDA</span>
         </div>
         <h3>Lifecycle</h3>
-        <p class="desc">Avanza hacia delante y <b>no retrocede</b>. Refleja lo que el contacto ha llegado a ser.</p>
+        <p class="desc">Marca <b>en qué punto está</b> el contacto y avanza hacia delante; no retrocede.</p>
         <p class="field-label">Etapas</p>
         <div class="chips"><span class="chip">Lead</span><span class="chip">MQL</span><span class="chip">SQL</span><span class="chip">Oportunidad</span><span class="chip">Cliente</span><span class="chip">Churn</span></div>
       </div>
@@ -777,8 +796,8 @@
       <div class="inner">
         <p class="eyebrow"><span class="ei" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M5 12H2"/><path d="M22 12h-3"/><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg></span>principio estratégico</p>
         <p class="big">Un <b>"No ahora"</b> no significa <b>"No nunca"</b>.</p>
-        <p class="sm">Si un contacto ya ha mostrado interés y conocemos su empresa, su necesidad y su contexto, no debe volver a comportarse como un Lead nuevo. Ha ganado madurez; lo único que ha cambiado es que hoy todavía no está preparado para comprar.</p>
-        <p class="sm">Por eso el <b>Lifecycle refleja la madurez</b> y las <b>propiedades del CRM reflejan la situación comercial</b>. Separar ambos conceptos mantiene un CRM limpio, informes fiables y automatizaciones mucho más escalables.</p>
+        <p class="sm">Que hoy no sea el momento —no tiene la necesidad, no encaja con nosotros todavía o no es su prioridad— no quiere decir que no vaya a serlo. Si ya conocemos su empresa, su contexto y su interés, <b>tenerlo identificado</b> nos permite volver justo cuando su situación cambie.</p>
+        <p class="sm">Por eso el <b>ciclo de vida</b> marca dónde está y las <b>propiedades del CRM</b> guardan su situación comercial. Separar ambos conceptos mantiene un CRM limpio, informes fiables y automatizaciones mucho más escalables.</p>
       </div>
     </div>
   </div>
@@ -788,7 +807,7 @@
   <div class="wrap">
     <div class="fr">
       <span class="wordmark">gurusup<span class="dot"></span></span>
-      <span>Lifecycle Funnel · Documentación interna · La madurez del contacto, no su estado comercial</span>
+      <span>Lifecycle Funnel · Documentación interna · Dónde está cada contacto y qué hacer en cada momento</span>
     </div>
   </div>
 </footer>
