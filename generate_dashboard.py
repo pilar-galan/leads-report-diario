@@ -3501,9 +3501,9 @@ def render_exec(d):
     # ── Embudo de Agustín · DOS MOMENTOS de descarte (por razón real) ──
     #   entran → [1] descarte volumen <3.000 (precualif) → gestionados → [2] descarte en gestión → en curso → {oport · proceso}
     ag_opp_n = pq.get("ag_opp", 0)
-    ag_mail = 8                                             # descalificados por mail automático (formulario · <3.000 declarado) · dato aportado por ventas (no accesible por API)
-    ag_entered = pq.get("ag_cohort", pq.get("ag_sql", 0))   # pasan a Agustín (≥9 jul, etapas SQL)
-    ag_top = ag_entered + ag_mail                            # total que pide demo (precualificación por formulario)
+    ag_mail = 8                                             # [paso 1] descartados por formulario automático (no cumplen criterios) · dato de ventas
+    ag_top = 40                                             # total que pide demo desde el 9 jul (dato real de ventas)
+    ag_entered = max(0, ag_top - ag_mail)                   # [paso 2] llegan a Agustín (40 − 8 = 32)
     ag_vol = pq.get("ag_vol_desc", 0)                        # [momento 1] descartados por volumen <3.000
     ag_gest = max(0, ag_entered - ag_vol)                    # gestionados (superan el filtro de volumen)
     ag_gestdesc = min(pq.get("ag_gestdesc", 0), ag_gest)     # [momento 2] descartados en gestión (otras razones)
