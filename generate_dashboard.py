@@ -3985,7 +3985,7 @@ def render_exec(d):
 <section>
   <div class="q">09 · ¿Cómo va el pipeline?</div>
   <h2 class="sh">Oportunidades <span class="tot">· {fmt(opp_real)}</span> totales</h2>
-  <div class="sd"><b>Oportunidades totales</b> (negocios abiertos) sumando las tres vías: <b style="color:var(--brand)">🟢 Inbound</b> + <b style="color:var(--warn)">🟠 Outbound</b> + <b style="color:var(--violet)">🧠 Brain</b>. Debajo, el desglose por vía y el detalle del <b>pipeline de inbound</b> (pulsa un canal para ver los negocios y su etapa).</div>
+  <div class="sd"><b>Oportunidades totales</b> (negocios abiertos) sumando las tres vías: <b style="color:var(--brand)">🟢 Inbound</b> + <b style="color:var(--warn)">🟠 Outbound</b> + <b style="color:var(--violet)">🧠 Brain</b>. Debajo, el desglose por vía.</div>
   <div class="note" style="margin-bottom:16px">💡 <b>Qué cuenta como oportunidad y por qué mejora el dato.</b> Todo lo que entra en el <b>pipeline de ventas</b> se cuenta como oportunidad — es su función (proceso comercial). La fase previa (descubrir la necesidad, validar el encaje, confirmar presupuesto y decisor) se trabaja por otras vías, p. ej. <b>Brain</b>: un contacto ahí <b>no es oportunidad</b> hasta que está validado y pasa a ventas. Antes se mezclaban como «oportunidad» contactos que aún no lo eran (e <b>importaciones</b> sin la etapa de ciclo de vida correcta), lo que inflaba el volumen y sesgaba la conversión. Ya está depurado, así que verás <b>menos oportunidades pero más fiables</b>. Es un <b>evolutivo</b>: la clave es mantener el proceso estable para poder comparar y aprender mes a mes.</div>
   <div class="cards" style="margin-bottom:18px">
     <div class="stat"><div class="sv tnum">{fmt(opp_real)}</div><div class="sl">🎯 Oportunidades totales<br><span style="color:var(--mut)">inbound + outbound + brain · 100%</span></div></div>
@@ -3993,14 +3993,7 @@ def render_exec(d):
     <div class="stat warn"><div class="sv tnum">{fmt(opp_out_real)}</div><div class="sl">🟠 Outbound / comercial<br><span style="color:var(--mut)">{pv(opp_out_real, opp_real)} del total</span></div></div>
     <div class="stat"><div class="sv tnum">{fmt(opp_brain_real)}</div><div class="sl">🧠 Brain<br><span style="color:var(--mut)">{pv(opp_brain_real, opp_real)} del total</span></div></div>
   </div>
-  <div class="section-label" style="margin:6px 0 12px">Detalle del pipeline de inbound · {fmt(pipe_cnt)} negocios abiertos</div>
-  <div class="cards" style="margin-bottom:18px">
-    <div class="stat ok"><div class="sv tnum">{("€"+fmt(round(pipe_val + ex.get("out_value",0) + ex.get("brain_value",0)))) if (pipe_val + ex.get("out_value",0) + ex.get("brain_value",0)) else "—"}</div><div class="sl">Valor estimado total del pipeline de ventas abierto<br><span style="color:var(--mut)">🟢 inbound €{fmt(round(pipe_val))} · 🟠 outbound/comercial €{fmt(round(ex.get("out_value",0)))} · 🧠 brain €{fmt(round(ex.get("brain_value",0)))}</span></div></div>
-    <div class="stat"><div class="sv tnum">{fmt(pipe_cnt)}</div><div class="sl">Negocios inbound abiertos<br><span style="color:var(--mut)">{pipe_known} con importe estimado · {fmt(max(0, pipe_cnt - pipe_known))} aún sin estimar</span></div></div>
-  </div>
-  <div class="note" style="margin-bottom:16px">💰 El <b>valor estimado</b> suma el importe de <b>todos los negocios abiertos en todas las etapas</b> del pipeline (Discovery, Demo/Validación, Best Case y <b>negociación</b>) — no se excluye ninguna etapa salvo las ya cerradas (ganadas/perdidas) y las freemium. Los negocios <b>sin importe cargado</b> en HubSpot no suman (aparecen como «aún sin estimar»): conviene rellenar su cantidad estimada para que el total refleje el potencial real.</div>
-  <div class="pipe-legend">Etapas: {pipe_legend or '<span>Sin etapas registradas</span>'}</div>
-  {opp_ch_html}
+  <div class="note">Todo lo que entra en el <b>pipeline de ventas</b> cuenta como oportunidad. El desglose por vía se trabaja en detalle en las secciones de pipeline (inbound / outbound / brain) más arriba.</div>
 </section>
 
 <section>
