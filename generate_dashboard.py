@@ -2744,6 +2744,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .agf-opp summary{display:flex;align-items:baseline;gap:9px;cursor:pointer;list-style:none} .agf-opp summary::-webkit-details-marker{display:none}
 .agf-opp b{font-size:21px;font-weight:900;color:var(--brand);line-height:1}
 .agf-opp span{font-size:10.5px;color:var(--ink2);line-height:1.35}
+.agf-opp-chev{margin-left:auto;align-self:center;background:var(--brand-d);color:#04140c;font-weight:800;font-size:10px;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.agf-opp[open] .agf-opp-chev{background:var(--brand)} .agf-opp[open] .agf-opp-chev::after{content:""}
+.agf-opp:not([open]) summary:hover .agf-opp-chev{filter:brightness(1.15)}
 .agf-opp.empty{opacity:.7}
 .agf-proc{background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:10px 13px;display:flex;align-items:baseline;gap:9px}
 .agf-proc b{font-size:21px;font-weight:900;color:var(--ink);line-height:1}
@@ -2755,9 +2758,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .mk-l{font-size:9.5px;color:var(--mut);font-weight:700;margin-top:3px;line-height:1.3} .mk-l small{font-weight:600;opacity:.85}
 @media(max-width:520px){.mailkpis{grid-template-columns:1fr 1fr}}
 .descal-box{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.22);border-radius:12px;padding:13px 15px}
-.descal-big{display:flex;align-items:center;gap:14px}
-.descal-big b{font-size:34px;font-weight:900;color:var(--sky);line-height:1}
-.descal-big span{font-size:12.5px;color:var(--ink2);line-height:1.4} .descal-big small{color:var(--mut)}
+.descal-big{display:flex;align-items:center;gap:13px}
+.descal-big b{font-size:23px;font-weight:700;color:var(--sky);line-height:1}
+.descal-big span{font-size:12px;font-weight:400;color:var(--ink2);line-height:1.45} .descal-big span b{font-size:12px;font-weight:600;color:var(--ink2)} .descal-big small{color:var(--mut);font-weight:400}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -3416,8 +3419,8 @@ def render_exec(d):
     if ag_opp_n and _agopps:
         ag_opp_leaf = (
             f'<details class="agf-opp"><summary><b>🎯 {fmt(ag_opp_n)}</b>'
-            f'<span>oportunidad{_ags} · {pv(ag_opp_n, ag_adv or 1)} de los que avanzan<br>'
-            f'<small>▾ ver negocios y etapa</small></span></summary>'
+            f'<span>oportunidad{_ags} · {pv(ag_opp_n, ag_adv or 1)} de los que avanzan</span>'
+            f'<span class="agf-opp-chev">ver negocios ▾</span></summary>'
             f'<div class="agopp-list">{_ag_opp_items}</div></details>')
     else:
         ag_opp_leaf = (f'<div class="agf-opp empty"><b>🎯 {fmt(ag_opp_n)}</b>'
