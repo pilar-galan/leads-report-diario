@@ -2396,8 +2396,9 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .iocol.out{background:linear-gradient(165deg,rgba(52,42,24,.5),rgba(41,30,19,.4));border-color:#5a4a2a}
 .iocol.brain{background:linear-gradient(165deg,rgba(40,30,55,.5),rgba(25,20,40,.4));border-color:#3f3560}
 .iocol.brain .io-h .io-tot{color:var(--violet)}
-.io-h{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.io-h .io-tot{margin-left:auto;color:var(--brand);font-size:20px}
+.io-h{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:baseline;gap:8px}
+.io-h .io-tot{margin-left:auto;color:var(--brand);font-size:15px;font-weight:700;opacity:.55;display:inline-flex;align-items:baseline;gap:4px}
+.io-h .io-tot small{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;opacity:.85}
 .iocol.out .io-h .io-tot{color:var(--warn)}
 .mf{display:flex;flex-direction:column;gap:7px}
 .mf-row{display:grid;grid-template-columns:minmax(150px,1fr) 1fr 48px;gap:14px;align-items:center;font-size:12.5px}
@@ -2406,8 +2407,10 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 .mf-fill{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand))}
 .iocol.out .mf-fill{background:linear-gradient(90deg,#a5741f,var(--warn))}
 .mf-c{font-size:10.5px;color:var(--mut);font-weight:700;text-align:right}
-.io-val{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2);font-size:11.5px;color:var(--mut);font-weight:700;display:flex;align-items:center;justify-content:space-between}
-.io-val span{font-size:17px;font-weight:800;color:var(--brand)}
+.io-val{margin-top:14px;padding:11px 13px;border-radius:12px;background:rgba(111,240,162,.09);border:1px solid var(--brand-d);font-size:11.5px;color:var(--ink2);font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.io-val span{font-size:21px;font-weight:900;color:var(--brand)}
+.iocol.out .io-val{background:rgba(255,202,92,.09);border-color:#a5741f}
+.iocol.brain .io-val{background:rgba(200,166,255,.09);border-color:#6a4fa0}
 .iocol.out .io-val span{color:var(--warn)} .iocol.brain .io-val span{color:var(--violet)}
 @media(max-width:820px){.io3{grid-template-columns:1fr}}
 .io3grp{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-top:22px;position:relative;left:50%;transform:translateX(-50%);width:min(1280px,calc(100vw - 32px));align-items:start}
@@ -3612,12 +3615,12 @@ def render_exec(d):
     <div class="iogrp-h">🚀 GuruSup CX <span>Customer Experience</span></div>
     <div class="iogrp-cols">
     <div class="iocol in">
-      <div class="io-h">🟢 Pipeline de Inbound <span class="io-tot tnum">{fmt(total_nf)}</span></div>
+      <div class="io-h">🟢 Pipeline de Inbound <span class="io-tot tnum">{fmt(total_nf)}<small>contactos</small></span></div>
       <div class="mf">{inb_fn}</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("inb_value",0)))) if ex.get("inb_value") else "— (importes sin cargar)"}</span></div>
     </div>
     <div class="iocol out">
-      <div class="io-h">🟠 Pipeline de Outbound <span class="io-tot tnum">{fmt(ob["contactos"])}</span></div>
+      <div class="io-h">🟠 Pipeline de Outbound <span class="io-tot tnum">{fmt(ob["contactos"])}<small>contactos</small></span></div>
       <div class="mf">{out_fn}</div>
       <div class="io-val">💰 Valor estimado pipeline<span>{("€"+fmt(round(ex.get("out_value",0)))) if ex.get("out_value") else "— (importes sin cargar)"}</span></div>
     </div>
@@ -3627,7 +3630,7 @@ def render_exec(d):
     <div class="iogrp-h">🧠 GuruSup Brain <span>outbound directo (Alex)</span></div>
     <div class="iogrp-cols">
     <div class="iocol brain">
-      <div class="io-h">🧠 Pipeline de Brain <span class="io-tot tnum">{fmt(brain_ct)}</span></div>
+      <div class="io-h">🧠 Pipeline de Brain <span class="io-tot tnum">{fmt(brain_ct)}<small>contactos</small></span></div>
       <div class="mf">
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(brain_ct)}</b> Contactos</div><div class="mf-bar"><div class="mf-fill" style="width:100%"></div></div><span class="mf-c"></span></div>
         <div class="mf-row"><div class="mf-l"><b class="tnum">{fmt(ex.get("brain_open", 0))}</b> Oportunidad (negocio)</div><div class="mf-bar"><div class="mf-fill" style="width:{max(5, round(ex.get("brain_open",0)/(brain_ct or 1)*100))}%"></div></div><span class="mf-c">{pv(ex.get("brain_open",0), brain_ct or 1)}</span></div>
