@@ -2634,10 +2634,10 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .part{font-size:13.5px;font-weight:800;color:var(--brand);margin:6px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:.01em}
 .part.part-bad{color:var(--bad)}
 /* SQL · niveles desplegables */
-.sqlvl3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.sqlvl3{display:grid;grid-template-columns:.82fr .82fr 1.55fr;gap:14px;align-items:start}
 .lvl{background:linear-gradient(165deg,rgba(24,52,38,.5),rgba(19,41,30,.35));border:1px solid var(--line2);border-radius:16px;overflow:hidden}
 .lvl.lvl-bad{background:linear-gradient(165deg,rgba(52,28,32,.45),rgba(41,22,26,.3));border-color:rgba(255,107,91,.28)}
-.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28);grid-column:1/-1}
+.lvl.lvl3{background:linear-gradient(165deg,rgba(28,40,58,.5),rgba(20,30,45,.35));border-color:rgba(34,211,238,.28)}
 .lvl .ph{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
 .lvl-subh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin:16px 0 4px}
 .vflow{display:flex;flex-direction:column;gap:5px;margin-top:6px}
@@ -2653,6 +2653,16 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 @media(max-width:640px){.vfork{grid-template-columns:1fr}}
 .vdet>summary{list-style:none;cursor:pointer} .vdet>summary::-webkit-details-marker{display:none}
 .vdet>summary .vchev{margin-left:auto;color:var(--bad);font-weight:800;font-size:10px} .vdet[open]>summary .vchev::after{content:" ▾"}
+/* Embudo superior ≥3.000: entrados → tratados */
+.agftop{display:flex;align-items:stretch;gap:8px;margin:6px 0 10px}
+.agfstep{flex:1;background:rgba(12,27,21,.5);border:1px solid var(--line);border-radius:12px;padding:11px 13px;text-align:center}
+.agfstep b{display:block;font-size:24px;font-weight:900;color:var(--ink);line-height:1} .agfstep span{font-size:11px;color:var(--mut);display:block;margin-top:4px;line-height:1.3}
+.agfstep.ok b{color:var(--sky)}
+.agfarr{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);font-weight:800;font-size:16px;min-width:44px}
+.agfarr span{font-size:11px;color:var(--sky);font-weight:800}
+.agfdet{flex:1} .agfdet>summary{list-style:none;cursor:pointer;height:100%} .agfdet>summary::-webkit-details-marker{display:none}
+.agfinfo{display:inline-block;font-size:9px;font-weight:800;color:var(--sky);background:rgba(34,211,238,.14);border-radius:6px;padding:1px 6px;margin-top:3px}
+.agfpop{margin-top:8px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.55;text-align:left}
 .lvl-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:15px 16px;user-select:none}
 .lvl-sum::-webkit-details-marker{display:none}
 .lvl-badge{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#04120b}
@@ -3260,10 +3270,15 @@ def render_exec(d):
     raz_rows = "".join(
         f'<div class="mrow"><span class="ml">{esc(r)}</span><span class="mn">{n} <small>{pv(n, raz_tot)}</small></span></div>'
         for r, n in raz[:6]) or '<div class="mrow"><span class="ml">Sin razones registradas</span><span class="mn">—</span></div>'
-    # Bifurcación del embudo ≥3.000: gestionados (en proceso) vs descartados; base = suma de ambos
+    # Embudo ≥3.000: entrados (mail) → tratados → {oportunidad · en proceso · descartados}
     ag_desc = pq.get("ag_descartados", 0)
-    ag_split = (ag_contact + ag_desc) or 1
     ag_opp_n = pq.get("ag_opp", 0)
+    ag_entered = pq.get("ag_sql", 0)                 # SQL que entraron (llegaron al mail)
+    ag_treated = ag_contact                          # tratados (contactados/gestionados)
+    ag_gap = max(0, ag_entered - ag_treated)         # entraron pero aún sin tratar
+    ag_base = ag_treated or 1                         # base de la bifurcación = tratados
+    ag_proc = max(0, ag_treated - ag_opp_n - ag_desc)  # tratados que siguen en proceso
+    ag_split = ag_base                                # compat
     # Lista clicable de las oportunidades de Agustín (nombre · canal · etapa)
     _agopps = pq.get("ag_opp_list", []) or []
     _ag_opp_items = "".join(
@@ -3803,23 +3818,30 @@ def render_exec(d):
       </summary>
       <div class="lvl-body">
         <div class="ph"><b>Desde el 9 jul, precualificación automatizada.</b> El <b>formulario de contacto</b> tiene un campo de volumen de consultas: con <b>≥3.000</b> avisa a <b>Agustín</b>; con <b>&lt;3.000</b> se envía mail de descalificación y se guarda en listas para reevaluar.</div>
-        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín · <b>{fmt(ag_split)}</b> gestionados (base 100%)</div>
+        <div class="lvl-subh">≥3.000 consultas · pasan a Agustín</div>
+        <div class="agftop">
+          <div class="agfstep"><b>{fmt(ag_entered)}</b><span>SQL entraron<br><small>≥3.000 · al mail</small></span></div>
+          <div class="agfarr">→ <span>{pv(ag_treated, ag_entered or 1)}</span></div>
+          <details class="agfdet"><summary class="agfstep ok"><b>{fmt(ag_treated)}</b><span>tratados <span class="agfinfo">ⓘ ¿y los {fmt(ag_gap)} restantes?</span></span></summary>
+            <div class="agfpop">De los <b>{fmt(ag_entered)}</b> que entraron, <b>{fmt(ag_gap)}</b> aún <b>no se han tratado</b>: sin respuesta o pendientes de contacto. La bifurcación de abajo se calcula sobre los <b>{fmt(ag_treated)} tratados</b> (base 100%).</div>
+          </details>
+        </div>
         <div class="vfork">
           <div class="vfork-col left">
-            <div class="vfork-tag ok">✅ En proceso de contacto · <b>{pv(ag_contact, ag_split)}</b></div>
-            <div class="vstep"><b>{ag_contact}</b><span>contactados · aún sin oportunidad</span></div>
-            <div class="varr">↓ <span>{pv(ag_opp_n, ag_contact or 1)} conversión</span></div>
+            <div class="vfork-tag ok">✅ Gestionados · <b>{fmt(ag_treated)}</b> (100% de tratados)</div>
+            <div class="vstep"><b>{fmt(ag_proc)}</b><span>en proceso · {pv(ag_proc, ag_base)} de los tratados</span></div>
+            <div class="varr">↓ <span>{pv(ag_opp_n, ag_base)} → oportunidad</span></div>
             {ag_opp_step}
           </div>
           <div class="vfork-col right">
-            <div class="vfork-tag bad">🔴 Descartados · <b>{pv(ag_desc, ag_split)}</b></div>
+            <div class="vfork-tag bad">🔴 Descartados · <b>{pv(ag_desc, ag_base)}</b> de los tratados</div>
             <details class="vdet">
-              <summary class="vstep bad"><b>{ag_desc}</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
+              <summary class="vstep bad"><b>{fmt(ag_desc)}</b><span>descartados · no pasaron a ventas</span><span class="vchev">▶ razones</span></summary>
               <div class="razbox" style="margin-top:6px">{raz_rows}</div>
             </details>
           </div>
         </div>
-        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">📞 {pq.get("ag_calls_unique",0)} por teléfono · 📅 {pq.get("ag_reuniones",0)} agendadas · los porcentajes de gestionados y descartados son sobre su suma ({fmt(ag_split)})</div>
+        <div class="sd" style="margin-top:8px;font-size:11.5px;color:var(--mut)">Flujo: <b>{fmt(ag_entered)}</b> entraron → <b>{fmt(ag_treated)}</b> tratados ({pv(ag_treated, ag_entered or 1)}) → <b>{fmt(ag_opp_n)}</b> oportunidad ({pv(ag_opp_n, ag_base)} de tratados). 📞 {pq.get("ag_calls_unique",0)} tel. · 📅 {pq.get("ag_reuniones",0)} agendadas.</div>
         <div class="lvl-subh">&lt;3.000 consultas · descalificación</div>
         <div class="razbox" style="background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.22)">
           {email_flow_html}
