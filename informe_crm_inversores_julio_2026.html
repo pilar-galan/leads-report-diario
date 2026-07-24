@@ -1,0 +1,534 @@
+<style>
+  /* ============================================================
+     GuruSup · Informe RevOps julio 2026 — Comité de inversores
+     Identidad de producto: verde profundo + acento salmón.
+     Tokens para tema claro/oscuro; el oscuro es el "mundo producto".
+     ============================================================ */
+  :root{
+    color-scheme: light dark;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+    /* Light (paper) — neutrals biased toward green */
+    --bg:#eef3ef; --bg-2:#e4ece6;
+    --surface:#ffffff; --card:#ffffff; --card-2:#f4f8f5;
+    --border:#d7e3db; --border-strong:#c2d3c8;
+    --ink:#0e2018; --ink-2:#3c5347; --muted:#6f8578;
+    --brand:#1f9d5f; --brand-2:#0f7a45; --brand-soft:#e5f4ec; --mint:#0f7a45;
+    --salmon:#d94f40; --salmon-soft:#fdeae7;
+    --grid:#e8efea; --track:#e4ece6;
+    --shadow:0 1px 2px rgba(14,32,24,.05), 0 12px 32px -18px rgba(14,32,24,.22);
+    --hero-grad: linear-gradient(135deg,#0e7a45,#1f9d5f 55%,#37c47c);
+    --num-grad: linear-gradient(135deg,#0f7a45,#1f9d5f);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#08120e; --bg-2:#0b1813;
+      --surface:#0f1e18; --card:#132a20; --card-2:#0f2419;
+      --border:#20402f; --border-strong:#2b5540;
+      --ink:#eafff4; --ink-2:#b3d2c4; --muted:#7f9b8c;
+      --brand:#57e08a; --brand-2:#1f9d5f; --brand-soft:rgba(87,224,138,.10); --mint:#c7f3d9;
+      --salmon:#ff6b5b; --salmon-soft:rgba(255,107,91,.12);
+      --grid:rgba(255,255,255,.06); --track:#0c2016;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 24px 48px -28px rgba(0,0,0,.7);
+      --hero-grad: linear-gradient(135deg,#1f9d5f,#57e08a);
+      --num-grad: linear-gradient(135deg,#1f9d5f,#79f2a6);
+    }
+  }
+  /* Explicit toggle overrides (must win over media query in both directions) */
+  :root[data-theme="light"]{
+    --bg:#eef3ef; --bg-2:#e4ece6; --surface:#ffffff; --card:#ffffff; --card-2:#f4f8f5;
+    --border:#d7e3db; --border-strong:#c2d3c8; --ink:#0e2018; --ink-2:#3c5347; --muted:#6f8578;
+    --brand:#1f9d5f; --brand-2:#0f7a45; --brand-soft:#e5f4ec; --mint:#0f7a45;
+    --salmon:#d94f40; --salmon-soft:#fdeae7; --grid:#e8efea; --track:#e4ece6;
+    --shadow:0 1px 2px rgba(14,32,24,.05), 0 12px 32px -18px rgba(14,32,24,.22);
+    --hero-grad: linear-gradient(135deg,#0e7a45,#1f9d5f 55%,#37c47c);
+    --num-grad: linear-gradient(135deg,#0f7a45,#1f9d5f);
+  }
+  :root[data-theme="dark"]{
+    --bg:#08120e; --bg-2:#0b1813; --surface:#0f1e18; --card:#132a20; --card-2:#0f2419;
+    --border:#20402f; --border-strong:#2b5540; --ink:#eafff4; --ink-2:#b3d2c4; --muted:#7f9b8c;
+    --brand:#57e08a; --brand-2:#1f9d5f; --brand-soft:rgba(87,224,138,.10); --mint:#c7f3d9;
+    --salmon:#ff6b5b; --salmon-soft:rgba(255,107,91,.12); --grid:rgba(255,255,255,.06); --track:#0c2016;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 24px 48px -28px rgba(0,0,0,.7);
+    --hero-grad: linear-gradient(135deg,#1f9d5f,#57e08a);
+    --num-grad: linear-gradient(135deg,#1f9d5f,#79f2a6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:
+      radial-gradient(1100px 520px at 80% -10%, var(--brand-soft), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--font-sans);
+    line-height:1.65; margin:0; -webkit-font-smoothing:antialiased;
+    font-feature-settings:"ss01","cv01"; letter-spacing:-0.005em;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 clamp(18px,4vw,44px);}
+  .col{max-width:820px;}
+
+  /* Typography helpers */
+  .eyebrow{font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.16em;
+    color:var(--brand-2); margin:0;}
+  h1,h2,h3{text-wrap:balance; letter-spacing:-0.02em; margin:0;}
+  h1{font-size:clamp(2.2rem,5.4vw,3.65rem); font-weight:800; line-height:1.03;}
+  h2{font-size:clamp(1.5rem,3.2vw,2.15rem); font-weight:750; line-height:1.12;}
+  h3{font-size:1.06rem; font-weight:700; letter-spacing:-0.01em;}
+  .num-mono{font-variant-numeric:tabular-nums;}
+
+  /* Balanced, justified intro paragraphs (per house style) */
+  .lede{
+    font-size:clamp(1.05rem,1.7vw,1.28rem); color:var(--ink-2); font-weight:420;
+    max-width:1040px; text-align:justify; text-justify:inter-word; text-wrap:pretty;
+    line-height:1.6;
+  }
+  .sd{
+    color:var(--ink-2); max-width:92ch; text-align:justify; text-justify:inter-word;
+    text-wrap:pretty; font-size:1.02rem;
+  }
+  @media (max-width:640px){ .lede,.sd{text-align:left;} }
+
+  /* Theme toggle */
+  .toggle{
+    position:fixed; top:16px; right:16px; z-index:50;
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--card); color:var(--ink-2); border:1px solid var(--border);
+    border-radius:999px; padding:8px 14px; font:inherit; font-size:.8rem; font-weight:600;
+    cursor:pointer; box-shadow:var(--shadow);
+  }
+  .toggle:hover{border-color:var(--border-strong); color:var(--ink);}
+  .toggle:focus-visible{outline:2px solid var(--brand); outline-offset:2px;}
+  .toggle svg{width:15px; height:15px;}
+
+  /* ---------- HERO ---------- */
+  header.hero{padding:clamp(56px,9vw,104px) 0 clamp(30px,5vw,46px);}
+  .hairline{height:3px; width:64px; border-radius:3px; background:var(--hero-grad); margin-bottom:26px;}
+  .kicker-row{display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin-bottom:22px;}
+  .brandmark{display:inline-flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-0.02em; font-size:1.02rem;}
+  .brandmark .dot{width:22px; height:22px; border-radius:7px; background:var(--hero-grad);
+    display:inline-grid; place-items:center; color:#04160d; font-size:.7rem; font-weight:900;}
+  .sep{width:1px; height:16px; background:var(--border-strong);}
+  .kicker-meta{color:var(--muted); font-size:.86rem; font-weight:600;}
+  header.hero h1{margin:8px 0 22px;}
+  header.hero h1 .accent{
+    background:var(--hero-grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+  }
+  .hero-meta{display:flex; flex-wrap:wrap; gap:8px; margin-top:30px;}
+  .tag{font-size:.78rem; font-weight:600; color:var(--ink-2);
+    background:var(--card-2); border:1px solid var(--border); border-radius:999px; padding:6px 13px;}
+  .tag b{color:var(--brand-2); font-weight:800;}
+
+  /* ---------- KPI band ---------- */
+  section{padding:clamp(34px,6vw,64px) 0; border-top:1px solid var(--border);}
+  .kpi-band{border-top:none; padding-top:clamp(20px,3vw,30px);}
+  .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px;}
+  .kpi{background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:22px 20px 20px; box-shadow:var(--shadow); position:relative; overflow:hidden;}
+  .kpi .big{font-size:clamp(2.1rem,3.6vw,2.9rem); font-weight:800; line-height:1;
+    letter-spacing:-0.03em; font-variant-numeric:tabular-nums;
+    background:var(--num-grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;}
+  .kpi .big.salmon{background:none; -webkit-text-fill-color:initial; color:var(--salmon);}
+  .kpi .lab{margin-top:10px; font-size:.9rem; color:var(--ink-2); font-weight:600; line-height:1.35;}
+  .kpi .sub{margin-top:7px; font-size:.76rem; color:var(--muted); line-height:1.4;}
+  .kpi .chip{position:absolute; top:14px; right:14px; font-size:.62rem; font-weight:800; letter-spacing:.09em;
+    text-transform:uppercase; padding:3px 8px; border-radius:999px;}
+  .chip.done{color:var(--brand-2); background:var(--brand-soft); border:1px solid color-mix(in srgb,var(--brand) 30%, transparent);}
+  .chip.goal{color:var(--salmon); background:var(--salmon-soft); border:1px solid color-mix(in srgb,var(--salmon) 30%, transparent);}
+
+  /* section headers */
+  .shead{display:flex; align-items:baseline; gap:16px; margin-bottom:20px;}
+  .sidx{font-size:.82rem; font-weight:800; color:var(--brand-2); font-variant-numeric:tabular-nums;
+    letter-spacing:.04em; padding-top:5px;}
+  .shead-tt{display:flex; flex-direction:column; gap:12px;}
+
+  /* generic cards / grids */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  @media (max-width:760px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+  .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow);}
+  .card h3{margin-bottom:6px;}
+  .card .h3sub{color:var(--muted); font-size:.8rem; font-weight:600; margin-bottom:14px;}
+  .card p{margin:.5em 0; color:var(--ink-2); font-size:.95rem;}
+
+  /* pillar list */
+  .rules{list-style:none; margin:0; padding:0; display:grid; gap:10px;}
+  .rules li{display:flex; gap:12px; align-items:flex-start; font-size:.94rem; color:var(--ink-2);}
+  .rules .rn{flex:0 0 auto; width:24px; height:24px; border-radius:7px; background:var(--brand-soft);
+    color:var(--brand-2); font-weight:800; font-size:.76rem; display:grid; place-items:center; margin-top:1px;
+    border:1px solid color-mix(in srgb,var(--brand) 22%, transparent); font-variant-numeric:tabular-nums;}
+  .rules li b{color:var(--ink);}
+
+  /* ---------- Funnel viz ---------- */
+  .viz-lab{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .viz-lab .k{font-size:.9rem; font-weight:600; color:var(--ink-2);}
+  .viz-lab .v{font-size:.92rem; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums;}
+  .fbar{height:38px; border-radius:9px; background:var(--track); position:relative; overflow:hidden;
+    border:1px solid var(--border);}
+  .fbar > span{position:absolute; inset:0 auto 0 0; border-radius:8px; display:flex; align-items:center; padding-left:14px;
+    color:#04160d; font-weight:800; font-size:.85rem; font-variant-numeric:tabular-nums;}
+  .fbar > span.g{background:linear-gradient(90deg,var(--brand-2),var(--brand));}
+  .fbar > span.neutral{background:repeating-linear-gradient(45deg,var(--muted),var(--muted) 7px,transparent 7px,transparent 12px);
+    background-color:color-mix(in srgb,var(--muted) 22%, transparent); color:var(--ink); border:1px dashed var(--border-strong);}
+  .funnel{display:grid; gap:16px; margin-top:6px;}
+  .flow-note{margin-top:4px; font-size:.82rem; color:var(--muted);}
+
+  /* meter (quality target) */
+  .meter{margin-top:8px;}
+  .meter-track{position:relative; height:46px; border-radius:11px; background:var(--track); border:1px solid var(--border); overflow:hidden;}
+  .meter-zone{position:absolute; top:0; bottom:0; background:var(--brand-soft);
+    border-left:2px dashed var(--brand); border-right:2px dashed var(--brand);}
+  .meter-fill{position:absolute; top:0; bottom:0; left:0; background:linear-gradient(90deg,var(--salmon),color-mix(in srgb,var(--salmon) 70%, #ffb4a8));
+    border-radius:10px 0 0 10px; display:flex; align-items:center; justify-content:flex-end; padding-right:10px;
+    color:#3a0d07; font-weight:800; font-size:.82rem;}
+  .meter-scale{display:flex; justify-content:space-between; margin-top:7px; font-size:.72rem; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .meter-legend{display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; font-size:.82rem; color:var(--ink-2);}
+  .meter-legend span{display:inline-flex; align-items:center; gap:7px;}
+  .sw{width:13px; height:13px; border-radius:4px; flex:0 0 auto;}
+  .sw.now{background:var(--salmon);}
+  .sw.goal{background:var(--brand-soft); border:2px dashed var(--brand);}
+
+  /* audit bars (before/after) */
+  .audit{display:grid; gap:18px; margin-top:4px;}
+  .audit-row .abars{display:grid; gap:8px; margin-top:8px;}
+  .abar{display:grid; grid-template-columns:96px 1fr; align-items:center; gap:12px;}
+  .abar .who{font-size:.78rem; color:var(--muted); font-weight:600; text-align:right;}
+  .abar .track{height:26px; background:var(--track); border-radius:7px; border:1px solid var(--border); overflow:hidden; position:relative;}
+  .abar .fill{height:100%; display:flex; align-items:center; padding-left:10px; font-size:.78rem; font-weight:800;
+    font-variant-numeric:tabular-nums; border-radius:6px;}
+  .abar .fill.declared{background:color-mix(in srgb,var(--muted) 26%, transparent); color:var(--ink); }
+  .abar .fill.real{background:linear-gradient(90deg,var(--brand-2),var(--brand)); color:#04160d;}
+
+  /* three funnels / owners */
+  .owner{background:var(--card-2); border:1px solid var(--border); border-radius:14px; padding:18px;}
+  .owner .tt{font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; font-weight:800; color:var(--brand-2);}
+  .owner h3{margin:8px 0 4px; font-size:1.15rem;}
+  .owner p{font-size:.86rem; color:var(--ink-2); margin:0;}
+
+  /* timeline */
+  .tl{position:relative; margin-top:6px; padding-left:4px;}
+  .tl ol{list-style:none; margin:0; padding:0; display:grid; gap:2px;}
+  .tl li{display:grid; grid-template-columns:88px 1fr; gap:18px; padding:16px 0; border-bottom:1px solid var(--border); align-items:start;}
+  .tl li:last-child{border-bottom:none;}
+  .tl .when{font-weight:800; color:var(--brand-2); font-size:.86rem; font-variant-numeric:tabular-nums; letter-spacing:.02em;}
+  .tl .what b{color:var(--ink);}
+  .tl .what{color:var(--ink-2); font-size:.94rem;}
+  .tl .what span.mini{display:block; color:var(--muted); font-size:.8rem; margin-top:3px;}
+  @media (max-width:560px){ .tl li{grid-template-columns:66px 1fr; gap:12px;} }
+
+  /* callout */
+  .callout{background:var(--card); border:1px solid var(--border); border-left:3px solid var(--salmon);
+    border-radius:14px; padding:22px 24px; box-shadow:var(--shadow);}
+  .callout .t{font-size:.72rem; text-transform:uppercase; letter-spacing:.13em; font-weight:800; color:var(--salmon); margin-bottom:8px;}
+  .callout p{color:var(--ink-2); margin:.4em 0; font-size:.96rem;}
+  .callout p b{color:var(--ink);}
+
+  /* strategic takeaways */
+  .take{display:grid; gap:14px;}
+  .take .item{display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start;}
+  .take .arw{color:var(--brand); font-weight:900; font-size:1.1rem; line-height:1.4;}
+  .take .item p{margin:0; color:var(--ink-2); font-size:.98rem;}
+  .take .item p b{color:var(--ink);}
+
+  /* footer */
+  footer{border-top:1px solid var(--border); padding:34px 0 56px; color:var(--muted); font-size:.82rem;}
+  footer .fn{max-width:80ch; line-height:1.6;}
+  footer strong{color:var(--ink-2);}
+  a{color:var(--brand-2); text-decoration:none; border-bottom:1px solid color-mix(in srgb,var(--brand) 40%, transparent);}
+
+  @media (prefers-reduced-motion: no-preference){
+    .fbar > span, .meter-fill, .abar .fill{animation:grow .9s cubic-bezier(.2,.7,.2,1) both;}
+    @keyframes grow{from{transform:scaleX(.02); transform-origin:left;} to{transform:scaleX(1);}}
+  }
+</style>
+
+<button class="toggle" id="themeToggle" aria-label="Cambiar tema claro/oscuro">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  <span id="themeLabel">Tema</span>
+</button>
+
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="hairline"></div>
+    <div class="kicker-row">
+      <span class="brandmark"><span class="dot">G</span>GuruSup</span>
+      <span class="sep"></span>
+      <span class="kicker-meta">RevOps · CRM &amp; Marketing Automation</span>
+    </div>
+    <p class="eyebrow">Informe para el comité de inversores · Julio 2026</p>
+    <h1>El motor de ingresos,<br><span class="accent">reconstruido desde el dato.</span></h1>
+    <p class="lede">Durante julio, GuruSup ha convertido un CRM heredado —sucio, sin proceso y sin métricas fiables— en un sistema de RevOps gobernado sobre HubSpot: datos depurados, un proceso comercial estandarizado con SLAs, un modelo de <em>lead scoring</em> y un flujo de IA en producción que cualifica y clasifica solo. Es la base que hace, por primera vez, <b>medible y disciplinada</b> la máquina de captación de la compañía.</p>
+    <div class="hero-meta">
+      <span class="tag">Periodo: <b>1–24 julio 2026</b></span>
+      <span class="tag">Área: <b>RevOps / HubSpot</b></span>
+      <span class="tag">Registro único de la verdad: <b>HubSpot</b></span>
+      <span class="tag">Fuente: <b>base de conocimiento interna</b></span>
+    </div>
+  </header>
+
+  <!-- ================= KPI BAND ================= -->
+  <section class="kpi-band" aria-label="Indicadores clave de julio">
+    <div class="kpi-grid">
+      <div class="kpi">
+        <span class="chip done">Logrado</span>
+        <div class="big num-mono">76%</div>
+        <div class="lab">Demos agendadas desde el nuevo precualificador</div>
+        <div class="sub">22 demos de 33 solicitudes cualificadas (desde el 9-jul)</div>
+      </div>
+      <div class="kpi">
+        <span class="chip done">Logrado</span>
+        <div class="big num-mono">~6.000</div>
+        <div class="lab">Oportunidades depuradas en HubSpot</div>
+        <div class="sub">Reclasificadas: clientes reales · negocio genuino · sin email · freemiums</div>
+      </div>
+      <div class="kpi">
+        <span class="chip done">Logrado</span>
+        <div class="big num-mono">8</div>
+        <div class="lab">Reglas del nuevo proceso comercial estándar</div>
+        <div class="sub">SLA de contacto, cualificación obligatoria y etapas de ciclo de vida</div>
+      </div>
+      <div class="kpi">
+        <span class="chip done">En producción</span>
+        <div class="big num-mono">1</div>
+        <div class="lab">Workflow de IA que clasifica razones de descarte</div>
+        <div class="sub">Dogfooding del propio producto sobre el CRM, activo desde el 9-jul</div>
+      </div>
+      <div class="kpi">
+        <span class="chip goal">Objetivo</span>
+        <div class="big salmon num-mono">45→65%</div>
+        <div class="lab">Calidad de leads (cualificados / total)</div>
+        <div class="sub">Meta comprometida: de ~45% a 60–70% con scoring + segmentación</div>
+      </div>
+      <div class="kpi">
+        <span class="chip done">Logrado</span>
+        <div class="big num-mono">3→1</div>
+        <div class="lab">Embudos gobernados bajo un pipeline único</div>
+        <div class="sub">Inbound · Outbound · Brain, consolidados en el objeto contacto</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 01 PUNTO DE PARTIDA ================= -->
+  <section aria-labelledby="s1">
+    <div class="shead">
+      <span class="sidx">01</span>
+      <div class="shead-tt">
+        <p class="eyebrow">El punto de partida</p>
+        <h2 id="s1">Un CRM que no se podía medir</h2>
+      </div>
+    </div>
+    <p class="sd">A comienzos de julio, el CRM arrastraba el ruido de importaciones masivas y un histórico sin higiene. HubSpot declaraba casi cien clientes cuando apenas un tercio eran reales; miles de oportunidades estaban mal etiquetadas; y buena parte de la actividad comercial —llamadas, emails, seguimientos— no quedaba registrada. Sin datos limpios ni proceso, cualquier métrica de conversión o de CAC era, en la práctica, imposible de sostener.</p>
+
+    <div class="grid-2" style="margin-top:22px;">
+      <div class="card">
+        <h3>El dato declarado no era el dato real</h3>
+        <div class="h3sub">Auditoría de higiene del CRM · contactos marcados como "cliente"</div>
+        <div class="audit">
+          <div class="audit-row">
+            <div class="viz-lab"><span class="k">Contactos etiquetados como cliente</span></div>
+            <div class="abars">
+              <div class="abar"><span class="who">Declarado</span>
+                <div class="track"><div class="fill declared" style="width:100%">~98</div></div></div>
+              <div class="abar"><span class="who">Real (auditado)</span>
+                <div class="track"><div class="fill real" style="width:38%">~37</div></div></div>
+            </div>
+            <p class="flow-note">Solo ~36–38 clientes eran reales: el resto, ruido de importación y freemiums.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Fricciones que costaban leads</h3>
+        <div class="h3sub">Diagnóstico recogido en las sesiones de julio</div>
+        <ul class="rules">
+          <li><span class="rn">!</span><span><b>~6.000 oportunidades</b> mal etiquetadas (freemiums marcados como oportunidad, importaciones).</span></li>
+          <li><span class="rn">!</span><span><b>114 contactos</b> sin email ni teléfono asociado.</span></li>
+          <li><span class="rn">!</span><span>Actividad comercial <b>sin registrar</b>: "la actividad sin registro no existe".</span></li>
+          <li><span class="rn">!</span><span>Formularios en JavaScript con <b>tracking pobre</b> → tráfico mal atribuido como "directo".</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 LO CONSTRUIDO ================= -->
+  <section aria-labelledby="s2">
+    <div class="shead">
+      <span class="sidx">02</span>
+      <div class="shead-tt">
+        <p class="eyebrow">Lo que se ha construido en julio</p>
+        <h2 id="s2">Cuatro palancas de RevOps</h2>
+      </div>
+    </div>
+    <p class="sd">Sobre ese punto de partida, el trabajo de julio se ordenó en cuatro frentes complementarios: sanear y consolidar el dato, estandarizar el proceso comercial, formalizar un modelo de puntuación de leads y poner la IA a trabajar dentro del propio CRM. Todo ello con HubSpot como sistema único de registro.</p>
+
+    <div class="grid-2" style="margin-top:22px;">
+      <div class="card">
+        <h3>A · Arquitectura y limpieza del dato</h3>
+        <div class="h3sub">Un solo objeto, un solo pipeline, datos de confianza</div>
+        <ul class="rules">
+          <li><span class="rn">✓</span><span>Depuración de <b>~6.000 oportunidades</b> y separación en clientes reales, negocio genuino, contactos sin email y freemiums.</span></li>
+          <li><span class="rn">✓</span><span>CRM consolidado en el <b>objeto contacto</b> con una única cadena de ciclo de vida; se retira el pipeline de leads antiguo.</span></li>
+          <li><span class="rn">✓</span><span>Inbound centralizado en el pipeline <b>"Brain" desde el 1 de julio</b>; outbound separado para no ensuciar HubSpot.</span></li>
+          <li><span class="rn">✓</span><span>Formularios migrados a nativos de HubSpot y autenticados en <b>forms.gurusup.com</b> (fin del <em>spam-flag</em>).</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>B · Proceso comercial estandarizado</h3>
+        <div class="h3sub">8 reglas acordadas el 14-jul · inbound + outbound alineados</div>
+        <ul class="rules">
+          <li><span class="rn">1</span><span><b>SLA de contacto:</b> mínimo 3 intentos de llamada antes de descartar.</span></li>
+          <li><span class="rn">2</span><span><b>La llamada es el primer contacto</b>, nunca el email automático.</span></li>
+          <li><span class="rn">3</span><span><b>Cualificación obligatoria:</b> nº de empleados + volumen de interacciones en cada primera llamada.</span></li>
+          <li><span class="rn">4</span><span><b>Etapas de ciclo de vida:</b> lead → MQL → SQL → demo agendada → oportunidad.</span></li>
+          <li><span class="rn">5</span><span><b>Registro completo</b> de toda actividad en HubSpot.</span></li>
+          <li><span class="rn">6</span><span><b>Emails personalizados</b> (empresa, sector, <em>pain</em>); prohibidos los genéricos.</span></li>
+          <li><span class="rn">7</span><span><b>Asignación automática</b> de leads por tamaño y scoring.</span></li>
+          <li><span class="rn">8</span><span><b>Revisión semanal</b> de calidad por fuente y <em>ad set</em>.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>C · Motor de <em>lead scoring</em> (fit + hit)</h3>
+        <div class="h3sub">Formalizado el 20-jul · umbral de MQL y automatismos</div>
+        <p><b>Fit score</b> — encaje con el ICP: email corporativo, volumen de consultas, personas que atienden soporte, industria.</p>
+        <p><b>Hit score</b> — comportamiento: canal de entrada, páginas vistas, clics, última actividad.</p>
+        <ul class="rules" style="margin-top:12px;">
+          <li><span class="rn">✓</span><span>Solo pasan a <b>MQL</b> los leads que piden demo <em>y</em> cumplen fit score (umbral ~50 pts).</span></li>
+          <li><span class="rn">✓</span><span>Automatismo: lead con <b>&gt;3.000 consultas/mes</b> asciende a MQL; <b>SQL</b> = ≥3.000 consultas/mes + demo activa.</span></li>
+          <li><span class="rn">✓</span><span>Señales de <em>disqualified</em>/<em>spam</em> se devuelven a las plataformas de ads para afinar campañas.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>D · IA en producción sobre el CRM</h3>
+        <div class="h3sub">Dogfooding del producto GuruSup · activo desde el 9-jul</div>
+        <p>Un <b>workflow de IA</b> extrae las transcripciones de las llamadas, <b>propone y etiqueta en HubSpot la razón de descarte</b> de cada SQL y, cuando no tiene certeza, <b>alerta a un responsable</b> para revisión humana.</p>
+        <p>Es, además, un caso escaparate: GuruSup usando su propia tecnología para gobernar su embudo comercial.</p>
+        <div class="callout" style="margin-top:14px; border-left-color:var(--brand); box-shadow:none;">
+          <div class="t" style="color:var(--brand-2)">Reporting near-real-time</div>
+          <p>Dashboard de leads con evolución mensual de tasas de conversión, MQLs segmentados por TOFU/MOFU/descargas, vista combinada inbound+outbound y un mini-diccionario de términos para que toda la empresa lea las métricas igual.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 03 IMPACTO ================= -->
+  <section aria-labelledby="s3">
+    <div class="shead">
+      <span class="sidx">03</span>
+      <div class="shead-tt">
+        <p class="eyebrow">Impacto medible</p>
+        <h2 id="s3">Los primeros resultados del sistema</h2>
+      </div>
+    </div>
+    <p class="sd">El nuevo precualificador ya arroja señal en su primer arranque, y el motor de scoring fija un objetivo de calidad concreto y auditable. Estos son los indicadores que empiezan a demostrar que el sistema convierte, no solo ordena.</p>
+
+    <div class="grid-2" style="margin-top:22px;">
+      <div class="card">
+        <h3>Precualificador de demandas</h3>
+        <div class="h3sub">Formulario de 3 preguntas → alerta automática para agendar demo · desde el 9-jul</div>
+        <div class="funnel">
+          <div>
+            <div class="viz-lab"><span class="k">Solicitudes de precualificación</span><span class="v num-mono">33</span></div>
+            <div class="fbar"><span class="g" style="width:100%">33</span></div>
+          </div>
+          <div>
+            <div class="viz-lab"><span class="k">Demos agendadas</span><span class="v num-mono">22 · 76%</span></div>
+            <div class="fbar"><span class="g" style="width:76%">22</span></div>
+          </div>
+          <div>
+            <div class="viz-lab"><span class="k">Descartadas (mayormente por volumen &lt;3.000/mes)</span><span class="v num-mono">resto</span></div>
+            <div class="fbar"><span class="neutral" style="width:33%">no cualifican</span></div>
+          </div>
+        </div>
+        <p class="flow-note">Tasa de agendado del <b>76%</b> sobre leads cualificados — el principal indicador de calidad disponible hoy.</p>
+      </div>
+
+      <div class="card">
+        <h3>Calidad de leads: dónde estamos y a dónde vamos</h3>
+        <div class="h3sub">Leads cualificados sobre el total de entrada</div>
+        <div class="meter">
+          <div class="meter-track">
+            <div class="meter-zone" style="left:60%; right:0;"></div>
+            <div class="meter-fill" style="width:45%">45%</div>
+          </div>
+          <div class="meter-scale"><span>0%</span><span>45% hoy</span><span>60–70% objetivo</span><span>100%</span></div>
+          <div class="meter-legend">
+            <span><span class="sw now"></span> Punto de partida (~45%)</span>
+            <span><span class="sw goal"></span> Objetivo comprometido (60–70%)</span>
+          </div>
+        </div>
+        <p class="flow-note">El salto se apoya en el scoring fit+hit, la reactivación de campañas que funcionaron y la segmentación por empresa.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Tres embudos, un solo gobierno</h3>
+      <div class="h3sub">Cada canal con propietario y reglas comunes en HubSpot</div>
+      <div class="grid-3">
+        <div class="owner"><div class="tt">Inbound</div><h3>Demanda entrante</h3><p>Formularios web y precualificación → alerta y agenda de demo. Propietario dedicado.</p></div>
+        <div class="owner"><div class="tt">Outbound</div><h3>Prospección</h3><p>Listas segmentadas y <em>lookalikes</em> sectoriales; gestionado aparte para no contaminar el dato.</p></div>
+        <div class="owner"><div class="tt">Brain</div><h3>Asistente / app</h3><p>Conversaciones del producto que entran como leads desde el 1-jul; antes se perdían.</p></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>La secuencia de julio</h3>
+      <div class="h3sub">De la limpieza del dato al sistema en marcha</div>
+      <div class="tl">
+        <ol>
+          <li><span class="when">1 jul</span><span class="what"><b>Pipeline "Brain" en marcha.</b><span class="mini">El inbound del asistente entra por fin como lead trazable en HubSpot.</span></span></li>
+          <li><span class="when">9 jul</span><span class="what"><b>Precualificador + IA de descarte, activos.</b><span class="mini">Formulario de 3 preguntas operativo y workflow de IA etiquetando razones de descarte.</span></span></li>
+          <li><span class="when">14 jul</span><span class="what"><b>Proceso comercial estandarizado.</b><span class="mini">8 reglas, SLA de 3 llamadas y cualificación obligatoria; inbound y outbound alineados.</span></span></li>
+          <li><span class="when">16 jul</span><span class="what"><b>Criterios de etapa y workflows del pipeline.</b><span class="mini">Umbral SQL ≥3.000 consultas/mes; discovery/demo solo cuentan al confirmarse.</span></span></li>
+          <li><span class="when">20 jul</span><span class="what"><b>Modelo fit+hit formalizado y workflows limpiados.</b><span class="mini">Primer reporte del precualificador: 33 entradas → 22 demos agendadas.</span></span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 04 LECTURA ESTRATÉGICA ================= -->
+  <section aria-labelledby="s4">
+    <div class="shead">
+      <span class="sidx">04</span>
+      <div class="shead-tt">
+        <p class="eyebrow">Lectura estratégica</p>
+        <h2 id="s4">Por qué esto importa para la ronda</h2>
+      </div>
+    </div>
+
+    <div class="grid-2" style="align-items:start;">
+      <div class="take">
+        <div class="item"><span class="arw">→</span><p><b>De inmedible a gobernado.</b> Por primera vez la compañía puede medir conversión, calidad y —cuando haya cierres— CAC sobre datos limpios. Es el prerrequisito de cualquier decisión de inversión en captación.</p></div>
+        <div class="item"><span class="arw">→</span><p><b>Disciplina de gasto.</b> El proceso obliga a validar la calidad del embudo antes de escalar inversión en <em>paid</em>: no se escala lo que no convierte.</p></div>
+        <div class="item"><span class="arw">→</span><p><b>El producto, aplicado a sí mismo.</b> La IA que cualifica y clasifica leads en el CRM es dogfooding: la misma tecnología que se vende, funcionando de puertas adentro.</p></div>
+        <div class="item"><span class="arw">→</span><p><b>Palanca siguiente: ABM.</b> Los datos limpios muestran que la mayor parte del negocio histórico llega por intros/referrals; se evalúa formalizar un modelo <em>Account-Based</em> con cuentas objetivo y ticket medio superior.</p></div>
+      </div>
+
+      <div class="callout">
+        <div class="t">Contexto honesto</div>
+        <p>El sistema descrito es <b>la respuesta</b> a un motor de captación que aún no cierra al ritmo esperado: el <em>paid</em> acumulaba meses de inversión sin conversión suficiente. Julio no ha resuelto todavía el resultado comercial —eso llegará con volumen de cierres—, pero ha construido <b>la infraestructura que lo hace alcanzable y medible</b>.</p>
+        <p>Los indicadores marcados como <b>objetivo</b> (p. ej. calidad 60–70%) son metas comprometidas, no resultados consolidados; los marcados como <b>logrado</b> están implementados y en uso.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <p class="fn"><strong>Notas y fuentes.</strong> Elaborado a partir de la base de conocimiento interna de GuruSup (actas de sesiones de RevOps, marketing y ventas, y HubSpot como sistema de registro), periodo 1–24 de julio de 2026. Las cifras de higiene del CRM y del precualificador son las reportadas por el equipo en dichas sesiones; se distingue de forma explícita entre <strong>logros implementados</strong> y <strong>objetivos comprometidos</strong>. Documento interno para el comité de inversores — confidencial.</p>
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var root=document.documentElement, btn=document.getElementById('themeToggle'), lab=document.getElementById('themeLabel');
+    function current(){ return root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light'); }
+    function paint(){ lab.textContent = current()==='dark' ? 'Claro' : 'Oscuro'; }
+    paint();
+    btn.addEventListener('click', function(){
+      root.setAttribute('data-theme', current()==='dark' ? 'light' : 'dark'); paint();
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){ if(!root.getAttribute('data-theme')) paint(); });
+  })();
+</script>
