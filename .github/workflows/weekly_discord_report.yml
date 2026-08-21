@@ -1,9 +1,11 @@
 name: Weekly Leads Report → Discord
 
 on:
-  schedule:
-    - cron: '45 6 * * 1'   # Lunes 08:45 hora España (UTC+2 verano)
-  workflow_dispatch:        # También ejecutable manualmente
+  # ⏸️ Envío semanal a Discord DESPROGRAMADO (a petición). El informe se enviará
+  #    manualmente. Para reactivar el envío automático, descomentar el bloque schedule.
+  # schedule:
+  #   - cron: '45 6 * * 1'   # Lunes 08:45 hora España (UTC+2 verano)
+  workflow_dispatch:        # Ejecutable manualmente desde la pestaña Actions
 
 jobs:
   send-report:
