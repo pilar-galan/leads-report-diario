@@ -18,8 +18,8 @@
   "2026-09": {
     "lead_mql": 35,
     "mql_sql": 39,
-    "sql_opp": 41,
-    "opp_cli": 45,
+    "sql_opp": 42,
+    "opp_cli": 43,
     "cli_churn": 16,
     "captured": "2026-09-14"
   }
