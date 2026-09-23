@@ -19,8 +19,8 @@
     "lead_mql": 36,
     "mql_sql": 38,
     "sql_opp": 42,
-    "opp_cli": 42,
+    "opp_cli": 41,
     "cli_churn": 16,
-    "captured": "2026-09-22"
+    "captured": "2026-09-23"
   }
 }
