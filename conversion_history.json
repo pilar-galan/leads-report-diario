@@ -25,7 +25,7 @@
   },
   "2026-10": {
     "lead_mql": 35,
-    "mql_sql": 41,
+    "mql_sql": 40,
     "sql_opp": 41,
     "opp_cli": 40,
     "cli_churn": 18,
