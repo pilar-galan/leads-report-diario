@@ -24,11 +24,11 @@
     "captured": "2026-09-30"
   },
   "2026-10": {
-    "lead_mql": 35,
-    "mql_sql": 40,
-    "sql_opp": 42,
-    "opp_cli": 39,
+    "lead_mql": 34,
+    "mql_sql": 42,
+    "sql_opp": 45,
+    "opp_cli": 38,
     "cli_churn": 18,
-    "captured": "2026-10-14"
+    "captured": "2026-10-15"
   }
 }
